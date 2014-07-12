@@ -1,0 +1,6 @@
+mkscc genomic data comes to us in the form of a tsv file exported from excel:
+
+     JennysSummaryTable_HBversion.txt
+
+Here we extract and transform copynumber data into the gistic-standard of -2, -1, 0, 1, 2.
+

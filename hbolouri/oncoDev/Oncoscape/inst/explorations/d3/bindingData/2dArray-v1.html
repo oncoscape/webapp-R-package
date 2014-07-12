@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+   <!-- script src="http://d3js.org/d3.v3.min.js"></script -->
+   <script src="http://localhost/home/js/d3.min.js"></script>
+
+<style>
+ 
+body {
+  font: 14px sans-serif;
+  font-weight: bold;
+  }
+ 
+.chart {
+   background-color: #efefef;
+   shape-rendering: crispEdges;
+   }
+  
+.series {
+   background-color: red;
+   }
+ 
+.text0 {
+   fill: red;
+   }
+ 
+.text1 {
+   fill: green;
+   }
+ 
+.text2 {
+   fill:steelblue;
+   }
+ 
+.text3 {
+   fill: yellow;
+    }
+ 
+.text4 {
+   fill: purple;
+   }
+ 
+.text5 {
+   fill:brown;
+   }
+ 
+</style>
+</head>
+
+<body>
+
+ 
+<script type="text/javascript">
+var nestedArray = [[5, 10, 15, 20, 25],
+                   [10, 20, 30, 40, 50],
+                   [43, 34, 17, 9, 2]];
+ 
+ 
+var chart = d3.select("body").append("svg")
+            .attr("class", "chart")
+            .attr("id", "chart")
+            .attr("width", 550)
+            .attr("height", 40 * 5);
+ 
+var series = chart.selectAll(".series")
+                .data(nestedArray)
+                .enter().append("svg:g")
+                .attr("class", "series");
+
+// document.querySelector('g').__data__   --> [5, 10, 15, 20, 25]
+// d3.selectAll("g")                      --> [Array[3]]
+// d3.selectAll("g").length               --> 1
+// d3.selectAll("g")[0]                   --> [<g class=​"series">​</g>​, <g class=​"series">​</g>​, <g class=​"series">​</g>​]
+// d3.selectAll("g")[0].length            --> 3
+// d3.selectAll("g")[0][0].__data__       --> [5, 10, 15, 20, 25]
+// d3.selectAll("g")[0][1].__data__       --> [10, 20, 30, 40, 50]
+// d3.selectAll("g")[0][2].__data__       --> [43, 34, 17, 9, 2]
+ 
+var point  = series.selectAll(".point")
+            .data(function(d,i) { // (vectors, and their index) one at a time
+                console.log("d: " + d + "  i: " + i);
+                return d;
+                })
+            .enter().append("text")  // an implicit for loop
+            .text(function(d,i,j) { 
+               console.log("d2: " + d + " i: " + i + " j: " + j); 
+               return d; 
+                })
+            .attr("class", function(d,i,j) { return "text" + j; } )
+            .attr("x",     function(d,i,j) { return 10 * d;     } )
+            .attr("y",     function(d,i,j) { return 40 * (j+1); } );
+
+//  d3.selectAll("text")[0].length       --> 15
+// d3.selectAll("text")[0][0].__data__   -->   5
+
+</script>
+</body>
+</html>

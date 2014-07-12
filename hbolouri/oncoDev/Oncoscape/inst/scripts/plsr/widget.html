@@ -1,0 +1,149 @@
+<style>
+
+.domain { 
+  fill: none; 
+  } 
+
+.axis path, .axis line {
+    stroke: black;
+    stroke-width: 1px;
+    }
+
+
+#plsrControlsDiv {
+   border: 1px solid #aaa;
+   //border: 5px solid #aaa;
+   font-family: sans-serif;
+   font-size: 12px;
+   margin-top: 2px;
+   margin-left: 5px;
+   margin-right: 10px;
+   margin-bottom: 5px;
+   background-color: #EED;
+   }
+
+#plsrFilterControlsDiv {
+   font-family: sans-serif;
+   font-size: 14px;
+   margin-top: 1px;
+   margin-left: 5px;
+   margin-right: 50px;
+   margin-bottom: 5px;
+   }
+
+#plsrPlotDiv {
+   border-style: solid;
+   border-width: 1px;
+   width: 800px;
+   height: 500px;
+   margin: 5px;
+   }
+
+
+.plsrSlider { 
+   margin-left:20px; 
+   margin-right:5px; 
+   margin-top:0px;
+   border: 3px solid #FFF;
+   height: 20px;
+   max: 0;  min: 10; 
+   orientation: 'horizontal';
+   }
+
+.plsrSliderReadout {
+  font-family:"Courier";
+  color: #00F;
+  background-color: #FFF;
+  font-size: 12px;
+  border: 2px solid #DDD;
+  width: 20px;
+  height: 20px;
+  resize: none;
+  margin-top: 1px;
+  margin-left: 1px;
+  }
+
+.plsrSliderTitleDiv {
+  font-family:"Arial";
+  color: #000000;
+  font-size: 14px;
+  padding-top: 10px;
+  padding-left: 40px;
+  }
+
+
+#plsrButtonDiv {
+   padding-botton: 30px;
+   }
+
+
+</style>
+
+
+<div id="plsrDiv">
+    <div id="plsrControlsDiv">
+          <div id="plsrFilterControlsDiv">
+
+                             <!--    slider #1, for ageAtDxMin -->
+
+              <div id="plsrSlider1Div" style="display: inline-block">
+                  <div id="plsrSlider1TitleDiv" class="plsrSliderTitleDiv" style="margin-left: 10px;">Low Age at Dx</div>
+                  <div style="width: 200px; overflow: hidden;">
+                      <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="plsrAgeAtDxMinSlider" class="plsrSlider"></div>
+                           <div style="margin-left: 20px;" id='msgBox1'>  
+                               <textarea id="plsrAgeAtDxMinSliderReadout" readonly class="plsrSliderReadout"'></textarea> 
+                          </div>
+                  </div>
+              </div>
+
+
+
+                             <!--    slider #2, for ageAtDxMax -->
+
+              <div id="plsrSlider2Div" style="display: inline-block">
+                  <div id="plsrSlider2TitleDiv" class="plsrSliderTitleDiv" style="margin-left: 10px;">High Age at Dx</div>
+                  <div style="width: 200px; overflow: hidden;">
+                      <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="plsrAgeAtDxMaxSlider" class="plsrSlider"></div>
+                           <div style="margin-left: 20px;" id='msgBox2'>  
+                               <textarea id="plsrAgeAtDxMaxSliderReadout" readonly class="plsrSliderReadout"'></textarea> 
+                          </div>
+                  </div>
+              </div>
+
+
+                             <!--    slider #3, for overallSurvivalMin -->
+
+              <div id="plsrSlider3Div" style="display: inline-block">
+                  <div id="plsrSlider3TitleDiv" class="plsrSliderTitleDiv" style="margin-left: 10px;">Low Survival</div>
+                  <div style="width: 200px; overflow: hidden;">
+                      <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="plsrSurvivalMinSlider" class="plsrSlider"></div>
+                           <div style="margin-left: 20px;" id='msgBox3'>  
+                               <textarea id="plsrSurvivalMinSliderReadout" readonly class="plsrSliderReadout"'></textarea> 
+                          </div>
+                  </div>
+              </div>
+
+
+                             <!--    slider #4, for overallSurvivalMax -->
+
+              <div id="plsrSlider4Div" style="display: inline-block">
+                  <div id="plsrSlider4TitleDiv" class="plsrSliderTitleDiv" style="margin-left: 10px;">High Survival</div>
+                  <div style="width: 200px; overflow: hidden;">
+                      <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="plsrSurvivalMaxSlider" class="plsrSlider"></div>
+                           <div style="margin-left: 20px;" id='msgBox4'>  
+                               <textarea id="plsrSurvivalMaxSliderReadout" readonly class="plsrSliderReadout"'></textarea> 
+                          </div>
+                  </div>
+              </div>
+
+              <div id="plsrButtonDiv" style="display: inline-block">
+                 <button id="plsrCalculateButton" type="button">Calculate</button>
+                 <button id="plsrSendGenesButton" type="button">Send Genes</button>
+              </div>
+
+
+          </div>
+    </div>
+
+    <div id="plsrPlotDiv" style="margin-top:0"></div>
+</div>

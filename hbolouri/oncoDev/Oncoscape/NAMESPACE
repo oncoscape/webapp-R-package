@@ -1,0 +1,29 @@
+exportClasses(Oncoscape)
+
+export(
+    Oncoscape,
+    PatientHistoryProvider,
+    Data2DProvider,
+    LocalFileData2DProvider,
+    entities,
+    features,
+    getData,
+    dimensions,
+    printf,
+    matrixToJSON,
+    startWebApp,
+    plotTimeline,
+    plotTimeline_simple,
+    invokeCommand,
+    assignPatientNumbersToTimelinesEvent
+    )
+
+exportMethods(
+    show,
+    getMode,
+    getServer,
+    setup,
+    run,
+    close,
+    getTable
+    )

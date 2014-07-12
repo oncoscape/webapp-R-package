@@ -1,0 +1,172 @@
+<style>
+
+
+#clinicalDataTableDiv {
+   min-width: 900px;
+   margin: 0 auto;
+   background-color: #EED;
+   font-family: sans-serif;
+   font-size: 14px;
+   }
+
+#oldclinicalDataTableDiv {
+   border: 1px solid #aaa;
+   height: 500px;
+   font-family: sans-serif;
+   background-color: #EED;
+   font-size: 12px;
+   margin-top: 1px;
+   margin-left: 10px;
+   margin-right: 10px;
+   margin-bottom: 1px;
+   padding: 1px;
+   padding-bottom: 20px;
+   }
+
+th, td { white-space: nowrap; } 
+
+
+
+#compactViewButton{
+   margin-left: 40px;
+   }
+
+
+#clinicalDataTableControlsDiv {
+   border: 1px solid #ccc;
+   font-family: sans-serif;
+   font-size: 12px;
+   margin-top: 2px;
+   margin-left: 10px;
+   margin-right: 10px;
+   margin-bottom: 5px;
+   background-color: #EED;
+   }
+
+#clinicalTablesButtonsDiv{
+   padding-left: 20px;
+   padding-bottom: 5px;
+   }
+
+#clinicalDataTableFilterControlsDiv{
+   font-family: sans-serif;
+   font-size: 14px;
+   margin-top: 40px;
+   margin-left: 100px;
+   margin-right: 100px;
+   margin-bottom: 20px;
+   }
+
+#clinicalDataTableOutboundButtonDiv{
+   margin-left: 240px;
+   }
+
+.clinicalDataFilterSlider { 
+   margin-left:20px; 
+   margin-right:5px; 
+   margin-top:0px;
+   border: 1px solid #FFF;
+   height: 20px;
+   max: 0;  min: 10; 
+   orientation: 'horizontal';
+   background-color: #FFF;
+   color: #00F;
+   }
+
+.clinicalDataFilterSliderReadout {
+  font-family:"Courier";
+  color: #0000FF;
+  background-color: #FFF;
+  font-size: 14px;
+  border: 1px solid #DDD;
+  width: 20px;
+  height: 16px;
+  resize: none;
+  margin-top: 4px;
+  margin-left: 2px;
+  }
+
+.clinicalDataFilterSliderTitleDiv {
+  font-family:"Arial";
+  color: #000000;
+  font-size: 14px;
+  padding-top: 10px;
+  padding-left: 40px;
+  }
+
+.tblClinicalControlButton {
+   margin-bottom: 2px;
+   }
+
+
+
+
+</style>
+
+
+<div id="clinicalDataModuleDiv">
+   <div id="clinicalDataTableControlsDiv">
+      <div id=clinicalDataTableFilterControlsDiv" style="border: 1px;">
+
+       <div id="slider1Div" style="display: inline-block">
+           <div id="sliderTitleDiv" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">ageAtDx min</div>
+           <div style="width: 200px; overflow: hidden;">
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxMinSlider" class="clinicalDataFilterSlider"></div>
+               <div style="margin-left: 20px;" id='msgBox'>  
+                  <textarea id="ageAtDxMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
+               </div>
+           </div>
+        </div>
+
+       <div id="slider2Div" style="display: inline-block">
+           <div id="sliderTitleDiv"  class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">ageAtDx max</div>
+           <div style="width: 300px; overflow: hidden;">
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxMaxSlider" class="clinicalDataFilterSlider"></div>
+               <div style="margin-left: 20px;" id='msgBox'>  
+                  <textarea id="ageAtDxMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
+               </div>
+           </div>
+        </div>
+
+       <div id="slider3Div" style="display: inline-block">
+           <div id="sliderTitle3Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">survival min</div>
+           <div style="width: 200px; overflow: hidden;">
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalMinSlider" class="clinicalDataFilterSlider"></div>
+               <div style="margin-left: 20px;" id='msgBox'>  
+                  <textarea id="overallSurvivalMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
+               </div>
+           </div>
+        </div>
+
+       <div id="slider4Div" style="display: inline-block">
+           <div id="sliderTitle4Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">survival max</div>
+           <div style="width: 200px; overflow: hidden;">
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalMaxSlider" class="clinicalDataFilterSlider"></div>
+               <div style="margin-left: 20px;" id='msgBox'>  
+                  <textarea id="overallSurvivalMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
+               </div>
+           </div>
+        </div>
+
+       <div id="clinicalTablesButtonsDiv" style="display: block">
+           <div id="sliderApplyDiv" style="display: inline-block">
+              <button id="applyClinicalTablesFiltersSlidersButton" class="tblClinicalControlButton" type="button">Apply Filters</button>
+           </div>
+           <div id="viewButtonDiv" style="display: inline-block">
+              <button id="showAllClinicalTablesRowsButton" class="tblClinicalControlButton" type="button">Remove Filters</button>
+              <!-- button id="toggleMoreFewerColumnsButton" class="tblClinicalControlButton" type="button">More Columns</button -->
+           </div>
+
+          <div id="clinicalDataTableOutboundButtonDiv" style="display: inline-block">
+             <button id="toMarkersAndTissuesButton" class="tblClinicalControlButton" type="button">Markers &amp; Tissues</button>
+             <button id="toGBMPathwaysButton" class="tblClinicalControlButton" type="button">GBM Pathways</button>
+             <button id="toPCAButton" class="tblClinicalControlButton" type="button">PCA</button>
+             <button id="toSurvivalStatsButton" class="tblClinicalControlButton" type="button">Survival</button>
+             <button id="toTimeLinesButton" class="tblClinicalControlButton" type="button">Timelines</button>
+          </div>
+       </div>
+
+    </div>
+   </div>
+   <div id="clinicalDataTableDiv"></div>
+</div>

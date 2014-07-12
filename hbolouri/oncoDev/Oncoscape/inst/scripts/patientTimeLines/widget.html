@@ -1,0 +1,55 @@
+<style>
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.select{
+	background-color: white;
+}
+.button{
+	background-color: white;
+	border-radius: 0 0 5px 5px; 
+	border-style: none solid solid; 
+	border-width: 0 1px 1px;
+
+}
+.resizable {
+    resize: both;   /* Options: horizontal, vertical, both */
+    overflow: auto; /* fix for Safari */
+}
+
+.domain { 
+  fill: none; 
+  } 
+
+
+</style>
+
+<canvas width="960" height="500" style="display:none"></canvas>
+
+<div id="patientTimeLinesDiv">
+	<div id="ArrangeDataDiv">
+	     <span id="AddSideBar">Features: </span>
+	     <span id="AlignByDiv">Align By: </span>
+	     <span id="OrderByDiv">Order By: </span>
+	     <button id="SaveImageDiv">Save Image </button>
+     </div>
+     <div id="DisplayDataDiv">
+     <span id="SideBarPlot" class="resizeable"></span>
+     <span id="patientTimeLinesDisplay" class="resizeable"></span>
+     </div>
+</div>

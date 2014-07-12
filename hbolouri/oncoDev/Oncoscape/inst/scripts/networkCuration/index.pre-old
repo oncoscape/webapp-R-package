@@ -1,0 +1,6 @@
+include(../index.common)
+include(code.js)
+<body>
+include(widget.html)
+</body>
+</html>

@@ -1,0 +1,7 @@
+include(../index.common)
+<body>
+include(Module.js)
+include(widget.html)
+include(../common.js)
+</body>
+</html>

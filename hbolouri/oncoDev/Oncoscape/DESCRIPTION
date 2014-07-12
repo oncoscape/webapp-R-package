@@ -1,0 +1,30 @@
+Package: Oncoscape
+Type: Package
+Title: Oncoscape:  Coordinated Exploration of Clinical and Molecular Cancer Data
+Version: 1.1.1
+Date: 2014-07-08
+Author: Paul Shannon
+Maintainer:  <pshannon@fhcrc.org>
+Depends: R (>= 2.13.0), websockets (>= 1.1.7), RJSONIO, base64enc, pls, RUnit, survival, coin, ggplot2
+Suggests: RUnit
+Description:  
+License: GPL
+LazyLoad: yes
+Collate: Oncoscape.R
+         PatientHistoryProvider.R
+         DataBridge.R
+         LocalFilePreparedTableHistoryProvider.R
+         Data2DProvider.R
+         LocalFileData2DProvider.R
+         DataProviderBridge.R
+         AnalysisBridge.R
+         NanoStringExpressionData.R
+         Analyses.R
+         clinicalData2.R
+         dateAndTime.R
+         patientTimeLines.R
+         PCA.R
+         PLSR.R
+         NetworkCuration.R
+         survival.R
+         zzz.R

@@ -1,0 +1,106 @@
+<script>
+
+var refnetColumns = [
+         {sTitle: "A"},                         // 0
+         {sTitle: "B"},                         // 1
+         {sTitle: "altA"},                      // 2
+         {sTitle: "altB"},                      // 3
+         {sTitle: "aliasA"},                    // 4
+         {sTitle: "aliasB"},                    // 5
+         {sTitle: "detectionMethod"},           // 6
+         {sTitle: "firstAuthor"},               // 7
+         {sTitle: "publicationID"},             // 8
+         {sTitle: "taxonA"},                    // 9
+         {sTitle: "taxonB"},                    // 10
+         {sTitle: "type"},                      // 11
+         {sTitle: "sourceDatabases"},           // 12
+         {sTitle: "interactionID"},             // 13
+         {sTitle: "confidenceScore"},           // 14
+         {sTitle: "provider"},                  // 15
+         {sTitle: "A.common"},                  // 16
+         {sTitle: "B.common"},                  // 17
+         {sTitle: "A.canonical"},               // 18
+         {sTitle: "B.canonical"},               // 19
+         {sTitle: "cellType"},                  // 20
+         {sTitle: "a.modification"},            // 21
+         {sTitle: "a.cellularComponent"},       // 22
+         {sTitle: "b.modification"},            // 23
+         {sTitle: "b.cellularComponent"},       // 24
+         {sTitle: "a.canonicalIdType"},         // 25
+         {sTitle: "b.canonicalIdType"},         // 26
+         {sTitle: "comment"}];                  // 27
+
+//--------------------------------------------------------------------------------------------------
+$(document).ready(function() {
+    console.log("==== refnet code.js document.ready");
+    $("#requestMGMTNetworkButton").click(requestInteractions);
+    $("#refnetResults").html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="refnetTable"></table>');
+    $( "#refnetAccordion" ).accordion({
+          heightStyle: "content",
+          collapsible: true
+          });
+    console.log("about to call .dataTable");
+  
+    $("#refnetTable").dataTable({
+        "sDom": "Rlfrtip",
+        "sDom": "Clfrtip",
+        "aoColumns": refnetColumns,
+	"sScrollX": "100px",
+        "iDisplayLength": 10,
+        "fnInitComplete": function(){
+            $(".display_results").show();
+          }
+         }); // dataTable
+
+
+    });
+//--------------------------------------------------------------------------------------------------
+requestInteractions = function() {
+
+   msg = {cmd: "fetchInteractions", status: "request", payload: "MGMT"}
+   msg.json = JSON.stringify(msg);
+   console.log(msg.json)
+
+   newCursorValue = "progress"
+   $("body").css("cursor", newCursorValue)
+   $("#requestMGMTNetworkButton").css("cursor", "progress");
+   $("#refnetResults").css("cursor", "progress");
+
+   socket.send(msg.json);
+
+} // requestDate
+//--------------------------------------------------------------------------------------------------
+displayInteractions = function(msg) {
+
+   result = msg.payload;
+   console.log("displayInteractions: ");
+
+   newCursorValue = "default";
+   $("body").css("cursor", newCursorValue);
+   $("#requestMGMTNetworkButton").css("cursor", newCursorValue);
+   $("#refnetResults").css("cursor", newCursorValue);
+
+   // $("#refnetResults").text(result);
+
+   if(msg.status == "success"){
+      var refnetTableAsJSON = msg.payload;
+      var tableRef = $("#refnetTable").dataTable();
+      tableRef.fnAddData(refnetTableAsJSON)
+      }
+   else{
+      alert("RefNet error");
+      }
+
+} // displayInteractions
+//--------------------------------------------------------------------------------------------------
+displayRefNetProviders = function(msg)
+{
+   console.log("=== displayRefNetProviders");
+
+} // displayRefNetProviders
+//--------------------------------------------------------------------------------------------------
+addJavascriptMessageHandler("displayInteractions", displayInteractions);
+addJavascriptMessageHandler("displayRefNetProviders", displayRefNetProviders);
+//--------------------------------------------------------------------------------------------------
+</script>
+

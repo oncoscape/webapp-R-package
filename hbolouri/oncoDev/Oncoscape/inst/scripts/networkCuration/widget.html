@@ -1,0 +1,71 @@
+<style>
+body {
+  height: 1200px;
+}
+
+#interactingGenesInput{
+   width:  600px;
+   }
+
+TD {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row_selected{
+    color: red;
+}
+#xxAbstractDialog {
+   display: none;
+}
+
+#cyNetworkCuration {
+  background-color: #DDD;
+  height: 500px;
+  width: 800px;
+  position: relative;
+  margin-top: 0px;
+  margin-left: 0px;
+  border: 1px solid #aaa;
+  padding: 0px;
+  display:block;
+  margin-bottom: 0px;
+  }
+
+</style>
+
+<div id="networkCurationDiv">
+  <div id="refnetAccordion">
+     <h3> Genes</h3>
+         <div>
+           <input type="text" id="interactingGenesInput"></input>
+         </div>
+     <h3> Providers</h3>
+         <div>
+            <div id="refnetProvidersControlDiv">
+                <button id="selectAllProvidersButton">All</button>
+                <button id="deselectAllProvidersButton">None</button>
+            </div>
+            <div id="refnetProvidersDiv">
+            </div>
+         </div>
+     <h3> Interactions </h3>
+         <div>
+           <button id="requestInteractionsButton">Get interactions</button>
+           <button id="clearInteractionsDataTableButton">Clear</button>
+           <button id="abstractSelectToggleButton">Select Row</button>
+           <button id="sendInteractionsToCyjsButton">To Cytoscape</button>
+           <div id="xxAbstractDialog" title="Basic dialog">
+               <p>This is the default dialog which is useful for displaying information. The dialog window can 
+                  be moved, resized and closed with the 'x' icon.</p>
+            </div>
+           <div id="refnetResults"></div>
+         </div>
+     <h3> Cytoscape </h3>
+         <div>
+           <button id="clearCyNetworkCurationButton">Clear</button>
+           <div id="cyNetworkCuration"></div>
+        </div>
+  </div>
+</div>

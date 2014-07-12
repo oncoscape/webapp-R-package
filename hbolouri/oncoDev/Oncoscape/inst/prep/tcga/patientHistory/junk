@@ -1,0 +1,6 @@
+mv nationwidechildrens.org_clinical_drug_gbm.txt drug_gbm.txt
+mv nationwidechildrens.org_clinical_follow_up_v1.0_gbm.txt follow_up_v1.0_gbm.txt
+mv nationwidechildrens.org_clinical_follow_up_v1.0_nte_gbm.txt follow_up_v1.0_nte_gbm.txt
+mv nationwidechildrens.org_clinical_nte_gbm.txt nte_gbm.txt
+mv nationwidechildrens.org_clinical_omf_v4.0_gbm.txt omf_v4.0_gbm.txt
+mv nationwidechildrens.org_clinical_radiation_gbm.txt radiation_gbm.txt

@@ -1,0 +1,856 @@
+PatientId	PathologyId	OperatingRoomDetail	ProcedureId	PathDateText	PathSpecimenType	PathSite	PathSubsite	PathSide	PathHistology	PathHistology2	PathQuality
+81RX451889E609Y2NO5779F73PEF5789165X	9358	111	204	2008-02-29	Right frontal mass, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+81RX451889E609Y2NO5779F73PEF5789165X	9359	112	205	2008-02-29	Brain, frontal lobe, right, biopsy	Frontal	NA	Right	Oligodendroglioma	NA	REV
+36F76R68QC6PUY771O86JO02241789IGBC16	9248	2	96	2005-06-08	Brain, right anterior temporal tumor, resection	Temporal	NA	Right	Oligodendroglioma	NA	STD
+620WK7L9XWYHD862784N87YJ73UX8XXX6QP8	9249	3	97	2013-01-12	Left frontal tumor	Frontal	NA	Left	Low-Grade Glioma	NA	STD
+G9909CY5X9I585P8PN6MO2I64HX657Z6G2HF	9250	4	98	2006-09-21	Brain tumor, left frontal, resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+G9909CY5X9I585P8PN6MO2I64HX657Z6G2HF	9251	4	98	2006-10-05	Brain tumor	Brain	NA	Left	Anaplastic Astrocytoma	NA	OUT
+66J9FXV1DSCZ3NYPNJ67606YICACTG950ZKR	9360	113	206	2009-02-27	Right temporal lobe, biopsy	Temporal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+1A14UWY76UUD29815FZHJ9O9I8WOWUR592YS	9367	120	213	2009-02-28	Right temporal and posterior temporal tumor	Temporal	NA	Right	Glioblastoma	NA	STD
+AIJ69AS4JP1M1G43TLXUY8163X0N435KG0TJ	9252	5	99	2011-03-21	Brain tumor, left temporal lobe, biopsy	Temporal	NA	Left	Small Cell Glioblastoma	NA	STD
+AIJ69AS4JP1M1G43TLXUY8163X0N435KG0TJ	9253	6	100	2011-04-01	Brain, left temporal, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+7Q1WN080BMRX0GZ3T75E0N2PBSNST437C33V	9254	7	101	2002-06-06	Brain tumor	Brain	NA	Left	Pleomorphic Xanthoastrocytoma	NA	STD
+7Q1WN080BMRX0GZ3T75E0N2PBSNST437C33V	9255	8	102	2002-12-24	Brain, left temporal lobe, tumor resection	Temporal	NA	Left 	High-Grade Astrocytoma	NA	STD
+7Q1WN080BMRX0GZ3T75E0N2PBSNST437C33V	9256	9	103	1994-03-27	Left brain tumor	Brain	NA	Left	Pleomorphic Xanthoastrocytoma	NA	STD
+80Y3CJMB62UU0IN7WZ7835K6H99DVIF929F4	9368	122	215	2009-08-27	Right frontal brain mass	Frontal	NA	Right	Glioblastoma	NA	REV
+80Y3CJMB62UU0IN7WZ7835K6H99DVIF929F4	9369	121	214	2009-07-27	BRAIN, TEMPORAL LOBE, RESECTION	Temporal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+6RE2474512Y3YR97WN847SQU5V6F08Y8BG52	9257	10	104	2009-03-27	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+71TX9B20V5O5A959V5LCA3Z3KHBOY8LHG9QQ	9258	11	105	1998-04-30	Right frontal tumor and CUSA specimen	Frontal	NA	Right	Oligodendroglioma	NA	STD
+71TX9B20V5O5A959V5LCA3Z3KHBOY8LHG9QQ	9259	12	106	2010-11-26	Right frontal tumor and anterior resection cavity	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+71TX9B20V5O5A959V5LCA3Z3KHBOY8LHG9QQ	9260	13	107	2013-01-16	Right frontal tumor, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	Recurrent/residual high-grade glioma with treatment effect	STD
+86PC42TLRUQ1UJ9D07OCTM510R35623P75L7	9370	124	217	2009-02-25	BRAIN, LEFT TEMPORAL, BIOPSIES	Temporal	NA	Left	High-grade Glioma	Anaplastic Oligoastrocytoma	REV
+86PC42TLRUQ1UJ9D07OCTM510R35623P75L7	9371	123	216	2009-02-04	TUMOR, LEFT TEMPORAL REGION, EXCISION	Temporal	NA	Left	Recurrent/residual high-grade glioma	NA	STD
+WQ9EN3DY9YTPU60471XC790NK8X3WO93454C	9261	15	109	1998-10-24	Tumor, brain tumor, deep tumor	Frontotemporal	NA	Left	Low-Grade Glioma	NA	STD
+WQ9EN3DY9YTPU60471XC790NK8X3WO93454C	9262	16	110	2008-12-02	Left temporal tumor	Temporal	NA	Left	High-Grade Glioma	Anaplastic Oligodendroglioma	STD
+X12H3Y95555PKW9QSEW7N4R66G7B3I701O84	9969	728	820	2009-06-02	Brain, left frontal lobe, tumor resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+Q85P89XYL51DNN0YG50QXGYBFAKIOM7SH38L	9970	729	821	2008-06-20	Right temporal tumor, resection	Temporal	NA	Right	Anaplastic Astrocytoma	NA	STD
+IJK5N8W0RL08KUI111MU3143G71WKNT79SS2	9365	118	211	1999-10-09	Right craniotomy	Frontal	NA	Right	Low-grade Glioma	NA	STD
+IJK5N8W0RL08KUI111MU3143G71WKNT79SS2	9366	119	212	2008-05-08	Right frontal tumor	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+CPI2Q09Z37H3XR81GXP558FP23NJ5WR38996	9356	109	202	2003-04-29	Brain, right frontal tumor, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+CPI2Q09Z37H3XR81GXP558FP23NJ5WR38996	9357	110	203	2000-05-09	Right frontal brain tumor	Frontal	NA	Right	Oligodendroglioma	NA	REV
+0O9MPA68S60HRL7J144PU0XE9XO6F8TG74VJ	9536	294	385	2001-02-20	Right frontal brain tumor, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+3F5KH5MIJ92MS0GC3VZ298X1A3794W6D2793	9545	303	394	2003-11-14	Right Frontal tumor resection	Frontal	NA	Right	Anaplastic Astrocytoma	NA	STD
+7UZGSFA45S69809O9GTO1S3Y40PZ3J2WI6Z3	9495	253	343	2001-05-26	Tumor, right parietal frontal region, excision	Frontoparietal	NA	Right	Oligoastrocytoma	NA	STD
+7UZGSFA45S69809O9GTO1S3Y40PZ3J2WI6Z3	9496	254	344	2004-06-23	Right Frontal tumor resection	Frontal	NA	Right	Glioblastoma	NA	STD
+7UZGSFA45S69809O9GTO1S3Y40PZ3J2WI6Z3	9497	255	345	2012-02-09	Right frontal tumor resection	Frontal	NA	Right	High-grade Glioma	NA	OUT
+Z6B18645T9JH504735OVJ35WMGDPTRK2M869	9547	305	396	2001-04-19	Right frontal, tumor resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+OXP4I774457U4J6V5N19201D7R3AWPAQ7N44	9399	155	246	2001-04-14	Right frontal tumor	Frontal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+OXP4I774457U4J6V5N19201D7R3AWPAQ7N44	9400	156	247	2008-12-14	Right frontal brain tumor, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma	Anaplastic Oligodendroglioma	STD
+2JOK6Y7LS89PFSZI3J44N827JO2HY0B2SEX7	9569	328	419	2001-03-02	Left frontal tumor resection	Frontal	NA	Left	Low-grade Astrocytoma	Oligoastrocytoma	STD
+2JOK6Y7LS89PFSZI3J44N827JO2HY0B2SEX7	9570	329	420	2004-02-29	Recurrent left frontal tumor resection	Frontal	NA	Left	Anaplastic Astrocytoma	NA	STD
+2JOK6Y7LS89PFSZI3J44N827JO2HY0B2SEX7	9571	330	421	2006-10-21	Frontal lesion, left, resection	Frontal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+70TS046CP8576GYX72G07I8RII2CYA2Y70SK	9579	339	430	2001-07-06	Left parietal tumor, resection	Parietal	NA	Left	Oligoastrocytoma	NA	STD
+9D0KUWJAY4C690PW7NH77R620Z517EFUE247	9401	158	249	2001-10-30	Left frontal tumor	Frontal	NA	Left	Gemistocytic Astrocytoma	NA	REV
+9D0KUWJAY4C690PW7NH77R620Z517EFUE247	9402	157	248	2001-07-10	Brain, left frontal tumor and CUSA specimen	Frontal	NA	Left	Oligodendroglioma	NA	STD
+9D0KUWJAY4C690PW7NH77R620Z517EFUE247	9403	159	250	2008-10-24	Anterior, posterior left frontal	Frontal	NA	Left	High-grade Glioma	Non-Cancer	STD
+64036R2YYO650S93A4J9K595936RN20P5X2Y	9586	349	440	2001-05-30	Brain, biopsies	Parietal	NA	Left	Pleomorphic Xanthoastrocytoma	Low-grade Astrocytoma	STD
+64036R2YYO650S93A4J9K595936RN20P5X2Y	9587	350	441	2002-03-13	Left parietal tumor resection	Parietal	NA	Left	Glioblastoma	NA	STD
+I852A2F92AQ9N9VRV3JO377D66339N936CQ1	9612	373	465	2001-08-23	Brain, Left frontal tumor, resection	Frontal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+8T39667Y690WE50GA8E8OQ7X4017NQV54872	9619	379	471	2006-08-17	Brain, left parietal, resection	Parietal	NA	Left	Glioblastoma	NA	STD
+1ZK87942V7023Q50MCOC0U1URC3WI78K63MB	9640	401	493	2002-01-10	Brain tumor, resection	Frontal	NA	Right	Gemistocytic Astrocytoma	NA	STD
+1ZK87942V7023Q50MCOC0U1URC3WI78K63MB	9641	402	494	2012-06-26	Right frontal tumor, resection	Frontal	NA	Right	Glioblastoma	NA	STD
+A5ZOQ1D91HHMQ68XEM4365786D3519G31ZM6	9668	423	514	2002-03-30	Left temporal tumor resection	Temporal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+7S8AQ803389A8296PP99NUV2O7232NNMLE0H	9404	160	251	2002-07-06	Right temporal tumor	Temporal	NA	Right	Glioblastoma	NA	STD
+7S8AQ803389A8296PP99NUV2O7232NNMLE0H	9405	161	252	2004-02-21	Right temporal lobe lesion	Temporal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+ZGL0MHHXLA66781987GNXJL751D9SLDEE6N5	9810	564	656	2002-12-08	Left frontal brain tumor excision	Frontal	NA	Left	Oligodendroglioma	NA	STD
+Z94I5UJLC4BCGH47M2F208UIZP2I11O49AIC	9494	252	342	2011-05-21	Left temporal tumor, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+288G4DJQ3HHMT5SSD5FMN3Z3C8HP904J3R3S	9928	682	775	2003-06-03	Brain adjacent to tumor, biopsy	Frontoparietal	NA	Left	Anaplastic Astrocytoma	NA	STD
+4SDWK33X4985CQSWCXW2E5AKBYLJC697PPLJ	9821	575	667	2003-05-25	Brain, right temporal tumor excision	Temporal	NA	Right	Oligodendroglioma	NA	STD
+4SDWK33X4985CQSWCXW2E5AKBYLJC697PPLJ	9822	576	668	2003-06-04	Brain, posterior tumor margin, resection	Temporal	NA	Right	Oligodendroglioma	Non-Cancer	STD
+4SDWK33X4985CQSWCXW2E5AKBYLJC697PPLJ	9823	577	669	2005-10-19	Right temporal lobe re-resection	Temporal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+8U73VLK53J404O0F3G36J22F51M1R06U5THG	9828	582	674	2003-06-02	Left temporal tumor excision	Temporal	NA	Left	Oligodendroglioma	NA	STD
+J7YR16Y2BYGR13QV2NKW0CAD0MJDE9TK19N5	9838	594	687	2003-09-12	Posterior fossa tumor	Fossa	NA	Midline	Ependymoma	NA	STD
+J7YR16Y2BYGR13QV2NKW0CAD0MJDE9TK19N5	9839	596	689	2007-04-06	Posterior fossa lesion	Fossa	NA	Midline	Non-Neoplastic	NA	STD
+01FX75N12IF22CQYD39Y243U4F48VX05VJ8G	9851	605	698	2003-04-20	Left frontal tumor biopsy	Frontal	NA	Left	Oligodendroglioma	NA	REV
+01FX75N12IF22CQYD39Y243U4F48VX05VJ8G	9852	606	699	2004-02-15	Left brain tumor resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+54OVO3NT3E2364W3J4QKR6S6S9R05ZLRS3JN	9733	487	577	2012-06-13	Right temporal lobe, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+54OVO3NT3E2364W3J4QKR6S6S9R05ZLRS3JN	9734	488	578	2012-06-21	Right temporal brain tumor, excision	Temporal	NA	Right	Glioblastoma	NA	STD
+3RI073PPTOM509NUYM8SEC886G3N4Y6R8VXB	9880	635	728	2004-06-15	Left frontal lobe tumor resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+11J8H9RIQVZRXRI26RSX4EY4SIKS989Y3EE3	9882	637	730	2004-06-06	Left frontal tumor resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+J7P108F1C98Y901513U5UM0404490MG4D9F1	9884	639	732	2004-07-11	Brain, posterior fossa tumor, resection	Occipital	NA	Midline	Ependymoma	NA	STD
+Y03OH3591F1I187HAI205QU3EQ3X1SOGUZFQ	9406	162	253	2004-11-16	Left frontal lobe	Frontal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+Y03OH3591F1I187HAI205QU3EQ3X1SOGUZFQ	9407	163	254	2008-11-28	Left frontal tumor	Frontal	NA	Left	Non-Cancer	NA	STD
+Y03OH3591F1I187HAI205QU3EQ3X1SOGUZFQ	9408	164	255	2004-07-13	Left frontal lobe	Frontal	NA	Left	Glioblastoma	NA	REV
+R60DNM4U4XP21W0N2KU94N0433065DN96U7S	9797	551	643	2004-07-24	Right frontal tumor, resection	Frontal	NA	Right	Glioblastoma	NA	STD
+R60DNM4U4XP21W0N2KU94N0433065DN96U7S	9798	552	644	2010-09-15	Right frontal tumor re-resection	Frontal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+K5OET1L3H6NMGQ598R28R03TVM92N7J2T56T	9987	748	841	2004-08-03	Cerebellar lesion, resection	Fossa	NA	Midline	Medulloblastoma	NA	STD
+K5OET1L3H6NMGQ598R28R03TVM92N7J2T56T	9988	749	842	2011-05-16	Posterior fossa lesion, resection	Fossa	NA	Midline	Non-Neoplastic	NA	STD
+8E8M8DB13GV66J8DUQ2C4U89AA060GO7IR88	9907	661	754	2004-11-18	Brain, right frontal tumor, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+MZ7K5180FYQ4481V4A2ZJK1VP7KQ8RJ3JPJA	9908	662	755	2005-04-15	Brain, left temporal tumor, resection	Temporal	NA	Left	Oligoastrocytoma	NA	STD
+MZ7K5180FYQ4481V4A2ZJK1VP7KQ8RJ3JPJA	9909	663	756	2013-11-19	Left temporal tumor resection	Temporal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+MG96T8C5UC5D20TU36I0G323817347JVN51O	9781	536	628	2005-04-22	Brain, left cranial tumor, resection	Brain	NA	Left	Glioblastoma	NA	STD
+DD16B863485P886WJ9J742H9W9H9PF44TH8F	9784	539	631	2005-01-09	Brain, right frontal mass, excision	Frontal	NA	Right	Glioblastoma	NA	STD
+8SSB22N1POV8U68NBOA20467L1PWJ6Z7E1M8	9989	750	843	2004-11-13	Right frontal tumor, excision	Frontoparietal	NA	Right	Low-grade Glioma	NA	REV
+8SSB22N1POV8U68NBOA20467L1PWJ6Z7E1M8	9990	751	844	2009-02-20	Right frontal tumor resection	Frontal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+I7SI1F2CR7XXI083W5P301S49CD3HR77H99G	9416	172	263	2005-01-24	Brain, left frontal tumor, resection	Frontal	NA	Left	Ganglioglioma	NA	STD
+I7SI1F2CR7XXI083W5P301S49CD3HR77H99G	9417	173	264	2008-02-01	Left frontal tumor, resection	Frontal	NA	Left	Ganglioglioma	NA	STD
+R93O969G1W51Q5LN7F2549VUU84Z8V05QI6W	9418	174	265	2009-08-17	Brain, frontal lobe, resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+VCE736555ZUR14F393Z2MYLR2YS0S6DLKKFU	9871	626	719	2007-03-16	Left frontal tumor, resection	Frontal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+M40F83D5Q0610H384RKEV86JZ887ZWF9X29W	9870	625	718	2011-08-23	Brain, left frontal tumor, excision	Frontal	NA	Left	Oligodendroglioma	NA	STD
+U28W06ZCQG4X1W6D8618UC83X79MG59TLS0D	9483	239	330	2012-04-03	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+2T8SZK24402D77JB8O92F9EDX791G0R4Z795	9731	486	576	2013-04-09	Left frontal tumor, resection	Frontal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+2T8SZK24402D77JB8O92F9EDX791G0R4Z795	9732	485	575	2006-01-07	Brain, left frontal, resection	Frontal	NA	Left	Glioblastoma	NA	REV
+92PPGYSN0MJ7PK3SP2Q1R49R4516N8CZ7220	9867	622	715	2006-01-30	Brain, right frontal, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+654424Q65O3QP94266X1M4149OZ77817LQ97	9419	176	267	2006-03-14	Brain, right temporal, resection	Temporal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+654424Q65O3QP94266X1M4149OZ77817LQ97	9420	175	266	2005-07-06	Right temporal tumor	Temporal	NA	Right	Glioblastoma	NA	OUT
+654424Q65O3QP94266X1M4149OZ77817LQ97	9421	177	268	2008-07-16	Bone, craniectomy	Bone	Skull	Right	Non-Cancer	NA	STD
+0ZOL19S3FZ064732VMQ7L4AZ14X9HMT89T1C	9946	701	793	2006-11-29	Right brain mass, resection	Brain	NA	Right	Low-grade Glioma	Oligodendroglioma	STD
+8V182BVX019K2NGW2006CZ39KF8Y72I1Y88G	9864	619	712	2006-04-09	Right cingulate gyrus, resection	Brain	NA	Right	Oligodendroglioma	NA	STD
+86NRXFU8485201484EJQC1E6K783318HYHNQ	9863	618	711	2007-04-12	Right frontal tumor, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+JT0XC93K1T51V7XC0W18HY0915S55081I153	9861	616	709	2012-02-15	Right frontal tumor, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+130K4ABCGI524RS9J7NQJ7SEST2I92V4P4F7	9857	612	705	2006-05-01	Brain, right frontal, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+130K4ABCGI524RS9J7NQJ7SEST2I92V4P4F7	9858	613	706	2006-05-01	Right brain biopsy	Brain	NA	Right	Low-grade Glioma	NA	REV
+5MA96170CEK403A654L59N7R9GTXH234306M	9428	184	275	2005-12-30	Brain, left frontal, resection	Frontal	NA	Left	Low-grade Astrocytoma	NA	STD
+5MA96170CEK403A654L59N7R9GTXH234306M	9429	185	276	2009-02-13	Brain tumor, left frontal, resection	Frontal	NA	Left	Anaplastic Astrocytoma	NA	STD
+Y8055XT8XSQ613R3S54MNXQ27IKFVP7AMOCO	9856	611	704	2006-02-24	Brain, right frontal, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+0JYO16C07F740U5Q3OZ7O1DC2T40PITF59YP	9854	610	703	2006-08-10	Right temporal tumor, resection	Temporal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+0JYO16C07F740U5Q3OZ7O1DC2T40PITF59YP	9855	609	702	2006-03-17	Brain, right temporal lobe, resection	Temporal	NA	Right	Anaplastic Astrocytoma	Gemistocytic Astrocytoma	REV
+U7PS005HUF7Z8AA6U6XSPUUU2M1705IBW69G	9832	586	678	2006-05-30	Cerebellum, mass, resection	Cerebellum	NA	Midline	Desmoplastic/Nodular Medulloblastoma	NA	STD
+T35Q4CMM7L156319I0QE4565QC93VZ5JU72B	9816	570	662	2006-07-20	Right temporal tumor, resection 	Temporal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+PIC011JM315Q5YO4JIF9Z76U1733WZZUNN78	9815	569	661	2006-10-09	Brain tumor, left frontal, resection	Frontal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+6I6531R171A6I95X404J990219Y9CBRSRF8S	9814	568	660	2006-08-22	Right frontal tumor, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+H49072Z359VVM3WN3F7MLGP5VC24T1I86KB2	9430	186	277	2006-11-28	Left temporal lobe tumor, resection	Temporal	NA	Left	Low-grade Glioma	NA	STD
+H49072Z359VVM3WN3F7MLGP5VC24T1I86KB2	9431	188	278	2009-07-21	Temporal lobe, resection, and CUSA	Temporal	NA	Left	Non-Cancer	Low-grade Glioma	STD
+21166ZF7MLZV81G61530W31364A7Z952A314	9662	416	508	2006-12-22	Right frontal tumor, biopsy	Frontal	NA	Right	Glioblastoma	NA	STD
+GEH322F8065018WWMUK7K1IWQKHVHU8GXMW9	9658	413	505	2007-01-15	Cortex, right frontal tumor, resection	Frontal	NA	Right	Oligoastrocytoma	NA	STD
+GEH322F8065018WWMUK7K1IWQKHVHU8GXMW9	9659	412	504	2007-01-15	Right frontal brain tumor, resection	Frontal	NA	Right	Oligoastrocytoma	NA	REV
+GEG5H454K450G4H0J306N4FYL6PJ75ARKAE6	9434	191	281	2007-06-08	Left frontal brain tumor, resection	Frontal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+GEG5H454K450G4H0J306N4FYL6PJ75ARKAE6	9435	192	282	2008-06-13	Recurrent brain tumor	Brain	NA	Left	Non-Cancer	NA	STD
+BNX151C6MG867KZME5YOH148BJQ537P2JHE3	9929	683	776	2007-03-15	Left frontal tumor resection	Frontal	NA	Left	Anaplastic Astrocytoma	NA	STD
+J529OSLRWWG0U53YIQ4KHX90KX56PICT8F6E	9638	399	491	2007-06-16	Left frontal lobe tumor, resection	Frontal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+UZPF16CLEU8P2E7XVH4V12U7C6G55FX7119H	9637	398	490	2007-05-17	Right frontal tumor, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+JJH74XK6GB4080S5EE6641F0X7BAE5036PD2	9636	397	489	2007-05-28	Brain, right parietal, biopsy and resection	Parietal	NA	Right	Pleomorphic Xanthoastrocytoma	NA	STD
+301FFY2704TB9XZXHGS1SI757931T88530EW	9436	193	283	2007-07-25	Right temporal tumor, resection	Temporal	NA	Right	High-grade Glioma	NA	STD
+301FFY2704TB9XZXHGS1SI757931T88530EW	9437	194	284	2009-07-11	Temporal lobe lesion, resection	Temporal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	Glioblastoma	STD
+IJPF28NIQI9C81U010M4PNX4F4NK280RISYC	9467	223	313	2007-07-12	Brain, left frontal, resection	Frontal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+G9H6B75310X92Y5GWSQS1990GPS0Z13GXS11	9608	369	461	2007-10-08	Right frontal tumor	Frontal	NA	Right	Anaplastic Astrocytoma	NA	STD
+3W84FKAJBBS67WABY76Z9ET063NUH9QF746S	9935	689	782	2012-06-05	Right frontal tumor, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+3W84FKAJBBS67WABY76Z9ET063NUH9QF746S	9936	690	783	2008-11-01	Brain tumor, right frontal, resection	Frontal	NA	Right	Oligodendroglioma	NA	REV
+YO60V56UBEY46Z72P2WF95XI5TH56BJTLNUA	9606	367	459	2007-12-11	Right frontal tumor, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+D2800F11W5JAAP250B05Z04KE4U78563LE7D	10009	769	862	2008-01-11	Brain, right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+736F47NB280E9830P2915FEXAFSSYRMWK4RW	9447	203	293	2008-06-17	Right frontal tumor, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+736F47NB280E9830P2915FEXAFSSYRMWK4RW	9448	204	294	2009-05-28	Bone flap, removal	Bone	NA	Right	Non-Cancer	NA	STD
+736F47NB280E9830P2915FEXAFSSYRMWK4RW	9449	205	295	2009-09-27	Right frontal tumor	Frontal	NA	Right	Non-Cancer	NA	STD
+736F47NB280E9830P2915FEXAFSSYRMWK4RW	9450	206	296	2006-01-10	Right frontal tumor	Frontal	NA	Right	Anaplastic Astrocytoma	NA	OUT
+96M2K28022Q4B502OO7FJKY6F44JQD280ZQP	9451	207	297	2008-02-28	Right temporal tumor, biopsy and resection	Temporal	NA	Right	Glioblastoma	NA	STD
+E7L849DYJ9EC7Q87U9V292U929855XAXO07X	9452	208	298	2008-04-02	Right frontal tumor	Frontal	NA	Right	Oligodendroglioma	NA	STD
+FZZK6AB262FY1V6B7F59UMGCM124CD7SOR9M	9458	214	304	2008-04-15	Brain, right temporal	Temporal	NA	Right	Glioblastoma	NA	STD
+5K024P8F8Y2T4207C593M6Z3XI9Q4A230863	9465	221	311	2012-11-26	Left parietal Brain tumor,biopsy	Parietal	NA	Left	Glioblastoma	NA	STD
+5K024P8F8Y2T4207C593M6Z3XI9Q4A230863	9466	222	312	2012-12-05	Left parietal tumor, biopsy	Parietal	NA	Left	Glioblastoma	NA	STD
+SHSFQEQU96243CO23Q7324JH217V4Z193R2D	10018	779	872	2008-07-31	Brain, left frontal, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+EL5I09T2P89L45XA8XMH60785461UW11HK53	9471	228	319	2009-01-04	Right frontal lobe tumor re-resection	Frontal	NA	Right	Oligoastrocytoma	NA	STD
+EL5I09T2P89L45XA8XMH60785461UW11HK53	9472	227	318	2009-01-05	Right frontal lobe mass, resection	Frontal	NA	Right	Oligoastrocytoma	NA	REV
+4975SUAU69110MLDJML1AEM1O7Y3B346FY5H	9473	230	321	2008-11-28	Right parietal mass, resection	Parietal	NA	Right	Low-grade Astrocytoma	NA	REV
+4975SUAU69110MLDJML1AEM1O7Y3B346FY5H	9474	229	320	2008-12-08	Right parietal tumor, resection	Parietal	NA	Right	Anaplastic Astrocytoma	NA	STD
+118GREMW0251764J15TG13IR126J26M9RM51	9463	219	309	2010-04-03	Brain, right temporal mass, resection	Temporal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+118GREMW0251764J15TG13IR126J26M9RM51	9457	213	303	2009-01-21	Brain tumor, right temporal, resection	Temporal	NA	Right	Glioblastoma	Small cell Glioblastoma	STD
+68661Z230Z19397BL42N69191UX853R62TQ5	9475	231	322	2009-03-16	Brain and dura, right frontal lobe	Frontal	NA	Right	Glioblastoma	NA	STD
+67908103BNL1J3M9872MZT2K654X5OJ4KCDF	9476	232	323	2009-03-13	Brain, left frontal, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+1T59BB1UU730M07304V3IZQ28FV2U3E2O5PA	9477	233	324	2009-04-05	Lesion, left brain	Frontal	NA	Left	Glioblastoma	NA	STD
+JUD94042BN0907S36X90C63VM1L3411Q4BAC	9479	235	326	2009-09-02	Brain, right occipital tumor, resection	Occipital	NA	Right	Glioblastoma	NA	STD
+35X45VI2M3T386957PUM7C729725HG841OA2	9487	244	335	2009-07-29	Brain, right frontal tumor	Frontal	NA	Right	Anaplastic Astrocytoma	NA	STD
+35X45VI2M3T386957PUM7C729725HG841OA2	9488	245	336	2010-06-11	Right frontal brain tumor, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+7G2N9JJZ85E17RGXL4R1LF9L672A998MDPCQ	9489	247	338	2009-09-06	Left parietal tumor, resection	Parietal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+7G2N9JJZ85E17RGXL4R1LF9L672A998MDPCQ	9490	246	337	2009-08-01	Left parietal tumor	Parietal	NA	Left	Oligodendroglioma	NA	OUT
+064H638Q61SF7P911925NKKPZ2U05EEQF097	10043	798	902	2009-07-27	Left frontal lobe mass, resection	Frontal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+6M35340TD2GL9TJ266C66702Y9SM8ENGP9I0	9491	248	339	2009-08-20	Right occipital tumor, excision	Occipital	NA	Right	Glioblastoma	NA	STD
+H5O6J538335821LJ9L5TLB0W1H596ZD9KP61	9455	211	301	2009-08-29	Right parietal brain tumor, biopsy	Parietal	NA	Right	Glioblastoma	NA	STD
+H5O6J538335821LJ9L5TLB0W1H596ZD9KP61	9456	212	302	2009-09-07	Brain, right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+X807F7YDO71X6G1R74XFE82YLI62003K750C	9454	210	300	2009-09-04	Left parietal tumor, resection	Parietal	NA	Left	Gliosarcoma	NA	STD
+C891J760LYFAORS95750HO6TYW8B1M1HY7XA	10045	800	904	2009-11-03	Right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+M6E6861L5879A0U0062QP90783ED0HE487EA	9492	250	340	2009-11-20	 Brain, right temporal tumor 	Temporal	NA	Right	Anaplastic Astrocytoma	NA	STD
+WIYKSYEN70J5X14X1T23KA1S93MA7V6IWKZ0	9591	354	445	2011-04-30	Left frontal brain tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+5H70J36T0F92C3T2U22H7BT3123I1MHO22N1	9590	353	444	2010-05-28	Right temporal tumor, resection	Temporal	NA	Right	Pilocytic Astrocytoma	NA	STD
+PCTIY0CN1KF6Q348C7L1U3776TT5Z1FLQ1KJ	9588	352	443	2010-05-19	Right frontal tumor	Frontal	NA	Right	Glioblastoma	NA	OUT
+PCTIY0CN1KF6Q348C7L1U3776TT5Z1FLQ1KJ	9589	351	442	2011-02-07	Brain, right frontal tumor, re-resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+QZANQ7312N0Z19QTG32WVL9M7M0032ZB7WZO	9585	348	439	2011-02-07	Brain, anterior temporal, tumor resection	Temporal	NA	Right	Glioblastoma	NA	STD
+DI5XEA94T23JZF854J2K8P08Z284VZ7OYT85	9584	347	438	2011-03-07	Brain, right frontal mass, resection	Frontal	NA	Right	Glioblastoma	NA	STD
+KQMFVWVXFQ6M7W8QVRA560936PK82VS085W9	9582	342	433	2011-03-09	Brain tumor, right parietal, biopsy and resection	Parietal	NA	Right	Glioblastoma	NA	STD
+S0IFD2UTC325N5MNZ0U60Q790113RAY9E5WP	9576	335	426	2011-03-21	Brain tumor, right parietal lobe, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+O0F404IAP6UGAD0699HK17Y8LLUD7RC8772J	9575	334	425	2011-05-02	Right parietal brain tissue	Parietal	NA	Right	Glioblastoma	NA	STD
+V492M2T31DR600NT5XSI3RBEGQ6031DZ62S8	9574	333	424	2011-05-11	Right frontal tumor, resection	Frontal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+YHP1495OUK01H1X80LNO6EFC22902E0OCQ2Z	9453	209	299	2011-05-24	Brain,left frontal tumor, biopsy and resection	Frontal	NA	Left	Glioblastoma	NA	STD
+28DF906Y1YH6MB6512Z5PD24CQL1C46G2X24	9445	201	291	2011-05-21	Right parietal tumor, resection	Frontoparietal	NA	Right	Glioblastoma	Glioblastoma with Oligodendroglioma component	STD
+28DF906Y1YH6MB6512Z5PD24CQL1C46G2X24	9446	202	292	2012-01-17	Right parietal tumor, resection	Parietal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+5P57W7VJ06ZVL0LT0J1PBI04TZPC3G786MO6	9444	200	290	2011-06-02	Right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+9B12QD0G93F84Q349JU9ZGTIE6S6751Q8747	9573	332	423	2011-07-23	Left frontal tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+04L45WAVUI35NEAZY7BBLF9855CGK4ANEWL1	9443	199	289	2011-08-04	Right temporal lobe with hoppocampus	Temporal	NA	Right	Glioblastoma	NA	STD
+BOK08ZT4V6HB6M1PW79D4D0O2AU3YJ1DHY5S	9930	684	777	2011-10-02	Left frontal tumor, resection	Frontal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+718L059BUON6U687FX5K6T13C8755ZIM9P0O	9560	320	411	2011-04-03	Left temporal brain tumor	Temporal	NA	Left	Glioblastoma	NA	OUT
+718L059BUON6U687FX5K6T13C8755ZIM9P0O	9561	319	410	2012-03-17	Left temporal brain tumor	Temporal	NA	Left	Recurrent/residual glioblastoma with treatment effect	NA	STD
+3JQ8L1B8R4OGHTS3424ZQ89WFKJT62J38D77	9441	198	288	2011-12-28	Left temporal lobe tumor, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+35PK1KQ82R1V9Y602O4KEH4Q84K92AWYQZ67	9425	181	272	2011-09-28	Right temporal tumor resection	Temporal	NA	Right	Low-grade Astrocytoma	NA	OUT
+35PK1KQ82R1V9Y602O4KEH4Q84K92AWYQZ67	9426	182	273	2011-10-09	Brain, right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+35PK1KQ82R1V9Y602O4KEH4Q84K92AWYQZ67	9427	183	274	2012-02-13	Right temporal tumor and CUSA specimen, excision	Temporal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+9ETTA9339I27375A6WIUX0TILP39J1YXQ6RZ	9412	168	259	2012-01-11	Right temporal tumor, Resection	Temporal	NA	Right	Glioblastoma	NA	STD
+3748MD775I99I21365GWL3WNPGDPZSA0B24B	9558	317	408	2012-02-16	Right frontal tumor, resection	Frontal	NA	Right	Anaplastic Ganglioglioma	NA	STD
+7IQ0RYJ7QLK1147852RLO80APF9ELUTV872O	9557	316	407	2012-02-27	Right frontal tumor, excision	Frontal	NA	Right	Glioblastoma	NA	STD
+9G7R5052K639R78C10482M8TTOFSJZV8ZH59	9556	315	406	2012-02-19	Right temporal brain tumor, exicision	Temporal	NA	Right	Anaplastic Ependymoma	NA	STD
+OD9884Y2G0X1941S841EM4NP022F08AON081	9555	314	405	2012-03-26	Right frontal tumor, resection	Frontal	NA	Right	Anaplastic Astrocytoma	NA	STD
+L7K0N8LBXUWI66U6I79024323BI829INA4N2	9411	167	258	2012-04-22	Right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+A33K8D589NK8MI90H2EHA3T3N6A8HCXHD6BP	9410	166	257	2012-04-11	Brain tumor resection	Parietal	NA	Right	Glioblastoma	NA	STD
+3SDIF67X62S2606LWNT46WE023W79YWJ30Y0	9552	311	402	2012-05-02	Right parietal-occipital brain tumor	Parietal-occipital	NA	Right	Glioblastoma	NA	STD
+3SDIF67X62S2606LWNT46WE023W79YWJ30Y0	9553	312	403	2012-05-02	Right parietal lobe tumor, biopsy	Parietal	NA	Right	Glioblastoma	NA	REV
+RAUGLO2L3UP1WK2JGB7NF79HJ58495T48KCJ	9897	651	744	2012-04-20	Left parietal tumor, resection and CUSA	Parietal	NA	Left	Glioblastoma	NA	STD
+JXB4C1C870BRMHNI6XOK1R94TN4OL74G3GPF	9551	310	401	2012-04-30	Left temporal lobe tumor	Temporal	NA	Left	Anaplastic Astrocytoma	NA	STD
+56485YF9H26B0PCI4O81T0ATO08T17KPPVJK	9931	685	778	2012-05-06	Right frontal brain tumor, excision	Frontal	NA	Right	Anaplastic Astrocytoma	NA	STD
+8W5N5NP8F983O701G6J8S716Z1151WHP71V9	9550	309	400	2012-06-08	Left frontal tumor, resection	Frontal	NA	Left	Diffuse Astrocytoma	NA	STD
+07T76N11CMXDUP17KT6F49J1033RHQ5E8EH6	9549	308	399	2012-07-24	Left temporal brain tumor, resection	Temporal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+K56425YU8856W53AJDM07444Y5XPQ2KTZ580	9548	306	397	2012-06-15	Left frontal lobe tumor, excision	Frontal	NA	Left	Glioblastoma	NA	STD
+2RI4107851361M4QW5LV9Y6V1NUWJJHRVU32	9542	300	391	2012-08-08	Brain, left frontal, resection	Frontal	NA	Left	Oligoastrocytoma	NA	STD
+429A48350F5KI7DA6FRSW10Z3X3862L2Y38K	9541	299	390	2012-08-06	Right frontal mass, resection	Frontal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+9F1QN6AK94N97FL811G9Y279M0UL6MXAME85	9409	165	256	2012-08-25	Brain, right frontal biopsy	Frontal	NA	Right	Glioblastoma	NA	STD
+KB8A90GYVNB5IED26428NNCSO631OHJOZ181	9537	295	386	2012-09-21	Left frontal mass, resection	Frontal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+CKU1QSF8007HQ3P5LZ4382CD764V0ROV8N5L	9526	284	375	2012-12-08	Right parietal tumor, resection	Parietal 	NA	Right	Glioblastoma	NA	STD
+6A56ESL5RB0ZUM6M8892LZKH6KEZ4Q43R569	9920	673	766	2012-12-23	Right frontal lobe tumor, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	High-grade Glioma	STD
+E396XTGB4JY3N7ARQKVJE98I545L2K69A5K7	9525	283	374	2013-01-22	Left frontal lobe mass, resection	Frontal	NA	Left	Papillary Glioneuronal Tumor	NA	STD
+OE8M969L53XKFK17T142HMT8P8J85C0O9IS2	9524	282	373	2013-03-19	Right frontal tumor, resection	Frontal	NA	Right	Glioblastoma with Oligodendroglioma component	NA	STD
+FZ493CZ632421TF08TR6H12R825HWTN8GU78	9523	281	372	2013-04-03	Left occipital tumor, resection	Occipital	NA	Left	Glioblastoma	NA	STD
+S5E834HU3VB26H6996K8R7D27LC6N33IT7UJ	9522	280	371	2013-05-16	Left frontal tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+04602L8H8137DMA15169753168UL34T157KF	9268	22	116	2009-11-14	Right temporal tumor, resection	Temporal	NA	Right	Oligodendroglioma	NA	STD
+QUUR6KL2C90656VF7VC55060B93ZP9P3A3C4	9269	23	117	2006-03-31	Brain, right frontal, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+8595LCBQT23X79S34EX3EJV475DUHD4430FP	9310	63	156	2009-08-06	Left temporal lobe mass, T-0, biopsy	Temporal	NA	Left	Glioblastoma	NA	NA
+8595LCBQT23X79S34EX3EJV475DUHD4430FP	9311	64	157	2009-08-16	Brain, left temporal tumor and CUSA, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+8595LCBQT23X79S34EX3EJV475DUHD4430FP	9312	65	158	2009-08-20	Brain, left occipital lobe, resection	Occipital	NA	Left	Glioblastoma	NA	STD
+5I40M2I87VU324ZBLEH893RN8WP7G6FOY039	9313	66	159	2012-06-18	Brain, left parietal tumor, excision	Parietal	NA	Left	Glioblastoma	NA	STD
+81631656XXDUK1F9RRLXVGC2XZFWP5RJ852J	9314	68	161	2011-09-15	Right frontal tumor, excision	Frontal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+9815O07Z5W0AP544I331659R2R6PDD0I06BX	9315	69	162	2011-02-28	Left temporal mass, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+4DIZ65Q977HSSM957A3A3O687029WD35Z03W	9267	21	115	2000-06-03	Left temporal, tumor resection	Temporal	NA	Left	Oligodendroglioma	NA	STD
+6PTMTI5V3NY2XEOHL9JWD8NVQQCYLNX242O0	9266	20	114	2008-07-28	Brain tumor, right frontal, resection	Frontal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+X362046H54K3T319085WRT0C4EQ629QN3240	9265	19	113	2010-05-20	Left frontal tumor, resection	Frontal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+104Q9Z7GF99ECISJH921P87AF9QOQXJ9SOLE	9264	18	112	2009-05-17	Right cerebellar tumor, resection	Cerebellar	NA	Right	Ganglioglioma	NA	STD
+3KIO51977Y99DA612WXC52LH6TCA194V85AS	9263	17	111	2012-09-06	Brain, left temporal, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+1H198YHY57R9C9T5U0O7EE15T7SW33015MD4	9316	70	163	1995-07-22	Tumor resection	Parietal	NA	Right	Low-grade Glioma	NA	STD
+A29XG354RDCMZ6924QUOLBHJ37S07955X1P5	9872	627	720	2013-07-01	Right parietal tumor, resection	Parietal	NA	Right	Glioma, NOS	NA	STD
+S97S9JMSZC9F2EAY8LLE2G1QOT07LPH38W4A	9521	279	370	2013-06-23	Left frontal mass, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+ZE87F7GP3188ZMX447T8PE2PRN49L0H801H5	9504	262	353	2013-06-09	Right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+27RQ364U4Y1IHHUGKT4P823SW49NH8UC9O7W	9914	668	761	2013-08-20	Right frontal tumor and CUSA contents, resection	Frontal	NA	Right	Anaplastic Astrocytoma	NA	STD
+27RQ364U4Y1IHHUGKT4P823SW49NH8UC9O7W	9915	669	762	2013-08-20	Brain, right frontal, biopsy	Frontal	NA	Right	Anaplastic Astrocytoma	NA	REV
+76ZIT2BOFCFHC0W9G146JWHH29284Q89W869	9790	545	637	2013-09-14	Right frontal tumor	Frontal	NA	Right	Recurrent/residual glioblastoma	NA	STD
+76ZIT2BOFCFHC0W9G146JWHH29284Q89W869	9791	545	637	2013-09-04	Right frontal tumor, corpus callosum	Frontal	NA	Right	Recurrent/residual glioblastoma	NA	OUT
+76ZIT2BOFCFHC0W9G146JWHH29284Q89W869	9792	546	638	2013-09-07	Brain, right frontal lobe, stereotactic biopsies	Frontal	NA	Right	Ganglioglioma	NA	REV
+31VKY13F20DP2H2ZEGLE2PKRU39M30Z0B600	9503	261	352	2013-07-24	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+3P3N56T7U7498T74V8G0I2F06V549P1G3186	9505	263	354	2013-07-02	Left frontal tumor, resection	Frontal	NA	Left	Anaplastic Astrocytoma	NA	STD
+4S3568IM4522CR9X7J14Y8KNOYXP9VT4260M	9459	215	305	2008-08-17	Brain tumor, right frontal, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+4S3568IM4522CR9X7J14Y8KNOYXP9VT4260M	9460	216	306	2013-09-22	Right frontal tumor, CUSA contents, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+4S3568IM4522CR9X7J14Y8KNOYXP9VT4260M	9461	217	307	2008-05-27	Right frontal tumor	Frontal	NA	Right	Oligodendroglioma	NA	OUT
+D70XEV1G327C5VA3J926J391VGDA1B60FXM9	9318	71	164	2011-06-12	Right temporal tumor resection	Temporal	NA	Right	Anaplastic Astrocytoma	NA	STD
+7524W14A5G61BFWK6V61I40VMIMD1689A6YX	9281	33	126	2010-04-28	Right temporoparietal tumor	Temporoparietal	NA	Right	Glioblastoma	NA	STD
+H00G98815131F98VDYEF28904S7XRXOTUHAE	9877	632	725	2004-03-29	Right temporal tumor resection	Temporal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+H00G98815131F98VDYEF28904S7XRXOTUHAE	9906	632	725	2004-04-16	Right temporal tumor resection	Temporal	NA	Left	Anaplastic Astrocytoma	NA	OUT
+S4VVPY66PM0N4EK51O0LZBW2O9JM3807E385	9282	34	127	2001-04-03	Left temporal tumor	Temporal	NA	Left	Oligodendroglioma	NA	STD
+S4VVPY66PM0N4EK51O0LZBW2O9JM3807E385	9283	35	128	NA	Left temporal tumor	Temporal	NA	Left	Oligoastrocytoma	NA	OUT
+5DK653HZOJZTX076KN2RQ42NNDGVE0WC9NW4	9274	25	119	2002-01-08	Brain, tumor and CUSA specimen, surgical excision	Brain	NA	Right	Oligodendroglioma	NA	STD
+TPW3J2624CL94VU4ZHZ9254A0F81FH76Q62W	9275	26	120	1997-01-13	Brain tumor, right parietal, craniotomy	Parietal	NA	Right	Glioblastoma	NA	STD
+TPW3J2624CL94VU4ZHZ9254A0F81FH76Q62W	9276	27	121	2000-03-10	Brain, tumor resection	Brain	NA	Right	Recurrent/Residual Glioblastoma With Treatment Effect	NA	STD
+E89X7790Z5BV5VS6397LL3O04OJZ594JK5V2	9378	131	224	2000-06-27	Right frontal and right temporal lobe tumor	Frontotemporal	NA	Right	Glioblastoma	NA	STD
+NI8Q778TJF55OB6E53ZAU29VJ94V574T5O7Y	9375	128	221	1998-02-09	Right frontal mass	Frontal	NA	Right	Oligodendroglioma	NA	STD
+NI8Q778TJF55OB6E53ZAU29VJ94V574T5O7Y	9376	129	222	2004-11-26	Right frontal tumor, re-resection	Frontal	NA	Right	Anaplastic Oligoastrocytoma	Non-Cancer	STD
+NI8Q778TJF55OB6E53ZAU29VJ94V574T5O7Y	9377	130	223	2006-02-06	Brain, right frontal mass, re-resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+5D66BYZC61Q00M3YRJQJHH2D948416JJL386	9352	106	199	2006-03-08	Brain, left parietal, resection	Parietal	NA	Left	Anaplastic Oligodendroglioma	Glioblastoma	STD
+5D66BYZC61Q00M3YRJQJHH2D948416JJL386	9354	107	200	2006-02-28	Brain, tumor resection	Brain	NA	Left	Oligodendroglioma	NA	REV
+I4C7F4Z4OOC8G7H228V0509Q5D4GGX240MBA	9350	104	197	2007-12-30	Right occipital tumor, resection	Occipital	NA	Right	Glioblastoma	NA	STD
+I4C7F4Z4OOC8G7H228V0509Q5D4GGX240MBA	9351	105	198	1999-05-22	Right pseudo Schwannoma	Suboccipital	NA	Right	Schwannoma	NA	STD
+Y23VC45089PA48C1KNQ96B8PZF29N26DR46J	9348	102	195	2000-02-27	Brain, tumor resection 	Brain	NA	Left	Gliosarcoma	NA	STD
+Y23VC45089PA48C1KNQ96B8PZF29N26DR46J	9349	103	196	1999-05-01	Left temporal tumor	Temporal	NA	Left	Glioblastoma	NA	OUT
+G6EVVD02HDPB1D9E40I53FF79729C1N98X36	9344	98	191	1999-03-10	BRAIN, RIGHT FRONTAL, BIOPSY AND CUSA	Frontal	NA	Right	Oligoastrocytoma	NA	STD
+G6EVVD02HDPB1D9E40I53FF79729C1N98X36	9345	99	192	2006-11-20	RIGHT FRONTOTEMPORAL INSULAR TUMOR, RESECTION	Frontotemporal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+9XJEY8W0338TR96071A07O300IJ6CM85081N	9342	96	189	2000-02-15	Left frontal brain tumor, biopsy and excision	Frontal	NA	Left	Low-grade Glioma	NA	STD
+9XJEY8W0338TR96071A07O300IJ6CM85081N	9343	97	190	2005-08-31	Left frontal tumor	Frontal	NA	Left	High-grade Glioma	NA	STD
+URN88V577S8F1K9YQ9I786RJ8IMPGWF2TUOS	9397	152	243	1999-06-26	Left frontoparietal tumor excision	Frontoparietal	NA	Left	Oligodendroglioma	NA	STD
+URN88V577S8F1K9YQ9I786RJ8IMPGWF2TUOS	9398	153	244	2003-06-29	Tumor resection cavity, excision	Fronto Parietal	NA	Left	Low-grade Glioma	NA	STD
+9Y62SV6I63OH7U46J7F683VZSET4Z9PS8WA9	9395	150	241	1999-08-19	Right posterior frontal tumor resection	Frontal	NA	Right	Glioblastoma	NA	STD
+9Y62SV6I63OH7U46J7F683VZSET4Z9PS8WA9	9396	151	242	2000-05-18	Right parietal tumor resection	parietal	NA	right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+YU35DIUO0H70JO1CNQAFVNO087PX6ZK2FXNV	9393	149	240	2004-08-08	Right frontal resection	frontal	NA	right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+YU35DIUO0H70JO1CNQAFVNO087PX6ZK2FXNV	9394	148	239	1999-06-07	Right frontal tumor resection	Frontal	NA	Right	Glioblastoma	NA	OUT
+640X399SEEOM2TOZ7424E50K9L000439RMXJ	9392	143	238	1999-07-04	Left Parietal tumor resection	Parietal	NA	Left	Glioblastoma	NA	OUT
+640X399SEEOM2TOZ7424E50K9L000439RMXJ	9389	142	235	1999-12-29	Tumor, Left parietal, resection	Parietal	NA	Left	Glioblastoma	NA	STD
+640X399SEEOM2TOZ7424E50K9L000439RMXJ	9390	144	236	2000-11-27	Brain mass, resection	Occipito-parietal	NA	left	Recurrent/residual glioblastoma with treatment effect	Anaplastic Astrocytoma	STD
+IW2W24S185R2A64J94E8273V3GP30QFO2T7Y	9387	140	233	1999-07-08	Brain, posterior fossa, excision	Suboccipital	NA	Midline	Medulloblastoma	NA	STD
+IW2W24S185R2A64J94E8273V3GP30QFO2T7Y	9388	141	234	2001-09-01	Cerebellar tumor resection	Suboccipital	NA	Midline	Medulloblastoma	NA	STD
+JC6I78QW0O517K1718DS1Y5YQ474PR768FTL	9384	137	230	1999-08-29	Right occipital tumor resection	Occipital	NA	Right	Glioblastoma	NA	OUT
+JC6I78QW0O517K1718DS1Y5YQ474PR768FTL	9385	138	231	2006-06-23	Right frontal tumor resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	REV
+JC6I78QW0O517K1718DS1Y5YQ474PR768FTL	9386	139	232	2006-06-30	Brain, right frontoparietal tumor, excision	Frontoparietal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+273J1J72MSTT057CX9C5EL3WD39N8EPPWQ85	9382	135	228	2000-02-12	Right temporal lobe tumor	Frontotemporal	Parietal 	right	Glioblastoma	NA	STD
+273J1J72MSTT057CX9C5EL3WD39N8EPPWQ85	9383	136	229	2000-06-08	Right temporal tumor resection	Temporal	NA	Right	Recurrent/residual glioblastoma	NA	STD
+ZVIKC173J92NZW8E8VKKQLE1E6T10QI14S33	9373	126	219	2005-08-10	Right temporal tumo resection	Temporal	NA	Right	Anaplastic Astrocytoma	NA	REV
+ZVIKC173J92NZW8E8VKKQLE1E6T10QI14S33	9374	127	220	2007-03-19	NA	Parietal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+6DN6LSM86QHPF36C541Z554YECJV9D2R6O7Q	9372	125	218	2000-02-12	Brain, left temporal lobe, craniotomy	Temporal	NA	Left	Oligodendroglioma	NA	STD
+04WYYCAOY496D45E3TQ985XK9A2Y8548V20J	9363	116	209	1999-12-12	Right frontal tumor resection	Frontal	NA	Right	Glioblastoma	NA	OUT
+04WYYCAOY496D45E3TQ985XK9A2Y8548V20J	9364	117	210	2000-05-27	Brain resection	Frontal temporal parietal	NA	Right	Recurrent/residual glioblastoma with treatment effect	Non-Cancer	STD
+VMJY5Q0QR3L4P5NMT8AZSQBDN9B8O3D6GZ5A	9361	114	207	1999-12-11	Left temporal tumor resection	Temporal	NA	Left	Glioblastoma	NA	OUT
+VMJY5Q0QR3L4P5NMT8AZSQBDN9B8O3D6GZ5A	9362	115	208	2000-09-09	Left anterior temporal recurrent tumor	Temporal	NA	Left	Gliosarcoma	NA	STD
+SS70I00EZDCY9GNJ937O0QJGAK5OKC589L1V	9355	108	201	2000-01-30	Left frontal mass resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+57MRIB5B619352IT07OSSY4736T253Y0FF50	9346	100	193	2000-03-01	Right temporal tumor resection	Temporal	NA	Right	Glioblastoma with Oligodendroglioma component	NA	STD
+57MRIB5B619352IT07OSSY4736T253Y0FF50	9347	101	194	2000-03-05	Temporal tumor craniotomy	Temporal	NA	Right	Oligodendroglioma	NA	STD
+H2XZ6L3726RSVQ41UQ5EQBK05632T353OG22	9340	94	187	2003-03-07	Right frontotemporal tumor resection	Frontotemporal	NA	Right	Glioblastoma	NA	REV
+H2XZ6L3726RSVQ41UQ5EQBK05632T353OG22	9341	95	188	2000-09-02	Frontal, temporal lobe tumor craniotomy	Frontotemporal	NA	right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+0NWRKV937M9ZYHW5718E3PA8Z20M7CSQG8PQ	9339	93	186	2002-06-03	Right Parietal tumor resection	Parietal	NA	Right	Glioblastoma	NA	STD
+8N431L64576KNO6DVUMPN540JM970B9XSBX6	9336	90	183	2000-03-18	Right Occipital tumor resection	Occipital	NA	Right	Glioblastoma	NA	STD
+8N431L64576KNO6DVUMPN540JM970B9XSBX6	9337	91	184	NA	NA	Temporoparietal	NA	Right	High-grade Astrocytoma	NA	OUT
+8N431L64576KNO6DVUMPN540JM970B9XSBX6	9338	92	185	2000-11-15	Right parietal occipital tumor	Temporoparietal	NA	Right	Non-Cancer	NA	STD
+FC5PKZ244GQOB098PB2IH2C7X33XO1OT765X	9334	88	181	2000-06-05	Brain right frontal biopsy	Frontal	NA	Right	Recurrent/residual glioblastoma with treatment effect	Anaplastic Astrocytoma	STD
+FC5PKZ244GQOB098PB2IH2C7X33XO1OT765X	9335	89	182	NA	NA	Frontal	NA	Right	Glioblastoma	NA	OUT
+VFF06282A5U06DB9OPWZWX8PXE79RHTK5QQO	9498	256	346	1998-01-05	Right frontal tumor resection	Frontal	NA	Right	Oligoastrocytoma	NA	OUT
+VFF06282A5U06DB9OPWZWX8PXE79RHTK5QQO	9499	257	347	2000-11-15	Brain, right frontal tumor, excision	Frontal	NA	Right	Primitive Neuroectodermal Tumor (PNET)	Anaplastic Oligoastrocytoma	STD
+K589NDV7953O6O0C0ATJRFNE000R60D4GF50	9506	264	355	2000-04-23	Right frontal tumor	Frontal	NA	Right	Oligodendroglioma	NA	STD
+K589NDV7953O6O0C0ATJRFNE000R60D4GF50	9507	265	356	2001-12-08	Right frontal tumor, surgical excision	Frontal	NA	Right	Glioblastoma with Oligodendroglioma component	Non-Cancer	STD
+7U2336893Y490WDGXFMC8Z7ON4K5NU3BHD5Z	9508	266	357	2000-05-05	Left frontal tumor resection	Frontal	NA	Left	Glioblastoma	NA	OUT
+7U2336893Y490WDGXFMC8Z7ON4K5NU3BHD5Z	9509	267	358	2001-01-28	Left frontal tumor resection	Frontal	NA	Left	Recurrent/residual glioblastoma with treatment effect	NA	STD
+BJBZK6739HJ9V2ZO8QU5F1Z1304A2T5H579Y	9510	268	359	2000-08-20	Right Parieto-Occipital biopsy	Parieto-occipital	NA	Right	Glioblastoma	NA	OUT
+BJBZK6739HJ9V2ZO8QU5F1Z1304A2T5H579Y	9511	269	360	2000-08-28	Brain tumor, right parietal lobe, biopsy and CUSA	Occipitoparietal	NA	Right	Glioblastoma	NA	STD
+21TMAG7M5L3A8TB1B12043HL955RRSP8C386	9512	270	361	2004-11-23	Left temporal tumor biopsy	Temporal	NA	Left	Glioblastoma	NA	REV
+21TMAG7M5L3A8TB1B12043HL955RRSP8C386	9513	271	362	2004-12-11	Brain, Left temporal tumor, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+73WD8E87U0B6Z65634QP9F18889NK816CXUP	9514	272	363	2003-11-08	Brain, right frontal lobe, craniotomy	Frontotemporoparietal	NA	Right	Glioblastoma	NA	STD
+JUNFHQ33444RIL8TMX94QI28V71QY7756209	9515	273	364	2000-12-05	Right temporal tumor resection	Temporal	NA	Right	Glioblastoma	NA	STD
+JUNFHQ33444RIL8TMX94QI28V71QY7756209	9516	274	365	2002-02-27	Brain, right temporal tumor, resection	Temporal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+U1U10V7FG6452U9319HYPRA8X23KVT3F0BMC	9517	275	366	2001-02-01	Brain tumor, biopsy	Frontal	NA	Left	Ganglioglioma	NA	STD
+U1U10V7FG6452U9319HYPRA8X23KVT3F0BMC	9518	276	367	1998-11-26	Brain, tumor resection	Frontal	NA	Right	Anaplastic Ganglioglioma	NA	OUT
+U1U10V7FG6452U9319HYPRA8X23KVT3F0BMC	9519	277	369	1999-01-27	Brain, tumor resection	Frontal	NA	Right	Anaplastic Ganglioglioma	NA	OUT
+U1U10V7FG6452U9319HYPRA8X23KVT3F0BMC	9520	278	368	1999-04-26	Brain, tumor resection	Frontal	NA	Right	Anaplastic Ganglioglioma	NA	OUT
+05026M722X36BJ7FA0I8TG0N7Z610IV1N188	9921	674	767	2001-01-11	Right frontotemporal lobe tumor, excision	Frontotemporal	NA	Right	Glioblastoma	NA	STD
+05026M722X36BJ7FA0I8TG0N7Z610IV1N188	9922	676	769	2001-01-11	Right frontotemporal tumor resection	Frontotemporal	NA	Right	Glioblastoma	NA	REV
+6C9UW094056PEA653V918S0XP3D133I9QVQ2	9527	285	376	2000-12-24	Left frontal brain tumor, excision	Frontal	NA	Left	Glioblastoma	NA	STD
+3807ACBXB1U63JT170CGM429YKA9SC5JWL68	9528	286	377	2004-03-03	Right temporal tumor resection	Frontotemporal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+4CIV7BWOS3A1ENZ22Z75UERF4PFG3U8EBVH4	9529	287	378	2000-11-06	Left frontal tumor biopsy	Frontal	NA	Left 	Oligodendroglioma	NA	REV
+4CIV7BWOS3A1ENZ22Z75UERF4PFG3U8EBVH4	9530	288	379	2000-12-27	Left frontal tumor, excision	Frontal	NA	Left	Oligodendroglioma	NA	STD
+G973LKX9J5OH3649213R03521S688YD77UD7	9531	289	380	2006-07-24	Right temporal tumor resection	Temporal	NA	Right	High-grade Glioma	NA	REV
+G973LKX9J5OH3649213R03521S688YD77UD7	9532	290	381	2006-07-02	Brain, right frontal, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma	NA	STD
+J51C7DXWX4Y16711L1U3JXA5SEU44E8H1VNW	9533	291	382	2001-01-17	Temporal lobe tumor biopsy	Temporal	NA	Left	Oligoastrocytoma	NA	STD
+Z431E26VB4QPQNPCUXBBMK9Q117Z91L092E2	9534	292	383	2001-02-22	Right frontotemporal tumor resection	Temoral	NA	Right	Glioblastoma	NA	STD
+Z431E26VB4QPQNPCUXBBMK9Q117Z91L092E2	9535	293	384	2001-02-06	Right temporal lobe lesion	Temporal	NA	Right	Gemistocytic Astrocytoma	NA	REV
+0L7N023TNJX061E1HO1085619EDO4LY818Z0	9543	301	392	2003-01-22	Right temporal tumor, biopsy	Temporal	NA	Right	Glioblastoma	NA	REV
+0L7N023TNJX061E1HO1085619EDO4LY818Z0	9544	302	393	2001-02-23	Right temporal tumor excision	Temporal	NA	Right	Glioblastoma	NA	STD
+5194O9EF80W0PB1399582L3RJ04L7U65RA8B	9546	304	395	2001-03-09	Left temporal tumor resection	Temporal	NA	Left	Glioblastoma	NA	STD
+689112VL78SON5QZH9CFIZB4FP73732ES18I	9562	321	412	2001-07-03	Right temporal tumor resection	Temporal	NA	Right	Ganglioglioma	NA	STD
+689112VL78SON5QZH9CFIZB4FP73732ES18I	9563	322	413	2001-02-22	Right temporal tumor, biopsy	Temporal	NA	Right	Low-grade Glioma	NA	OUT
+2QPV17894KCI9UM6ZM3P0IYMS5PLH8016VWS	9564	323	414	2003-02-16	Right temporal tumor resection	Temporal	NA	Right	Anaplastic Astrocytoma	NA	REV
+2QPV17894KCI9UM6ZM3P0IYMS5PLH8016VWS	9565	324	415	2001-04-21	NA	Temporal	NA	Right	Anaplastic Astrocytoma	NA	STD
+VX975MZE5D6N52OI882K7C291QB7V1R28108	9566	325	416	2005-11-21	Left Lateral cavernous sinus wall tumor	Temporal	NA	Left	Anaplastic Ependymoma	NA	STD
+VX975MZE5D6N52OI882K7C291QB7V1R28108	9567	326	417	2006-03-23	Mass, cavernous sinus, resection	Temporal	NA	Right	Anaplastic Ependymoma	NA	STD
+VX975MZE5D6N52OI882K7C291QB7V1R28108	9572	331	422	2001-05-26	Subarachnoid tumor mass, C2-5, excision	Spine	C2-C5	Midline	Ependymoma	NA	STD
+0A7J9377U50LPD71Q4F7TCUDRRWUJ3244E13	9568	327	418	2001-07-05	Left frontal tumor excision	Frontotemporal	NA	Left	Oligoastrocytoma	Oligodendroglioma	STD
+M6925H8DHI6E021YZC4L6Z89733V2PPN1T74	9577	336	427	2001-07-03	Posterior fossa mass, resection	Occipital	NA	Midline	Ependymoma	NA	STD
+731E7OJ8DM8Z6T2U373P16JROT9486OAGR0M	9578	338	429	2001-08-09	Brain tumor, frontal excision	Frontal	NA	Left	Astroblastoma	Glioblastoma	STD
+755484O401KJ6QVSMG79MM176R25ZO9OS72M	9580	340	431	2001-06-21	Left frontal tumor	Frontal	NA	Left	Anaplastic Oligodendroglioma	NA	REV
+755484O401KJ6QVSMG79MM176R25ZO9OS72M	9581	341	432	2005-01-10	Brain, left frontal tumor, resection	Frontal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+22SE3ME4128313XSUB82P06WERQP6OKXE038	9611	372	464	2001-06-15	Right temporal lobe biopsies	Temporal	NA	Right	Anaplastic Oligoastrocytoma	Metastatic Adenocarcinoma	STD
+9H4WM8867J6W0I684QZO5898AR45JQ666L42	9613	374	466	2001-06-15	Brain, right parietal, excision	Parietal	NA	Right	Oligodendroglioma	NA	STD
+V5SHX1BZ8F1A9RBXN732846E2SPHS5E1YMN7	9959	714	806	2003-03-18	Left frontal tumor biopsy	Frontal	NA	Left	Low-grade Glioma	NA	REV
+V5SHX1BZ8F1A9RBXN732846E2SPHS5E1YMN7	9960	715	807	2001-09-06	Left frontal tumor, resection	Frontal	NA	Left	Low-grade Astrocytoma	NA	STD
+GD1E0UFM4Z1PST05DUT6P47X0Y06F4IK403K	9614	375	467	2001-02-24	Right parietal tumor resection	Parietal	NA	Right	Glioblastoma	Gliosarcoma	OUT
+GD1E0UFM4Z1PST05DUT6P47X0Y06F4IK403K	9615	376	468	2001-06-09	Right parietal tumor resection	Parietal	NA	Right	Gliosarcoma	NA	OUT
+GD1E0UFM4Z1PST05DUT6P47X0Y06F4IK403K	9616	377	469	2002-03-22	Cusa, Pareital tumor, dura overlying lesion	Parietal	NA	Right	Anaplastic Astrocytoma	NA	STD
+DQKJ8P4Z89ZVZ37K72YY4049IL80YI370YO0	9617	378	470	2001-12-25	Brain, temporal lobe, tumor resection	Temporal	NA	Left	Oligoastrocytoma	NA	STD
+3S90F65O75R0SS71I6909RNX85GT9ZXWVSRM	9620	380	472	2001-11-02	Left parietal tumor resection	Parietal	NA	Left	Meningioma	NA	STD
+3S90F65O75R0SS71I6909RNX85GT9ZXWVSRM	9621	381	473	2003-04-22	Right temporal tumor excision	Temporal	NA	Right	Glioblastoma	NA	STD
+9O2E8XSD7QPV1D83R6D77AJ9E955K463DI0A	9622	382	474	2001-10-19	Left frontal tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+V8Z6X2B7E7H3G1C8ZD2Y5S33L5GD3H0EGB4T	9623	383	475	2002-01-03	Brain, right frontal tumor, resection	Frontal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+6NJ539C0UOB8BZ9GIMC74EN9011U335OV9L3	9624	384	476	2001-08-22	Tumor, left frontal, left temporal, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+62355PK37SXB2L9K014536LW5EJ62IY2B0S8	9625	385	477	2004-08-14	Brain tumor resection	Frontal	NA	Right	Glioblastoma	NA	STD
+ALY2EX5UO6W1U2Z6Q9YW52W8S4HMZ91H3TG8	9642	403	495	2002-01-30	Posterior fossa and CUSA specimen, craniotomy	Fossa	NA	Midline	Ependymoma	NA	STD
+LCJTE57X3G9KOI00B6O89G8A4J70330524GU	9643	404	496	2002-02-15	Brain, right temporal, excision	Temporal	NA	Right	Anaplastic Astrocytoma	NA	STD
+O8I1MYIA4JP496028C6M35360R8QO6ZIY2Z3	9650	405	497	2002-01-17	Left temporal tumor	Temporal	NA	Left	Glioblastoma	NA	STD
+C6KW932C0Q17KFH24NIL1L13149JAJYNWDZ5	9663	417	509	2002-02-17	Right temporal tumor resection	Temporal	NA	Right	Glioblastoma	NA	OUT
+C6KW932C0Q17KFH24NIL1L13149JAJYNWDZ5	9664	419	510	2002-10-21	NA	Temporal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+C6KW932C0Q17KFH24NIL1L13149JAJYNWDZ5	9665	420	511	2003-05-30	Right temporal tumor	Temporal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+V0S5F9KU1N4NHF3RUJQVWPGYXA9782D470C9	9666	421	512	2001-07-30	Left temporal tumor resection	Temporal	NA	Left	Glioblastoma	NA	OUT
+V0S5F9KU1N4NHF3RUJQVWPGYXA9782D470C9	9667	422	513	2002-09-16	Brain, left temporal lobe, tumor resection	Temporal	NA	Left	Recurrent/residual glioblastoma with treatment effect	NA	STD
+UU6XQF5R2ZJ0I7B14DYW6103JE730L3113O6	9669	424	515	2002-04-27	Tumor, right parietal, resection	Frontoparietal	NA	Right	Glioblastoma	NA	STD
+UU6XQF5R2ZJ0I7B14DYW6103JE730L3113O6	9670	425	516	2002-09-17	Brain, right parietal lobe, resection	Frontoparietal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+2E55EKV9443O4184EP608O1Y720O4W6782M0	9671	426	517	2000-05-12	Left frontal tumor resection	Frontal	NA	Left	Oligoastrocytoma	NA	REV
+2E55EKV9443O4184EP608O1Y720O4W6782M0	9672	427	518	2002-04-09	Left frontal craniotomy	Frontal	NA	Left	Malignant Oligoastrocytoma	NA	STD
+8LPXV7S23P47FRED94T41Q18RP21D465T525	9923	677	770	2002-06-13	Brain tumor, biopsy	Frontal	NA	Right	Glioblastoma	NA	STD
+8LPXV7S23P47FRED94T41Q18RP21D465T525	9924	678	771	2002-12-14	Right frontal tumor, resection	Frontal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+A56E83070GA7K4633428JR6SUZ789XE1S51Q	9673	428	519	2003-04-10	Brain, occipital, resection	Occipital	NA	Right	Astroblastoma	NA	REV
+A56E83070GA7K4633428JR6SUZ789XE1S51Q	9674	429	520	2003-03-24	Brain, right occipital	Occipital	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+A56E83070GA7K4633428JR6SUZ789XE1S51Q	9675	430	521	2004-01-24	Right occipital tumor resection	Occipital	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+A56E83070GA7K4633428JR6SUZ789XE1S51Q	9676	431	522	2004-07-14	Right occipital tumor re-resection	Parietooccipital	NA	Right	Non-Cancer	NA	STD
+A56E83070GA7K4633428JR6SUZ789XE1S51Q	9677	432	523	2004-09-19	Right parietal tumor resection	Parietal	NA	Right	High-grade Glioma	Malignant Transformation	STD
+A56E83070GA7K4633428JR6SUZ789XE1S51Q	9678	434	525	2005-03-23	Subdural membrane, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+A56E83070GA7K4633428JR6SUZ789XE1S51Q	9679	435	526	2005-05-30	Brain, right subdural tumor, resection	Subdural	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+2N8ZK244W20CJTMJDR711IG74S22XF14DE6Q	9680	436	527	2002-05-21	Right frontal tumor resection	Frontal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+2N8ZK244W20CJTMJDR711IG74S22XF14DE6Q	9681	437	528	1999-06-24	Right frontal tumor resection	Frontal	NA	Right	Glioblastoma	NA	OUT
+P9MDBS60E5A94H70A8G8DI0QXBELIFEZ1280	9682	438	529	2002-07-08	Brain, left frontal-temporal, tumor excision	Frontal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+0YNSW9U40580SGS9R305EN9IMT5U5D49J6EV	9683	439	530	2002-05-14	Right temporal brain mass	Temporal	NA	Right	Primitive Neuroectodermal Tumor (PNET)	NA	STD
+0YNSW9U40580SGS9R305EN9IMT5U5D49J6EV	9684	440	531	2002-07-06	Right temporal tumor	Temporal	NA	Right	Glioblastoma	NA	STD
+TM75UFKL61B8S32JFCH78TNAL9F374I7749N	9801	555	647	2002-08-04	Brain, right frontal, stereotactic biopsy	Frontal	NA	Right	Anaplastic Astrocytoma	NA	STD
+TM75UFKL61B8S32JFCH78TNAL9F374I7749N	9802	556	648	2002-08-16	Brain, right frontal and temporal tumor resection	Frontotemporal	NA	Right	Glioblastoma	NA	STD
+LJ163G6NZN7B34NU2JNH678OP1DZ8G41PZE7	9803	557	649	2002-07-31	Intraventricular brain tumor, excision	Frontal	NA	Left	Subependymoma	NA	STD
+0Q3831U824T4LU1U1N5SRQZ17P8J3E4DZ8M7	9961	716	808	2002-10-23	Brain, frontal lobe biopsy	Frontal	NA	Left	Low-grade Astrocytoma	NA	STD
+0Q3831U824T4LU1U1N5SRQZ17P8J3E4DZ8M7	9962	717	809	1997-07-22	Left frontal tumor resection	Frontal	NA	Left	Low-grade Astrocytoma	NA	OUT
+0FMADUQO358OCF4BE5B1EK1XFRE0Y89ZDT10	9804	558	650	2002-09-22	Brain, left frontal, biopsy	Frontal	NA	Left	Anaplastic Astrocytoma	NA	STD
+0FMADUQO358OCF4BE5B1EK1XFRE0Y89ZDT10	9805	559	651	2003-03-24	Brain, lateral frontal cortex, resection	Frontal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+6YVD9FV180G8531U9NDIL6Z35E6P04VHSCYK	9691	447	538	2002-09-07	Brain, left temporal lobe, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+5YOQ1OX81949BUVP56CD1QR8Q4E8K0XU175V	9697	453	544	2002-04-24	Right occipital tumor excision	Occipital	NA	Right	Glioblastoma	NA	OUT
+5YOQ1OX81949BUVP56CD1QR8Q4E8K0XU175V	9698	454	545	2002-12-29	Brain, right occipital, biopsy	Temporooccipital	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+HZ2IEN7RHZV873H7Z630CI0603D3CO8SU3MP	9727	481	571	2003-01-12	Brain, left frontal, tumor resection	Frontotemporal	NA	Left	Anaplastic Astrocytoma	NA	REV
+HZ2IEN7RHZV873H7Z630CI0603D3CO8SU3MP	9728	482	572	2003-08-03	Left frontal brain tumor	Frontotemporal	NA	Left	High-grade Astrocytoma	NA	STD
+59341M6WI3R96UHA0S1G2ESU4HVLXSAOK55H	9694	450	541	2002-10-03	Brain, temporal lobe, tumor resection	Temporal	NA	Right	Glioblastoma	NA	STD
+416S0TEV8JD5LA6BF9F7FO1ACSK0K878L76D	9692	448	539	2002-09-21	Brain, right temporal lobe, tumor resection	Temporal	NA	Right	Glioblastoma	NA	STD
+416S0TEV8JD5LA6BF9F7FO1ACSK0K878L76D	9693	449	540	2002-12-26	Brain, right frontotemporal tumor resection	Frontotemporal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+IQAPD42L372UX6VPG1NXCT36GLZ7DQGW298J	9806	560	652	2002-10-13	Right frontal tumor, excision	Frontal	NA	Right	Oligodendroglioma	NA	STD
+IQAPD42L372UX6VPG1NXCT36GLZ7DQGW298J	9807	561	653	2005-06-14	Left frontal tumor excision	Frontal	NA	Left	Non-Cancer	NA	OUT
+27FM2K5KGQB8OAVR0WVZF31O76HD59TK65N9	9695	451	542	2002-10-03	Left temporal tumor, resection	Temporooccipital	NA	Left	Glioblastoma	NA	STD
+XK800DX23YR7O7U8A72PIF6L5PA79LPHZRU8	9963	718	810	2002-10-17	Brain tumor, resection	Fossa	NA	Midline	Ependymoma	NA	STD
+HOMI4I560041X481322A43E9G82168EUON6F	9808	562	654	2004-04-19	Right frontal brain tumor, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+Q7082D75PQKRA8Q9W7T6B157YIU2BIZJ43W2	9809	563	655	2002-11-28	Brain, right frontoparietal, tumor resection	Parietal	NA	Right	Anaplastic Astrocytoma	NA	STD
+7P55769R7ZRJICI71597XL78KL70839M0IQD	9696	452	543	2002-12-20	Brain, left parietal lobe, resection	Parietal	NA	Left	Glioblastoma	NA	STD
+7K5Z9O1R4Q6FJ7HO621A04O5L5TYX401DR0N	9718	471	562	2003-01-22	Right parietal tumor, resection	Temporoparietal	NA	Right	Glioblastoma	NA	STD
+KR77QW9H1WV8470DQ4B1DD7UMDX18RST91J5	9811	565	657	2002-12-21	Brain, left temporal, tumor resection	Temporal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+8JV8IB9HC576T61IFQ12K917352N8BS13D86	9745	500	592	2003-08-17	Right frontal tumor	Frontal	NA	Right	Glioblastoma	NA	STD
+8JV8IB9HC576T61IFQ12K917352N8BS13D86	9746	501	593	2006-01-22	Brain, right frontal mass, re-resection	Frontal	NA	Right	High-grade Glioma	NA	STD
+AQM3ON14ZG30LGNUAN8UT30K1X0MZ849R965	9716	469	560	2003-01-25	Brain, left frontal, tumor excision	Temporofrontal	NA	Left	Glioblastoma	NA	STD
+AQM3ON14ZG30LGNUAN8UT30K1X0MZ849R965	9717	470	561	2004-06-09	Brain tumor excision	Temporofrontal	NA	Left	High-grade Glioma	NA	STD
+GA804Q4QREVGLP0M39N40RAL5R4H5F4J03I4	9699	455	546	2002-12-28	Brain, right parietal, tumor excision	Parietal	NA	Right	Glioblastoma	NA	STD
+B8GO1X885D0G1HA3U58P509144W3N193817J	9812	566	658	2003-01-26	Brain, left frontal lobe	Frontal	NA	Left	Oligodendroglioma	NA	STD
+1YSXJTDIJLI787212VM1W55PG80T38AE661T	9725	479	569	2002-02-23	Left temporal lobe tumor excision	Temporal	NA	Left	Glioblastoma	NA	OUT
+1YSXJTDIJLI787212VM1W55PG80T38AE661T	9726	480	570	2003-06-26	Left temporal lobe tumor excision	Temporal	NA	Left	Recurrent/residual glioblastoma with treatment effect	NA	STD
+95R8S7LE3Y1AL8IEUY5AL7PNL269Y422W78P	9813	567	659	2003-01-05	Brain, left frontal love, craniotomy	Frontal	NA	Left	Oligodendroglioma	NA	STD
+85BM3DWML24Z5OAHDAO100ID55GDCK9S7FR1	9820	574	666	2003-05-20	Brain, right parietal, tumor resection	Frontoparietal	NA	Right	Low-grade Glioma	NA	STD
+1L7HK41Y3P13DO21746569W6R306LGKLVC4O	9719	472	563	2003-03-04	Brain, left occipital tumor, occipital lobe	Parietooccipital	NA	Left	Glioblastoma	NA	STD
+2KX7IWV7RNP44ZT8D0I5DSV0Y14C312T79AV	9720	473	564	2003-03-11	Brain, parietal lobe, resection	Parietal	NA	Left	Glioblastoma	NA	STD
+4KN3Z5O1M6R77VGT96S9G9W864V93M040QZR	9721	475	565	2003-03-19	Brain, right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+29NM05LP539K5F78R49URIVWKA7A9CUJ16J1	9824	578	670	2003-04-28	Right frontal parietal tumor	Frontal	NA	Right	Glioblastoma	NA	STD
+10BWI9NHP89WM5W3KU4UJXQL11UVUSZG9I7B	9825	579	671	2003-07-15	Right temporal tumor excision	Temporal	NA	Right	Anaplastic Astrocytoma	NA	STD
+10BWI9NHP89WM5W3KU4UJXQL11UVUSZG9I7B	9826	580	672	2003-04-24	Right temporal tumor excision	Temporal	NA	Right	Low-grade Glioma	NA	REV
+10BWI9NHP89WM5W3KU4UJXQL11UVUSZG9I7B	9827	581	673	2005-01-29	Right frontal tumor, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+YEJ98TR9DWG0TN4YSB41R17U683WS2D80V9B	9723	477	567	2003-05-01	Brain, left parietal, biopsies	Temporoparietal	NA	Left	Glioblastoma	NA	STD
+YEJ98TR9DWG0TN4YSB41R17U683WS2D80V9B	9724	478	568	2003-05-13	Brain, left temporal tumor, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+07UAIQ23ENB05RZ18DSZW7G4VR90D274MHXP	9748	503	595	2003-09-11	Right temporal tumor, hippocampus, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+V9044R315M82I5AH4G2N98LWJ96O37076VOW	9722	476	566	2003-05-27	Left temporal tumor,resection	Temporal	NA	Left	Glioblastoma	NA	STD
+IA561KV360137YW1P3V324S67WU0YS8LW6TV	9829	583	675	2003-07-05	Left temporal tumor excision	Temporal	NA	Left	Anaplastic Astrocytoma	NA	STD
+K009CNT0PK48P6169H60U35TWO1W181FV788	9729	483	573	2003-07-25	Left temporal lobe excision	Temporal	NA	Left	Glioblastoma	NA	STD
+9354E840L801ISI9Z3T8N06DE89J20T64Q7Y	9830	584	676	2005-05-22	Left parietooccipital lesion, resection	Temporoparietal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+3R7D2BA0133XLIV6G1Z51555M75V4L3EH844	9730	484	574	2003-07-15	Left parietal tumor	Parietal	NA	Left	Glioblastoma	NA	STD
+5Q874C53506F779W3R4RG9EOJO16DH111EZP	9747	502	594	2003-09-06	Right parietal tumor	Parietal	NA	Right	Glioblastoma	NA	STD
+3305D0WWT51QT3D4600638YT92810K72WSB6	9831	585	677	2003-10-05	Right frontal tumor	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+D7OYQC2515O9SF3B9C3PT5T424BVCFMI0S42	9749	504	596	2003-10-03	Left frontal brain tumor, biopsy	Frontal	NA	Left	Glioblastoma	NA	STD
+822Q31E9ZPDW6OZ79FJ2F0QBHV1ZNMC276B8	9750	505	597	2003-04-22	Brain, right parietooccipital mass, resection	Parietooccipital	NA	Right	Glioblastoma	NA	STD
+822Q31E9ZPDW6OZ79FJ2F0QBHV1ZNMC276B8	9751	506	598	2003-10-11	Re-excision, right parietal tumor	Parietal	NA	Right	High-grade Astrocytoma	NA	STD
+822Q31E9ZPDW6OZ79FJ2F0QBHV1ZNMC276B8	9752	507	599	2005-04-30	Brain, right parietal tumor, resection	Parieto-occipital	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+70D7508R51W3S507YG9J6L5BOS5J6BVCAS0U	9755	510	602	2003-11-14	Left frontal tumor, biopsies	Frontotemporal	NA	Left	Glioblastoma	NA	STD
+70D7508R51W3S507YG9J6L5BOS5J6BVCAS0U	9756	511	603	2003-11-28	Left temporal/hippocampal resection	Temporal	NA	Left	Glioblastoma	NA	STD
+MK64D59UQ6KY4H336390AY2ATC3L46KU1YLG	9840	597	690	2003-10-22	Right frontal tumor excision	Temporal	NA	Right	Glioblastoma	Gliosarcoma	STD
+MK64D59UQ6KY4H336390AY2ATC3L46KU1YLG	9841	598	691	2005-07-25	Right temporal tumor, resection	Temporal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+Y6L94JL8N9Q76YD365G3P8VVV6A66V63L6U6	9842	599	692	2003-11-21	Left temporal brain tumor	Temporal	NA	Left	Gliosarcoma	NA	REV
+Y6L94JL8N9Q76YD365G3P8VVV6A66V63L6U6	9843	600	693	2004-01-25	Left temporal tumor resection	Temporal	NA	Left	Gliosarcoma	NA	STD
+6G1S90QQE93248QDCB7R0UD9866E8UD8WPX2	9844	601	694	2003-11-15	Right temporal tumor resection	Temporal	NA	Right	Anaplastic Astrocytoma	NA	STD
+UPY2C62OST952R5MNH0F0L0D97NWLCO84F39	9785	540	632	2004-03-03	Right parietal tumor resection	Parietal	NA	Right	Glioblastoma	NA	STD
+UPY2C62OST952R5MNH0F0L0D97NWLCO84F39	9786	541	633	2005-01-19	Right parietal brain tumor	Parietal	NA	Right	Recurrent/residual glioblastoma	NA	STD
+7J76G9DHIKZP5IXKR45ROO4HT5JAYG7T1AH6	9845	602	695	2003-12-18	Right inferior temporal lobe biopsy	Temporal	NA	Right	Anaplastic Astrocytoma	NA	STD
+7J76G9DHIKZP5IXKR45ROO4HT5JAYG7T1AH6	9846	603	696	2004-01-26	Right temporal tumor resection	Temporal	NA	Right	Anaplastic Astrocytoma	NA	STD
+Y4JC98J5Q9KUK00AV0LAPE3484F67980975B	9847	604	697	2002-11-14	Right frontal tumor resection	Frontal	NA	Right	Oligoastrocytoma	NA	STD
+E93VM26EF5NO60ND695QO222EEIM2C677ZJ9	9853	607	700	2004-01-20	Left fronto-parietal tumor resection	Temporal	NA	Left	Gliosarcoma	NA	STD
+8O612VY1O1IUWLAO860TZI9V729Y3U3785V5	9753	508	600	2003-11-29	Brain, left frontal, craniotomy	Frontal	NA	Left	High-grade Glioma	NA	STD
+8O612VY1O1IUWLAO860TZI9V729Y3U3785V5	9754	509	601	2003-12-14	Left frontal tumor resection	Frontal	NA	Left	Glioblastoma	NA	STD
+AQZUZC15KRQ0V4SEMA68TRI9DVG03B368HHW	9918	672	765	2003-11-18	Left temporal tumor, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+AQZUZC15KRQ0V4SEMA68TRI9DVG03B368HHW	9919	671	764	2003-10-25	Brain, left temporal lobe, stereotactic biopsy	Temporal	NA	Left	Glioblastoma	NA	STD
+A427J21A0A53MZ6A1ROLFVJ6OQC5FA950JAU	9757	512	604	2003-12-24	Right frontal tumor resection	Frontal	NA	Right	Glioblastoma	NA	STD
+31U9B572D1B817N36224AYA9GI9F2J4TEIZB	9873	628	721	2004-06-13	Right temporal tumor	Temporal	NA	Right	Low-grade Astrocytoma	NA	STD
+36KL0QO7FQKCJE74641V2RFM2KN078DY9PH1	9771	526	618	2004-01-10	Left temporal tumor and CUSA, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+CM26I87ILBH0581T2HKQYV6A71RGU0A8OFNH	9772	527	619	2004-01-10	Left temporal tumor resection	Temporal	NA	Left	Glioblastoma	NA	STD
+U7Y9YB3859Z6XEX3O9Z122CHXZ51F45B8XOB	9874	629	722	2004-05-13	Right temporal lobe tumor resection	Temporal	NA	Right	Gliosarcoma	NA	REV
+U7Y9YB3859Z6XEX3O9Z122CHXZ51F45B8XOB	9875	630	723	2005-01-09	Brain, right temporal tumor, resection	Temporal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	Gliosarcoma	STD
+3S9N2S450E44TF09CNR964QZ23KR48UK9P97	9964	723	815	2004-02-28	Right lateral temporal resection	Temporal	NA	Right	Low-grade Astrocytoma	NA	STD
+2053A62725OA48238B7M037N69SQ2OZ5WSZ6	9876	631	724	2004-02-28	Left temporal tumor resection	Temporal	NA	Left	Anaplastic Astrocytoma	NA	STD
+J8N85GK3I8KTU12OBQ60N32T27BRIJA1N1K6	9773	528	620	2004-03-07	Left frontal tumor resection	Frontal	NA	Left	Glioblastoma	NA	STD
+8EX9H32ON8CANPPNQR156T0VI35328Y3H75V	9878	633	726	2004-04-11	Cerebello-Pontine angle tumor resection	Occipital	NA	Left	Schwannoma	NA	STD
+XS220UL99M7515K49Q84IYF4980J09J6OQUK	9879	634	727	2004-04-03	Left frontal tumor resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+52574N8U8STF9HJG7264804125HZIQDEVGMT	9775	530	622	2004-04-04	Right temporal tumor resection	Frontotemporal	NA	Right	Oligodendroglioma	Glioblastoma	STD
+H4N4T3B6L6T2UU8332I46VO696X44IOZV501	9774	529	621	2004-03-29	Right temporal tumor resection	Temporal	NA	Right	Glioblastoma	NA	STD
+LZ19035D41P4454AD4R01870X6OWE4LPH3U7	9776	531	623	2004-04-05	Right temporal tumor resection	Temporal	NA	Right	Glioblastoma	NA	STD
+H1K548C1E86U3RM00UAV48F89ZNDS93702UK	9793	547	639	2004-06-21	Right temporal tumor resection	Temporo-occipital	NA	Right	Glioblastoma	NA	STD
+0MEE1Z1G0ASVV9NS94AT57M58CE4M8AA0Q84	9881	636	729	2004-06-11	Temporal lobe tumor resection	Temporal	NA	Right	Glioblastoma	NA	STD
+605662DZ3I9F7EVB3966JO8QV3J4LI111V90	9789	544	636	2004-11-09	Brain tumor, resection	Brain	NA	Right	Glioblastoma	NA	STD
+534UWSKXW6M6M05E9G25MP6H0Z1Z9KL33L4Q	9794	548	640	2004-05-08	Left temporal tumor resection	Temporal	NA	Left	Glioblastoma	NA	STD
+534UWSKXW6M6M05E9G25MP6H0Z1Z9KL33L4Q	9795	549	641	2005-03-02	Brain, left temporal tumor, resection	Temporal	NA	Left	Recurrent/residual glioblastoma with treatment effect	NA	STD
+ZXO625N7Z46UG2CU28B996KEPFO8F6T29KZ4	9883	638	731	2004-06-26	Left temporal lobe tumor resection	Temporal	NA	Left	Oligoastrocytoma	NA	STD
+H2L2JV0J2W1L3B10375EES67O7T7X8SGHNZQ	9949	704	796	2004-07-08	Left parietal tumor resection	Parietal	NA	Left	Pilocytic Astrocytoma	NA	STD
+988X4W1T5D00IW4FL9Y7OPU9NK4B5JULX395	9796	550	642	2004-06-29	Right frontoparietal tumor resection	Fronto-parietal	NA	Right	Glioblastoma	NA	STD
+48A70U83JCCJ9BJ51W4N5AI16FWO6AB8T72R	9885	640	733	2004-06-18	Right fronto-parietal tumor resection	Frontal	NA	Right	Oligodendroglioma	NA	REV
+48A70U83JCCJ9BJ51W4N5AI16FWO6AB8T72R	9886	641	734	2004-10-15	Right brain tumor, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+1HD1L9XI259NXPEW6983925NSS6W0CD0974C	9887	642	735	2001-04-16	Right, brain tumor excision	Frontotemporal pareital	NA	Right	Oligodendroglioma	NA	STD
+1HD1L9XI259NXPEW6983925NSS6W0CD0974C	9888	643	736	2004-09-11	Brain, tumor, resection	Temporal	NA	Left	Recurrent/residual high-grade glioma	NA	STD
+23O523B0A97SW2P22135MS7D7X7F96P4A7D6	9782	537	629	2004-08-03	Brain, right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+23O523B0A97SW2P22135MS7D7X7F96P4A7D6	9783	538	630	2005-03-02	Right temporal mass, resection	Temporal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+MRLO6HO1WX83FC8S24A3198T83T8P58X7W19	9799	553	645	2004-08-21	Left parietal tumor resection	Frontoparietal	NA	Left	Glioblastoma	NA	STD
+MRLO6HO1WX83FC8S24A3198T83T8P58X7W19	9800	554	646	2006-06-10	Brain, left parietal, resection	Parietal	NA	Left	Recurrent/residual glioblastoma with treatment effect	NA	STD
+7FH766Z3GDO919X1H01W12W1C20YYN4XM4R2	9947	702	794	2004-10-17	Brain, right frontal tumor, resection	Frontal	NA	Right	Oligoastrocytoma	NA	STD
+R19TZJ67Q5IQ2V82QJZ2J4BNFIM3N015082J	9710	466	557	2004-09-27	Right frontal brain tumor, resection	Frontal	NA	Right	Gliosarcoma	NA	STD
+Z9QGD15B11M4D424L0VI217EC76X53LDS23C	9889	644	737	2004-10-02	Right frontal lobe, biopsy	Frontal	NA	Right	Oligodendroglioma	NA	STD
+DVEGR11W1L23W2BJ42JI1GT12XGW312HQK33	9413	171	262	2005-02-22	Brain, right frontal tumor, resection	Frontal	NA	Right	Oligodendroglioma	NA	REV
+DVEGR11W1L23W2BJ42JI1GT12XGW312HQK33	9414	170	261	2009-06-17	Brain, right frontal tumor, resection	Frontal	NA	Right	High-grade Glioma	Non-Cancer	STD
+DVEGR11W1L23W2BJ42JI1GT12XGW312HQK33	9415	169	260	2005-02-06	Brain, right frontal tumor, resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+859O5NJQ4M72RQ674T55M01ZXN769UT185P5	9892	647	740	2004-11-06	Brain, left frontal tumor, resection	Frontal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+VK0IIMDX6X89TP12355RD7CU7I39J8PQI1RM	9787	543	635	2005-02-27	Left temporal tumor, resection	Temporal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+VK0IIMDX6X89TP12355RD7CU7I39J8PQI1RM	9788	542	634	2004-10-31	Left temporal tumor, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+62VQ68P7YBMF8AR63U6T68Z6756796JGJDQT	9486	242	333	2004-11-21	Left temporal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+0TK8NZDC8N7I7A930W1397217HNR924OTWGF	9951	706	798	2005-05-19	Posterior fossa lesion, resection	Fossa	NA	Right	Pilocytic Astrocytoma	NA	STD
+RD71Q4V92903B37SM46QUO8K42PI13YJWRE3	9910	664	757	2005-03-25	Brain, left temporal, biopsy	Temporal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+RD71Q4V92903B37SM46QUO8K42PI13YJWRE3	9911	665	758	2005-04-17	Brain, left temporal lobe tumor resection	Temporal	NA	Left	High-grade Glioma	NA	STD
+ZXHX90WZ0A65730MFCKFDORXCP856N51K19E	9912	666	759	2005-03-19	Brain, cerebellar tumor, resection	Occipital	NA	Left	Medulloblastoma	NA	STD
+0OT7IJ4U0RUTLUC64O10SXTT7RJ53Y55ROO0	9484	240	331	2006-04-10	Brain, left frontal tumor, resection	Frontal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+0OT7IJ4U0RUTLUC64O10SXTT7RJ53Y55ROO0	9485	241	332	1990-06-30	Left frontal tumor resection	Frontal	NA	left	Gemistocytic Astrocytoma	NA	OUT
+0OT7IJ4U0RUTLUC64O10SXTT7RJ53Y55ROO0	9493	251	341	2003-06-30	Left frontal tumor resection	Frontal	NA	left	Non-Cancer	NA	OUT
+J889R24PRX61V8CD643J1D7365WVM56OS0BA	9779	534	626	2005-06-01	Left temporal tumor, craniotomy	Temporal	NA	Left	Recurrent/residual high-grade glioma	NA	STD
+J889R24PRX61V8CD643J1D7365WVM56OS0BA	9780	535	627	2003-03-30	Left temporal tumor	Temporal	NA	Left	Glioblastoma	NA	OUT
+95I6IJ6LZE0CS88TW0WGCPM31K513TBGN8R7	9768	524	616	2005-05-23	Brain, right frontal biopsy	Frontal	NA	Right	Low-grade Astrocytoma	NA	REV
+95I6IJ6LZE0CS88TW0WGCPM31K513TBGN8R7	9769	523	615	2005-05-23	Brain, right frontal biopsy	Frontal	NA	Right	Glioblastoma	NA	REV
+95I6IJ6LZE0CS88TW0WGCPM31K513TBGN8R7	9770	525	617	2005-08-13	Right frontal tumor, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+DD61JL4JFB447754ZOK4Y52S7VIG08GLK9W4	9913	667	760	2005-03-26	Brain, frontal intrinsic tumor	Frontal	NA	Right	Oligodendroglioma	NA	STD
+6YVGYU8SQ1ZTKI8355M187C8AAY1G894BDB9	9895	650	743	2005-04-17	Brain, intraventricular tumor, resection	Left	NA	Intraventricular	Subependymoma	NA	STD
+M392T3IB58R6M9U6HO829AN5460IYZ6KM3EF	9893	648	741	2005-05-20	Brain, left frontal tumor, resection	Frontal	NA	Left	Oligoastrocytoma	NA	STD
+M392T3IB58R6M9U6HO829AN5460IYZ6KM3EF	9894	649	742	2005-05-08	Left frontal tumor	Frontal	NA	Left	Fibrillary Astrocytoma	NA	OUT
+RI6628793636J133JDS31UTMRO516Q57X6DQ	9869	624	717	2005-06-14	Brain, left temporal lobe, hippocampus	Temporal	NA	Left	Oligodendroglioma	NA	STD
+0D1O9Y7TE7HN7IX2MX5ZPHMM6EFK730N1L74	9777	532	624	2005-08-10	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+IMNPA33PHL965V5KWIF9DA75F5J403R34W8W	9711	467	558	2007-01-16	Brain, right temporo-occipital tumor, resection	Temporo-occipital	NA	Right	Glioblastoma with Oligodendroglioma component	NA	STD
+70UDOJ384RLTHS97Q7M3R0TR59D51LRNO48L	9778	533	625	2005-07-21	Right temporal parietal tumor, resection and CUSA	Temporal	Parietal	Right	Glioblastoma	NA	STD
+7T27M2T5X7HI2V92DE0ZNW24WX3UGFP4717U	9766	521	613	2005-08-21	Left frontal tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+7T27M2T5X7HI2V92DE0ZNW24WX3UGFP4717U	9767	522	614	2007-01-23	Left frontal tumor, resection	Frontal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+2R9DC34NO51KEOB5Q50LO3QPD9FKQ2O2857A	9868	623	716	2005-10-18	Brain, left parietal, lobectomy	Parietal 	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+735064C4000BAN2BS88LIA7BF52NG115JF47	9866	621	714	2006-03-18	Brain, right temporal, resection	Temporal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+J1SMJ7L1O47GTIGB56VW71CV0937B11OIC96	9735	490	580	2007-03-22	Right frontal lesion, resection	Frontal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+J1SMJ7L1O47GTIGB56VW71CV0937B11OIC96	9736	489	579	2005-11-15	Frontal mass, right, biopsy	Frontal	NA	Right	Glioblastoma	NA	STD
+59DP1M6JE6CO2U8FBK52JCA2ZUSB3L3T459X	9761	516	608	2005-11-04	Brain, occipito-parietal, biopsies	Occipito-parietal	NA	Right	Glioblastoma	NA	STD
+59DP1M6JE6CO2U8FBK52JCA2ZUSB3L3T459X	9762	517	609	2005-11-29	Tumor, right parietal, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+59DP1M6JE6CO2U8FBK52JCA2ZUSB3L3T459X	9763	518	610	2006-03-18	Right parietal lobe, excision	Parietal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+KZ38FO8D40C18GZ2MX031341M844D0D53U46	9764	519	611	2005-11-21	Left anterior temporal lobe, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+KZ38FO8D40C18GZ2MX031341M844D0D53U46	9765	520	612	2005-11-21	Left brain tumor	Brain	NA	Left	Glioblastoma	NA	REV
+46I97M3BO1HN60D3M43APZJ3S47YJQ8LTA9C	9481	237	328	2006-05-05	Left insular tumor biopsy	Frontal	NA	Left	Oligodendroglioma	NA	STD
+46I97M3BO1HN60D3M43APZJ3S47YJQ8LTA9C	9482	238	329	2008-04-14	Left frontotemporal tumor, Resection	Frontal	NA	Left	Glioblastoma	NA	STD
+OU98M5H3LV35P76G2502165N8D1G8KUA240A	9422	179	270	2008-01-29	Left frontal mass, excision	Frontal	NA	Left	High-grade Glioma	Glioblastoma	STD
+OU98M5H3LV35P76G2502165N8D1G8KUA240A	9423	178	269	2008-01-04	Brain, left frontal, resection	Frontal	NA	Left	Ganglioglioma	NA	REV
+3089F8MTDDQUTR9UK2Y0H54K9FJ81TF49VK3	9480	236	327	2006-02-22	Brain, right temporal, resection	Temporal	NA	Right	Oligodendroglioma	NA	STD
+S579JFTO7IK151AR5L1LYDHC2128K239104E	9865	620	713	2006-03-19	Brain, left frontal, resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+J166ZHN20BX855O20K2AF6C8D57LS3O9DJ26	9862	617	710	2005-11-06	Right frontal tumor, biopsy	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+0HW9M1A643Q63VMN6N095NYCSCF88M0UH13B	9424	180	271	2008-01-23	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+2023D0MS4MSHZPU18472JJOYO9ZVBYFY7F0B	9859	615	708	2007-09-02	Right parietal tumor, resection	Parietal	NA	Right	High-grade Glioma	NA	STD
+2023D0MS4MSHZPU18472JJOYO9ZVBYFY7F0B	9860	614	707	2006-01-14	Brain, right temporal	Temporal	NA	Right	Low-grade Astrocytoma	NA	REV
+HN49UD34O54INTN4002FDG999637DGB199M6	9744	499	591	2006-04-14	Right temporo-parietal lobe, excision	Temporo-parietal	NA	Right	Glioblastoma	NA	STD
+34JO5R6FESMHVPPKQ7S2VN02VA86XZ93NO28	9759	514	606	2006-01-09	Brain, left temporal, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+34JO5R6FESMHVPPKQ7S2VN02VA86XZ93NO28	9760	515	607	2005-11-30	Left temporal biopsy	Temporal	NA	Left	Glioblastoma	NA	OUT
+68F1ECS3993HME132HB2R3TOCHT5USTG9O38	9758	513	605	2006-01-23	Brain, right parietal, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+9B7E90G338116UZ3HJ9X955FV1Y0G20VD0LN	9836	593	686	2006-09-18	Right frontal tumor, resection	Frontal	NA	Right	Anaplastic Oligoastrocytoma	Recurrent/residual high-grade glioma with treatment effect	STD
+9B7E90G338116UZ3HJ9X955FV1Y0G20VD0LN	9837	592	685	2003-08-18	Right frontal lobe tumor	Frontal	NA	Right	Anaplastic Oligoastrocytoma	NA	REV
+QQ0J73E83NGB3717022LMZX5SR6MI3C070SY	9712	468	559	2006-08-05	Brain tumor, right frontoparietal mass, resection	Frontoparietal	NA	Right	Glioblastoma	NA	STD
+7LN4KYW1ZE9R4UKTL4E6251J6O01N279798C	9833	587	679	2006-05-22	Brain, left parietal, resection	Parietal	NA	Left	Gliosarcoma	NA	STD
+7LN4KYW1ZE9R4UKTL4E6251J6O01N279798C	9834	588	680	2006-10-31	Parietal tumor, left, resection	Parietal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	Non-Cancer	STD
+7LN4KYW1ZE9R4UKTL4E6251J6O01N279798C	9835	591	684	2008-02-04	Suboccipital mass, excision; bone flap	Suboccipital	Bone 	Left	Gliosarcoma	NA	STD
+667610IG1OAUPO4KGK2P1FQNMP2P87G919I1	9741	496	588	2006-05-31	Brain, right frontal tumor, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+667610IG1OAUPO4KGK2P1FQNMP2P87G919I1	9742	497	589	2006-05-31	Brain, right frontal, resection	Frontal	NA	Right	Glioblastoma	NA	REV
+667610IG1OAUPO4KGK2P1FQNMP2P87G919I1	9743	498	590	2006-05-31	Brain, right frontal, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	REV
+3414BTWHKE0NRB937A5L572Y9WC4P6R2LI2Z	9740	495	587	2006-06-13	Brain tumor, right temporal and hippocampus, right	Temporal	NA	Right	Glioblastoma	NA	STD
+HS9KBCJ3Z7LJ4D5F67IEUBHMTZZT11H81OA0	9818	573	665	2006-07-07	Brain, left parietal tumor, resection	Parietal	NA	Left	Oligodendroglioma	NA	STD
+HS9KBCJ3Z7LJ4D5F67IEUBHMTZZT11H81OA0	9819	572	664	1999-09-26	Left parietal tumor	Parietal	NA	Left	Oligodendroglioma	NA	OUT
+2R2RI1HU10UTCJ93RSPP7O74B59XR40RR77Z	9817	571	663	2006-08-26	Brain tumor, right frontal, biopsy	Frontal	NA	Right	Oligodendroglioma	NA	STD
+Y02Y12FFHRH387P1B369K5VQ87O5K5JA9MDI	9706	463	554	2007-02-23	Right frontal tumor, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+Y02Y12FFHRH387P1B369K5VQ87O5K5JA9MDI	9707	462	553	2006-06-28	Right brain tumor	Brain	NA	Right	Glioblastoma	NA	OUT
+FC938L7Z3919NPU4L06P0641X58WV5J4AV69	9708	464	555	2006-10-17	Right frontal tumor, resection	Frontal	NA	Right	Glioblastoma	NA	STD
+FC938L7Z3919NPU4L06P0641X58WV5J4AV69	9709	465	556	2007-02-22	Right frontal tumor, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+86XTX1K0G4398387367V11X8FE7N8670F6P9	9468	224	314	2006-11-26	Right parietal lobe tumor, excisional biopsy	Parietal	NA	Right	Pleomorphic Xanthoastrocytoma	NA	REV
+86XTX1K0G4398387367V11X8FE7N8670F6P9	9469	225	315	2006-12-13	Right parietal tumor resection	Parietal	NA	Right	Glioblastoma	NA	STD
+3BI3Q840V9QTBOOK1IS8V49MG69362ZVL481	9739	493	585	2006-11-03	Brain, right parietal lobe, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+5LC8KGSW4H7C0I4FOM51X9OR9RSO03737Z6M	9737	492	583	2005-12-01	Brain, right temporal, biopsy	Temporal	NA	Right	High-grade Glioma	Glioblastoma with Oligodendroglioma component	REV
+5LC8KGSW4H7C0I4FOM51X9OR9RSO03737Z6M	9738	491	582	2006-11-03	Parieto-occipital tumor, right, resection	Parieto-occipital	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+1NFYHS18489BQ30E7MN9396ELIDAMF88C23N	9661	415	507	2006-12-16	Brain, right temporal lobe, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+1PI3OQK6PRPQCB2SE9WGD6VIIT0KJ84Q13OY	9660	414	506	2007-01-13	Brain, left frontal, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+ZP6R3LC662KSK3KTYT5X062C024RKW9Q3522	9432	189	279	2007-03-30	Left parietal tumor, resection	Parietal	NA	Left	Glioblastoma	NA	STD
+ZP6R3LC662KSK3KTYT5X062C024RKW9Q3522	9433	190	280	2008-02-26	Left parietal tumor and CUSA, resection	Parietal	NA	Left	Recurrent/residual glioblastoma with treatment effect	NA	STD
+J9T5A8GOL7IKO68XGUD60D42TC87UJ2NBOP1	9656	410	502	2007-04-27	Right temporal lobe tumor, biopsy	Temporal	NA	Right	Glioblastoma	NA	REV
+J9T5A8GOL7IKO68XGUD60D42TC87UJ2NBOP1	9657	411	503	2007-07-24	Right temporal lobe tumor	Temporal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+2O105BSP1P030BN87J5FW48I9H1LU345SE5J	9652	409	501	2007-04-09	Left frontal tumor biopsy	Frontal	NA	Left	Low-grade Glioma	NA	REV
+2O105BSP1P030BN87J5FW48I9H1LU345SE5J	9653	409	501	2005-06-21	Left frontal tumor	Frontal	NA	Left	Hemangioblastoma	NA	OUT
+2O105BSP1P030BN87J5FW48I9H1LU345SE5J	9654	407	499	2007-05-03	Left frontal tumor, resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+2O105BSP1P030BN87J5FW48I9H1LU345SE5J	9655	408	500	2010-02-21	Left frontal tumor, resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+R7K4ST5I0C08P5GOD5U8BI9K0706ILV20A7K	9651	406	498	2007-05-07	Right temporal, frontal tumor	Temporal	Frontal	Right	Anaplastic Oligoastrocytoma	Anaplastic Oligodendroglioma	STD
+DNT0Z0S1MYK2H086E195Z09RO926J6UEH3QT	9639	400	492	2007-06-01	Left frontal tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+5M8YT62ZZIRAQDA5WWWR730G5MG28PBSDG6M	9634	396	488	2007-06-29	Right frontal tumor resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+5M8YT62ZZIRAQDA5WWWR730G5MG28PBSDG6M	9635	395	487	2000-12-04	Right frontal tumor	Frontal	NA	Right	Low-grade Glioma	NA	OUT
+5D5VPER472HX57V8E898436A09DLL77G7C83	9633	394	486	2007-07-05	Right frontal tumor, resection	Frontal	NA	Right	Anaplastic Astrocytoma	NA	STD
+N7OR1R82Y8TNR2494FV1J298HXA1PVSD11V0	9632	393	485	2007-07-09	Right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+ZBTO836K89CXV2HAX12HE365T8W77HZYIZ7F	9630	390	483	2007-06-26	Right frontal tumor, resection	Frontal	NA	Right	Glioblastoma	NA	STD
+ZBTO836K89CXV2HAX12HE365T8W77HZYIZ7F	9631	392	484	2007-12-19	Right brain tumor, resection	Brain	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+6ZQYGN639480156LQ42T6DEM1Y5J44JON121	9629	389	482	2007-07-17	Left frontotemporal tumor, resection	Frontotemporal	NA	Left	Oligodendroglioma	NA	STD
+X31D1JRURHV6HJAZ5O1ZHUK666TV5UN60MI8	9627	388	481	2008-07-04	4th ventricle tumor, resection	4th ventricle	NA	Midline	Subependymoma	NA	STD
+X31D1JRURHV6HJAZ5O1ZHUK666TV5UN60MI8	9628	388	480	2008-07-04	Left cerebellar tumor, resection	Cerebellar	NA	Left	Meningioma	NA	STD
+O5KBVY8TEF8MD3692L69275DR0M639WAW989	9626	386	478	2007-07-18	Right frontal lobe tumor, resection	Frontal	NA	Right	Anaplastic Astrocytoma	NA	STD
+X8FFQJ79764TQE698V17CUXAR3Y6FSR1L77X	9610	371	463	2007-08-27	Brain, left temporal/ occipital tumor, resection	Temporal	Occipital	Left	Glioblastoma	NA	STD
+WFQVEBM2033MSPJ8LKVUMX4V83217S3W84V5	9609	370	462	2007-08-01	Right temporal tumor	Temporal	NA	Right	Gliosarcoma	NA	STD
+0R6S2Y2793Y15781MQZW3ASAC79ZJQ66991K	9903	658	751	2007-10-30	Left temporal lobe, biopsies	Temporal	NA	Left	Glioblastoma	NA	REV
+0R6S2Y2793Y15781MQZW3ASAC79ZJQ66991K	9904	659	752	2007-10-30	CUSA, temporal tumor, resection	Temporal	NA	Left	Glioblastoma	Glioblastoma, Giant cell	STD
+A5DSC4S1433AG1095NOA4GZ3KMT1REL479PZ	9607	368	460	2007-11-27	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+L32AVX2TBSFCF4O72R2DQA7OQ5M60MW779I2	9438	195	285	2008-01-09	Brain, left occipital lobe tumor, resection	Occipital	NA	Left	Glioblastoma	NA	STD
+45FVGUFKF1JUI0J9IA8UGZS224047OZNX46C	9439	196	286	2008-01-13	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+45FVGUFKF1JUI0J9IA8UGZS224047OZNX46C	9440	197	287	2008-09-05	Brain tumor, right parietal	Parietal	NA	Right	Recurrent/residual glioblastoma with treatment effect	Non-Cancer	STD
+909S01738GAR1Y88WSPCHG618MNYF9YJ4FHA	9464	220	310	2008-05-31	Right temporal tumor,resection	Frontotemporal	NA	Right	Glioblastoma	NA	STD
+WMOYEWI28H4G43WIBTS08JEZ50K29H103AU0	9604	366	458	2007-08-29	Right cerebellar tumor, resection	Cerebellar	NA	Right	Glioblastoma	NA	REV
+WMOYEWI28H4G43WIBTS08JEZ50K29H103AU0	9605	365	456	2008-06-11	Recurrent cerebellar tumor	Cerebellar	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+2676X8615357MJ8WM3YP0889H4J4EI7CG501	9462	218	308	2008-08-11	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+4359J5420E70R7AYF72SHWHB9WDW08HBW8ER	9470	226	316	2008-09-22	Brain tumor, right parietal and temporal	Parietal	Temporal	Right	Glioblastoma	NA	STD
+FB3RH372V7TN8EE14Q20HCX4072W4G154592	9478	234	325	2009-06-15	Brain tumor, right temporal, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+62CVCCUT2U63BH36HFXRYBU1J60Z6E5X7VHW	9916	652	745	2010-04-09	Left frontal tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+62CVCCUT2U63BH36HFXRYBU1J60Z6E5X7VHW	9917	670	763	2010-04-03	Left frontal biopsy	Frontal	NA	Left	Anaplastic Astrocytoma	NA	OUT
+N504S8252D32U5LHC4Q0J49Z3UN113ZM65M3	9600	362	453	2000-02-28	Right frontal brain tumor	Frontal	NA	Right	Oligodendroglioma	NA	STD
+N504S8252D32U5LHC4Q0J49Z3UN113ZM65M3	9601	363	454	2001-04-08	Right frontal tumor	Frontal	NA	Right	Oligodendroglioma	Anaplastic Oligodendroglioma	STD
+N504S8252D32U5LHC4Q0J49Z3UN113ZM65M3	9602	361	452	2001-10-02	Right frontal tumor, craniotomy	Frontal	NA	Right	Anaplastic Oligoastrocytoma	NA	STD
+N504S8252D32U5LHC4Q0J49Z3UN113ZM65M3	9603	364	455	1991-02-13	Right frontal tumor	Frontal	NA	Right	Oligodendroglioma	NA	STD
+Y6N4876AZ0IG93LRO08F8G7BSBNE483084H5	9597	358	449	2002-07-01	Left temporal tumor	Temporal	NA	Left	Anaplastic Oligodendroglioma	Non-Cancer	STD
+Y6N4876AZ0IG93LRO08F8G7BSBNE483084H5	9598	360	451	1996-02-11	Tumor, tissue	Brain	NA	Left	Oligodendroglioma	NA	STD
+Y6N4876AZ0IG93LRO08F8G7BSBNE483084H5	9599	359	450	1992-02-26	Left brain tumor	Brain	NA	Left	Oligodendroglioma	NA	OUT
+3L180379JFVT0R678G6N6NQ1SN97W7E2FDNH	9594	357	448	2012-06-08	Left frontal lobe tumor, excision	Frontal	NA	Left	Glioblastoma	NA	STD
+249GDJ35DI356L6Y1ANBS71WTOV32V217072	9592	355	446	2006-09-15	Right frontal brain tumor, resection	Frontal	NA	Right	Glioblastoma	NA	STD
+249GDJ35DI356L6Y1ANBS71WTOV32V217072	9593	356	447	2007-01-29	Right frontal tumor, resection	Frontal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+39BYZ7ASQ6YK6969DOSV8FU1B88DGY33V5QL	9583	343	434	2011-03-11	Right frontal tumor and CUSA contents, resection	Frontal	NA	Right	Glioblastoma	NA	STD
+B09959V50K3JS96C2H4LYB9BN28R79KZMGNV	9559	318	409	2011-11-02	Left parietal brain tumor, resection	Parietal	NA	Left	Glioblastoma	NA	STD
+M8E9BD7AC638354RB0956NL00I2I2SJC2XSS	9554	313	404	2012-03-16	Brain, left frontal lobe, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+27707074PHDO6625A80FBJ11HLN6C1A76130	9540	298	389	2012-08-14	Right frontal brain tumor, resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+A81UZFR36JB4761742R159J4Z9O25CHCK5YE	9539	297	388	2012-08-05	Brain, left frontal tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+W6Z5Q63B84C0W6911NMQ8656OA06L76UO9WC	9538	296	387	2012-09-02	Left temporal lobe	Temporal	NA	Left	Anaplastic Astrocytoma	NA	STD
+337MBYJ78K796F2H1H21PR1R54BO6824P13X	9501	259	350	1996-03-15	Frontal brain tumor	Frontal	NA	Left	Oligoastrocytoma	NA	STD
+337MBYJ78K796F2H1H21PR1R54BO6824P13X	9502	260	351	2003-12-02	Left frontal lobe resection	Frontal	NA	Left	Glioblastoma	NA	STD
+38HP69BSSQRR5BJY585GBHVVVJJ18KR17BT1	9500	258	349	2003-11-19	 Brain, right frontal lobe, craniotomy	Frontal	NA	Right	Glioblastoma	NA	STD
+7FE4YS3WHIE014360321OG4QZGNV9OE2JFL2	9284	36	129	2006-01-15	Brain, frontal, resection	Frontal	NA	Left	Gliosarcoma	NA	STD
+7FE4YS3WHIE014360321OG4QZGNV9OE2JFL2	9290	44	137	2006-12-02	Left frontal tumor, resection	Frontal	NA	Left	No Tumor Identified	Non-Cancer	STD
+V0B3P8T7QMV7G9D9M305HCGB881YDY4LP2R5	9300	54	147	2001-08-06	Tumor, left frontal	Frontal	NA	Left 	Anaplastic Oligoastrocytoma	NA	STD
+V0B3P8T7QMV7G9D9M305HCGB881YDY4LP2R5	9301	54	147	2001-07-16	Sarcoma, surgical excision	Dura	NA	Left 	Pleomorphic Leiomyosarcoma	NA	STD
+V0B3P8T7QMV7G9D9M305HCGB881YDY4LP2R5	9302	55	148	1994-09-05	Left frontal tumor	Frontal	NA	Left 	Low-Grade Glioma	Glioblastoma	STD
+HF189G82Z5G705UDPID76O64S3T2GCVER2HW	9303	56	149	2006-04-08	BRAIN, TEMPORAL, HIPPOCAMPUS AND FRONTAL, RIGHT	Frontotemporal	NA	Right	Low-Grade Glioma	NA	STD
+HF189G82Z5G705UDPID76O64S3T2GCVER2HW	9304	57	150	2003-07-20	Right frontal tumor and CUSA specimen	Frontal	NA	Right 	Oligodendroglioma	NA	STD
+HF189G82Z5G705UDPID76O64S3T2GCVER2HW	9305	58	151	1996-02-06	Right frontal tumor	Frontal	NA	Right	Low-grade Glioma	NA	OUT
+7RLO4847L4H03MIVG2V9QCB9C59YQYYFD570	9306	59	152	2006-02-05	Brain, right frontal, resection	Frontal	NA	Right	Recurrent/Residual High-Grade Glioma With Treatment Effect	NA	STD
+7RLO4847L4H03MIVG2V9QCB9C59YQYYFD570	9307	60	153	2002-07-19	Right frontal tumor	Frontal	NA	Right	Glioblastoma	NA	OUT
+86L4D051D37Y39L9W5ZMZ0N4W1028BXYHI37	9308	61	154	2008-03-08	Right temporal resection for recurrent mass	Temporal	NA	Right	Recurrent/Residual High-Grade Glioma With Treatment Effect	NA	STD
+86L4D051D37Y39L9W5ZMZ0N4W1028BXYHI37	9309	62	155	2006-05-08	Brain, right temporal, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+D1LPZCRCF7N55H9MYA4021D8H1BBR8774P8P	9319	72	165	2004-04-14	 Brain, right, tumor, excision	Brain	NA	Right	Oligodendroglioma	NA	STD
+K0HJ7MA6U931FRT40HF6HGKDH1YTI0R2J848	9320	73	166	2000-07-05	Brain, left temple, CUSA aspirate, biopsy	Brain	NA	Left	Anaplastic Astrocytoma	NA	STD
+K0HJ7MA6U931FRT40HF6HGKDH1YTI0R2J848	9321	74	167	2001-04-05	Left temporal lobe tumor	Temporal	NA	Left	Anaplastic Astrocytoma	NA	STD
+6D4TZ4NQQ88060134715MA7E00EVK40358UG	9322	75	168	1999-06-22	Brain tumor, resection	Brain	NA	Left	Glioblastoma	Pleomorphic Xanthoastrocytoma	STD
+6D4TZ4NQQ88060134715MA7E00EVK40358UG	9323	76	169	1991-06-25	Left frontotemporoparietal tumor	Frontotemporoparietal	NA	Left	Pleomorphic Xanthoastrocytoma	NA	OUT
+6D4TZ4NQQ88060134715MA7E00EVK40358UG	9324	78	171	2001-05-16	Frontal tumor and CUSA aspirate, excision	Frontal	NA	Left	High-grade Glioma	NA	STD
+6D4TZ4NQQ88060134715MA7E00EVK40358UG	9325	77	170	2001-09-10	Epidural tissue, biopsy	Epidural tissue	NA	Left	Non-Cancer	NA	STD
+6D4TZ4NQQ88060134715MA7E00EVK40358UG	9326	80	173	2002-10-04	Brain, frontal lobe, tumor resection	Frontal	NA	Left	High-grade Glioma	Glioblastoma	STD
+6GKZAV4JU88I6GYC89YVX8Z5001V907W7HO4	9327	81	174	2002-02-16	Brain, left posterior fossa, biopsy	Posterior fossa	NA	Left	Anaplastic Astrocytoma	NA	STD
+6GKZAV4JU88I6GYC89YVX8Z5001V907W7HO4	9328	82	175	1964-07-11	Cerebellar tumor	Cerebellum	NA	NA	Low-grade Astrocytoma	NA	OUT
+X35G8PQ4ES6859XHU7UOF2Q3IJ2L3DAGUAR8	9391	147	237	2007-02-05	Right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+XDN72O09PCU9CFH33IKPFK91D4LO396YYW6O	9379	132	225	1995-06-17	Right temporal insular and frontal lesion	Temporal	Frontal	Right	Oligodendroglioma	NA	STD
+XDN72O09PCU9CFH33IKPFK91D4LO396YYW6O	9380	133	226	2000-11-05	Tumor	Brain	NA	Right	Oligodendroglioma	NA	STD
+XDN72O09PCU9CFH33IKPFK91D4LO396YYW6O	9381	134	227	2002-09-08	Brain, right frontal lobe, tumor resection	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+262DGMF1W766A0KH3Z1F639HANH0292JAYZC	9330	84	177	2000-11-08	Tumor excision	Frontal	NA	Right	Primitive Neuroectodermal Tumor (PNET)	NA	STD
+262DGMF1W766A0KH3Z1F639HANH0292JAYZC	9332	86	179	2001-01-10	Right frontal tumor resection	Frontal	NA	Right	Non-Cancer	NA	STD
+262DGMF1W766A0KH3Z1F639HANH0292JAYZC	9333	87	180	2001-01-30	Left parietal tumor excision	parietal	NA	Left	Glioblastoma	NA	STD
+D7SQ47H4LVQ033F64YIZAU5648V0YNZ0W2IV	9329	83	176	2009-07-29	Brain, left occipital tumor, resection	Occipital	NA	Left	Glioblastoma	NA	STD
+5H0MT053HJ7QR5P6NCYA1OZD1B65I48PFJS4	9298	52	145	2007-11-05	Left Parietal Tumor resection	Parietal	NA	Left	Glioblastoma	NA	STD
+2302UZT35OROZ808V0D6Y8427PUGA86EY15I	9277	28	122	2004-02-28	Right parietal incision and drainage biopsy	Parietal	NA	Right	Recurrent/residual glioblastoma with treatment effect	Non-Cancer	STD
+2302UZT35OROZ808V0D6Y8427PUGA86EY15I	9278	30	123	2002-12-01	Right parietal lobe and CUSA specimen resection	Frontoparietal	NA	Right	Glioblastoma	NA	STD
+2302UZT35OROZ808V0D6Y8427PUGA86EY15I	9279	31	124	2003-12-02	Brain, right tempoparietal craniotomy	Parietal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+TNFTE32L284T7Y8H2LVZE861S97V8AWML9X8	9272	24	118	2003-09-11	Right temporal tumor, hippocampus, CUSA, Resection	Temporal	NA	Right	Glioblastoma	NA	STD
+Z29UHG0MBS4D9J73X9G7066CJ0O02E433V09	9291	45	138	NA	NA	Parietal	NA	Left	Glioblastoma	NA	OUT
+Z29UHG0MBS4D9J73X9G7066CJ0O02E433V09	9292	46	139	2000-02-28	Left frontal tumor biopsy	Frontal	NA	left	Recurrent/residual glioblastoma with treatment effect	NA	STD
+Z29UHG0MBS4D9J73X9G7066CJ0O02E433V09	9299	53	146	1996-04-18	Tumor from frozen section	Parietal	NA	Left	Glioblastoma	NA	STD
+1UD2RAM46X49BN26CD55D1D45H07LY1M8R2M	9288	42	135	2004-08-11	Brain, right temporal resection	Temporal Lobe	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+5KSTR2ZK3W00OCW98J03357MG2035J9F97S1	9287	41	134	2000-05-29	Brain, right frontal, biopsy	Frontoparietal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+5KSTR2ZK3W00OCW98J03357MG2035J9F97S1	9296	50	143	NA	NA	Frontoparietal	NA	Right	Glioblastoma	NA	OUT
+5KSTR2ZK3W00OCW98J03357MG2035J9F97S1	9297	51	144	1996-09-21	Brain tumor resection	Frontoparietal	NA	Right	Glioblastoma	NA	STD
+40Q3IY27Y61G4712C66V9D6W7H16IE62295R	9294	48	141	1999-10-14	Left frontal Mass resection	Frontal	NA	Left	Glioblastoma	NA	STD
+40Q3IY27Y61G4712C66V9D6W7H16IE62295R	9295	49	142	1999-11-10	Left frontal mass resection	Frontal	NA	Left	Glioblastoma	NA	STD
+40Q3IY27Y61G4712C66V9D6W7H16IE62295R	9286	38	131	2000-04-04	Brain Biopsy	Frontal	NA	Left	Glioblastoma	NA	STD
+B5V3K31769KRZ988LYSL190YB9R4X025689X	9285	37	130	2003-09-06	Right temporal tumor resection	Temporal	NA	Right	Glioblastoma	NA	STD
+4B572151D2DJA1OT3G280XB13UD2304R918M	9280	32	125	2001-04-24	Left parietal mass resection	Parietal	NA	Left	Primitive Neuroectodermal Tumor (PNET)	NA	STD
+4B572151D2DJA1OT3G280XB13UD2304R918M	9289	43	136	NA	Pituitary tumor	Pituitary	NA	NA	Pituitary Adenoma	NA	OUT
+4B572151D2DJA1OT3G280XB13UD2304R918M	9293	47	140	1999-07-19	NA	Brain	NA	Right	Primitive Neuroectodermal Tumor (PNET)	NA	OUT
+UY267Q3Y4DCA2PYZ975Z9Z06MB6T7KG063VY	10156	912	1091	1996-02-12	Anterior margin, biopsy and CUSA specimen	Temporal	NA	Left	Recurrent/residual glioblastoma with treatment effect	NA	STD
+UY267Q3Y4DCA2PYZ975Z9Z06MB6T7KG063VY	10157	914	1094	1995-10-05	Brain tumor resection	Frontotemporal	NA	Left	Glioblastoma	NA	OUT
+F69424U75LLU7PR4WZA12G3492AQ1QGXV46H	10154	910	1089	1996-09-18	Left brain tumor, resection	Frontoparietal	NA	Left	Oligodendroglioma	NA	STD
+F69424U75LLU7PR4WZA12G3492AQ1QGXV46H	10155	911	1090	1996-07-20	Brain tumor resection	Frontoparietal	NA	Left	Oligodendroglioma	NA	OUT
+5JKI955UG19056PKB193A9D2SI507699C4F4	9998	759	852	2008-01-17	Right temporal lesion biopsies	Temporal	NA	Right	Low-grade Glioma	NA	STD
+5JKI955UG19056PKB193A9D2SI507699C4F4	9999	760	853	2010-02-17	Right parietal lesion, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+XFS79K59U6P71O8069EO12Q7QUID83UFGT1N	9685	441	532	2013-12-20	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+225HO0VQ1LBM4H7GREPCLW7Y881L2869M6S7	9686	443	534	2013-11-15	Left temporal tumor	Temporal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	Glioblastoma	STD
+225HO0VQ1LBM4H7GREPCLW7Y881L2869M6S7	9687	442	533	2013-07-21	Left temporal lobe tumor, resection	Temporal	NA	Left	Anaplastic Astrocytoma	NA	REV
+I8E8PD83P39G63OIRLLX18L878G4K0H64AT8	9688	444	535	2013-10-26	Left parietal tumor, resection	Parietal	NA	Left	Glioblastoma	NA	STD
+79062G9K5WJBPTWWO734TD0O72M8I1T4T1L5	9689	445	536	2013-10-22	Left temporal tumor and CUSA specimen, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+3166RNEV102MZ6C8DE805TZ2253IQP68B3C2	9690	446	537	2013-11-08	Right frontal mass, resection	Frontal	NA	Right	Glioblastoma	NA	STD
+EG2W04H41BO0U95K80210995O98P80MW35W6	9700	456	547	2013-09-25	Right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+GXFXJ31RYSA111QZ2DSM728YICU8V99U0A01	9701	457	548	2013-08-18	Left temporal tumor and CUSA contents, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+TB0OZD1JXNS4SDBP1D2B7PJ537110052J5L3	9702	458	549	2012-07-01	Right parietal tumor, resection	Parietal	NA	Right	Glioblastoma	NA	STD
+TB0OZD1JXNS4SDBP1D2B7PJ537110052J5L3	9703	459	550	2013-09-07	Brain, right parietal, resection and CUSA	Parietal	NA	Right	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+FR8X54UMUJ22E3228P68AEHQ1Q3U59FMG55Q	9704	460	551	2011-06-20	Right temporal tumor, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+8E00D9TLVN3C761S4JGH45471Q3C1R94H96H	9705	461	552	2011-04-30	Brain, right temporal tumor, biopsy and resection	Temporal	NA	Right	Glioblastoma	NA	STD
+2R81G882OV3192H73JQ8KOALDDXNN72K9Y7Y	10185	936	1137	2012-03-14	Right petrous ridge tumor, resection	Suboccipital	NA	Right	Meningioma	NA	STD
+SDI5VY0J843H089K711S4B40M83C3J8392Z0	10246	1001	1252	2010-06-27	Left CP angle tumor, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+X88SL22G63X8922JGFV5137QB145VPD632N8	10279	1018	1268	2010-04-10	Right cerebellar/suboccipital mass, resection	Occipital	NA	Right	Meningioma	NA	STD
+X31GVRI8K41CG5AG702AV06SHZ7N4B8XW875	10206	953	1165	2011-04-26	Left CP angle tumor, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+0L890JB8XO3AK17J1RI6J91XM94SQFLXUQWL	10215	962	1179	2011-03-26	Right CP angle tumor resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+YYBH3FPS9QE3RQB22GHKOYPVAC4NQ21LOU88	10195	943	1154	2011-09-17	Right internal auditory canal tumor, excision	Suboccipital	NA	Right	Schwannoma	NA	STD
+6A41N3AORO34CZ36W38DQ7A160Y0VV8S05FF	9948	703	795	2002-11-04	Brain, right temporal tumor, resection	Temporal	NA	Right	Dysembryoplastic Neuroepithelial Tumor (DNET)	NA	STD
+L39S7H6HF7ZR446H86M82C1TN2S2Q16YM3U1	10211	956	1173	2003-07-18	Right retro-orbital tumor excision	Retro-orbital	NA	Right	Meningioma	NA	OUT
+L39S7H6HF7ZR446H86M82C1TN2S2Q16YM3U1	10212	957	1174	2004-12-18	Left acoustic schwannoma resection	Brain	NA	Left	Schwannoma	NA	OUT
+L39S7H6HF7ZR446H86M82C1TN2S2Q16YM3U1	10199	947	1158	2010-05-30	Cerebellar tumor, resection	Occipital	NA	Midline	Pilocytic Astrocytoma	NA	STD
+L39S7H6HF7ZR446H86M82C1TN2S2Q16YM3U1	10200	947	1158	2010-07-04	Cerebellar tumor resection	Occipital	NA	Midline	Ependymoma	NA	OUT
+L39S7H6HF7ZR446H86M82C1TN2S2Q16YM3U1	10201	948	1160	2010-05-29	Left temporal tumor, resection	Temporal	NA	Left	Meningioma	NA	STD
+L39S7H6HF7ZR446H86M82C1TN2S2Q16YM3U1	10202	949	1161	2011-05-21	Retro Orbital Tumor, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+L39S7H6HF7ZR446H86M82C1TN2S2Q16YM3U1	10203	950	1162	2011-05-27	Right CP angle tumor, resection	Cerebello-pontine	NA	Right	Schwannoma	NA	STD
+166U21WL74K5AZ3XG41YZ6353MOM91M75A46	9966	725	817	2003-07-25	Skull base mass, excision	Fossa	NA	Left	Meningioma	NA	STD
+66XXF1SZ90P06A0PU397T116PPP9RH50X2GF	10197	945	1156	2011-06-23	Right CP angle tumor, resection	Suboccipital	NA	Right	Schwannoma	Non-Cancer	STD
+R5R355MZ78FVGUD4FHPZCZ5800NO7T7FTE42	9950	705	797	2005-01-11	Brain, left occipital tumor, resection	Occipital	NA	Left	Ganglioglioma	NA	STD
+X2MBA1ZT555H2EZ3WELH3FBY7GLGA50V4H51	10214	959	1176	2011-04-24	Brain tumor, posterior fossa, resection	Suboccipital	NA	Bilateral	Meningioma	NA	STD
+E4I8E0I0U759B31UCY646PIR6672SP1389E1	9952	707	799	2005-10-17	Right frontal tumor	Frontal	NA	Right	Ganglioglioma	NA	STD
+E4I8E0I0U759B31UCY646PIR6672SP1389E1	9953	708	800	1998-06-17	Right frontal tumor resection	Frontal	NA	Right	Ganglioglioma	NA	OUT
+E4I8E0I0U759B31UCY646PIR6672SP1389E1	9954	709	801	2002-06-17	Right frontal tumor	Frontal	NA	Right	Ganglioglioma	NA	OUT
+E4I8E0I0U759B31UCY646PIR6672SP1389E1	9955	710	802	2003-06-17	Right frontal lesion excision	Frontal	NA	Right	Ganglioglioma	NA	OUT
+E4I8E0I0U759B31UCY646PIR6672SP1389E1	9956	711	803	2003-06-17	Right frontal tumor	Frontal	NA	Right	Ganglioglioma	NA	OUT
+G7AB167V37UPGBUY619RBWCYP7URLAGLIENJ	10288	1028	1278	2006-05-02	Mass, left CP angle, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+G7AB167V37UPGBUY619RBWCYP7URLAGLIENJ	10289	1030	1280	2010-01-25	Left CP angle mass, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+Q05D80LB352GX23BQH2B65U35DDREP7WWPQ5	9957	712	804	2006-03-17	Mass, right lateral ventricle, resection	Parietal	NA	Right	Subependymoma	NA	STD
+0KJ26I129W6Q48UYL0EN3B7P6SUQ2C9ZCW62	10204	951	1163	2011-05-12	Right CP angle tumor, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+FW0IJFY4QNYP45R274V31PO7N2B058NDFNT2	10134	892	1064	2013-02-27	Right CP angle tumor resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+7XOA012P665273USQRW70Q0B4S0U44DRPNI4	9965	724	816	2009-01-17	Right CP angle tumor, resection	Occipital	NA	Right	Meningioma	NA	STD
+S5QMYMX47Q4LS0Z9IAGRP0MIQO80323T2B9H	10231	974	1198	2006-03-06	Extra-axial mass, left frontal resection	Frontal	NA	Left	Meningioma	NA	STD
+S5QMYMX47Q4LS0Z9IAGRP0MIQO80323T2B9H	10232	976	1200	2010-05-04	Frontotemporal tumor resection	Frontotemporal	NA	Left	Atypical Meningioma	Non-Cancer	STD
+S5QMYMX47Q4LS0Z9IAGRP0MIQO80323T2B9H	10233	976	1200	2010-05-04	Left orbital tumor resection	Brain	NA	Left	Meningioma	NA	STD
+S5QMYMX47Q4LS0Z9IAGRP0MIQO80323T2B9H	10234	975	1199	2010-08-24	Left frontal tumor, resection	Frontal	NA	Left	Anaplastic Meningioma	NA	STD
+56J30721O4V8WC0Q99W7218S39P212QM543G	10286	1026	1276	2010-01-22	Right internal auditory canal tumor, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+56J30721O4V8WC0Q99W7218S39P212QM543G	10287	1027	1277	2010-01-29	Internal auditory canal tumor, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+FZA2AK3D2N743L93R3X7931QO4O29665C70H	10198	946	1157	2011-05-17	Right CP angle tumor, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+0L5U087NXRKK060K21BUJB43UAK4X326D6EG	10283	1022	1272	2010-03-15	Right CP angle mass, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+8XW49T1XNQF0LB96F1K3J84557JDM3H6K9C7	10247	1002	1253	2010-07-10	Frontal lobe mass, resection	Frontal	NA	Left	Meningioma	NA	STD
+8XW49T1XNQF0LB96F1K3J84557JDM3H6K9C7	10248	1003	1254	2010-07-10	Parietal brain tumor, resection	Frontal	NA	Left	Meningioma	NA	REV
+8XW49T1XNQF0LB96F1K3J84557JDM3H6K9C7	10249	1004	1255	2010-07-10	Brain tumor, resection	Frontal	NA	Left	Meningioma	NA	REV
+MZD016T1ISH7WZ47M25V58IWJL7HEUZ2Y40W	10284	1024	1274	2010-02-10	Right petroclival tumor, resection	Petroclival	NA	Right	Meningioma	NA	STD
+MZD016T1ISH7WZ47M25V58IWJL7HEUZ2Y40W	10285	1025	1275	2010-02-10	Petroclival tumor, resection	Petroclival	NA	Right	Meningioma	NA	STD
+C29681V0029BLC632O81P680MP7RV041Q1FM	10280	1019	1269	2010-03-27	Left intracanalicular mass, resection	Middle Fossa	NA	Left	Schwannoma	NA	STD
+1Y44ZDTH26P1GBXB0VPM8OF5PZWIFGY971H2	10282	1021	1271	2010-02-20	Right CP angle mass, resection	Suboocipital	NA	Right	Schwannoma	NA	STD
+6K62LOV72470OGRZ5R3DBK9MIQMM6H2LNX38	10159	918	1097	2012-08-12	Cerebellopontine angle, left, resection	Brain	NA	Left	Schwannoma	NA	STD
+5AOH3M0O1CXQ1YH97G34L8PVAFS7A13U0376	10236	978	1202	2010-08-28	Left vestibular mass, resecton	Brain	NA	Left	Schwannoma	NA	STD
+7S7FWFQ782417F0287X691BHGXV65817RC6E	10237	979	1203	2010-08-23	Right intracanalicular vestibular mass, resection	Brain	NA	Right	Schwannoma	NA	STD
+NCP08X837W7784Q3RXK7E82TC0W1ZJA1QB5D	10230	973	1197	2010-09-06	Cerebellopontine angle mass, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+T02NYYSVM9BGBB629QJJQNDS66YBJU17AZ01	10238	980	1204	2010-07-09	Vestibular nerve, right, excision	Suboccipital	NA	Right	Schwannoma	NA	STD
+73LW302RW42GA62T74Y247589DA24GBOLE0L	10235	977	1201	2010-08-29	CP angle tumor resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+6OG6F916NR70CVKTB62Z242NX589Q8082FWL	10229	972	1196	2010-10-03	Left suboccipital mass, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+B527376C3Q4C9GTS9R9X4KJ23662K3PGO8SL	10188	939	1140	2011-11-13	Cerebellopontine angle tumor, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+91492K4L2H8545662A3FO116N88151O51JN0	10125	882	1054	2013-07-25	Right mastoid hemagiopericytoma, excision	Mastoid	NA	Right	Hemangiopericytoma	NA	STD
+91492K4L2H8545662A3FO116N88151O51JN0	10120	872	1040	2007-07-03	Right parietal tumor resection	Parietal	NA	Right	Hemangiopericytoma	NA	OUT
+91492K4L2H8545662A3FO116N88151O51JN0	10121	874	1041	2011-06-03	Skull right parietal tumor, resection	Parietal	NA	Right	Hemangiopericytoma	NA	STD
+X6S4C9NC37626YX04D9J1625AGHPL868RP31	10181	932	1133	2012-05-16	Left CP angle tumor, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+2BT02A2E04R3R5UR90DCX288L3DX7YTWW16L	10132	890	1062	2011-06-25	Brain tumor, left CP angle, biopsy and resection	Suboccipital	NA	Left	Meningioma	NA	STD
+2BT02A2E04R3R5UR90DCX288L3DX7YTWW16L	10133	891	1063	2013-03-13	Right CP angle tumor, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+5RS96H8VM8TP1HKCSP36I061E335ZB9APWPU	10218	965	1182	2011-02-22	Left CP angle tumor resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+MQ4JGO604H0BK0V127ZR123PC3Q3T25IRW20	10220	967	1184	2011-02-02	Brain, left parietal mass, resection	Parietal	NA	Left	Meningioma	NA	STD
+BJSVC959121L60K741JN2JC1QV69209P3HYF	10219	966	1183	2011-01-30	Suboccipital mass, resection	Suboccipital	NA	Left	Meningioma	NA	STD
+9VVT5DI5IV750DB5YX7H5V73JJ8EQP6PF483	10228	971	1195	2011-02-03	Left suboccipital tumor, resection	Suboccipital	NA	Left	Hemangioblastoma	NA	STD
+095SW3XQ1QR0086QL1NQ9B5F4GV08650CPA6	10187	938	1139	2011-11-18	Right frontal tumor resection	Frontal	NA	Right	Meningioma	NA	STD
+K172KXCFH37D4RWHWB06U2OBG6L8K43B87R1	10216	963	1180	2011-02-19	Suprasellar mass, biopsy and resection	Pterional	NA	Right	Craniopharyngioma, Adamantinomatous type	NA	STD
+423WK8DBBM62UEH09K27226GXBU7RM851181	10213	958	1175	2011-04-08	Right posterior fossa tumor, resection	Suboccipital	NA	Right	Meningioma	NA	STD
+AU5B9WL8E43668TE3D7IUFPNDJ5W71875G67	10205	952	1164	2011-04-29	Right occipital mass, excision	Suboccipital	NA	Right	Schwannoma	NA	STD
+3FG8NHO1J524M2M9P3JPR3Q42O75JQ8J9LH2	10136	894	1066	2012-10-15	Right internal-auditory canal lesion, resection	Mastoid	NA	Right	Schwannoma	NA	STD
+2HXN163Q80F05J483FN7I516Q3830T894S3O	10184	935	1136	2012-03-19	Right CP angle tumor, excision	Suboccipital	NA	Right	Schwannoma	NA	STD
+0673A83751SYP3N1H4U3624NK8587UU2EWMJ	10183	934	1135	2012-04-01	Left clinoid meningioma, resection	Frontotemporal	NA	Left	Meningioma	NA	STD
+JN3FK112W128J3GLDJC6A9ZBBA9F9M2P7T89	10182	933	1134	2012-04-14	Anterior skull base tumor resection	Frontal	NA	Bilateral	Meningioma	NA	STD
+AFL8519NOLCXNE8Q945261A2J3T9B2GDGR67	10160	919	1098	2012-08-22	Left cerebellar pontine angle mass, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+9C90MMA6KIM6546RS019I09M7T66106M92Y8	10161	920	1099	2012-07-20	Right temporal brain tumor, resection	Temporal	NA	Right	Meningioma	NA	STD
+04I6U210GKO6SXE0D40DPVDJN1LT0SI0AJD0	10141	901	1072	2012-09-16	Right CP angle tumor, resection	Suboccipital	NA	Right	Hemangiopericytoma	NA	STD
+04I6U210GKO6SXE0D40DPVDJN1LT0SI0AJD0	10142	902	1073	1999-07-12	Brain tumor, resection	Suboccipital	NA	Right	Hemangiopericytoma	NA	OUT
+HOYTK4B0VZ2N4K17E9D50U6OL5R2JLQ3CS2B	10128	886	1058	2013-05-18	Left CP angle tumor, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+ACW6E5A5479X17KFMD447KQQ9B38MRJU7R17	10137	895	1067	2012-12-29	Right frontal	Frontal	NA	Right	Meningioma	NA	STD
+5213ZV4B48D72A5BJG7C0WXYK4L58HK8TPPU	10139	899	1070	2012-10-20	Skull base tumor, resection	Frontotemporal	NA	Right	Chordoma	NA	STD
+5213ZV4B48D72A5BJG7C0WXYK4L58HK8TPPU	10140	900	1071	2012-10-04	Sphenoid mass, biopsy	Sphenoid	NA	Midline	Chordoma	NA	STD
+5213ZV4B48D72A5BJG7C0WXYK4L58HK8TPPU	10158	917	1096	2012-12-06	Clival tumor resection	Clival	NA	Right	Chordoma	NA	STD
+AHB9Y2E1900600A002G97WEOWSSY58H9XO3C	10129	887	1059	2013-04-16	Left vestibular tumor, resection	Suboccipital	NA	Left	Schwannoma	NA	STD
+2RY3X775X7R533Q12Q0GMR4TK0VO3MYZF3M0	10135	893	1065	2013-01-10	Right frontal tumor, resection	Frontal	NA	Right	Meningioma	NA	STD
+47ICQWFZVBFNR6E79913Q6U5U4T743MJ6767	10124	881	1053	2013-05-28	Right cerebellopontine angle mass, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+R989NRV933DNZKO0E8N0B65Y6K819XQNS017	10126	884	1056	2013-06-13	Right CP angle tumor, resection	Retrosigmoid	NA	Right	Schwannoma	NA	STD
+R989NRV933DNZKO0E8N0B65Y6K819XQNS017	10127	885	1057	2013-08-29	Right CP angle tumor, resection	Petrosal	NA	Right	Schwannoma	NA	STD
+9RJJHA5XFT1279XP0K1WL02011ZH0F9XU0T7	10250	1005	1256	2007-07-21	Right parietal tumor resection	Parietal	NA	Right	Meningioma	Non-Cancer	REV
+9RJJHA5XFT1279XP0K1WL02011ZH0F9XU0T7	10251	1006	1257	2010-05-25	Tentorial meningioma, resection	Suboccipital	NA	Right	Atypical Meningioma	Non-Cancer	STD
+B849582QD287EFJU7134H9MJN35IW658T390	10281	1020	1270	2010-04-07	Right posterior fossa tumor, resection	Suboccipital	NA	Right	Meningioma	NA	STD
+0PNYE8R366Y361OX2424K857SB9NI7FEX8F1	10186	937	1138	2011-12-08	Brain, right frontal, excision	Frontoparietal	NA	Right	Meningioma	NA	STD
+DHX54B9JZ6I2EN6X764SAI1BG831BJW4HK9Q	10252	1008	1259	2010-05-11	Suprasellar tumor resection	Frontal	NA	Bilateral	Meningioma	NA	STD
+8I593XMW7E9X92T1D76OB55D34997EPY86YV	9958	713	805	2009-06-30	Brain tumor, right cerebellum, resection	Occipital	NA	Right	Dysplastic Gangliocytoma of the Cerebellem (Lhermitte-Duclos Disease)	NA	STD
+8ENX8VI0T3ML39347X4W6JVC503ASYUGZY70	10130	888	1060	2013-04-06	Left middle fossa mass resection	Fossa	NA	Left	Hemangiopericytoma	NA	STD
+8ENX8VI0T3ML39347X4W6JVC503ASYUGZY70	10131	889	1061	2004-06-24	Left temporal tumor resection	Temporal	NA	Left	Hemangiopericytoma	NA	OUT
+9113J5X4P7G91Y17QS9L69993K5SYAQQR8Q1	10196	944	1155	2011-07-14	Left Occipital tumor, resection	Occipital	NA	Left	Meningioma	NA	STD
+98ED4724Z17ZS16C9RN09Z1K677787P0SGB9	10138	896	1068	2012-12-09	Clinoidal tumor, resection	Frontotemporal	NA	Right	Meningioma	NA	STD
+CO74QPJ0DQV4319UBTI73WS9X7Z7V1X10EM0	10217	964	1181	2011-02-19	Right internal auditory mass, resection	Suboccipital	NA	Right	Schwannoma	NA	STD
+7SPD00O436JL15V5C4X87XC6TQNMHWG703L1	10253	1009	1260	2010-05-02	Left frontal lesion, resection	Frontal	NA	Left	Meningioma	NA	STD
+WFP55SU37A7R0D3467Q3CS4LK3062Q7CAQ17	9898	653	746	2014-01-24	Left parietal tumor and cusa contents	Parietal	NA	Left	Glioblastoma	NA	STD
+L98UAM2B495O9Q1VNQO615SK5GMVY7BM613X	9899	654	747	2014-01-09	Left frontal tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+I932M568K26I1Z4P538R86T82G2SV40H1LJ2	9900	655	748	2014-02-17	Left temporal tumor	Temporal	NA	Left	Glioblastoma	NA	STD
+VC0MN67WZRHE4XDA46SA43VJQ5834996G855	9901	657	750	2014-02-17	Right frontal tumor, resection	Frontal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+VC0MN67WZRHE4XDA46SA43VJQ5834996G855	9902	656	749	2013-11-10	Right frontal tumor	Frontal	NA	Right	Glioblastoma	NA	OUT
+GF3CW0O9O9J1WV6Z0UDO4IPM86K8K95X1382	9905	660	753	2007-10-19	Left temporal tumor, resection	Temporal	NA	Left	Glioblastoma	NA	STD
+684JKDE1GUF9QYP2R409825965HBVQ81P573	9925	679	772	2013-09-04	Brain, left temporal, resection	Temporal	NA	Left	Gliosarcoma	NA	STD
+684JKDE1GUF9QYP2R409825965HBVQ81P573	9926	680	773	2014-02-27	Left temporal tumor, resection	Temporal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	Gliosarcoma	STD
+V2NSTAU2W9808LT3887FF2O6TXK1SV15Q1YB	9927	681	774	2001-10-01	Left cavernous sinus brain tumor	Pterional	NA	Left	Meningioma	NA	STD
+A8224870SVQP3515BY3K21HGTFZH05Q62WD5	9967	727	819	2006-07-16	Brain, right occipital tumor, resection	Temporooccipital	NA	Right	Glioblastoma	NA	STD
+2S45RH750361909AD9XV2P5KY32ZH5986Y8G	9971	730	822	1991-07-01	Right frontal tumor resection	Frontal	NA	Right	Oligodendroglioma	NA	STD
+OLI28HTSP6GC9E82VF33V18ZI2UJHX3A1X72	9972	731	823	2000-05-10	Brain, left temporal tumor excision	Temporal	NA	Left	Oligoastrocytoma	NA	STD
+1M9W2AQ86U6Z19A5M114EU5UB0TLL78Z9UL5	9974	732	825	2001-01-28	Left frontal brain tumor resection	Frontal	NA	Left	Low-grade Glioma	NA	REV
+1M9W2AQ86U6Z19A5M114EU5UB0TLL78Z9UL5	9975	733	826	2007-06-17	Left frontal lobe tumor, resection	Frontal	NA	Left	Anaplastic Ganglioglioma	NA	STD
+1M9W2AQ86U6Z19A5M114EU5UB0TLL78Z9UL5	9976	734	827	2010-11-18	Left frontal mass and CUSA, resection	Frontal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+1M9W2AQ86U6Z19A5M114EU5UB0TLL78Z9UL5	9977	735	828	2013-01-06	Left frontal tumor, resection	Frontal	NA	Left	Recurrent/residual high-grade glioma with treatment effect	NA	STD
+683JQ8MZT1F432C8HX6NMH8X1K9Q024VVDAT	9978	736	829	2001-05-18	Brain, left frontal mass resection	Frontal	NA	Left	Oligodendroglioma	NA	STD
+683JQ8MZT1F432C8HX6NMH8X1K9Q024VVDAT	9979	737	830	2001-04-28	Left frontal tumor biopsy	Frontal	NA	Left	Anaplastic Astrocytoma	NA	OUT
+683JQ8MZT1F432C8HX6NMH8X1K9Q024VVDAT	9980	738	831	2010-12-16	Brain, cyst wall, excision	Frontal	NA	Left	Negative	NA	STD
+PZ4IN1Z75S75W8F835ZT8D9B28J2U6H4NSI1	9981	741	834	2010-11-05	Right frontal tumor resection	Frontal	NA	Right	Glioblastoma	NA	OUT
+NBE6NLG4533560727IKX2S0VV7N8388IYG3P	9982	742	835	2001-01-10	Left parietal mass, excision	Parietal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+NBE6NLG4533560727IKX2S0VV7N8388IYG3P	9983	744	837	2006-07-27	Left parietal tumor re-resection	Parietal	NA	Left	Anaplastic Oligodendroglioma	NA	OUT
+2133GT131Y0KL813Y1J62F5FR003TGWRS081	9984	745	838	2007-03-17	Right temporal lobe tumor	Temporal	NA	Right	Oligodendroglioma	NA	REV
+2133GT131Y0KL813Y1J62F5FR003TGWRS081	9985	746	839	2003-06-29	Brain tumor biopsy	Temporal	NA	Right	Oligodendroglioma	NA	OUT
+85D5GOUICT9ALE6J4RF4W140931C1I956K8A	9986	747	840	2011-11-17	Brain, left frontal tumor	Frontal	NA	Left	Glioblastoma	NA	STD
+P917MCMUSS45488P90N2T717AD4MF03WU18O	9991	752	845	2006-03-10	Brain, left temporal, biopsy	Temporal	NA	Left	Glioblastoma	NA	STD
+F01J26WSB479A01N89BN5U6BZ6WCRDMP89GZ	9992	753	846	2007-01-21	Left frontal tumor resection	Frontal	NA	Left	Anaplastic Astrocytoma	NA	REV
+RXW01RT6R884KU01ULH7M217K8R5048G2JPN	9993	754	847	2006-11-14	Right posterior frontal tumor 	Frontal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+139C8NER2T02PB9KNBIJ77263VYHCVOC12KB	9994	755	848	2007-03-19	Left frontal tumor resection	Frontal	NA	Left	Glioblastoma	NA	OUT
+139C8NER2T02PB9KNBIJ77263VYHCVOC12KB	9995	756	849	2008-11-19	Left temporoparietal tumor resection	Temporoparietal	NA	Left	Recurrent/residual glioblastoma with treatment effect	NA	OUT
+W8I137ZTZND076M912SJBS3S9NW2QAS73G3H	9996	757	850	2007-06-08	Right thalamic lesion, biopsies	Thalamus	NA	Right	Anaplastic Astrocytoma	NA	STD
+LYC39YBB7J440UI9492Z01MI0686S13U4KJB	9997	758	851	2005-12-03	Brain tumor resection	Frontal	NA	Left	Low-grade Astrocytoma	NA	OUT
+0YTKU40O2ZJ90K66255JGN5D1Z28VT43320Z	10003	764	857	2007-09-24	Left frontal tumor resection	Frontal	NA	Left	Oligodendroglioma	NA	REV
+SSI9H3OAJVVP78ND5S17BO45S8B3E8676W36	10004	765	858	2007-11-01	Right temporal lobe resection	Temporal	NA	Right	Anaplastic Oligodendroglioma	NA	STD
+SSI9H3OAJVVP78ND5S17BO45S8B3E8676W36	10005	766	859	2004-11-03	Right temporal tumor resection	Temporal	NA	Right	Oligoastrocytoma	NA	OUT
+SSI9H3OAJVVP78ND5S17BO45S8B3E8676W36	10006	766	859	2004-11-03	Right temporal brain tumor excision	Temporal	NA	Right	Oligodendroglioma	NA	OUT
+F30094F54O6EOLP6MKGF9XU2J9LY458EP73U	10007	767	860	2008-01-06	Left temporal lobe resection	Temporal	NA	Left	Pleomorphic Xanthoastrocytoma	NA	STD
+9M3VP5S6IE7586Z2SU7L6Q5BETT3S8656OV2	10008	768	861	2010-09-04	Left frontal tumor excision	Frontal	NA	Left	Glioblastoma	NA	OUT
+K66T8D8TL641400U85N0EOO82L3UMD6IT4WA	10015	775	868	1999-06-15	Posterior fossa tumor resection	Fossa	NA	Midline	Anaplastic Ependymoma	NA	OUT
+K66T8D8TL641400U85N0EOO82L3UMD6IT4WA	10016	777	870	2007-12-30	Left temporal tumor excision	Temporal	NA	Left	Anaplastic Astrocytoma	NA	OUT
+K2V02RKQI400F6AK7G47D6JWZFG19600SQMV	10017	778	871	2008-03-03	Left frontal tumor resection	Frontal	NA	Left	Glioblastoma	NA	OUT
+L37W13199DF045129M5431N24F24BYY2C0G6	10019	780	873	2009-01-02	Right frontal brain tumor	Frontal	NA	Right	Glioblastoma	NA	REV
+L37W13199DF045129M5431N24F24BYY2C0G6	10020	781	874	2010-09-26	Right frontal tumor resection	Frontal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	STD
+4G1SPI4Y8KL16C95P5755T2GBFPYC71507E3	10021	782	875	2008-12-20	Left frontal lobe mass, resection	Frontal	NA	Left	Glioblastoma	NA	REV
+F42C21DHL5J1NTRH5K7YRR63470978V1P034	10022	783	877	2006-12-26	Posterior left parietal lobe mass biopsy 	Parietal	NA	Left	Anaplastic Oligodendroglioma	NA	STD
+82627D1Y5884659Y228SMIWR3M68A2JVV30L	10023	784	878	2010-09-08	Posterior fossa tumor resection	Fossa	NA	Midline	Glioblastoma	NA	STD
+82627D1Y5884659Y228SMIWR3M68A2JVV30L	10024	785	879	1991-06-18	Posterior fossa tumor resection	Fossa	NA	Midline	Ependymoma	NA	STD
+7849TU910N7631LO7L915Z98349FH74YC07K	10025	786	881	2010-03-09	Right frontal tumor, resection	Frontal	NA	Right	Glioblastoma	NA	REV
+7849TU910N7631LO7L915Z98349FH74YC07K	10042	787	882	2010-03-18	Right frontal tumor,resection	Frontal	NA	Right	Glioma, NOS	Non-Cancer	STD
+OGU6BI33022U8Z2GMY1O531VH5UV4FJ86DUV	10044	799	903	2009-08-24	Brain left temporal tumor	Temporal	NA	Left	Glioblastoma	NA	STD
+2PG79FU7TC32EIC970SMS9D17FQKBGJE0WYG	10046	801	905	2010-02-05	Left frontal tumor biopsy	Frontal	NA	Left	Oligodendroglioma	NA	STD
+Z7TW1PXKS19P8CMZ56YN4YUM27ZZB40A27OR	10049	805	914	2010-03-08	Right occipital brain tumor, resection	Occipital	NA	Right	Non-Neoplastic	NA	REV
+Z7TW1PXKS19P8CMZ56YN4YUM27ZZB40A27OR	10050	804	913	2010-03-26	Brain, right occipital mass resection	Occipital	NA	Right	Glioblastoma	NA	STD
+G9806GTEV54548Y96M46W9WJ0RR0A4L16CBF	10051	806	915	2010-08-16	Left temporal lobe mass, excision	Temporal	NA	Left	Anaplastic Astrocytoma	NA	REV
+T95WMQ26154DYGM5P004K16NZOJ6660T9T2G	10052	807	916	2010-09-21	Left parietal tumor resection	Parietal	NA	Left	Glioblastoma	NA	STD
+97K52I3E163AN5ES1S725R2B3EG3RRI50CQ9	10053	808	917	2010-09-11	Right temporal	Temporal	NA	Right	Glioblastoma	NA	STD
+V704TUN6MC86I1RX675Z4Z7F456JARI6H234	10054	809	918	2010-12-01	Left frontal tumor, resection	Frontal	NA	Left	Anaplastic Oligoastrocytoma	NA	STD
+V704TUN6MC86I1RX675Z4Z7F456JARI6H234	10056	810	919	2010-10-24	Left frontal tumor biopsy	Frontal	NA	Left	Oligoastrocytoma	NA	OUT
+DM7XJ25G42QF1FZQM14E3W12021NP65GE6EZ	10059	815	925	2010-11-08	Brain tumor, biopsy	Occipital	NA	Right	Glioblastoma	NA	REV
+DM7XJ25G42QF1FZQM14E3W12021NP65GE6EZ	10060	814	926	2010-11-26	Right occipital tumor resection	Occipital	NA	Right	Glioblastoma	NA	STD
+PQ7OE74TPE8B2BKJP1JRXQQ3O9525K65NK3X	10061	817	929	2010-12-13	Right temporal tumor resection	Temporal	NA	Right	Gliosarcoma	NA	REV
+PQ7OE74TPE8B2BKJP1JRXQQ3O9525K65NK3X	10062	816	928	2010-12-13	Right temporal tumor resection	Temporal	NA	Right	Gliosarcoma	NA	REV
+2QBF65ZC6070487DNC40P02382W81BJ589CJ	10063	818	930	2010-11-17	Right frontal tumor resection	Frontal	NA	Right	Glioblastoma	NA	STD
+4WA7KF6KX5QLHP2O899GJ591NMF105C46GY4	10064	819	931	2011-01-11	Right frontal mass resection	Frontal	NA	Right	Glioblastoma	NA	STD
+TBHW430MJJW6KW7NOAKHQ63S79U121H6PA6O	10065	821	933	2008-05-26	Left brain tumor resection	Parietooccipital	NA	NA	Glioblastoma	NA	OUT
+1RDRX2473W80B5R41RR254I41WA4K38S8S33	10074	834	972	2011-03-15	Brain tumor, left temporal, resection	Temporal	NA	Left	Oligoastrocytoma	NA	STD
+OAF0230QEVMCJN4W7BHMVW474Y077567YM32	10075	835	973	2011-01-01	Right frontoparietal tumor resection	Frontoparietal	NA	Right	Glioblastoma	NA	OUT
+OAF0230QEVMCJN4W7BHMVW474Y077567YM32	10076	836	974	2011-05-02	Brain tumor resection	Frontoparietal	NA	Right	Recurrent/residual glioblastoma with treatment effect	NA	OUT
+VC58TEZK2B1K071IM8335SOWKP301BTJ9122	10080	841	979	2011-07-04	Left frontoparietal AVM, excision	Frontal	NA	Left	Malignant Astrocytic Neoplasm	NA	STD
+VC58TEZK2B1K071IM8335SOWKP301BTJ9122	10081	842	980	2011-07-04	Left frontal lesion resection	Frontal 	NA	Left	Glioblastoma	NA	STD
+JMB0DB05IW508Z6NEJ5O8X9RJ674100100M8	10077	837	975	2011-09-27	Brain, right parietal lesion, biopsy	Parietal	NA	Right	Low-grade Astrocytoma	NA	REV
+JMB0DB05IW508Z6NEJ5O8X9RJ674100100M8	10078	838	976	2011-09-27	Brain, right frontal lesion, biopsy	Frontal	NA	Right	High-grade Glioma	NA	REV
+8B0LF964T27D04FP1A3D0Q5C4MA4P1K1E62R	10079	839	977	2011-09-05	Right splenium of the Corpus callosum, biopsy	Parietal	NA	Right	Low-grade Astrocytoma	Glioma, NOS	STD
+8J5M1589MY77Y345K0A9BK0JRI1N95IOH304	10089	848	993	2011-10-16	Left frontal tumor, resection	Frontal	NA	Left	Glioblastoma	NA	STD
+657EG732C52D2L70082FW7EB98799N3A10V5	10090	849	994	2010-02-22	Third ventricle tumor biopsy	Third Ventricle	NA	Midline	Pilocytic Astrocytoma	NA	OUT
+0407O9006QSZ8YI46Y3MY1735VHQVER3FLA6	10091	850	995	2011-09-22	Brain left insular tumor, biopsies	Frontotemporal	NA	Left	Glioblastoma	NA	OUT
+O7B67WC0H40IU73MHSFRHB4GW6JA1HDVG3Q7	10092	851	996	2005-09-17	Right frontal tumor biopsy	Frontal	NA	Right	Low-grade Astrocytoma	NA	OUT
+3C9TW66QW4A87IT9TRLRPI1I946TBIDR0Q7P	10093	852	997	2011-10-15	Right parietal tumor resection	Parietal	NA	Right	Glioblastoma	NA	OUT
+3C9TW66QW4A87IT9TRLRPI1I946TBIDR0Q7P	10094	854	998	2011-11-15	Right parietal tumor resection	Parietal	NA	Right	Non-Cancer	NA	OUT
+7TD0U15331CS664WU4613J2U342166X400D0	10119	870	1038	2012-10-17	Right temporal mass, resection	Temporal	NA	Right	Glioblastoma	NA	STD
+59WIJ3V25FR06L99W52G9OFA0DU39P2U947I	10012	772	865	2002-07-04	Left lateral ventricular mass, excision	Ventricle	NA	Left	Central Neurocytoma	NA	STD

@@ -1,0 +1,56 @@
+<script>
+include(../markersAndTissues/reorganizedAndColoredMarkers.cyjs)
+include(../markersAndTissues/vizmap3.json)
+
+</script>
+<style>
+
+div {
+   display: block;
+   }
+
+#markersAndTissuesDiv{
+  }
+
+#cyMarkersDiv {
+  background-color: #DDD;
+  position: relative;
+
+  height: 400px;
+  width: 600px;
+
+  border: 1px solid #aaa;
+
+  margin-top: 0px;
+  margin-left: 0px;
+
+  padding: 0px;
+
+  }
+
+#markersAndSamplesMouseOverReadoutDiv{
+  border: 1px solid #aaa;
+  width: 800px;
+  height: 20px;
+  }
+
+#markersAndTissuesbuttonDiv{
+  margin-top: 1px;
+  margin-bottom: 1px;
+  }
+
+</style>
+
+<div id="markersAndTissuesDiv">
+   <div id="markersAndSamplesMouseOverReadoutDiv"></div>
+   <div id="markersAndTissuesButtonDiv">
+      <button id="cyMarkersHideEdgesButton">Hide Edges</button>
+      <button id="cyMarkersShowEdgesButton">Show All Edges</button>
+      <button id="cyMarkersShowEdgesFromSelectedButton">Show Edges From Selected</button>
+      <button id="cyMarkersZoomSelectedButton">Zoom Selected</button>
+   </div>
+   <div id="cyMarkersDiv"></div>
+</div>
+
+
+

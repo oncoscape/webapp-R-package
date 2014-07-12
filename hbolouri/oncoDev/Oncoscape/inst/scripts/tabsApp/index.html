@@ -1,0 +1,1049 @@
+<!DOCTYPE html> 
+<html>
+
+<head>
+   <meta charset="UTF-8">
+   <title> Oncoscape </title>
+   <script src="http://s3.amazonaws.com/oncoscape/js/jquery-2.1.0.min.js"></script>
+   <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+   <link   rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+
+   <script src="http://s3.amazonaws.com/oncoscape/js/cytoscape-2.2.9.min.js"></script>
+
+   <script src="http://s3.amazonaws.com/oncoscape/js/jquery.cytoscape.js-panzoom.js"></script>
+   <link   href="http://s3.amazonaws.com/oncoscape/fonts/font-awesome-4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" />
+   <link   href="http://s3.amazonaws.com/oncoscape/js/jquery.cytoscape.js-panzoom.css" rel="stylesheet" type="text/css" />
+   <script src="http://s3.amazonaws.com/oncoscape/js/jquery.cytoscape.js-panzoom.js"></script>
+
+   <script src="http://s3.amazonaws.com/oncoscape/js/d3.min.js"></script>
+
+   <script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+   <link   rel="stylesheet" type="text/css"
+           href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
+
+   <link   rel="stylesheet" type="text/css"
+           href="http://cdn.datatables.net/colreorder/1.1.0/css/dataTables.colReorder.min.css"></script>
+
+   <!-- img src="//cdn.datatables.net/colreorder/1.1.0/images/insert.png" -->
+   <script src="//cdn.datatables.net/colreorder/1.1.0/js/dataTables.colReorder.min.js"></script>
+   <script src="//cdn.datatables.net/colvis/1.1.0/js/dataTables.colVis.min.js"></script>
+
+   <link   rel="stylesheet" type="text/css"
+           href="http://cdn.datatables.net/colvis/1.1.0/css/dataTables.colVis.css"></script>
+
+   <script src="http://s3.amazonaws.com/oncoscape/js/jquery.multi-select.js" type="text/javascript"></script>
+   <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+
+
+<script>
+
+//
+// declare these includes first
+//
+var socket;
+var dispatchOptions = {};
+var socketConnectedFunctions = [];
+var onReadyFunctions = [];
+
+//
+// Do not modify the following line.  If Oncoscape is launched from LabKey then a new labkey javascript
+// object will be created with members {.mode, .reportSession, .filteredPatients}
+//
+//var labkey = {labkeyOncoscape};
+var filteredPatients = [];
+
+//----------------------------------------------------------------------------------------------------
+addJavascriptMessageHandler = function(cmd, func)
+{
+   dispatchOptions[cmd] = func
+}
+//----------------------------------------------------------------------------------------------------
+</script>
+</head>
+
+
+<body>
+<script>
+onReadyFunctions.push(function() {
+    console.log("====== tabapps document ready");
+    window.tabsAppRunning = true
+    $("#tabs").tabs({
+         // todo: distinguish between tabs, only do needed resets
+       activate: function(event, ui) {
+            console.log("tabs.activate");
+            console.log(" ==== tab.activate, tableRef.fnAdjustColumnSizing");
+            var tableRef = $("#clinicalTable").dataTable();
+            if (tableRef.length > 0) {
+               tableRef.fnAdjustColumnSizing();
+              } // if
+            console.log(" ==== tab.activate, possible cyjs resize and fit");
+            if(typeof(cwMarkers) != "undefined") {
+               cwMarkers.resize(); 
+               cwMarkers.fit(50);
+               }
+            if(typeof(cwGBM) != "undefined") {
+                cwGBM.resize();
+                cwGBM.fit(50);
+                }
+            if(typeof(cwAngio) != "undefined") {
+                cwAngio.resize();
+                cwAngio.fit(50);
+                }
+            } // activate
+        }); // tabs
+    });  // ready
+
+</script>
+
+
+<style>
+.ui-tabs .ui-tabs-nav li a {font-size:10pt !important;}
+</style>
+
+<script>
+</script>
+
+<script>
+//----------------------------------------------------------------------------------------------------
+var ClinicalTableModule = (function () {
+
+var currentIDs;   // assign this to the full content in the tbl on startup
+var tableRef;
+var pcaButton;
+var displayDiv;
+
+   //--------------------------------------------------------------------------------------------
+   function initializeUI(){
+      pcaButton = $("#toPCAButton");
+      pcaButton.click(function(){sendCurrentIDsToModule("PCA")});
+      displayDiv = $("#clinicalDataTableDiv");
+      $(window).resize(handleWindowResize);
+      handleWindowResize();
+      $("#ageAtDxMinSlider").slider({
+         change: function(event, ui) {$("#ageAtDxMinSliderReadout").text (ui.value)},
+         min: 10,
+         max: 89,
+         value: 10
+         });
+    $("#ageAtDxMinSliderReadout").text(10);
+
+    $("#ageAtDxMaxSlider").slider({
+       change: function(event, ui) {$("#ageAtDxMaxSliderReadout").text (ui.value)},
+       min: 10,
+       max: 89,
+       value: 89
+       });
+    $("#ageAtDxMaxSliderReadout").text(89);
+
+    $("#overallSurvivalMinSlider").slider({
+       change: function(event, ui) {$("#overallSurvivalMinSliderReadout").text (ui.value)},
+       min: 0,
+       max: 11,
+       value: 0
+       });
+    $("#overallSurvivalMinSliderReadout").text(0);
+
+    $("#overallSurvivalMaxSlider").slider({
+       change: function(event, ui) {$("#overallSurvivalMaxSliderReadout").text (ui.value)},
+       min: 0,
+       max: 11,
+       value: 11
+       });
+    $("#overallSurvivalMaxSliderReadout").text(11);
+    //$("#applyClinicalTablesFiltersSlidersButton").button();
+    //$("#showAllClinicalTablesRowsButton").button()
+    $("#showAllClinicalTablesRowsButton").click(showAllRows)
+    $("#applyClinicalTablesFiltersSlidersButton").click(readAndApplyClinicalTableFilters);
+    $("#toMarkersAndTissuesButton").prop("disabled",true);
+    $("#toGBMPathwaysButton").prop("disabled",true);
+    $("#toSurvivalStatsButton").prop("disabled",true);
+    $("#toTimeLinesButton").prop("disabled",true);
+    };
+
+   //--------------------------------------------------------------------------------------------
+   sendCurrentIDsToModule = function(moduleName) {
+      console.log("entering sendCurrentIDsToModule");
+      var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
+      var currentIDs = []
+      for(var i=0; i < rows.length; i++) 
+          currentIDs.push(rows[i][0]);
+      console.log(currentIDs.length + " patientIDs going to " + moduleName)
+      callback = moduleName + "HandlePatientIDs";
+      msg = {cmd:"sendPatientIDsToModule",
+             callback: callback,
+             status:"request",
+             payload:{targetModule: moduleName,
+                      ids: currentIDs}
+             };
+      msg.json = JSON.stringify(msg);
+      //console.log(msg.json);
+      socket.send(msg.json);
+      } // sendTissueIDsToModule
+
+//----------------------------------------------------------------------------------------------------
+   function showAllRows() {
+      tableRef.fnFilter("", 0);
+      }
+
+   //--------------------------------------------------------------------------------------------
+   function readAndApplyClinicalTableFilters() {
+      console.log("readAndApplyClinicalTableFilters")
+      var ageAtDxMin = $("#ageAtDxMinSliderReadout").val()
+      var ageAtDxMax = $("#ageAtDxMaxSliderReadout").val()
+      var overallSurvivalMin = $("#overallSurvivalMinSliderReadout").val()
+      var overallSurvivalMax = $("#overallSurvivalMaxSliderReadout").val()
+
+      msg = {cmd:"filterPatientHistory", 
+             callback: "handleFilterPatientHistory",
+             status:"request",
+             payload:{ageAtDxMin: ageAtDxMin,
+                      ageAtDxMax: ageAtDxMax,
+                      overallSurvivalMin: overallSurvivalMin,
+                      overallSurvivalMax: overallSurvivalMax}};
+      msg.json = JSON.stringify(msg);
+      console.log(msg.json);
+      socket.send(msg.json);
+      } // readAndApplyClinicalTableFilters 
+
+
+   //--------------------------------------------------------------------------------------------
+   function handleFilterPatientHistory(msg) {
+      console.log("=== handleFilterPatientHistory");
+      console.log(msg);
+      if(msg.status != "success"){
+         alert("handleFilterClinicalDataTable error: " + msg.payload);
+         return;
+         }
+
+      var count = msg.payload.count;
+      var ids = msg.payload.ids;
+      console.log("--- filtered ids returned by Oncoscape: " + ids);
+
+        // having trouble getting visible tissueIDs from DataTable for now
+        // an imperfect workaround:  save them to a global variable
+        // TODO:  this does not work with direct in-browser filtering of the table
+
+       // if tissueIDs is a single string, then 'length' returns the number
+       // of characters in the string, not the number of elements in the array
+       // protect against this.
+
+     if(count == 1){
+        currentIDs = [ids]
+        filterString = ids
+        }
+     else{
+        currentIDs =  ids
+        filterString = ids[0];
+        for(var i=1; i < ids.length; i++){
+           filterString += "|" + ids[i]
+           }
+        } // if more than one id
+
+      console.log("---- clinicalDataTable2.handleFilterClinicalDataTable");
+      console.log(filterString)
+      console.log("about to call fnFilter");
+      tableRef.fnFilter(filterString, 0, true);
+      $("#tabs").tabs( "option", "active", 0);
+      } // handleFilterClinicalDataTable 
+
+
+   //--------------------------------------------------------------------------------------------
+  handleWindowResize = function(){
+      displayDiv.width($(window).width() * 0.95);
+      displayDiv.height($(window).height() * 0.95);
+     }; // handleWindowResize
+
+   //--------------------------------------------------------------------------------------------
+  requestData = function(){
+     console.log("cdt requests data");
+     payload = ""; // demo/clinicalTable320.RData";
+     msg = {cmd: "getPatientHistory", callback: "handlePatientHistory", status: "request", 
+            payload: payload};
+     msg.json = JSON.stringify(msg);
+     socket.send(msg.json);
+     };
+
+   //--------------------------------------------------------------------------------------------
+  function displayTable(msg){
+     console.log("entering ctbl displayTable");
+     tblColumnNames = msg.payload.colnames;
+     columnTitles = [];
+     for(var i=0; i < tblColumnNames.length; i++){
+        columnTitles.push({sTitle: tblColumnNames[i]});
+        }
+     
+     console.log(columnTitles);
+
+     displayDiv.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="clinicalTable"></table>');
+     $("#clinicalTable").dataTable({
+        "sDom": "Rlfrtip",
+         sDom: 'C<"clear">lfrtip',
+        "aoColumns": columnTitles,
+	"sScrollX": "100px",
+        "iDisplayLength": 25,
+         bPaginate: true,
+        "scrollX": true,
+        "fnInitComplete": function(){
+            $(".display_results").show();
+            }
+         }); // dataTable
+
+     console.log("displayTable adding data to table");
+     tableRef = $("#clinicalTable").dataTable();
+     tableRef.fnAddData(msg.payload.mtx);
+     }; // displayTable
+
+
+  return{
+    requestData: requestData,
+    init: function(){
+      onReadyFunctions.push(initializeUI);
+      addJavascriptMessageHandler("handlePatientHistory", displayTable);
+      addJavascriptMessageHandler("handleFilterPatientHistory", handleFilterPatientHistory);
+      addJavascriptMessageHandler("PatientHistoryHandlePatientIDs", handleFilterPatientHistory);
+      socketConnectedFunctions.push(requestData);
+      }
+    }; // returned object
+
+  }); // DateAndTimeModule
+
+//----------------------------------------------------------------------------------------------------
+ctbl = ClinicalTableModule();
+ctbl.init();
+
+</script>
+<script>
+//----------------------------------------------------------------------------------------------------
+var PCAModule = (function () {
+
+  var broadcastButton;
+  var pcaDisplay;
+  var pcaResults;
+  var patientClassification;
+  var firstTime = true;
+  var selectedRegion;    // from brushing
+  var d3PlotBrush;
+
+  //--------------------------------------------------------------------------------------------
+  initializeUI = function(){
+      pcaDisplay = $("#pcaDisplay");
+      pcaHandleWindowResize();
+      broadcastButton = $("#broadcastSelectionToClinicalTable");
+      //broadcastButton.button();
+      broadcastButton.click(broadcastSelection);
+      $(window).resize(pcaHandleWindowResize);
+      broadcastButton.prop("disabled",true);
+      };
+
+  //--------------------------------------------------------------------------------------------
+  runDemo = function(){
+     payload = "";
+     msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request", 
+            payload: payload};
+     socket.send(JSON.stringify(msg));
+     };
+
+  //--------------------------------------------------------------------------------------------
+  getPatientClassification = function(){
+     payload = "";
+     msg = {cmd: "getPatientClassification", callback: "handlePatientClassification", 
+            status: "request", payload: payload};
+     socket.send(JSON.stringify(msg));
+     };
+
+  //--------------------------------------------------------------------------------------------
+  handlePatientClassification = function(msg){
+     console.log("=== handlePatientClassification");
+     console.log(msg)
+     if(msg.status == "success"){
+        patientClassification = JSON.parse(msg.payload)
+        console.log("got classification, length " + patientClassification.length);
+        }
+     else{
+       alert("error!" + msg.payload)
+       }
+      }; // handlePatientIDs
+
+  //--------------------------------------------------------------------------------------------
+  pcaHandleWindowResize = function(){
+     pcaDisplay.width($(window).width() * 0.95);
+     pcaDisplay.height($(window).height() * 0.80);
+     if(!firstTime) {d3PcaScatterPlot(pcaResults);}
+     };
+
+   //--------------------------------------------------------------------------------------------
+   broadcastSelection = function(){
+      console.log("broadcastSelection: " + selectedRegion);
+      x1=selectedRegion[0][0];
+      y1=selectedRegion[0][1];
+      x2=selectedRegion[1][0];
+      y2=selectedRegion[1][1];
+      ids = [];
+      for(var i=0; i < pcaResults.length; i++){
+         p = pcaResults[i];
+         if(p.PC1 >= x1 & p.PC1 <= x2 & p.PC2 >= y1 & p.PC2 <= y2)
+            ids.push(p.id[0]);
+         } // for i
+      if(ids.length > 0)
+         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+      };
+
+  //--------------------------------------------------------------------------------------------
+  sendIDsToModule = function(ids, moduleName, title){
+       callback = moduleName + title;
+       msg = {cmd:"sendIDsToModule",
+              callback: callback,
+              status:"request",
+              payload:{targetModule: moduleName,
+                       ids: ids}
+             };
+      socket.send(JSON.stringify(msg));
+      } // sendTissueIDsToModule
+
+
+  //--------------------------------------------------------------------------------------------
+  pcaPlot = function(msg){
+      console.log("==== pcaPlot");
+      console.log(msg);
+      if(msg.status == "success"){
+         pcaResults = JSON.parse(msg.payload);
+         d3PcaScatterPlot(pcaResults);
+         if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
+             $("#tabs").tabs( "option", "active", 1);
+         } // success
+    else{
+      console.log("pcaPlot about to call alert: " + msg)
+      alert(msg.payload)
+      }
+     firstTime = false;
+     };
+
+  //--------------------------------------------------------------------------------------------
+  handlePatientIDs = function(msg){
+      console.log("Module.pca: handlePatientIDs");
+      console.log(msg)
+      if(msg.status == "success"){
+         patientIDs = msg.payload
+         console.log("pca handlePatientIds: " + patientIDs);
+         payload = patientIDs
+         msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request", 
+                payload: payload};
+         socket.send(JSON.stringify(msg));
+         }
+    else{
+      console.log("handlePatientIDs about to call alert: " + msg)
+      alert(msg.payload)
+      }
+     }; // handlePatientIDs
+
+  //--------------------------------------------------------------------------------------------
+  d3PlotBrushReader = function(){
+     console.log("plotBrushReader");
+     selectedRegion = d3PlotBrush.extent();
+     //console.log("region: " + selectedRegion);
+     x0 = selectedRegion[0][0];
+     x1 = selectedRegion[1][0];
+     width = Math.abs(x0-x1);
+     //console.log("width: " + width);
+     if(width > 1)
+        broadcastButton.prop("disabled", false);
+     else
+        broadcastButton.prop("disabled", true);
+     }; // d3PlotBrushReader
+
+  //-------------------------------------------------------------------------------------------
+  chooseColor = function(d){
+     id = d.id[0];
+     for(var i=0; i<patientClassification.length; i++){
+        if (id == patientClassification[i].rowname[0]){
+          result = patientClassification[i].color[0]
+          console.log("match " + id + " to color " + result)
+          return(result)
+          } // if match
+        } // for i
+     console.log("chooseColor, no match for id " + id);
+     return("black");
+     }
+  //-------------------------------------------------------------------------------------------
+  d3PcaScatterPlot = function(dataset) {
+
+     var padding = 50;
+     var width = $("#pcaDisplay").width();
+     var height = $("#pcaDisplay").height();
+
+     var xMax = d3.max(dataset, function(d) { return +d.PC1;} );
+     var xMin = d3.min(dataset, function(d) { return +d.PC1;} );
+     var yMax = d3.max(dataset, function(d) { return +d.PC2;} );
+     var yMin = d3.min(dataset, function(d) { return +d.PC2;} );
+ 
+       // todo:  after finding min and max, determine largest of each axis in abs value
+       // todo:  then find next larger even number, use that throughout
+     
+     xMax = xMax * 1.1
+     xMin = xMin * 1.1
+     xMax = 40
+     xMin = -40
+     yMax = 30
+     yMin = -30
+
+     //console.log("xMax: " + xMax);   console.log("xMin: " + xMin);
+     //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);
+
+     d3.select("svg").remove();  // so that append("svg") is not cumulative
+
+     var xScale = d3.scale.linear()
+                    .domain([xMin,xMax])
+                    .range([padding, width - padding]);
+
+     var yScale = d3.scale.linear()
+                    .domain([yMin, yMax])
+                    .range([height - padding, padding]); // note inversion 
+
+     var xAxis = d3.svg.axis()
+                   .scale(xScale)
+                   .orient("bottom")
+                   .ticks(5);
+
+     var yAxis = d3.svg.axis()
+                   .scale(yScale)
+                   .orient("left")
+                   .ticks(5);
+
+     d3PlotBrush = d3.svg.brush()
+        .x(xScale)
+        .y(yScale)
+        .on("brushend", d3PlotBrushReader);
+
+     var svg = d3.select("#pcaDisplay")
+                 .append("svg")
+                 .attr("width", width)
+                 .attr("height", height)
+                 .call(d3PlotBrush);
+
+     var tooltip = d3.select("body")
+                     .attr("class", "tooltip")
+                     .append("div")
+                     .style("position", "absolute")
+                     .style("z-index", "10")
+                     .style("visibility", "hidden")
+                     .text("a simple tooltip");
+
+     var circle = svg.selectAll("circle")
+                     .data(dataset)
+                     .enter()
+                     .append("circle")
+                     .attr("cx", function(d,i) {return xScale(d.PC1);})
+                     .attr("cy", function(d,i) {return yScale(d.PC2);})
+                     .attr("r", function(d) { return 3;})
+                     .style("fill", function(d) {return(chooseColor(d))})
+                     //.style("fill", function(d) { return "blue"})
+                     .on("mouseover", function(d,i){
+                         tooltip.text(d.id);
+                         return tooltip.style("visibility", "visible");
+                         })
+                    .on("mousemove", function(){return tooltip.style("top",
+                           (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+                    .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+      
+     var xTranslationForYAxis = xScale(0);
+     var yTranslationForXAxis = yScale(0);
+
+     svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0, " + yTranslationForXAxis + ")")
+        .call(xAxis);
+
+     svg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
+        .call(yAxis);
+
+     //svg.append("g")
+     //   .attr("class", "brush")
+     //   .call(d3PlotBrush);
+
+     } // d3PcaScatterPlot
+
+
+  //--------------------------------------------------------------------------------------------
+  return{
+   init: function(){
+      onReadyFunctions.push(initializeUI);
+      addJavascriptMessageHandler("pcaPlot", pcaPlot);
+      addJavascriptMessageHandler("PCAHandlePatientIDs", handlePatientIDs);
+      addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)
+      socketConnectedFunctions.push(getPatientClassification);
+      socketConnectedFunctions.push(runDemo);
+      }
+   };
+
+}); // PCAModule
+//----------------------------------------------------------------------------------------------------
+pca = PCAModule();
+pca.init();
+
+</script>
+<script>
+onReadyFunctions.push(function() {
+    console.log("====== tabapps document ready");
+    window.tabsAppRunning = true
+    $("#tabs").tabs({
+         // todo: distinguish between tabs, only do needed resets
+       activate: function(event, ui) {
+            console.log("tabs.activate");
+            console.log(" ==== tab.activate, tableRef.fnAdjustColumnSizing");
+            var tableRef = $("#clinicalTable").dataTable();
+            if (tableRef.length > 0) {
+               tableRef.fnAdjustColumnSizing();
+              } // if
+            console.log(" ==== tab.activate, possible cyjs resize and fit");
+            if(typeof(cwMarkers) != "undefined") {
+               cwMarkers.resize(); 
+               cwMarkers.fit(50);
+               }
+            if(typeof(cwGBM) != "undefined") {
+                cwGBM.resize();
+                cwGBM.fit(50);
+                }
+            if(typeof(cwAngio) != "undefined") {
+                cwAngio.resize();
+                cwAngio.fit(50);
+                }
+            } // activate
+        }); // tabs
+    });  // ready
+
+</script>
+
+
+
+<div id="tabs">
+   <ul>
+     <li><a href="#clinicalDataModuleDiv">Clinical Data</a></li>
+     <li><a href="#pcaDiv">PCA</a></li>
+   </ul>
+
+<style>
+
+.domain { 
+  fill: none; 
+  } 
+
+
+.extent {
+  fill-opacity: .1;
+  stroke: #f00;
+}
+
+
+.axis path, .axis line {
+    stroke: black;
+    stroke-width: 1px;
+    }
+
+#pcaDiv {
+   margin: 0px;
+   padding: 0px;
+   }
+
+#pcaDisplay {
+   border: 1px solid #aaa;
+   width: 50px;
+   height: 50px;
+   background-color: #EED;
+   margin-top: 1px;
+   margin-left: 3px;
+   margin-right: 0;
+   margin-bottom: 1px;
+   padding: 1px;
+   padding-bottom: 0px;
+   }
+
+</style>
+
+<div id="pcaDiv">
+   <div id="pcaDisplay"></div>
+   <button id="broadcastSelectionToClinicalTable">To Clinical Data... </button>
+</div>
+
+<style>
+
+
+#clinicalDataTableDiv {
+   min-width: 900px;
+   margin: 0 auto;
+   background-color: #EED;
+   font-family: sans-serif;
+   font-size: 14px;
+   }
+
+#oldclinicalDataTableDiv {
+   border: 1px solid #aaa;
+   height: 500px;
+   font-family: sans-serif;
+   background-color: #EED;
+   font-size: 12px;
+   margin-top: 1px;
+   margin-left: 10px;
+   margin-right: 10px;
+   margin-bottom: 1px;
+   padding: 1px;
+   padding-bottom: 20px;
+   }
+
+th, td { white-space: nowrap; } 
+
+
+
+#compactViewButton{
+   margin-left: 40px;
+   }
+
+
+#clinicalDataTableControlsDiv {
+   border: 1px solid #ccc;
+   font-family: sans-serif;
+   font-size: 12px;
+   margin-top: 2px;
+   margin-left: 10px;
+   margin-right: 10px;
+   margin-bottom: 5px;
+   background-color: #EED;
+   }
+
+#clinicalTablesButtonsDiv{
+   padding-left: 20px;
+   padding-bottom: 5px;
+   }
+
+#clinicalDataTableFilterControlsDiv{
+   font-family: sans-serif;
+   font-size: 14px;
+   margin-top: 40px;
+   margin-left: 100px;
+   margin-right: 100px;
+   margin-bottom: 20px;
+   }
+
+#clinicalDataTableOutboundButtonDiv{
+   margin-left: 240px;
+   }
+
+.clinicalDataFilterSlider { 
+   margin-left:20px; 
+   margin-right:5px; 
+   margin-top:0px;
+   border: 1px solid #FFF;
+   height: 20px;
+   max: 0;  min: 10; 
+   orientation: 'horizontal';
+   background-color: #FFF;
+   color: #00F;
+   }
+
+.clinicalDataFilterSliderReadout {
+  font-family:"Courier";
+  color: #0000FF;
+  background-color: #FFF;
+  font-size: 14px;
+  border: 1px solid #DDD;
+  width: 20px;
+  height: 16px;
+  resize: none;
+  margin-top: 4px;
+  margin-left: 2px;
+  }
+
+.clinicalDataFilterSliderTitleDiv {
+  font-family:"Arial";
+  color: #000000;
+  font-size: 14px;
+  padding-top: 10px;
+  padding-left: 40px;
+  }
+
+.tblClinicalControlButton {
+   margin-bottom: 2px;
+   }
+
+
+
+
+</style>
+
+
+<div id="clinicalDataModuleDiv">
+   <div id="clinicalDataTableControlsDiv">
+      <div id=clinicalDataTableFilterControlsDiv" style="border: 1px;">
+
+       <div id="slider1Div" style="display: inline-block">
+           <div id="sliderTitleDiv" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">ageAtDx min</div>
+           <div style="width: 200px; overflow: hidden;">
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxMinSlider" class="clinicalDataFilterSlider"></div>
+               <div style="margin-left: 20px;" id='msgBox'>  
+                  <textarea id="ageAtDxMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
+               </div>
+           </div>
+        </div>
+
+       <div id="slider2Div" style="display: inline-block">
+           <div id="sliderTitleDiv"  class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">ageAtDx max</div>
+           <div style="width: 300px; overflow: hidden;">
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxMaxSlider" class="clinicalDataFilterSlider"></div>
+               <div style="margin-left: 20px;" id='msgBox'>  
+                  <textarea id="ageAtDxMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
+               </div>
+           </div>
+        </div>
+
+       <div id="slider3Div" style="display: inline-block">
+           <div id="sliderTitle3Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">survival min</div>
+           <div style="width: 200px; overflow: hidden;">
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalMinSlider" class="clinicalDataFilterSlider"></div>
+               <div style="margin-left: 20px;" id='msgBox'>  
+                  <textarea id="overallSurvivalMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
+               </div>
+           </div>
+        </div>
+
+       <div id="slider4Div" style="display: inline-block">
+           <div id="sliderTitle4Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">survival max</div>
+           <div style="width: 200px; overflow: hidden;">
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalMaxSlider" class="clinicalDataFilterSlider"></div>
+               <div style="margin-left: 20px;" id='msgBox'>  
+                  <textarea id="overallSurvivalMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
+               </div>
+           </div>
+        </div>
+
+       <div id="clinicalTablesButtonsDiv" style="display: block">
+           <div id="sliderApplyDiv" style="display: inline-block">
+              <button id="applyClinicalTablesFiltersSlidersButton" class="tblClinicalControlButton" type="button">Apply Filters</button>
+           </div>
+           <div id="viewButtonDiv" style="display: inline-block">
+              <button id="showAllClinicalTablesRowsButton" class="tblClinicalControlButton" type="button">Remove Filters</button>
+              <!-- button id="toggleMoreFewerColumnsButton" class="tblClinicalControlButton" type="button">More Columns</button -->
+           </div>
+
+          <div id="clinicalDataTableOutboundButtonDiv" style="display: inline-block">
+             <button id="toMarkersAndTissuesButton" class="tblClinicalControlButton" type="button">Markers &amp; Tissues</button>
+             <button id="toGBMPathwaysButton" class="tblClinicalControlButton" type="button">GBM Pathways</button>
+             <button id="toPCAButton" class="tblClinicalControlButton" type="button">PCA</button>
+             <button id="toSurvivalStatsButton" class="tblClinicalControlButton" type="button">Survival</button>
+             <button id="toTimeLinesButton" class="tblClinicalControlButton" type="button">Timelines</button>
+          </div>
+       </div>
+
+    </div>
+   </div>
+   <div id="clinicalDataTableDiv"></div>
+</div>
+
+</div>
+
+
+<script>
+</script>
+
+<script>
+//--------------------------------------------------------------------------------------------------
+function getRandomFloat (min, max)
+{
+    return Math.random() * (max - min) + min;
+}
+//----------------------------------------------------------------------------------------------------
+function getRandomInt (min, max) 
+{
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+//----------------------------------------------------------------------------------------------------
+dispatchMessage = function(msg)
+{
+   console.log("--- webapp, index.common, dispatchMessage: " + msg.cmd);
+
+   if (dispatchOptions[msg.cmd])
+       dispatchOptions[msg.cmd](msg)
+   else
+      console.log("unrecognized socket request: " + msg.cmd);
+} 
+//--------------------------------------------------------------------------------------------------
+setupSocket = function (socket)
+{
+  try {
+     socket.onopen = function() {
+        console.log("websocket connection now open");
+        for(var f=0; f < socketConnectedFunctions.length; f++){
+           console.log("calling the next sockectConnectedFunction");
+           socketConnectedFunctions[f]();
+           } // for f
+        } 
+     socket.onmessage = function got_packet(msg) {
+        msg = JSON.parse(msg.data)
+        console.log("index.common onmessage sees " + msg.cmd);
+        dispatchMessage(msg)
+        } // socket.onmessage, got_packet
+     socket.onclose = function(){
+        //$("#status").text(msg.cmd)
+        console.log("socket closing");
+        } // socket.onclose
+    } // try
+  catch(exception) {
+    $("#status").text("Error: " + exception);
+    }
+
+} // setupSocket
+//----------------------------------------------------------------------------------------------------
+function invokeSuccess(r)
+{
+    socket.rserveExecuting = false;
+
+    if (r.errors.length > 0)
+    {
+        for (var i=0; i < r.errors.length; i++)
+        {
+        $("#status").text("Error: " + r.errors[i]);
+        }
+    }
+    else
+    if (r.outputParams.length > 0)
+    {
+        // note that LabKey has handled the JSON parsing already
+        var msg = r.outputParams[0].value;
+        console.log("index.common onmessage sees " + msg.cmd);
+        dispatchMessage(msg);
+    }
+
+    //
+    // call the next pending command if available
+    //
+    if (socket.rservePendingCommands.length > 0)
+    {
+        // note that M4 macro language uses 'shift' so quote it below
+        executeRserveCommand(socket.rservePendingCommands.shift());
+    }
+}
+//----------------------------------------------------------------------------------------------------
+function invokeFailure(error)
+{
+    $("#status").text("Error: " + error.exception);
+}
+//----------------------------------------------------------------------------------------------------
+function executeRserveCommand(data)
+{
+    if (socket.rserveExecuting)
+    {
+        //
+        // put this command on our pending list and execute when the server has responded.
+        //
+
+        //console.log("in executeRserveCommand - pending:" + data);
+        socket.rservePendingCommands.push(data);
+    }
+    else
+    {
+        //
+        // execute immediately
+        //
+        socket.rserveExecuting = true;
+
+        //console.log("in executeRserveCommand - executing:" + data);
+        LABKEY.Report.execute( {
+            success: invokeSuccess,
+            failure: invokeFailure,
+            script : 'invokeCommand',
+            reportSessionId : socket.rserveSession,
+            inputParams : { DATA : data }
+        });
+    }
+}
+//----------------------------------------------------------------------------------------------------
+// todo: investigate why json returned by LabKey is creating array[1] in some cases.
+// both JSON.parse and the LabKey util decode function do this
+//----------------------------------------------------------------------------------------------------
+function flattenArrays(d)
+{
+    for (var key in d)
+    {
+        if (d.hasOwnProperty(key))
+        {
+            var val = d[key];
+            if ((val instanceof Array) && val.length == 1)
+            {
+                d[key] = val[0];
+            }
+        }
+    }
+}
+//----------------------------------------------------------------------------------------------------
+setupLabKey = function(socket)
+{
+    // replace socket send for LabKey
+    socket.send = executeRserveCommand;
+    socket.rservePendingCommands = [];
+    socket.rserveExecuting = false;
+    socket.rserveSession = labkey.reportSession;
+    console.log("rserveSession:  " + labkey.reportSession);
+
+    // kick off init functions
+    for(var f=0; f < socketConnectedFunctions.length; f++)
+    {
+        console.log("calling the next sockectConnectedFunction");
+        socketConnectedFunctions[f]();
+    }
+}
+
+function setupFilteredPatients()
+{
+    if (typeof labkey != "undefined" && labkey.filteredPatients)
+    {
+        filteredPatients = labkey.filteredPatients.split(';');
+        console.log("==== filteredPatients: " + filteredPatients.length)
+    }
+}
+//--------------------------------------------------------------------------------------------------
+$(document).ready(function()
+{
+    console.log("==== index.common document.ready #1");
+
+    for (var f = 0; f < onReadyFunctions.length; f++)
+    {
+        console.log("calling on ready function");
+        onReadyFunctions[f]();
+    }
+
+    //
+    // labkeyMode has three states:
+    // undefined - labkey not involved
+    // labkeyWS - labkey launched Oncoscape; local R must be run with WS
+    // labkeyRS - labkey launched oncoscape; Rserve is used
+    //
+    if (typeof labkey == "undefined")
+    {
+        socket = new WebSocket("ws://" + window.location.host);
+        setupSocket(socket);
+    }
+    else
+    if (labkey.mode == "WS")
+    {
+        socket = new WebSocket("ws://localhost:7777/");
+        setupSocket(socket);
+    }
+    else
+    if (labkey.mode == "RS")
+    {
+        socket = {};
+        setupLabKey(socket);
+    }
+    else
+    {
+        console.log("unrecognized labkey.mode was provided: " + labkey.mode);
+    }
+
+    // todo: probably a better place to put this
+    setupFilteredPatients();
+})
+//--------------------------------------------------------------------------------------------------
+</script>
+
+</body>
+</html>
