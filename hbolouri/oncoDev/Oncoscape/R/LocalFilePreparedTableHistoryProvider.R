@@ -15,22 +15,30 @@ LocalFilePreparedTablePatientHistoryProvider <- function(path)
    protocol <- tokens[1]
    path <- tokens[2]
 
-   if(protocol == "pkg")
+   if(protocol == "tbl")
       full.path <- system.file(package="Oncoscape", "extdata", path)
+   else
+      stop(sprintf("LocalFilePreparedTablePatientHistoryProvider, unrecognized protocol: '%s'", protocol))
 
-   if(protocol == "file")
-      full.path <- path
+       # check first for truly local file, then look in package extdata/
+   if(file.exists(path)) {
+       full.path <- path
+       }
+   else {
+       full.path <- system.file(package="Oncoscape", "extdata", path)
+       }
 
-   if(protocol %in% (c("pkg", "file"))){
-       standard.name <- "tbl.patientHistory"
-       if(!file.exists(full.path)){
-          printf("Oncoscape  LocalFilePreparedTablePatientHistoryProvider  error.  Could not read patientHistory file: '%s'", full.path);
-          stop()
-          }
-       eval(parse(text=sprintf("%s <<- %s", standard.name, load(full.path))))
-       printf("loaded %s from %s, %d x %d", standard.name, full.path,
-              nrow(tbl.patientHistory), ncol(tbl.patientHistory))
-      } # either pkg or file protocol
+   printf("reading patient history table from local file: %s", full.path)
+   
+   standard.name <- "tbl.patientHistory"
+   if(!file.exists(full.path)){
+       printf("Oncoscape  LocalFilePreparedTablePatientHistoryProvider error, file not found: '%s'", full.path);
+       stop()
+       }
+   
+   eval(parse(text=sprintf("%s <<- %s", standard.name, load(full.path))))
+   printf("loaded %s from %s, %d x %d", standard.name, full.path,
+          nrow(tbl.patientHistory), ncol(tbl.patientHistory))
 
    this <- new ("LocalFilePreparedTablePatientHistoryProvider", table=tbl.patientHistory, events=list())
 

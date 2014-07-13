@@ -27,7 +27,7 @@ PatientHistoryProvider = function(sourceURI)
    protocol <- tokens[1]
    path <- tokens[2]
    
-   if(!protocol %in% c("caisisEvents", "tcga", "pkg", "file")){
+   if(!protocol %in% c("caisisEvents", "tbl")){
        warning(sprintf("'%s% protocol not yet supported", protocol));
        return(NA)
        }
@@ -36,9 +36,7 @@ PatientHistoryProvider = function(sourceURI)
    
    if(protocol == "caisisEvents")
      result <- LocalFileCaisisEventsPatientHistoryProvider(sourceURI)
-   else if(protocol == "tcga")
-     result <- LocalFileTCGAPatientHistoryProvider(path)
-   else if(protocol == "pkg")
+   else if(protocol == "tbl")
      result <- LocalFilePreparedTablePatientHistoryProvider(sourceURI)
 
    result

@@ -363,15 +363,17 @@ getCaisisPatientHistory <- function(WS, msg)
     filename <- msg$payload
     full.path <-  system.file(package="Oncoscape", "extdata", filename)
 
-   printf("--- DataProviderBridge looking for 'caisisEvents': %s", "caisisEvents" %in% ls(DATA.PROVIDERS))
+   category.name <- "patientHistory"
+
+   printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(DATA.PROVIDERS))
     
-   if(!"caisisEvents" %in% ls(DATA.PROVIDERS)){
+   if(!category.name %in% ls(DATA.PROVIDERS)){
        error.message <- "Oncoscape DataBridge error:  no caisisPatientHistoryProvider defined"
        return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
        sendOutput(DATA=toJSON(return.msg), WS=WS)
        }
 
-   patientHistoryProvider <- DATA.PROVIDERS$caisisEvents
+   patientHistoryProvider <- DATA.PROVIDERS$patientHistory
    events <- getEvents(patientHistoryProvider)
    #colnames <- colnames(tbl)
    #matrix <- as.matrix(tbl)

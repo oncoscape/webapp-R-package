@@ -2,6 +2,7 @@ exportClasses(Oncoscape)
 
 export(
     Oncoscape,
+    dataProviders,
     PatientHistoryProvider,
     Data2DProvider,
     LocalFileData2DProvider,

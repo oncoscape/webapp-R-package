@@ -8,8 +8,7 @@ printf <- function(...) noquote(print(sprintf(...)))
 runTests <- function()
 {
    test.webSocketConstructor()
-
-   #test.runServer()
+   #test_.setupDataProviders()
    
 } # runTests
 #---------------------------------------------------------------------------------------------------
@@ -25,7 +24,7 @@ test.webSocketConstructor <- function ()
       #   4) make sure a new one CAN be created
       #   5) close the new one too, to leave a clean slate
     
-    port.number <- 7689L
+    port.number <- 7681L
     
     onco <- Oncoscape(htmlFile=NA, mode="websockets", port=port.number)
     onco <- setup(onco)
@@ -86,4 +85,31 @@ test.survivalBoxPlot <- function()
     printf("temp.file: %s", temp.file)
 
 } # test.survivalBoxPlot
+#----------------------------------------------------------------------------------------------------
+test_.setupDataProviders <- function()
+{
+   print("--- test_.setupDataProviders")
+
+      # if the sample file is in the current directory, then we are in development mode: use it
+      # if not, we are in automated testing mode, so use the one built in to the package
+   
+   filename <- "manifest-sample.txt"
+   if(!file.exists(filename))
+       filename <- system.file(package="Oncoscape", "unitTests", filename)
+
+   printf("  using %s for .setupDataProviders test", filename)
+   checkTrue(file.exists(filename))
+   Oncoscape:::.setupDataProviders(filename)
+
+   dp <- dataProviders()
+   provider.types <- ls(dp)
+
+   checkTrue(all(c("mRNA", "patientClassification", "patientHistory") %in% provider.types))
+
+   checkTrue(is(dp$mRNA, "LocalFileData2DProvider"))
+   checkTrue(is(dp$patientClassification, "LocalFileData2DProvider"))
+   #checkTrue(is(dp$patientHistory, "LocalFilePreparedTablePatientHistoryProvider"))
+   checkTrue(is(dp$patientHistory, "LocalFileCaisisEventsPatientHistoryProvider"))
+
+} # test_.setupDataProviders
 #----------------------------------------------------------------------------------------------------

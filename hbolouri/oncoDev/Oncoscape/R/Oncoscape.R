@@ -61,17 +61,22 @@ addRMessageHandler <- function(key, function.name)
        }
 
    lines <- scan(manifest, sep="\n", what=character(0))
+   deleters <- grep("^ *#", lines)
+   if(length(deleters) > 0)
+       lines <- lines[-deleters]
+       
    print(lines)
-   signature <- "^patientHistory: "
+   signature <- "^ *patientHistory: "
    signatureLine <- grep(signature, lines, ignore.case=TRUE)
-
-   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
+   if(length(signatureLine) > 1)
+       warning(sprintf("Oncoscape::.setupDataProviders, multiple %s entries, using only the first", signature))
    
+   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
 
    if(length(signatureLine > 0)){
        text <- lines[signatureLine[1]]
        path <- sub(signature, "", text)
-       tokens <<- strsplit(path, "://")[[1]]
+       tokens <- strsplit(path, "://")[[1]]
        if(!length(tokens) == 2){
            printf("Oncoscape error.  Manifest line for patientHistoryill-formed: '%s'", text);
            stop()
@@ -79,8 +84,10 @@ addRMessageHandler <- function(key, function.name)
        DATA.PROVIDERS$patientHistory <- PatientHistoryProvider(path);
        } # found patientHistory line
 
-   signature <- "^mRNA: *"
+   signature <- "^ *mRNA: *"
    signatureLine <- grep(signature, lines, ignore.case=TRUE)
+   if(length(signatureLine) > 1)
+       warning(sprintf("Oncoscape::.setupDataProviders, multiple %s entries, using only the first", signature))
 
    printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
 
@@ -95,9 +102,10 @@ addRMessageHandler <- function(key, function.name)
        DATA.PROVIDERS$mRNA <- Data2DProvider(path);
        } # found mRNA line
 
-
-   signature <- "^patientClassification: "
+   signature <- "^ *patientClassification: *"
    signatureLine <- grep(signature, lines, ignore.case=TRUE)
+   if(length(signatureLine) > 1)
+       warning(sprintf("Oncoscape::.setupDataProviders, multiple %s entries, using only the first", signature))
 
    printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
 
@@ -111,29 +119,6 @@ addRMessageHandler <- function(key, function.name)
            }
        DATA.PROVIDERS$patientClassification <- Data2DProvider(path);
        } # found patientClassificationline
-
-   signature <- "^caisisEvents: "
-   signatureLine <- grep(signature, lines, ignore.case=TRUE)
-   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
-
-   if(length(signatureLine > 0)){
-       text <- lines[signatureLine[1]]
-       path <- sub(signature, "", text)
-       tokens <<- strsplit(path, "://")[[1]]
-       if(!length(tokens) == 2){
-           printf("Oncoscape error.  Manifest line for %s ill-formed: '%s'", signature, text);
-           stop()
-           }
-       printf("about to create caisisProvider for path '%s'", path)
-       caisisProvider <- PatientHistoryProvider(path);
-       printf("caisisProvider: ");
-       print(show(caisisProvider))
-       DATA.PROVIDERS$caisisEvents <- caisisProvider
-       printf("successful read of caisisEvents? %d", length(getEvents(caisisProvider)))
-       } # found caisisEventsLine
-
-
-
 
 
 } # .setupDataProviders
@@ -465,6 +450,12 @@ startWebApp <- function(file="tabsApp/index.html", port=7777L, mode="websockets"
     run(onco)
 
 } # startWebApp
+#----------------------------------------------------------------------------------------------------
+dataProviders <- function()
+{
+    DATA.PROVIDERS
+
+} # dataProviders
 #----------------------------------------------------------------------------------------------------
 addRMessageHandler("sendPatientIDsToModule", "sendPatientIDsToModule");
 addRMessageHandler("sendIDsToModule", "sendIDsToModule");

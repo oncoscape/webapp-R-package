@@ -181,6 +181,8 @@ explore_timeLinesData <- function()
                     Type="Temozolomide"))
 
    all.event.names <- sort(unique(unlist(lapply(all.events, function(event) event$Name))))
+   checkEquals(all.event.names,
+               c("Chemo", "DOB", "Death", "Diagnosis", "Encounter", "MRI", "OR", "Progression", "Radiation"))
    
 } # explore_timeLinesData
 #----------------------------------------------------------------------------------------------------
