@@ -29,6 +29,7 @@ runTests = function (levels)
     test_localFilePreparedTable()
     test_filterPatientHistory()
     test_getPatientClassification()
+    explore_timeLinesData()
     
 } # runTests
 #----------------------------------------------------------------------------------------------------
@@ -127,4 +128,59 @@ test_getPatientClassification <- function()
    checkEquals(names(x[[1]]), c ("gbmDzSubType", "color", "rowname"))
 
 } # test_getPatientClassification
+#----------------------------------------------------------------------------------------------------
+# grok lisa's patient timelines data input
+explore_timeLinesData <- function()
+{
+   print("--- explore_timeLinesData")
+
+   cmd <- "getCaisisPatientHistory";
+   status <- "request"
+   callback <- "handleCaisisPatientHistory"
+   sample.file.1 <- "demo/caisis.RData"
+   
+   websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=sample.file.1)), client)
+   system("sleep 1")
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+
+   checkEquals(msg.incoming$cmd, callback)
+   checkEquals(msg.incoming$status, "success")
+
+   all.events <- fromJSON(msg.incoming$payload)
+   checkTrue(length(all.events) == 73)
+   x <- all.events[[1]]
+   checkEquals(x$PatientID, "FC5PKZ244GQOB098PB2IH2C7X33XO1OT765X")
+   checkEquals(x$PtNum, 1)
+   checkEquals(x$Name, "Death")
+   checkEquals(x$date, "06/05/2000")
+   checkEquals(x$StatusQuality, "STD")
+
+
+   cmd <- "getCaisisPatientHistory";
+   status <- "request"
+   callback <- "handleCaisisPatientHistory"
+   sample.file.2 <- "BTC_clinicaldata_6-18-14.RData" # no subdirectory
+   
+   websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=sample.file.2)), client)
+
+   system("sleep 1")
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+
+   checkEquals(msg.incoming$cmd, callback)
+   checkEquals(msg.incoming$status, "success")
+
+   all.events <- fromJSON(msg.incoming$payload)
+   checkTrue(length(all.events) == 2581)
+   checkEquals(all.events[[1]],
+               list(PatientID="P1",
+                    PtNum=1,
+                    Name="Chemo",
+                    date=c("7/12/2006", "8/22/2006"),
+                    Type="Temozolomide"))
+
+   all.event.names <- sort(unique(unlist(lapply(all.events, function(event) event$Name))))
+   
+} # explore_timeLinesData
 #----------------------------------------------------------------------------------------------------
