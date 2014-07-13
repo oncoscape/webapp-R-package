@@ -23,7 +23,6 @@ Collate: Oncoscape.R
          Analyses.R
          clinicalData2.R
          dateAndTime.R
-         patientTimeLines.R
          PCA.R
          PLSR.R
          NetworkCuration.R

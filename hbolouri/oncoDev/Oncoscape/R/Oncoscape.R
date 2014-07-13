@@ -43,9 +43,9 @@ addRMessageHandler <- function(key, function.name)
    printf("loading '%s' as 'tbl.nano'", load(filename))
    tbl.nano <<- nano
 
-   filename <- system.file(package="Oncoscape", "extdata", "BTC_clinicaldata_6-18-14.RData")
-   printf("loading '%s' as 'PatientData_json'", filename, load(filename, envir=.GlobalEnv))
-   printf("    %d length", length(PatientData_json))
+   #filename <- system.file(package="Oncoscape", "extdata", "BTC_clinicaldata_6-18-14.RData")
+   #printf("loading '%s' as 'PatientData_json'", filename, load(filename, envir=.GlobalEnv))
+   #printf("    %d length", length(PatientData_json))
 
    tbl.clinical <<- cleanupClinicalTable(tbl.clinical, tbl.idLookup)
 
@@ -63,10 +63,13 @@ addRMessageHandler <- function(key, function.name)
    lines <- scan(manifest, sep="\n", what=character(0))
    print(lines)
    signature <- "^patientHistory: "
-   patientHistoryLine <- grep(signature, lines, ignore.case=TRUE)
+   signatureLine <- grep(signature, lines, ignore.case=TRUE)
 
-   if(length(patientHistoryLine > 0)){
-       text <- lines[patientHistoryLine[1]]
+   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
+   
+
+   if(length(signatureLine > 0)){
+       text <- lines[signatureLine[1]]
        path <- sub(signature, "", text)
        tokens <<- strsplit(path, "://")[[1]]
        if(!length(tokens) == 2){
@@ -77,10 +80,12 @@ addRMessageHandler <- function(key, function.name)
        } # found patientHistory line
 
    signature <- "^mRNA: *"
-   mRNALine <- grep(signature, lines, ignore.case=TRUE)
+   signatureLine <- grep(signature, lines, ignore.case=TRUE)
 
-   if(length(mRNALine > 0)){
-       text <- lines[mRNALine[1]]
+   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
+
+   if(length(signatureLine > 0)){
+       text <- lines[signatureLine[1]]
        path <- sub(signature, "", text)
        tokens <<- strsplit(path, "://")[[1]]
        if(!length(tokens) == 2){
@@ -92,10 +97,12 @@ addRMessageHandler <- function(key, function.name)
 
 
    signature <- "^patientClassification: "
-   patientClassificationLine <- grep(signature, lines, ignore.case=TRUE)
+   signatureLine <- grep(signature, lines, ignore.case=TRUE)
 
-   if(length(patientClassificationLine > 0)){
-       text <- lines[patientClassificationLine[1]]
+   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
+
+   if(length(signatureLine > 0)){
+       text <- lines[signatureLine[1]]
        path <- sub(signature, "", text)
        tokens <<- strsplit(path, "://")[[1]]
        if(!length(tokens) == 2){
@@ -104,6 +111,30 @@ addRMessageHandler <- function(key, function.name)
            }
        DATA.PROVIDERS$patientClassification <- Data2DProvider(path);
        } # found patientClassificationline
+
+   signature <- "^caisisEvents: "
+   signatureLine <- grep(signature, lines, ignore.case=TRUE)
+   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
+
+   if(length(signatureLine > 0)){
+       text <- lines[signatureLine[1]]
+       path <- sub(signature, "", text)
+       tokens <<- strsplit(path, "://")[[1]]
+       if(!length(tokens) == 2){
+           printf("Oncoscape error.  Manifest line for %s ill-formed: '%s'", signature, text);
+           stop()
+           }
+       printf("about to create caisisProvider for path '%s'", path)
+       caisisProvider <- PatientHistoryProvider(path);
+       printf("caisisProvider: ");
+       print(show(caisisProvider))
+       DATA.PROVIDERS$caisisEvents <- caisisProvider
+       printf("successful read of caisisEvents? %d", length(getEvents(caisisProvider)))
+       } # found caisisEventsLine
+
+
+
+
 
 } # .setupDataProviders
 #---------------------------------------------------------------------------------------------------

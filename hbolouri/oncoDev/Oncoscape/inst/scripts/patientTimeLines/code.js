@@ -38,24 +38,25 @@ handleTissueIDsforTimeLine = function(msg){
    console.log(msg.json)
    socket.send(msg.json);
 
-//   window.clinicalData2CurrentTissueIDs = tissueIDs;
-
- // handleIncomingTissueIDs
-
-}
-
+} // handleTissueIDsforTimeLine
 //----------------------------------------------------------------------------------------------------
 loadPatientDemoData = function(){
 
-    console.log("==== patientTimeLines  get Events from File");
-	   msg = {cmd: "getPatientJSONevents_fromFile", status: "request", 
-                 payload: "caisis.RData"};
- 	  msg.json = JSON.stringify(msg);
-	   console.log(msg.json)
-	   socket.send(msg.json);
-
-}
-
+   console.log("==== patientTimeLines  get Events from File");
+   cmd = "getCaisisPatientHistory";
+   status = "request"
+   callback = "DisplayPatientTimeLine"
+   filename = "BTC_clinicaldata_6-18-14.RData";
+   msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
+   console.log(msg.json)
+   socket.send(JSON.stringify(msg));
+   
+//    msg = {cmd: "getPatientJSONevents_fromFile", status: "request", payload: "caisis.RData"};
+//   msg.json = JSON.stringify(msg);
+//    console.log(msg.json)
+//    socket.send(msg.json);
+//
+} // loadPatientDemoData
 //--------------------------------------------------------------------------------------------------
 DisplayPatientTimeLine = function(msg) {
     console.log("==== DisplayPatientTimeLine  code.js document.ready");
@@ -65,11 +66,11 @@ DisplayPatientTimeLine = function(msg) {
 
     console.log("==== DisplayPatientTimeLine  Events");	
 	Events = msg.payload;
-	console.log(Events);
+	console.log("Event count: " + Events.length);
 
-	var RemoveIDs = ["P7", "P253", "P134", "P91", "P225", "P41"]
-		Events = Events.filter(function(d){ 
-			return RemoveIDs.indexOf(d.PatientID) === -1})
+	//var RemoveIDs = ["P7", "P253", "P134", "P91", "P225", "P41"]
+	//	Events = Events.filter(function(d){ 
+	//		return RemoveIDs.indexOf(d.PatientID) === -1})
 
 	parseDate = d3.time.JAVASCRIPT_FORMAT ("%m/%d/%Y").parse;
 	FormatDate = d3.time.JAVASCRIPT_FORMAT ("%x");
@@ -112,10 +113,10 @@ DisplayPatientTimeLine = function(msg) {
 	
 	ShowEvents = EventTypes.keys();
 
-	console.log(Events)
-	console.log(EventsByID)
-	console.log(EventTypes)
-	console.log(EventTypes.keys())
+	//console.log(Events)
+	//console.log(EventsByID)
+	//console.log(EventTypes)
+	//console.log(EventTypes.keys())
 
 	if(InitialLoad){
 		dispatch.LoadOptions();
@@ -743,7 +744,8 @@ click =  function(d){
 //--------------------------------------------------------------------------------------------------
 onReadyFunctions.push(function() {
 	addJavascriptMessageHandler("tissueIDsForPatientTimeline", handleTissueIDsforTimeLine);
-	addJavascriptMessageHandler("timeLineMatrix", DisplayPatientTimeLine);
+	//addJavascriptMessageHandler("timeLineMatrix", DisplayPatientTimeLine);
+	addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
 
 	if(typeof(window.tabsAppRunning) == "undefined") {
             console.log("no tabsApp, requesting load of demo data");

@@ -12,8 +12,6 @@ export(
     printf,
     matrixToJSON,
     startWebApp,
-    plotTimeline,
-    plotTimeline_simple,
     invokeCommand,
     assignPatientNumbersToTimelinesEvent
     )
