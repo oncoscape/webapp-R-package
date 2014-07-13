@@ -7,9 +7,10 @@ addRMessageHandler("DataProviderBridge.ping",         "DataProviderBridgePing") 
 #addRMessageHandler("get_MSK_GBM_CopyNumber_Data",     "get_MSK_GBM_copyNumber_Data")
 #addRMessageHandler("get_MSK_GBM_mRNA_Data",           "get_MSK_GBM_mRNA_Data")
 #addRMessageHandler("get_MSK_GBM_mRNA_Average",        "get_MSK_GBM_mRNA_Average")
-addRMessageHandler("getPatientHistory",               "getPatientHistory")
-addRMessageHandler("filterPatientHistory",            "filterPatientHistory")
-addRMessageHandler("getPatientClassification",        "getPatientClassification")
+addRMessageHandler("getPatientHistory",                "getPatientHistory")
+addRMessageHandler("filterPatientHistory",             "filterPatientHistory")
+addRMessageHandler("getPatientClassification",         "getPatientClassification")
+addRMessageHandler("getCaisisPatientHistory",          "getCaisisPatientHistory")
 #----------------------------------------------------------------------------------------------------
 DataProviderBridgePing <- function(WS, msg)
 {
@@ -336,7 +337,6 @@ filterPatientHistory <- function(WS, msg)
 #----------------------------------------------------------------------------------------------------
 getPatientClassification <- function(WS, msg)
 {
-   
    if(!"patientClassification" %in% ls(DATA.PROVIDERS)){
        error.message <- "Oncoscape DataBridge error:  no patient classification provider defined"
        return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")
@@ -357,3 +357,25 @@ getPatientClassification <- function(WS, msg)
 
 } # getPatientClassification
 #----------------------------------------------------------------------------------------------------
+getCaisisPatientHistory <- function(WS, msg)
+{
+    callback <- msg$callback
+    filename <- msg$payload
+    full.path <-  system.file(package="Oncoscape", "extdata", filename)
+
+    if(file.exists(full.path)){
+       var.name <- load(full.path)
+       stopifnot(var.name == "PatientData_json")
+       payload <- toJSON(PatientData_json)
+       status <- "success"
+       return.msg <- list(cmd=msg$callback, callback="", status="success", payload=payload)
+       }
+    else{
+       return.msg <- list(cmd=msg$callback, callback="", status="failure", payload=sprintf("could not read '%s'", filename))
+       }
+
+   sendOutput(DATA=toJSON(return.msg), WS=WS)
+
+} # getCaisisPatientHistory
+#----------------------------------------------------------------------------------------------------
+                                    

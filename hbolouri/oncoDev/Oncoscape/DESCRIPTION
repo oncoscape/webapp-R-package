@@ -14,6 +14,7 @@ Collate: Oncoscape.R
          PatientHistoryProvider.R
          DataBridge.R
          LocalFilePreparedTableHistoryProvider.R
+         LocalFileCaisisEventsHistoryProvider.R
          Data2DProvider.R
          LocalFileData2DProvider.R
          DataProviderBridge.R

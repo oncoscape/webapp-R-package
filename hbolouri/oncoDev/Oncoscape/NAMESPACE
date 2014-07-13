@@ -25,5 +25,8 @@ exportMethods(
     setup,
     run,
     close,
-    getTable
+    getTable,
+    getEvents,
+    legalEventNames,
+    requiredEventNames
     )

@@ -32,8 +32,7 @@ LocalFilePreparedTablePatientHistoryProvider <- function(path)
               nrow(tbl.patientHistory), ncol(tbl.patientHistory))
       } # either pkg or file protocol
 
-   this <- new ("LocalFilePreparedTablePatientHistoryProvider", data=list(),
-                patientIDs="", eventNames="", table=tbl.patientHistory)
+   this <- new ("LocalFilePreparedTablePatientHistoryProvider", table=tbl.patientHistory, events=list())
 
    this
 
@@ -45,6 +44,8 @@ setMethod("show", "LocalFilePreparedTablePatientHistoryProvider",
        msg <- sprintf("LocalFilePreparedTablePatientHistoryProvider")
        cat(msg, "\n", sep="")
        msg <- sprintf("tbl dimensions: %d x %d", nrow(object@table), ncol(object@table))
+       cat(msg, "\n", sep="")
+       msg <- sprintf("events list length: %d", length(object@events))
        cat(msg, "\n", sep="")
        }) # show
 
@@ -90,6 +91,12 @@ setMethod("getTable", "LocalFilePreparedTablePatientHistoryProvider",
 
    function(self) {
       self@table
+  })
+#---------------------------------------------------------------------------------------------------
+setMethod("getEvents", "LocalFilePreparedTablePatientHistoryProvider",
+
+   function(self) {
+      self@events
   })
 #---------------------------------------------------------------------------------------------------
 
