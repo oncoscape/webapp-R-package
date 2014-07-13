@@ -184,17 +184,16 @@ returnTblPtInfoString <- function(WS, msg)
 #---------------------------------------------------------------------------------------------------
 returnPatientFile<- function(WS, msg)
 {
-	    print(msg)
-		#returns already loaded PatientData_json
-
-		return.msg <- toJSON(list(cmd="timeLineMatrix",
-                             callback="",
-                             status="success",
-                             payload=PatientData_json))
-      websocket_write(DATA=return.msg, WS=WS)
+    print(msg)
+    #returns already loaded PatientData_json
+    return.msg <- toJSON(list(cmd="timeLineMatrix",
+                              callback="",
+                              status="success",
+                              payload=PatientData_json))
+    websocket_write(DATA=return.msg, WS=WS)
 
 	
-}
+} # returnPatientFile
 #---------------------------------------------------------------------------------------------------
 returnPatientJSONevents<- function(WS, msg)
 {
