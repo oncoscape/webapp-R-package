@@ -436,7 +436,7 @@ sendIDsToModule <- function(WS, msg)
 } # sendIDsToModule
 #----------------------------------------------------------------------------------------------------
 startWebApp <- function(file="tabsApp/index.html", port=7777L, mode="websockets", openBrowser=TRUE,
-                        manifest=NA)
+                        manifest=system.file(package="Oncoscape", "scripts", "tabsApp", "manifest.txt"))
 {
     onco <- Oncoscape(file, port=port, mode=mode, openBrowser=openBrowser, manifest)
     onco <- setup(onco)
