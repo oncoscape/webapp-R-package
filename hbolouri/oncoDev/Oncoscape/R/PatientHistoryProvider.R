@@ -2,10 +2,10 @@ setClass("PatientHistoryProvider",
          representation(sourceURI="character",
                         protocol="character",
                         path="character",
-                        data="list",
                         patientIDs="character",
                         eventNames="character",
-                        table="data.frame")
+                        table="data.frame",
+                        events="list")
         
          )
 
@@ -14,6 +14,10 @@ setClass("PatientHistoryProvider",
 #setGeneric("getPatientData", signature="self", function(self, patients=NA, events=NA) standardGeneric("getPatientData"))
 #setGeneric("getClinicalTable", signature="self", function(self, patients=NA, events=NA) standardGeneric("getClinicalTable"))
 setGeneric("getTable", signature="self", function(self, patients=NA, events=NA) standardGeneric("getTable"))
+setGeneric("getEvents", signature="self", function(self, patients=NA, events=NA) standardGeneric("getEvents"))
+setGeneric("legalEventNames", signature="self", function(self) standardGeneric("legalEventNames"))
+setGeneric("requiredEventNames", signature="self", function(self) standardGeneric("requiredEventNames"))
+
 
 # constructor
 #---------------------------------------------------------------------------------------------------
@@ -23,15 +27,15 @@ PatientHistoryProvider = function(sourceURI)
    protocol <- tokens[1]
    path <- tokens[2]
    
-   if(!protocol %in% c("caisis", "tcga", "pkg", "file")){
+   if(!protocol %in% c("caisisEvents", "tcga", "pkg", "file")){
        warning(sprintf("'%s% protocol not yet supported", protocol));
        return(NA)
        }
 
    result <- NA
    
-   if(protocol == "caisis")
-     result <- LocalFileCaisisPatientHistoryProvider(path)
+   if(protocol == "caisisEvents")
+     result <- LocalFileCaisisEventsPatientHistoryProvider(sourceURI)
    else if(protocol == "tcga")
      result <- LocalFileTCGAPatientHistoryProvider(path)
    else if(protocol == "pkg")
@@ -242,4 +246,18 @@ assignPatientNumbersToTimelinesEvent <- function(x)
 #   result
 #       
 # } # toTable
+#---------------------------------------------------------------------------------------------------
+setMethod ("legalEventNames", "PatientHistoryProvider",
+
+   function(self){
+     c("DOB", "Status",  "Diagnosis", "MRI", "Chemo", "Radiation", "OR", "Pathology", "Encounter", "Progression", "Death")
+     })
+
+#---------------------------------------------------------------------------------------------------
+setMethod ("requiredEventNames", "PatientHistoryProvider",
+
+   function(self){
+     legalEventNames(self)
+     })
+
 #---------------------------------------------------------------------------------------------------
