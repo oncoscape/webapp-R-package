@@ -52,7 +52,8 @@ var displayDiv;
     $("#toMarkersAndTissuesButton").prop("disabled",true);
     $("#toGBMPathwaysButton").prop("disabled",true);
     $("#toSurvivalStatsButton").prop("disabled",true);
-    $("#toTimeLinesButton").prop("disabled",true);
+//    $("#toTimeLinesButton").prop("disabled",true);
+	$("#toTimeLinesButton").click(function(){sendCurrentIDsToModule("TimeLine")});
     };
 
    //--------------------------------------------------------------------------------------------

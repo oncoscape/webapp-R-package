@@ -388,18 +388,18 @@ getCaisisPatientHistory <- function(WS, msg)
 
 
 
-    if(file.exists(full.path)){
-       var.name <- load(full.path)
-       stopifnot(var.name == "PatientData_json")
-       payload <- toJSON(PatientData_json)
-       status <- "success"
-       return.msg <- list(cmd=msg$callback, callback="", status="success", payload=payload)
-       }
-    else{
-       return.msg <- list(cmd=msg$callback, callback="", status="failure", payload=sprintf("could not read '%s'", filename))
-       }
+#    if(file.exists(full.path)){
+#       var.name <- load(full.path)
+#       stopifnot(var.name == "PatientData_json")
+#       payload <- toJSON(PatientData_json)
+#       status <- "success"
+#       return.msg <- list(cmd=msg$callback, callback="", status="success", payload=payload)
+#       }
+#    else{
+#       return.msg <- list(cmd=msg$callback, callback="", status="failure", payload=sprintf("could not read '%s'", filename))
+#       }
 
-   sendOutput(DATA=toJSON(return.msg), WS=WS)
+#   sendOutput(DATA=toJSON(return.msg), WS=WS)
 
 } # getCaisisPatientHistory
 #----------------------------------------------------------------------------------------------------

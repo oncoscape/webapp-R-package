@@ -7,15 +7,18 @@
 
 include(../clinicalDataTable/Module.js)
 include(../pca/Module.js)
+include(../patientTimeLines/Module.js)
 include(../tabsApp/code.js)
 
 <div id="tabs">
    <ul>
      <li><a href="#clinicalDataModuleDiv">Clinical Data</a></li>
      <li><a href="#pcaDiv">PCA</a></li>
+     <li><a href="#patientTimeLinesDiv">TimeLine</a></li>
    </ul>
 
 include(../pca/widget.html)
+include(../patientTimeLines/widget.html)
 include(../clinicalDataTable/widget.html)
 
 </div>

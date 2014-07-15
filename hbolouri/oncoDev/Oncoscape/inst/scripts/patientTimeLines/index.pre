@@ -1,6 +1,6 @@
 include(../index.common)
 <body>
-include(code.js)
+include(Module.js)
 include(widget.html)
 include(../common.js)
 </body>
