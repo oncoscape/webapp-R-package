@@ -142,7 +142,7 @@ var TimeLineModule = (function () {
 		callback = "DisplayPatientTimeLine"
 		filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
 		msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
-		console.log(JSON.stringify(msg))
+		// console.log(JSON.stringify(msg))
 	    socket.send(JSON.stringify(msg));
 
 	} // loadPatientDemoData

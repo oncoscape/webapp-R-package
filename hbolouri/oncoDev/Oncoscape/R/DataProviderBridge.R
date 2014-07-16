@@ -303,13 +303,15 @@ getTabularPatientHistory <- function(WS, msg)
 #   return the IDs for all rows that meet these constraints
 filterPatientHistory <- function(WS, msg)
 {
-   if(!"patientHistory" %in% ls(DATA.PROVIDERS)){
-       error.message <- "Oncoscape DataProviderBridge error:  no patientHistoryProvider defined"
+   signature <- "patientHistoryTable";
+
+   if(!signature %in% ls(DATA.PROVIDERS)){
+       error.message <- sprintf("Oncoscape DataProviderBridge error:  no %s defined", signature)
        return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
        sendOutput(DATA=toJSON(return.msg), WS=WS)
        }
 
-   patientHistoryProvider <- DATA.PROVIDERS$patientHistory
+   patientHistoryProvider <- DATA.PROVIDERS$patientHistoryTable
    tbl <- getTable(patientHistoryProvider)
 
    filters <- msg$payload

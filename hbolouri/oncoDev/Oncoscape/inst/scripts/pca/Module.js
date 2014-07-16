@@ -2,23 +2,23 @@
 //----------------------------------------------------------------------------------------------------
 var PCAModule = (function () {
 
-  var broadcastButton;
+  var pcaBroadcastButton;
   var pcaDisplay;
   var pcaResults;
   var patientClassification;
   var firstTime = true;
-  var selectedRegion;    // from brushing
+  var pcaSelectedRegion;    // from brushing
   var d3PlotBrush;
 
   //--------------------------------------------------------------------------------------------
   initializeUI = function(){
       pcaDisplay = $("#pcaDisplay");
       pcaHandleWindowResize();
-      broadcastButton = $("#broadcastSelectionToClinicalTable");
-      //broadcastButton.button();
-      broadcastButton.click(broadcastSelection);
+      pcaBroadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
+      //pcaBroadcastButton.button();
+      pcaBroadcastButton.click(pcaBroadcastSelection);
       $(window).resize(pcaHandleWindowResize);
-      broadcastButton.prop("disabled",true);
+      pcaBroadcastButton.prop("disabled",true);
       };
 
   //--------------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ var PCAModule = (function () {
   //--------------------------------------------------------------------------------------------
   handlePatientClassification = function(msg){
      console.log("=== handlePatientClassification");
-     console.log(msg)
+     //console.log(msg)
      if(msg.status == "success"){
         patientClassification = JSON.parse(msg.payload)
         console.log("got classification, length " + patientClassification.length);
@@ -58,12 +58,12 @@ var PCAModule = (function () {
      };
 
    //--------------------------------------------------------------------------------------------
-   broadcastSelection = function(){
-      console.log("broadcastSelection: " + selectedRegion);
-      x1=selectedRegion[0][0];
-      y1=selectedRegion[0][1];
-      x2=selectedRegion[1][0];
-      y2=selectedRegion[1][1];
+   pcaBroadcastSelection = function(){
+      console.log("pcaBroadcastSelection: " + pcaSelectedRegion);
+      x1=pcaSelectedRegion[0][0];
+      y1=pcaSelectedRegion[0][1];
+      x2=pcaSelectedRegion[1][0];
+      y2=pcaSelectedRegion[1][1];
       ids = [];
       for(var i=0; i < pcaResults.length; i++){
          p = pcaResults[i];
@@ -90,7 +90,7 @@ var PCAModule = (function () {
   //--------------------------------------------------------------------------------------------
   pcaPlot = function(msg){
       console.log("==== pcaPlot");
-      console.log(msg);
+      //console.log(msg);
       if(msg.status == "success"){
          pcaResults = JSON.parse(msg.payload);
          d3PcaScatterPlot(pcaResults);
@@ -107,10 +107,10 @@ var PCAModule = (function () {
   //--------------------------------------------------------------------------------------------
   handlePatientIDs = function(msg){
       console.log("Module.pca: handlePatientIDs");
-      console.log(msg)
+      //console.log(msg)
       if(msg.status == "success"){
          patientIDs = msg.payload
-         console.log("pca handlePatientIds: " + patientIDs);
+         //console.log("pca handlePatientIds: " + patientIDs);
          payload = patientIDs
          msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request", 
                 payload: payload};
@@ -125,16 +125,16 @@ var PCAModule = (function () {
   //--------------------------------------------------------------------------------------------
   d3PlotBrushReader = function(){
      console.log("plotBrushReader");
-     selectedRegion = d3PlotBrush.extent();
-     //console.log("region: " + selectedRegion);
-     x0 = selectedRegion[0][0];
-     x1 = selectedRegion[1][0];
+     pcaSelectedRegion = d3PlotBrush.extent();
+     //console.log("region: " + pcaSelectedRegion);
+     x0 = pcaSelectedRegion[0][0];
+     x1 = pcaSelectedRegion[1][0];
      width = Math.abs(x0-x1);
      //console.log("width: " + width);
      if(width > 1)
-        broadcastButton.prop("disabled", false);
+        pcaBroadcastButton.prop("disabled", false);
      else
-        broadcastButton.prop("disabled", true);
+        pcaBroadcastButton.prop("disabled", true);
      }; // d3PlotBrushReader
 
   //-------------------------------------------------------------------------------------------
@@ -143,7 +143,6 @@ var PCAModule = (function () {
      for(var i=0; i<patientClassification.length; i++){
         if (id == patientClassification[i].rowname[0]){
           result = patientClassification[i].color[0]
-          console.log("match " + id + " to color " + result)
           return(result)
           } // if match
         } // for i
@@ -153,6 +152,7 @@ var PCAModule = (function () {
   //-------------------------------------------------------------------------------------------
   d3PcaScatterPlot = function(dataset) {
 
+     pcaBroadcastButton.prop("disabled",true);
      var padding = 50;
      var width = $("#pcaDisplay").width();
      var height = $("#pcaDisplay").height();
