@@ -13,8 +13,7 @@ export(
     printf,
     matrixToJSON,
     startWebApp,
-    invokeCommand,
-    assignPatientNumbersToTimelinesEvent
+    invokeCommand
     )
 
 exportMethods(
