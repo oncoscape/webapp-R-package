@@ -15,8 +15,13 @@ LocalFileCaisisEventsPatientHistoryProvider <- function(path)
    protocol <- tokens[1]
    path <- tokens[2]
 
-      # try first in the package.  if that fails, try the path directly
-   if(!file.exists("path"))
+   printf("");
+   printf("LocalFileCaisisEventsPatientHistoryProvider, protocol: %s", protocol)
+   printf("    path: %s", path)
+   printf("");
+
+      # try look in the file system.  if that fails, look in the extdata directory of the installed package
+   if(!file.exists(path))
        path <- system.file(package="Oncoscape", "extdata", path)
 
    if(!file.exists(path)){

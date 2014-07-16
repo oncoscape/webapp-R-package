@@ -66,7 +66,9 @@ addRMessageHandler <- function(key, function.name)
        lines <- lines[-deleters]
        
    print(lines)
-   signature <- "^ *patientHistory: "
+
+   #-------------------------- patientHistoryEvents
+   signature <- "^ *patientHistoryEvents: "
    signatureLine <- grep(signature, lines, ignore.case=TRUE)
    if(length(signatureLine) > 1)
        warning(sprintf("Oncoscape::.setupDataProviders, multiple %s entries, using only the first", signature))
@@ -81,9 +83,31 @@ addRMessageHandler <- function(key, function.name)
            printf("Oncoscape error.  Manifest line for patientHistoryill-formed: '%s'", text);
            stop()
            }
-       DATA.PROVIDERS$patientHistory <- PatientHistoryProvider(path);
-       } # found patientHistory line
+       printf("patientHistory: %s", path)
+       DATA.PROVIDERS$patientHistoryEvents <- PatientHistoryProvider(path);
+       } # found patientHistoryEvents line
 
+   #-------------------------- patientHistoryTable
+   signature <- "^ *patientHistoryTable: "
+   signatureLine <- grep(signature, lines, ignore.case=TRUE)
+   if(length(signatureLine) > 1)
+       warning(sprintf("Oncoscape::.setupDataProviders, multiple %s entries, using only the first", signature))
+   
+   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
+
+   if(length(signatureLine > 0)){
+       text <- lines[signatureLine[1]]
+       path <- sub(signature, "", text)
+       tokens <- strsplit(path, "://")[[1]]
+       if(!length(tokens) == 2){
+           printf("Oncoscape error.  Manifest line for patientHistoryTable ill-formed: '%s'", text);
+           stop()
+           }
+       printf("patientHistory: %s", path)
+       DATA.PROVIDERS$patientHistoryTable <- PatientHistoryProvider(path);
+       } # found patientHistoryEvents line
+
+   #-------------------------- mRNA
    signature <- "^ *mRNA: *"
    signatureLine <- grep(signature, lines, ignore.case=TRUE)
    if(length(signatureLine) > 1)
@@ -102,6 +126,7 @@ addRMessageHandler <- function(key, function.name)
        DATA.PROVIDERS$mRNA <- Data2DProvider(path);
        } # found mRNA line
 
+   #-------------------------- patientClassification
    signature <- "^ *patientClassification: *"
    signatureLine <- grep(signature, lines, ignore.case=TRUE)
    if(length(signatureLine) > 1)
