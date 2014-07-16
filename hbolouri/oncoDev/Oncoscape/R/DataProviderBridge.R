@@ -7,10 +7,10 @@ addRMessageHandler("DataProviderBridge.ping",         "DataProviderBridgePing") 
 #addRMessageHandler("get_MSK_GBM_CopyNumber_Data",     "get_MSK_GBM_copyNumber_Data")
 #addRMessageHandler("get_MSK_GBM_mRNA_Data",           "get_MSK_GBM_mRNA_Data")
 #addRMessageHandler("get_MSK_GBM_mRNA_Average",        "get_MSK_GBM_mRNA_Average")
-addRMessageHandler("getPatientHistory",                "getPatientHistory")
+addRMessageHandler("getTabularPatientHistory",         "getTabularPatientHistory")
 addRMessageHandler("filterPatientHistory",             "filterPatientHistory")
 addRMessageHandler("getPatientClassification",         "getPatientClassification")
-addRMessageHandler("getCaisisPatientHistory",          "getCaisisPatientHistory")
+addRMessageHandler("getCaisisPatientHistory",          "getCaisisPatientHistory")          # uses eventList (multi-flat, list of lists)
 #----------------------------------------------------------------------------------------------------
 DataProviderBridgePing <- function(WS, msg)
 {
@@ -270,15 +270,20 @@ get_MSK_GBM_mRNA_Average <- function(WS, msg)
 
 } # get_MSK_GBM_mRNA_Average
 #----------------------------------------------------------------------------------------------------
-getPatientHistory <- function(WS, msg)
+getTabularPatientHistory <- function(WS, msg)
 {
-   if(!"patientHistory" %in% ls(DATA.PROVIDERS)){
-       error.message <- "Oncoscape DataBridge error:  no patientHistoryProvider defined"
+   signature <- "patientHistoryTable";
+   
+   if(!signature %in% ls(DATA.PROVIDERS)){
+       error.message <- sprintf("Oncoscape DataProviderBridge error:  no %s provider defined", signature)
        return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
        sendOutput(DATA=toJSON(return.msg), WS=WS)
        }
 
-   patientHistoryProvider <- DATA.PROVIDERS$patientHistory
+   print("---- current provider keys:")
+   print(ls(DATA.PROVIDERS))
+   
+   patientHistoryProvider <- DATA.PROVIDERS$patientHistoryTable
    tbl <- getTable(patientHistoryProvider)
    colnames <- colnames(tbl)
    matrix <- as.matrix(tbl)
@@ -287,11 +292,11 @@ getPatientHistory <- function(WS, msg)
    return.cmd = msg$callback
    return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(colnames=colnames, mtx=matrix))
 
-   printf("DataBridge.R responding to '%s' with '%s'", msg$cmd, msg$callback);
+   printf("DataProviderBridge.R, getTabularPatientHistory responding to '%s' with '%s'", msg$cmd, msg$callback);
    
    sendOutput(DATA=toJSON(return.msg), WS=WS)
 
-} # getPatientHistory
+} # getTabularPatientHistory
 #----------------------------------------------------------------------------------------------------
 # msg$payload has 4 fields:
 #   ageAtDxMin, ageAtDxMax, overallSurvivalMin, overallSurvivalMax
@@ -299,7 +304,7 @@ getPatientHistory <- function(WS, msg)
 filterPatientHistory <- function(WS, msg)
 {
    if(!"patientHistory" %in% ls(DATA.PROVIDERS)){
-       error.message <- "Oncoscape DataBridge error:  no patientHistoryProvider defined"
+       error.message <- "Oncoscape DataProviderBridge error:  no patientHistoryProvider defined"
        return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
        sendOutput(DATA=toJSON(return.msg), WS=WS)
        }
@@ -338,7 +343,7 @@ filterPatientHistory <- function(WS, msg)
 getPatientClassification <- function(WS, msg)
 {
    if(!"patientClassification" %in% ls(DATA.PROVIDERS)){
-       error.message <- "Oncoscape DataBridge error:  no patient classification provider defined"
+       error.message <- "Oncoscape DataProviderBridge error:  no patient classification provider defined"
        return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")
        printf("found no patient classifcation, return this msg:")
        print(return.msg)
@@ -363,18 +368,19 @@ getCaisisPatientHistory <- function(WS, msg)
     filename <- msg$payload
     full.path <-  system.file(package="Oncoscape", "extdata", filename)
 
-   category.name <- "patientHistory"
+   category.name <- "patientHistoryEvents"
 
    printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(DATA.PROVIDERS))
-    
+
    if(!category.name %in% ls(DATA.PROVIDERS)){
-       error.message <- "Oncoscape DataBridge error:  no caisisPatientHistoryProvider defined"
+       error.message <- "Oncoscape DataProviderBridge error:  no caisisPatientHistoryProvider defined"
        return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
        sendOutput(DATA=toJSON(return.msg), WS=WS)
        }
 
-   patientHistoryProvider <- DATA.PROVIDERS$patientHistory
+   patientHistoryProvider <- DATA.PROVIDERS$patientHistoryEvents
    events <- getEvents(patientHistoryProvider)
+   printf("found %d caisis-style events", length(events))
    #colnames <- colnames(tbl)
    #matrix <- as.matrix(tbl)
    #colnames(matrix) <- NULL
@@ -382,11 +388,9 @@ getCaisisPatientHistory <- function(WS, msg)
    return.cmd = msg$callback
    return.msg <- list(cmd=msg$callback, callback="", status="success", payload=events)
 
-   printf("DataBridge.R responding to '%s' with '%s'", msg$cmd, msg$callback);
+   printf("DataProviderBridge.R, getCaisisPatientHistory responding to '%s' with '%s'", msg$cmd, msg$callback);
    
    sendOutput(DATA=toJSON(return.msg), WS=WS)
-
-
 
 #    if(file.exists(full.path)){
 #       var.name <- load(full.path)
@@ -398,7 +402,10 @@ getCaisisPatientHistory <- function(WS, msg)
 #    else{
 #       return.msg <- list(cmd=msg$callback, callback="", status="failure", payload=sprintf("could not read '%s'", filename))
 #       }
-
+#
+#   printf("--- getCaisisPatienthistory returning this msg:")
+#   print(return.msg)
+#    
 #   sendOutput(DATA=toJSON(return.msg), WS=WS)
 
 } # getCaisisPatientHistory
