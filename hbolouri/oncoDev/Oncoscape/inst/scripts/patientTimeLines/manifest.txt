@@ -1,2 +1,4 @@
-patientHistory: caisisEvents://mskGBM/BTC_clinicaldata_6-18-14.RData
+#patientHistory: caisisEvents://mskGBM/BTC_clinicaldata_6-18-14.RData
+patientHistoryEvents: caisisEvents:///Users/pshannon/s/data/hamid/repo/hbolouri/oncoDev/Oncoscape/inst/explorations/tcgaPatientHistoryToEventList/testTCGApatientHistory.RData
+
 

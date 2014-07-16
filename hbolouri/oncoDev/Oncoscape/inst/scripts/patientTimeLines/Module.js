@@ -15,6 +15,7 @@ var TimeLineModule = (function () {
 	var MainEventTextSpacing = [0, 70, 82, 85, 75, 72, 75, 75, 80]
  	var selectedRegion;    // from brushing
 	var d3PlotBrush;
+        var broadcastButton;
    	var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
 	   							{Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
 						   		{Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
@@ -40,7 +41,7 @@ var TimeLineModule = (function () {
     	  broadcastButton = $("#broadcastSelectionToClinicalTable");
 	  	  broadcastButton.click(broadcastSelection);
 	      $(window).resize(TimeLineHandleWindowResize);
-    	  broadcastButton.prop("disabled",true);
+    	  broadcastButton.prop("disabled",false);
 		
 		 dispatch.load();
       };
@@ -139,7 +140,7 @@ var TimeLineModule = (function () {
 		cmd = "getCaisisPatientHistory";
 		status = "request"
 		callback = "DisplayPatientTimeLine"
-		filename = "BTC_clinicaldata_6-18-14.RData";
+		filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
 		msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
 		console.log(JSON.stringify(msg))
 	    socket.send(JSON.stringify(msg));
@@ -154,7 +155,7 @@ var TimeLineModule = (function () {
 	    console.log("==== DisplayPatientTimeLine  Events");	
 		Events = msg.payload;
 		console.log("Event count: " + Events.length);
-
+         
 		parseDate = d3.time.JAVASCRIPT_FORMAT ("%m/%d/%Y").parse;
 		FormatDate = d3.time.JAVASCRIPT_FORMAT ("%x");
 	
