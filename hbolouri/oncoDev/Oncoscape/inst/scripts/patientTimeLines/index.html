@@ -80,6 +80,7 @@ var TimeLineModule = (function () {
 	var MainEventTextSpacing = [0, 70, 82, 85, 75, 72, 75, 75, 80]
  	var selectedRegion;    // from brushing
 	var d3PlotBrush;
+        var broadcastButton;
    	var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
 	   							{Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
 						   		{Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
@@ -105,7 +106,7 @@ var TimeLineModule = (function () {
     	  broadcastButton = $("#broadcastSelectionToClinicalTable");
 	  	  broadcastButton.click(broadcastSelection);
 	      $(window).resize(TimeLineHandleWindowResize);
-    	  broadcastButton.prop("disabled",true);
+    	  broadcastButton.prop("disabled",false);
 		
 		 dispatch.load();
       };
