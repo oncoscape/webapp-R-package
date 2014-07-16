@@ -52,8 +52,7 @@ var displayDiv;
     $("#toMarkersAndTissuesButton").prop("disabled",true);
     $("#toGBMPathwaysButton").prop("disabled",true);
     $("#toSurvivalStatsButton").prop("disabled",true);
-//    $("#toTimeLinesButton").prop("disabled",true);
-	$("#toTimeLinesButton").click(function(){sendCurrentIDsToModule("TimeLine")});
+    $("#toTimeLinesButton").prop("disabled",false);
     };
 
    //--------------------------------------------------------------------------------------------
@@ -153,7 +152,7 @@ var displayDiv;
   requestData = function(){
      console.log("cdt requests data");
      payload = ""; // demo/clinicalTable320.RData";
-     msg = {cmd: "getPatientHistory", callback: "handlePatientHistory", status: "request", 
+     msg = {cmd: "getTabularPatientHistory", callback: "handlePatientHistory", status: "request", 
             payload: payload};
      msg.json = JSON.stringify(msg);
      socket.send(msg.json);
