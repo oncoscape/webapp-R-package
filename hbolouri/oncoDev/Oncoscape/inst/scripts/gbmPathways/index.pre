@@ -1,8 +1,8 @@
 include(../index.common)
-<body>
+include(../common.js)
 include(../m4-workarounds.txt)
 include(code.js)
+<body>
 include(widget.html)
-include(../common.js)
 </body>
 </html>

@@ -1,7 +1,7 @@
 include(../index.common)
-<body>
-include(code.js)
-include(widget.html)
 include(../common.js)
+include(code.js)
+<body>
+include(widget.html)
 </body>
 </html>
