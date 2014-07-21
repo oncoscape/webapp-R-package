@@ -368,6 +368,8 @@ getCaisisPatientHistory <- function(WS, msg)
 {
    callback <- msg$callback
    patientIDs <- msg$payload
+   if(all(nchar(patientIDs==0)))
+       patientIDs = NA
 
    category.name <- "patientHistoryEvents"
 
@@ -382,10 +384,12 @@ getCaisisPatientHistory <- function(WS, msg)
 
    patientHistoryProvider <- DATA.PROVIDERS$patientHistoryEvents
    events <- getEvents(patientHistoryProvider, patient.ids=patientIDs)
-   printf("found %d caisis-style events for %d patients", length(events), length(patientIDs))
-   #colnames <- colnames(tbl)
-   #matrix <- as.matrix(tbl)
-   #colnames(matrix) <- NULL
+   if(is.na(patientIDs))
+       patient.count <- "all"
+   else
+       patient.count <- length(patientIDs)
+   
+   printf("found %d caisis-style events for %s patients", length(events), patient.count)
    
    return.cmd = msg$callback
    return.msg <- list(cmd=msg$callback, callback="", status="success", payload=events)
@@ -393,22 +397,6 @@ getCaisisPatientHistory <- function(WS, msg)
    printf("DataProviderBridge.R, getCaisisPatientHistory responding to '%s' with '%s'", msg$cmd, msg$callback);
    
    sendOutput(DATA=toJSON(return.msg), WS=WS)
-
-#    if(file.exists(full.path)){
-#       var.name <- load(full.path)
-#       stopifnot(var.name == "PatientData_json")
-#       payload <- toJSON(PatientData_json)
-#       status <- "success"
-#       return.msg <- list(cmd=msg$callback, callback="", status="success", payload=payload)
-#       }
-#    else{
-#       return.msg <- list(cmd=msg$callback, callback="", status="failure", payload=sprintf("could not read '%s'", filename))
-#       }
-#
-#   printf("--- getCaisisPatienthistory returning this msg:")
-#   print(return.msg)
-#    
-#   sendOutput(DATA=toJSON(return.msg), WS=WS)
 
 } # getCaisisPatientHistory
 #----------------------------------------------------------------------------------------------------

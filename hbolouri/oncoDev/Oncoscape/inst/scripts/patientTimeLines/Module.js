@@ -111,8 +111,8 @@ var TimeLineModule = (function () {
       socket.send(JSON.stringify(msg));
       } // sendTissueIDsToModule
 
-	//--------------------------------------------------------------------------------------------------	
-      handlePatientIDs = function(msg){
+   //--------------------------------------------------------------------------------------------------	
+   handlePatientIDs = function(msg){
       console.log("Module.TimeLine: handlePatientIDs");
       console.log(msg)
       if(msg.status == "success"){
@@ -122,30 +122,26 @@ var TimeLineModule = (function () {
          msg = {cmd: "getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", 
                 payload: payload};
          socket.send(JSON.stringify(msg));
-
-//	   $("#tabs").tabs( "option", "active", 7);
-
+         // $("#tabs").tabs( "option", "active", 7);
          }
-    else{
-      console.log("handlePatientIDs about to call alert: " + msg)
-      alert(msg.payload)
-      }
-     }; // handlePatientIDs
+      else{
+         console.log("handlePatientIDs about to call alert: " + msg)
+         alert(msg.payload)
+         }
+      }; // handlePatientIDs
 
 
-	//----------------------------------------------------------------------------------------------------
-	loadPatientDemoData = function(){
+    //----------------------------------------------------------------------------------------------------
+    loadPatientDemoData = function(){
 
-		console.log("==== patientTimeLines  get Events from File");
-		cmd = "getCaisisPatientHistory";
-		status = "request"
-		callback = "DisplayPatientTimeLine"
-		filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
-		msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
-		// console.log(JSON.stringify(msg))
-	    socket.send(JSON.stringify(msg));
-
-	} // loadPatientDemoData
+       console.log("==== patientTimeLines  get Events from File");
+       cmd = "getCaisisPatientHistory";
+       status = "request"
+       callback = "DisplayPatientTimeLine"
+       msg = {cmd: cmd, callback: callback, status: "request", payload: ""};
+        // console.log(JSON.stringify(msg))
+       socket.send(JSON.stringify(msg));
+       } // loadPatientDemoData
 
 	//--------------------------------------------------------------------------------------------------
 	DisplayPatientTimeLine = function(msg) {

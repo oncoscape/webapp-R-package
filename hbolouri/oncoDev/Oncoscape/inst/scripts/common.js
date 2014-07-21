@@ -1,5 +1,22 @@
 <script>
-//--------------------------------------------------------------------------------------------------
+var socket;
+var dispatchOptions = {};
+var socketConnectedFunctions = [];
+var onReadyFunctions = [];
+
+//
+// Do not modify the following line.  If Oncoscape is launched from LabKey then a new labkey javascript
+// object will be created with members {.mode, .reportSession, .filteredPatients}
+//
+//var labkey = {labkeyOncoscape};
+
+var filteredPatients = [];
+//----------------------------------------------------------------------------------------------------
+addJavascriptMessageHandler = function(cmd, func)
+{
+   dispatchOptions[cmd] = func
+}
+//----------------------------------------------------------------------------------------------------
 function getRandomFloat (min, max)
 {
     return Math.random() * (max - min) + min;
