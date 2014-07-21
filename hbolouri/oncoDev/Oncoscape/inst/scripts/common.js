@@ -14,7 +14,12 @@ var filteredPatients = [];
 //----------------------------------------------------------------------------------------------------
 addJavascriptMessageHandler = function(cmd, func)
 {
-   dispatchOptions[cmd] = func
+   if(cmd in dispatchOptions){
+      alert("javascript message handler for '" +  cmd + " already set");
+      }
+   else{
+      dispatchOptions[cmd] = func
+      }
 }
 //----------------------------------------------------------------------------------------------------
 function getRandomFloat (min, max)
