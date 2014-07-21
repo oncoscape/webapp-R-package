@@ -112,7 +112,7 @@ var TimeLineModule = (function () {
       } // sendTissueIDsToModule
 
 	//--------------------------------------------------------------------------------------------------	
-	handlePatientIDs = function(msg){
+      handlePatientIDs = function(msg){
       console.log("Module.TimeLine: handlePatientIDs");
       console.log(msg)
       if(msg.status == "success"){
@@ -856,7 +856,7 @@ var TimeLineModule = (function () {
 		onReadyFunctions.push(initializeUI);
 		
 		addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
-    	addJavascriptMessageHandler("TimeLineHandlePatientIDs", handlePatientIDs);
+    	addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
  	
 	    socketConnectedFunctions.push(loadPatientDemoData);
    }
