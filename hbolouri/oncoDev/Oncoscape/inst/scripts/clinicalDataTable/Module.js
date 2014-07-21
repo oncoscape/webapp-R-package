@@ -5,12 +5,15 @@ var ClinicalTableModule = (function () {
 var currentIDs;   // assign this to the full content in the tbl on startup
 var tableRef;
 var pcaButton;
+var timeLinesButton;
 var displayDiv;
 
    //--------------------------------------------------------------------------------------------
    function initializeUI(){
       pcaButton = $("#toPCAButton");
       pcaButton.click(function(){sendCurrentIDsToModule("PCA")});
+      timeLinesButton = $("#toTimeLinesButton")
+      timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines")});
       displayDiv = $("#clinicalDataTableDiv");
       $(window).resize(handleWindowResize);
       handleWindowResize();
