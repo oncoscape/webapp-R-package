@@ -366,14 +366,14 @@ getPatientClassification <- function(WS, msg)
 #----------------------------------------------------------------------------------------------------
 getCaisisPatientHistory <- function(WS, msg)
 {
-    callback <- msg$callback
-    filename <- msg$payload
-    full.path <-  system.file(package="Oncoscape", "extdata", filename)
+   callback <- msg$callback
+   patientIDs <- msg$payload
 
    category.name <- "patientHistoryEvents"
 
    printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(DATA.PROVIDERS))
-
+   printf("--- payload: %s", paste(patientIDs, collapse=","));
+    
    if(!category.name %in% ls(DATA.PROVIDERS)){
        error.message <- "Oncoscape DataProviderBridge error:  no caisisPatientHistoryProvider defined"
        return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
@@ -381,8 +381,8 @@ getCaisisPatientHistory <- function(WS, msg)
        }
 
    patientHistoryProvider <- DATA.PROVIDERS$patientHistoryEvents
-   events <- getEvents(patientHistoryProvider)
-   printf("found %d caisis-style events", length(events))
+   events <- getEvents(patientHistoryProvider, patients=patientIDs)
+   printf("found %d caisis-style events for %d patients", length(events), length(patientIDs))
    #colnames <- colnames(tbl)
    #matrix <- as.matrix(tbl)
    #colnames(matrix) <- NULL

@@ -97,11 +97,5 @@ setMethod("getTable", "LocalFileCaisisEventsPatientHistoryProvider",
       self@table
   })
 #---------------------------------------------------------------------------------------------------
-setMethod("getEvents", "LocalFileCaisisEventsPatientHistoryProvider",
-
-   function(self) {
-      self@events
-  })
-#---------------------------------------------------------------------------------------------------
 
 

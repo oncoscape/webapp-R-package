@@ -13,8 +13,8 @@ setClass("PatientHistoryProvider",
 #setGeneric("patientEventNames",   signature="self", function (self, ...) standardGeneric ("patientEventNames"))
 #setGeneric("getPatientData", signature="self", function(self, patients=NA, events=NA) standardGeneric("getPatientData"))
 #setGeneric("getClinicalTable", signature="self", function(self, patients=NA, events=NA) standardGeneric("getClinicalTable"))
-setGeneric("getTable", signature="self", function(self, patients=NA, events=NA) standardGeneric("getTable"))
-setGeneric("getEvents", signature="self", function(self, patients=NA, events=NA) standardGeneric("getEvents"))
+setGeneric("getTable", signature="self", function(self, patient.ids=NA, event.names=NA) standardGeneric("getTable"))
+setGeneric("getEvents", signature="self", function(self, patient.ids=NA, event.names=NA) standardGeneric("getEvents"))
 setGeneric("legalEventNames", signature="self", function(self) standardGeneric("legalEventNames"))
 setGeneric("requiredEventNames", signature="self", function(self) standardGeneric("requiredEventNames"))
 
@@ -167,5 +167,25 @@ setMethod ("requiredEventNames", "PatientHistoryProvider",
    function(self){
      legalEventNames(self)
      })
+
+#---------------------------------------------------------------------------------------------------
+setMethod("getEvents", "PatientHistoryProvider",
+
+   function(self, patient.ids=NA, event.names=NA) {
+
+      hits <- 1:length(self@events)  # so we can return all events for all patients
+
+      if(!all(is.na(patient.ids))){
+         hits <- which(unlist(lapply(self@events, function(event) event$PatientID %in% patient.ids)))
+         }
+
+      events <- self@events[hits]   # apply any filtering which
+      
+      if(!all(is.na(event.names))){
+         hits <- which(unlist(lapply(events, function(event) event$Name %in% event.names)))
+         }
+
+      events[hits]
+      })
 
 #---------------------------------------------------------------------------------------------------
