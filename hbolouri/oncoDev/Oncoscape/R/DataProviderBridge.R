@@ -381,7 +381,7 @@ getCaisisPatientHistory <- function(WS, msg)
        }
 
    patientHistoryProvider <- DATA.PROVIDERS$patientHistoryEvents
-   events <- getEvents(patientHistoryProvider, patients=patientIDs)
+   events <- getEvents(patientHistoryProvider, patient.ids=patientIDs)
    printf("found %d caisis-style events for %d patients", length(events), length(patientIDs))
    #colnames <- colnames(tbl)
    #matrix <- as.matrix(tbl)
