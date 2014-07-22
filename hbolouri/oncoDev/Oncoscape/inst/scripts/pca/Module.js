@@ -2,7 +2,7 @@
 //----------------------------------------------------------------------------------------------------
 var PCAModule = (function () {
 
-  var pcaBroadcastButton;
+  var broadcastButton;
   var pcaDisplay;
   var pcaResults;
   var patientClassification;
@@ -11,18 +11,18 @@ var PCAModule = (function () {
   var d3PlotBrush;
 
   //--------------------------------------------------------------------------------------------
-  initializeUI = function(){
+  function initializeUI () {
       pcaDisplay = $("#pcaDisplay");
       pcaHandleWindowResize();
-      pcaBroadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
-      //pcaBroadcastButton.button();
-      pcaBroadcastButton.click(pcaBroadcastSelection);
+      broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
+      //broadcastButton.button();
+      broadcastButton.click(pcaBroadcastSelection);
       $(window).resize(pcaHandleWindowResize);
-      pcaBroadcastButton.prop("disabled",true);
+      broadcastButton.prop("disabled",true);
       };
 
   //--------------------------------------------------------------------------------------------
-  runDemo = function(){
+  function runDemo (){
      payload = "";
      msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request", 
             payload: payload};
@@ -30,7 +30,7 @@ var PCAModule = (function () {
      };
 
   //--------------------------------------------------------------------------------------------
-  getPatientClassification = function(){
+  function getPatientClassification (){
      payload = "";
      msg = {cmd: "getPatientClassification", callback: "handlePatientClassification", 
             status: "request", payload: payload};
@@ -38,7 +38,7 @@ var PCAModule = (function () {
      };
 
   //--------------------------------------------------------------------------------------------
-  handlePatientClassification = function(msg){
+  function handlePatientClassification (msg){
      console.log("=== handlePatientClassification");
      //console.log(msg)
      if(msg.status == "success"){
@@ -51,14 +51,14 @@ var PCAModule = (function () {
       }; // handlePatientIDs
 
   //--------------------------------------------------------------------------------------------
-  pcaHandleWindowResize = function(){
+  function pcaHandleWindowResize () {
      pcaDisplay.width($(window).width() * 0.95);
      pcaDisplay.height($(window).height() * 0.80);
      if(!firstTime) {d3PcaScatterPlot(pcaResults);}
      };
 
    //--------------------------------------------------------------------------------------------
-   pcaBroadcastSelection = function(){
+  function pcaBroadcastSelection (){
       console.log("pcaBroadcastSelection: " + pcaSelectedRegion);
       x1=pcaSelectedRegion[0][0];
       y1=pcaSelectedRegion[0][1];
@@ -75,7 +75,7 @@ var PCAModule = (function () {
       };
 
   //--------------------------------------------------------------------------------------------
-  sendIDsToModule = function(ids, moduleName, title){
+  function sendIDsToModule (ids, moduleName, title){
        callback = moduleName + title;
        msg = {cmd:"sendIDsToModule",
               callback: callback,
@@ -88,7 +88,7 @@ var PCAModule = (function () {
 
 
   //--------------------------------------------------------------------------------------------
-  pcaPlot = function(msg){
+  function pcaPlot (msg){
       console.log("==== pcaPlot");
       //console.log(msg);
       if(msg.status == "success"){
@@ -105,7 +105,7 @@ var PCAModule = (function () {
      };
 
   //--------------------------------------------------------------------------------------------
-  handlePatientIDs = function(msg){
+  function handlePatientIDs(msg){
       console.log("Module.pca: handlePatientIDs");
       //console.log(msg)
       if(msg.status == "success"){
@@ -123,22 +123,26 @@ var PCAModule = (function () {
      }; // handlePatientIDs
 
   //--------------------------------------------------------------------------------------------
-  d3PlotBrushReader = function(){
-     console.log("plotBrushReader");
+  function d3PlotBrushReader () {
+     console.log("plotBrushReader 1037a 22jul2014");
      pcaSelectedRegion = d3PlotBrush.extent();
      //console.log("region: " + pcaSelectedRegion);
      x0 = pcaSelectedRegion[0][0];
      x1 = pcaSelectedRegion[1][0];
      width = Math.abs(x0-x1);
      //console.log("width: " + width);
-     if(width > 1)
-        pcaBroadcastButton.prop("disabled", false);
-     else
-        pcaBroadcastButton.prop("disabled", true);
+     if(width > 1){
+        broadcastButton.prop("disabled", false);
+        console.log("width > 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
+        }
+     else{
+        broadcastButton.prop("disabled", true);
+        console.log("width !> 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
+        }
      }; // d3PlotBrushReader
 
   //-------------------------------------------------------------------------------------------
-  chooseColor = function(d){
+  function chooseColor (d){
      id = d.id[0];
      for(var i=0; i<patientClassification.length; i++){
         if (id == patientClassification[i].rowname[0]){
@@ -146,13 +150,13 @@ var PCAModule = (function () {
           return(result)
           } // if match
         } // for i
-     console.log("chooseColor, no match for id " + id);
+     //console.log("chooseColor, no match for id " + id);
      return("black");
      }
   //-------------------------------------------------------------------------------------------
-  d3PcaScatterPlot = function(dataset) {
+  function d3PcaScatterPlot(dataset) {
 
-     pcaBroadcastButton.prop("disabled",true);
+     broadcastButton.prop("disabled",true);
      var padding = 50;
      var width = $("#pcaDisplay").width();
      var height = $("#pcaDisplay").height();
@@ -243,10 +247,6 @@ var PCAModule = (function () {
         .attr("class", "y axis")
         .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
         .call(yAxis);
-
-     //svg.append("g")
-     //   .attr("class", "brush")
-     //   .call(d3PlotBrush);
 
      } // d3PcaScatterPlot
 
