@@ -402,54 +402,6 @@ getCaisisPatientHistory <- function(WS, msg)
 
 } # getCaisisPatientHistory
 #----------------------------------------------------------------------------------------------------
-createRandomPatientPairedDistributionsForTesting <- function(WS, msg)
-{
-   callback <- msg$callback
-
-   if(!all(c("popSize1", "popSize2") %in% names(msg$payload))){
-       error.message <- "Oncoscape DataProviderBridge error:  createRandomPatientPairedDistributionsForTesting needs 'popSize1', 'popSize2' args"
-       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
-       sendOutput(DATA=toJSON(return.msg), WS=WS)
-       return()
-      } # payload fields wrong
-   
-   printf("---- createRandom");
-   print(msg$payload)
-   
-   popSize1 <- msg$payload[["popSize1"]]
-   popSize2 <- msg$payload[["popSize2"]]
-   
-   data.category.name <- "patientHistoryTable"
-   printf("--- DataProviderBridge looking for '%s': %s",  data.category.name, data.category.name %in% ls(DATA.PROVIDERS))
-
-   if(!data.category.name %in% ls(DATA.PROVIDERS)){
-       error.message <- "Oncoscape DataProviderBridge error:  no caisisPatientHistoryProvider defined"
-       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
-       sendOutput(DATA=toJSON(return.msg), WS=WS)
-       }
-
-   x <- 99;
-   provider <- DATA.PROVIDERS[[data.category.name]]
-   tbl <- getTable(provider)
-   pop.indices <- sample(1:nrow(tbl), size=popSize1+popSize2)
-   pop.indices.1 <- pop.indices[1:popSize1]
-   pop.indices.2 <- pop.indices[(popSize1+1):(popSize1 + popSize2)]
-
-   printf("pop.indices.1: %d", length(pop.indices.1))
-   printf("pop.indices.2: %d", length(pop.indices.2))
-   
-   vals.1 <- as.numeric(tbl$FirstProgression[pop.indices.1])
-   names(vals.1) <- tbl$ID[pop.indices.1]
-   vals.2 <- as.numeric(tbl$FirstProgression[pop.indices.2])
-   names(vals.2) <- tbl$ID[pop.indices.2]
-   
-   printf("dim of pt tbl: %d, %d", nrow(provider), ncol(provider))
-   return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(pop1=vals.1,
-                                                                                    pop2=vals.2))
-   sendOutput(DATA=toJSON(return.msg), WS=WS)   
-
-} # createRandomPatientPairedDistributionsForTesting
-#----------------------------------------------------------------------------------------------------
 # this message handler requires that a "patientHistoryTable" is in DATA.PROVIDERS
 # no support here yet for a "patientHistoryEvents" data source
 calculatePairedDistributionsOfPatientHistoryData <- function(WS, msg)
