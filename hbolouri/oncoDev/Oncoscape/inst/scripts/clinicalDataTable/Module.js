@@ -59,7 +59,7 @@ var displayDiv;
     };
 
    //--------------------------------------------------------------------------------------------
-   sendCurrentIDsToModule = function(moduleName) {
+   function sendCurrentIDsToModule (moduleName) {
       console.log("entering sendCurrentIDsToModule");
       var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
       var currentIDs = []
@@ -146,13 +146,13 @@ var displayDiv;
 
 
    //--------------------------------------------------------------------------------------------
-  handleWindowResize = function(){
+  function handleWindowResize(){
       displayDiv.width($(window).width() * 0.95);
       displayDiv.height($(window).height() * 0.95);
      }; // handleWindowResize
 
    //--------------------------------------------------------------------------------------------
-  requestData = function(){
+  function requestData (){
      console.log("cdt requests data");
      payload = ""; // demo/clinicalTable320.RData";
      msg = {cmd: "getTabularPatientHistory", callback: "handlePatientHistory", status: "request", 

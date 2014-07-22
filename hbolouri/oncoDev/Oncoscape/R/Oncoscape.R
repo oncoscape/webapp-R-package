@@ -349,7 +349,7 @@ receiveMessage <- function(DATA, isRaw=TRUE)
 
     msg <- as.list(fromJSON(charData))
     print("==== oncoscape receiveMessage")
-    print(msg)
+    #print(msg)
     required.fields <- c("cmd", "status", "payload")
     #printf("--- browser in receiveMessage: %s", paste(names(msg), collapse=","))
     #browser()
@@ -440,7 +440,7 @@ sendPatientIDsToModule <- function(WS, msg)
    ids <- msg$payload$ids
    printf("Oncoscape::sendPatientIDsToModule received %d patientIDs for %s",
           length(ids), target);
-   print(msg)
+   #print(msg)
 
    return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success", payload=ids))
    sendOutput(DATA=return.msg, WS=WS)
@@ -452,7 +452,7 @@ sendIDsToModule <- function(WS, msg)
    target <- msg$payload$targetModule
    ids <- msg$payload$ids
    printf("Oncoscape::sendIDsToModule received %d IDs for %s", length(ids), target);
-   print(msg)
+   #print(msg)
 
    payload <- list(count=length(ids), ids=ids)
    return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success", payload=payload))
