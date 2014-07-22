@@ -180,12 +180,13 @@ setMethod("getEvents", "PatientHistoryProvider",
          }
 
       events <- self@events[hits]   # apply any filtering which
-      
+    
       if(!all(is.na(event.names))){
          hits <- which(unlist(lapply(events, function(event) event$Name %in% event.names)))
+	      events <- events[hits]
          }
 
-      events[hits]
+	events
       })
 
 #---------------------------------------------------------------------------------------------------

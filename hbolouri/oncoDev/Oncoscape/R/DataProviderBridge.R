@@ -368,7 +368,7 @@ getCaisisPatientHistory <- function(WS, msg)
 {
    callback <- msg$callback
    patientIDs <- msg$payload
-   if(all(nchar(patientIDs==0)))
+   if(all(nchar(patientIDs)==0))
        patientIDs = NA
 
    category.name <- "patientHistoryEvents"

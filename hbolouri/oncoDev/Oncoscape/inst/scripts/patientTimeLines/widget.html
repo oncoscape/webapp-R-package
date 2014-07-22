@@ -37,6 +37,7 @@
   } 
 
 
+
 </style>
 
 <canvas width="960" height="500" style="display:none"></canvas>
@@ -47,10 +48,23 @@
 	     <span id="AlignByDiv">Align By: </span>
 	     <span id="OrderByDiv">Order By: </span>
 	     <button id="SaveImageDiv">Save Image </button>
-       	 <button id="broadcastSelectionToClinicalTable">To Clinical Data... </button>
+       	 <button id="SendSelectionToClinicalTable">To Clinical Data... </button>
      </div>
      <div id="TimeLineDisplay">
      <span id="SideBarPlot" class="resizeable"></span>
      <span id="patientTimeLinesDisplay" class="resizeable"></span>
+     </div>
+     
+     <div id="AddCalculatedEvent"  style="display:none">
+     <form>
+          <label for="Name">Name</label>
+          <input type="text" id="Name" value="e.g. Survival"><br>
+          <label for="Event1">Event 1</label>
+          <input type="text" id="Event1" value="(legend)"><br>
+          <label for="Event2">Event 2</label>
+          <input type="text" id="Event2" value="(legend)"><br>
+          <label for="TimeScale"> Time Scale</label>
+          <input type="text" id="TimeScale" value="Days, Months, Years"><br>
+	</form>
      </div>
 </div>
