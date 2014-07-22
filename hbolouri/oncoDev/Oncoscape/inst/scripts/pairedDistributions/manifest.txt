@@ -1,0 +1,2 @@
+patientHistoryTable: tbl://tcgaGBM/tbl.ptHistory.RData
+patientClassification: pkg://tcgaGBM/tbl.dzSubTypes.RData
