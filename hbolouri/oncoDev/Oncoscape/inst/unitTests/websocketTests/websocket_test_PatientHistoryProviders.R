@@ -160,28 +160,6 @@ explore_timeLinesData <- function()
    
 } # explore_timeLinesData
 #----------------------------------------------------------------------------------------------------
-test_createRandomPatientPairedDistributionsForTesting <- function()
-{
-   print("--- test_createRandomPatientPairedDistributionsForTesting")
-
-   cmd <- "createRandomPatientPairedDistributionsForTesting"
-   status <- "request"
-   callback <- "pairedDistributionsPlot"
-   payload <- list(popSize1=20, popSize2=30);
-
-   websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=payload)), client)
-   system("sleep 1")
-   service(client)
-
-   pop1 <- msg.incoming$payload$pop1
-   pop2 <- msg.incoming$payload$pop2
-   checkEquals(length(pop1), 20)
-   checkEquals(length(pop2), 30)
-
-   
-
-} # test_createRandomPatientPairedDistributionsForTesting
-#----------------------------------------------------------------------------------------------------
 test_calculatePairedDistributionsOfPatientHistoryData <- function()
 {
    print("--- test_calculatePairedDistributionsOfPatientHistoryData")
