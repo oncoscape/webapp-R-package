@@ -11,6 +11,8 @@ addRMessageHandler("getTabularPatientHistory",         "getTabularPatientHistory
 addRMessageHandler("filterPatientHistory",             "filterPatientHistory")
 addRMessageHandler("getPatientClassification",         "getPatientClassification")
 addRMessageHandler("getCaisisPatientHistory",          "getCaisisPatientHistory")          # uses eventList (multi-flat, list of lists)
+addRMessageHandler("createRandomPatientPairedDistributionsForTesting", "createRandomPatientPairedDistributionsForTesting")
+addRMessageHandler("calculatePairedDistributionsOfPatientHistoryData", "calculatePairedDistributionsOfPatientHistoryData")
 #----------------------------------------------------------------------------------------------------
 DataProviderBridgePing <- function(WS, msg)
 {
@@ -400,4 +402,142 @@ getCaisisPatientHistory <- function(WS, msg)
 
 } # getCaisisPatientHistory
 #----------------------------------------------------------------------------------------------------
-                                    
+createRandomPatientPairedDistributionsForTesting <- function(WS, msg)
+{
+   callback <- msg$callback
+
+   if(!all(c("popSize1", "popSize2") %in% names(msg$payload))){
+       error.message <- "Oncoscape DataProviderBridge error:  createRandomPatientPairedDistributionsForTesting needs 'popSize1', 'popSize2' args"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       return()
+      } # payload fields wrong
+   
+   printf("---- createRandom");
+   print(msg$payload)
+   
+   popSize1 <- msg$payload[["popSize1"]]
+   popSize2 <- msg$payload[["popSize2"]]
+   
+   data.category.name <- "patientHistoryTable"
+   printf("--- DataProviderBridge looking for '%s': %s",  data.category.name, data.category.name %in% ls(DATA.PROVIDERS))
+
+   if(!data.category.name %in% ls(DATA.PROVIDERS)){
+       error.message <- "Oncoscape DataProviderBridge error:  no caisisPatientHistoryProvider defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       }
+
+   x <- 99;
+   provider <- DATA.PROVIDERS[[data.category.name]]
+   tbl <- getTable(provider)
+   pop.indices <- sample(1:nrow(tbl), size=popSize1+popSize2)
+   pop.indices.1 <- pop.indices[1:popSize1]
+   pop.indices.2 <- pop.indices[(popSize1+1):(popSize1 + popSize2)]
+
+   printf("pop.indices.1: %d", length(pop.indices.1))
+   printf("pop.indices.2: %d", length(pop.indices.2))
+   
+   vals.1 <- as.numeric(tbl$FirstProgression[pop.indices.1])
+   names(vals.1) <- tbl$ID[pop.indices.1]
+   vals.2 <- as.numeric(tbl$FirstProgression[pop.indices.2])
+   names(vals.2) <- tbl$ID[pop.indices.2]
+   
+   printf("dim of pt tbl: %d, %d", nrow(provider), ncol(provider))
+   return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(pop1=vals.1,
+                                                                                    pop2=vals.2))
+   sendOutput(DATA=toJSON(return.msg), WS=WS)   
+
+} # createRandomPatientPairedDistributionsForTesting
+#----------------------------------------------------------------------------------------------------
+# this message handler requires that a "patientHistoryTable" is in DATA.PROVIDERS
+# no support here yet for a "patientHistoryEvents" data source
+calculatePairedDistributionsOfPatientHistoryData <- function(WS, msg)
+{
+   #browser()
+   
+   callback <- msg$callback
+   attribute.of.interest <- msg$payload[["attribute"]]
+
+      # define the basic error message, to which details can be added
+   error.msg <- "Error.  DataProviderBridge::calculatePairedDistributionsOfPatientHistoryData"
+
+   testing <- FALSE
+   
+   if("mode" %in% names(msg$payload)){
+      testing <- length(grep("test",  msg$payload[["mode"]], ignore.case=TRUE)) > 0
+      } # no "mode" in payload
+       
+      # make sure we have the data
+   data.category.name <- "patientHistoryTable"
+   printf("--- DataProviderBridge looking for '%s': %s",  data.category.name, data.category.name %in% ls(DATA.PROVIDERS))
+   
+   if(!data.category.name %in% ls(DATA.PROVIDERS)){
+       error.message <- sprintf("Oncoscape DataProviderBridge error:  no %s defined", data.category.name)
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       return()
+       }
+
+   provider <- DATA.PROVIDERS[[data.category.name]]
+   tbl <- getTable(provider)
+   if(!attribute.of.interest %in% colnames(tbl)){
+       error.msg <- sprintf("%s: attribute.of.interest not in colnames(tbl): '%s'",
+                            error.msg, attribute.of.interest)
+       return.msg <- list(cmd=msg$callback, payload=error.msg, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       return()
+       }
+
+   all.ids <- tbl$ID
+
+   if(testing){  # generate two random populations
+      full.count <- length(all.ids)
+      population.sizes <- as.integer(full.count/10)
+      population.1 <- all.ids[sample(1:full.count, population.sizes)]
+      population.2 <- all.ids[sample(1:full.count, population.sizes)]
+        # eliminate overlap
+      population.2 <- setdiff(population.2, population.1)
+      }
+   else {
+      population.1 <- msg$payload$pop1
+      population.2 <- msg$payload$pop2
+      population.1 <- intersect(population.1, all.ids)
+      population.2 <- intersect(population.2, all.ids)
+      }
+      
+   populations.error <- FALSE
+   if(length(population.1) < 1){
+      error.msg <- sprintf("%s. population.1 has no members", error.msg)
+      populations.error <- TRUE
+      }
+
+   if(length(population.2) < 1){
+      error.msg <- sprintf("%s. population.2 has no members", error.msg)
+      populations.error <- TRUE
+      }
+      
+   if(populations.error){    
+      return.msg <- list(cmd=msg$callback, payload=error.msg, status="error")
+      sendOutput(DATA=toJSON(return.msg), WS=WS)
+      return()
+      }
+                              
+   pop.indices.1 <- match(population.1, all.ids)
+   pop.indices.2 <- match(population.2, all.ids)
+      
+   printf("pop.indices.1: %d", length(pop.indices.1))
+   printf("pop.indices.2: %d", length(pop.indices.2))
+   
+   vals.1 <- as.numeric(tbl[pop.indices.1, attribute.of.interest])
+   vals.2 <- as.numeric(tbl[pop.indices.2, attribute.of.interest])
+
+   names(vals.1) <- tbl$ID[pop.indices.1]
+   names(vals.2) <- tbl$ID[pop.indices.2]
+   
+   return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(pop1=vals.1,
+                                                                                    pop2=vals.2))
+   sendOutput(DATA=toJSON(return.msg), WS=WS)   
+
+} # calculatePairedDistributionsOfPatientHistoryData
+#----------------------------------------------------------------------------------------------------
