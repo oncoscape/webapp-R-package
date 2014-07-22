@@ -11,7 +11,7 @@ var PairedDistributionsModule = (function () {
   var d3PlotBrush;
 
   //--------------------------------------------------------------------------------------------
-  initializeUI = function(){
+  function initializeUI (){
       generateRandomPairedDistributionsDataButton =  $("#generateRandomPairedDistributionsDataButton");
       generateRandomPairedDistributionsDataButton.click(requestRandomPairedDistributions);
 
