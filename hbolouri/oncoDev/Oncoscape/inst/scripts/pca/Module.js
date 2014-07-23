@@ -9,6 +9,7 @@ var PCAModule = (function () {
   var firstTime = true;
   var pcaSelectedRegion;    // from brushing
   var d3PlotBrush;
+  var pcaTabNumber = 2;
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -95,7 +96,7 @@ var PCAModule = (function () {
          pcaResults = JSON.parse(msg.payload);
          d3PcaScatterPlot(pcaResults);
          if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
-             $("#tabs").tabs( "option", "active", 1);
+             $("#tabs").tabs( "option", "active", pcaTabNumber);
          } // success
     else{
       console.log("pcaPlot about to call alert: " + msg)

@@ -7,6 +7,7 @@ var tableRef;
 var pcaButton;
 var timeLinesButton;
 var displayDiv;
+var ClinicalTableTabNum=1;
 
    //--------------------------------------------------------------------------------------------
    function initializeUI(){
@@ -141,7 +142,7 @@ var displayDiv;
       console.log(filterString)
       console.log("about to call fnFilter");
       tableRef.fnFilter(filterString, 0, true);
-      $("#tabs").tabs( "option", "active", 0);
+      $("#tabs").tabs( "option", "active", ClinicalTableTabNum);
       } // handleFilterClinicalDataTable 
 
 

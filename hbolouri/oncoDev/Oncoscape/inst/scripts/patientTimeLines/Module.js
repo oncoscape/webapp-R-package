@@ -5,7 +5,7 @@ var TimeLineModule = (function () {
      define(JAVASCRIPT_FORMAT, format)
 
      //--------------------------------------------------------------------------------------------------
-     var tabNumber = 2
+     var TimelineTabNumber = 3
      var margin = {top: 10, right: 15, bottom: 30, left: 20}
      var AlignBy = "--";
      var OrderBy = "--";
@@ -172,7 +172,7 @@ var TimeLineModule = (function () {
    function handlePatientIDs(msg){
       console.log("Module.TimeLine: handlePatientIDs");
       console.log(msg)
-    $("#tabs").tabs( "option", "active", tabNumber);
+    $("#tabs").tabs( "option", "active", TimelineTabNumber);
  //       InitialLoad=true;
      if(msg.status == "success"){
          patientIDs = msg.payload
