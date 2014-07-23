@@ -32,78 +32,12 @@ var TimeLineModule = (function () {
            PatientHeight = 3;
 
      var Events,EventsByID, FormatDate, EventTypes, ShowEvents;
-     var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update");
+     var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update", "UpdateMenuOptions");
      var InitialLoad=true;
 
        
-      //--------------------------------------------------------------------------------------------
-       function OpenDialogForAddedEvents(MenuType) {
-          console.log("======== Dialog for Adding Events")
-          dialog = $( "#AddCalculatedEvent" ).dialog({
-                autoOpen: false,
-                title: "Calculate Event",
-                height: 300,
-                width: 400,
-                buttons: {
-                  "Create": function(){
-                            var value = CreateCalculatedEvent()
-                            
-                            if(MenuType == "OrderBy"){
-                                   OrderBy = value;
-                                   console.log("OrderBy is now: " + OrderBy);
-                                   OrderEvents();
-                              } else if (MenuType == "SidePlot"){
-                                   SidePlotEvent = value;
-                                   console.log("SidePlotEvent is now: " + SidePlotEvent);
-                              }
-                              dialog.dialog("close")
-                               UpdateMenuOptions();
-                               dispatch.Update(); 
-                               dispatch.DisplayPatients();
-                       },
-                  Cancel: function() { dialog.dialog( "close" ); UpdateCalculatedEvent("--");}
-                },
-                close: function() {}
-                
-         });
-           dialog.dialog( "open" );
-          console.log("open dialog")
-
-     }
-      //--------------------------------------------------------------------------------------------
-     function UpdateCalculatedEvent(value){
-               
-          }
         //--------------------------------------------------------------------------------------------
-       function CreateCalculatedEvent() {
-                          var Name = $( "#Name" ).val();
-                          var Event1 = $( "#Event1" ).val();
-                          var Event2 = $( "#Event2" ).val();
-                          var TimeScale = $( "#TimeScale").val();
-                         console.log("Calculated Event: ")
-                         console.log(Name); console.log(Event1); console.log(Event2); console.log(TimeScale);
-
-                          var valid = true;
-      
-                          valid = valid && EventTypes.has(Event1);
-                          valid = valid && EventTypes.has(Event2);
-                           valid = valid && ["Days", "Months", "Years"].indexOf(TimeScale) !== -1;
-  
-                          if ( valid ) {
-                            CalculatedEvents.set(Name, [{Name: Name, Event1: Event1, Event2: Event2,  TimeScale: TimeScale}])
-                            console.log("Calculated Events Added: " + Name)
-                            console.log(CalculatedEvents);
-                             dialog.dialog( "close" );
-                             return(Name);
-                          } else {
-                                 console.log("Invalid Calculated Event");
-                               return("--");
-                          }
-                   }
-
-      
-       //--------------------------------------------------------------------------------------------
-       initializeUI = function(){
+       function initializeUI(){
              console.log("========== initializing Timeline UI")
            TimeLineDisplay = $("#TimeLineDisplay");
            TimeLineHandleWindowResize();
@@ -116,7 +50,7 @@ var TimeLineModule = (function () {
       };
 
      //--------------------------------------------------------------------------------------------------     
-     getDateDiff = function(Event1, Event2, TimeScale){
+     function getDateDiff(Event1, Event2, TimeScale){
           console.log("Date Difference of " +Event2+ " - " + Event1 + " in " + TimeScale)          
           var DateDiff = []; var TimeScaleValue=1
           if(TimeScale==="Days"){TimeScaleValue=OneDay;}
@@ -144,7 +78,7 @@ var TimeLineModule = (function () {
      }
      
      //--------------------------------------------------------------------------------------------------     
-     getHorizontalBarSize = function(Patient){
+     function getHorizontalBarSize(Patient){
      
           console.log("Creating Horizontal BarPlot: ", Patient)
           var BarSizes = []
@@ -157,34 +91,59 @@ var TimeLineModule = (function () {
      }
      
       //--------------------------------------------------------------------------------------------
-     TimeLineHandleWindowResize = function(){
+     function TimeLineHandleWindowResize(){
           TimeLineDisplay.width($(window).width() * 0.95);
            TimeLineDisplay.height($(window).height() * 0.80);
           if(!InitialLoad) {dispatch.DisplayPatients();}
      };
 
    //--------------------------------------------------------------------------------------------
-   broadcastSelection = function(){
+   function broadcastSelection(){
       console.log("broadcastSelection: " + selectedRegion);
       x1=selectedRegion[0][0];
       y1=selectedRegion[0][1];
       x2=selectedRegion[1][0];
       y2=selectedRegion[1][1];
       ids = [];
+      
       console.log(selectedRegion)
-      console.log(Events)
+      function LogTime(t){
+                     if(AlignBy === "--"){ 
+                               return t;
+                     } else{ var Dir = (t<0 ? -1 : 1); 
+                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2)
+                    }
+               }     
+  
       for(var i=0; i < Events.length; i++){
          event = Events[i];
-         if(event.PtNum >= y1/PatientHeight & event.PtNum <= y2/PatientHeight)
-            if(ids.indexOf(event.PatientID) === -1)
-            	ids.push(event.PatientID);
+         if(event.PtNum >= y1/PatientHeight & event.PtNum <= y2/PatientHeight){
+			// Patient within range
+            
+            if(event.date.length>1 ){
+                 if( (LogTime(event.date[0]-event.offset) >=x1 & LogTime(event.date[0]-event.offset) <= x2) ||
+	                 (LogTime(event.date[1]-event.offset) >=x1 & LogTime(event.date[1]-event.offset) <= x2) ){
+	                  // date endpoints within range
+	                
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            } else{
+                 if (LogTime(event.date-event.offset) >=x1 & LogTime(event.date-event.offset) <= x2) {
+	                  // date within range
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            }
+         }
       } // for i
-      if(ids.length > 0)
+    
+    if(ids.length > 0)
          sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
     };
 
 //--------------------------------------------------------------------------------------------
-  d3PlotBrushReader = function(){
+  function d3PlotBrushReader(){
      console.log("plotBrushReader");
      selectedRegion = d3PlotBrush.extent();
      //console.log("region: " + pcaSelectedRegion);
@@ -198,7 +157,7 @@ var TimeLineModule = (function () {
      }; // d3PlotBrushReader
 
    //--------------------------------------------------------------------------------------------
-  sendIDsToModule = function(ids, moduleName, title){
+  function sendIDsToModule(ids, moduleName, title){
        callback = moduleName + title;
        msg = {cmd:"sendIDsToModule",
               callback: callback,
@@ -210,7 +169,7 @@ var TimeLineModule = (function () {
       } // sendTissueIDsToModule
 
    //--------------------------------------------------------------------------------------------------     
-   handlePatientIDs = function(msg){
+   function handlePatientIDs(msg){
       console.log("Module.TimeLine: handlePatientIDs");
       console.log(msg)
     $("#tabs").tabs( "option", "active", tabNumber);
@@ -231,7 +190,7 @@ var TimeLineModule = (function () {
 
 
     //----------------------------------------------------------------------------------------------------
-    loadPatientDemoData = function(){
+    function loadPatientDemoData(){
 
        console.log("==== patientTimeLines  get Events from File");
 //       InitialLoad=true;
@@ -245,7 +204,7 @@ var TimeLineModule = (function () {
        } // loadPatientDemoData
 
      //--------------------------------------------------------------------------------------------------
-     DisplayPatientTimeLine = function(msg) {
+     function DisplayPatientTimeLine(msg) {
          console.log("==== DisplayPatientTimeLine  Module.js document.ready");
           console.log(msg);
 
@@ -302,6 +261,8 @@ var TimeLineModule = (function () {
           })
 
           console.log("CaculatedEvents stored:", CalculatedEvents)
+          console.log("Events stored:", Events)
+          console.log("EventsByID stored:", EventsByID)
 
           if(InitialLoad){
                dispatch.LoadOptions();
@@ -524,7 +485,7 @@ var TimeLineModule = (function () {
                     y = d3.scale.linear().range([TimeLineSize.height, 0]), 
                     yAxis = d3.svg.axis().scale(y).orient("left").ticks(0)
                     ;
-               var LogTime = function(t){
+               function LogTime(t){
                      if(AlignBy === "--"){ 
                                return t;
                      } else{ var Dir = (t<0 ? -1 : 1); 
@@ -752,14 +713,8 @@ var TimeLineModule = (function () {
                          }
                     })
      
-          //--------------------------------------------------------------------------------------------------
-          dispatch.on("LoadOptions.Menu",  function(){
-               console.log("======== LoadOptions.Menu")     
-               UpdateMenuOptions()
-          })
-     
-          //--------------------------------------------------------------------------------------------------
-          UpdateMenuOptions = function(){
+         //--------------------------------------------------------------------------------------------------
+         dispatch.on("UpdateMenuOptions.Menu", function(){
      
             console.log("======== UpdateMenuOptions")
             console.log("CalculatedEvents keys: ", CalculatedEvents.keys())
@@ -794,23 +749,95 @@ var TimeLineModule = (function () {
                          .text(function(d) { return d})
            ;
                      
-               }
+        })
+        //--------------------------------------------------------------------------------------------------
+          dispatch.on("LoadOptions.Menu",  function(){
+               console.log("======== LoadOptions.Menu")     
+               dispatch.UpdateMenuOptions()
+          })
+     
+          
           //--------------------------------------------------------------------------------------------------
           dispatch.on("Update.Menu", function(){
                console.log("======== Update.Menu")
-               OrderByMenu.select("option")
-                         .property("value", OrderBy)
-               AddSideBarMenu.select("option")
-                         .property("value", SidePlotEvent)
-console.log("SideBarMenu: ", AddSideBarMenu)
-				
-               AlignByMenu.select("option")
-                         .property("value", AlignBy)
+                
+               OrderByMenu.selectAll("option")
+                         .each(function(d){console.log(d); if(d === OrderBy) return d3.select(this).attr("selected", "selected")})
+               AddSideBarMenu.selectAll("option")
+                         .each(function(d){console.log(d); if(d === SidePlotEvent) return d3.select(this).attr("selected", "selected")})				
+               AlignByMenu.selectAll("option")
+                         .each(function(d){console.log(d); if(d === AlignBy) return d3.select(this).attr("selected", "selected")})
           })
      })
+     //--------------------------------------------------------------------------------------------
+     function UpdateCalculatedEvent(value){
+               
+          }
+        //--------------------------------------------------------------------------------------------
+       function CreateCalculatedEvent() {
+                          var Name = $( "#Name" ).val();
+                          var Event1 = $( "#Event1" ).val();
+                          var Event2 = $( "#Event2" ).val();
+                          var TimeScale = $( "#TimeScale").val();
+                         console.log("Calculated Event: ")
+                         console.log(Name); console.log(Event1); console.log(Event2); console.log(TimeScale);
+
+                          var valid = true;
+      
+                          valid = valid && EventTypes.has(Event1);
+                          valid = valid && EventTypes.has(Event2);
+                           valid = valid && ["Days", "Months", "Years"].indexOf(TimeScale) !== -1;
+  
+                          if ( valid ) {
+                            CalculatedEvents.set(Name, [{Name: Name, Event1: Event1, Event2: Event2,  TimeScale: TimeScale}])
+                            console.log("Calculated Events Added: " + Name)
+                            console.log(CalculatedEvents);
+                             dialog.dialog( "close" );
+                             return(Name);
+                          } else {
+                                 console.log("Invalid Calculated Event");
+                               return("--");
+                          }
+                   }
+
+      
+      //--------------------------------------------------------------------------------------------
+       function OpenDialogForAddedEvents(MenuType) {
+          console.log("======== Dialog for Adding Events")
+          dialog = $( "#AddCalculatedEvent" ).dialog({
+                autoOpen: false,
+                title: "Calculate Event",
+                height: 300,
+                width: 400,
+                buttons: {
+                  "Create": function(){
+                            var value = CreateCalculatedEvent()
+                            
+                            if(MenuType == "OrderBy"){
+                                   OrderBy = value;
+                                   console.log("OrderBy is now: " + OrderBy);
+                                   OrderEvents();
+                              } else if (MenuType == "SidePlot"){
+                                   SidePlotEvent = value;
+                                   console.log("SidePlotEvent is now: " + SidePlotEvent);
+                              }
+                              dialog.dialog("close")
+                               dispatch.UpdateMenuOptions();
+                               dispatch.Update(); 
+                               dispatch.DisplayPatients();
+                       },
+                  Cancel: function() { dialog.dialog( "close" ); UpdateCalculatedEvent("--");}
+                },
+                close: function() {}
+                
+         });
+           dialog.dialog( "open" );
+          console.log("open dialog")
+
+     }
 
      //--------------------------------------------------------------------------------------------------
-     AlignEvents = function(){
+     function AlignEvents(){
      
           console.log("========Align Event: "+ AlignBy);
           Events.forEach(function(d){ d.offset = 0; d.showPatient=true;})
@@ -835,7 +862,7 @@ console.log("SideBarMenu: ", AddSideBarMenu)
      }     
 
      //--------------------------------------------------------------------------------------------------
-     OrderEvents = function(){
+     function OrderEvents(){
      
           console.log("========Order Event: "+ OrderBy);
           var PatientOrderBy = []
@@ -867,7 +894,7 @@ console.log("SideBarMenu: ", AddSideBarMenu)
           console.log(PatientOrderBy)
      }     
      //--------------------------------------------------------------------------------------------------
-     OrderBySidePlot = function(){
+     function OrderBySidePlot(){
      
           console.log("========Order by SidePlot: "+ SidePlotEvent);
           var PatientOrderBy = [], Categories = [];
@@ -1000,7 +1027,7 @@ console.log("SideBarMenu: ", AddSideBarMenu)
           return true;
      }
      //--------------------------------------------------------------------------------------------------     
-     ToggleVisibleEvent =  function(d){
+     function ToggleVisibleEvent(d){
          
          var hide = false;
          var newFilters = [];
