@@ -27,4 +27,3 @@ addJavascriptMessageHandler("dateAndTimeString", myTimeFunction);
 //addDispatchOption('time',  myTimeFunction);
 //--------------------------------------------------------------------------------------------------
 </script>
-
