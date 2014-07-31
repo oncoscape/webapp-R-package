@@ -34,6 +34,8 @@
    <script src="http://s3.amazonaws.com/oncoscape/js/jquery.multi-select.js" type="text/javascript"></script>
    <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
+	<script type="text/javascript" src="http://mbostock.github.io/d3/talk/20111018/d3/d3.layout.js"></script>
+	 
 
 <script>
 
@@ -306,6 +308,29 @@ onReadyFunctions.push(function() {
 
 <script>
 //----------------------------------------------------------------------------------------------------
+var DashboardModule = (function () {
+
+     function DashboardInitializeUI(){
+
+      };
+
+     
+return{
+
+   init: function(){
+      onReadyFunctions.push(DashboardInitializeUI);
+//      addJavascriptMessageHandler("String", displayTime);
+      }
+   };
+
+}); // DateAndTimeModule
+//----------------------------------------------------------------------------------------------------
+Dashboard = DashboardModule();
+Dashboard.init();
+
+</script>
+<script>
+//----------------------------------------------------------------------------------------------------
 var ClinicalTableModule = (function () {
 
 var currentIDs;   // assign this to the full content in the tbl on startup
@@ -313,6 +338,7 @@ var tableRef;
 var pcaButton;
 var timeLinesButton;
 var displayDiv;
+var ClinicalTableTabNum=1;
 
    //--------------------------------------------------------------------------------------------
    function initializeUI(){
@@ -382,6 +408,22 @@ var displayDiv;
       msg.json = JSON.stringify(msg);
       //console.log(msg.json);
       socket.send(msg.json);
+      
+      msg = {cmd:"sendPatientIDsToSelectionTree",
+              callback: "addSelectionToTree",
+              status:"request",
+              payload:{  name: "table_filter",
+         			PatientIDs : currentIDs,
+         			Tab: "ClinicalTable",
+         			Settings: {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
+                      ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
+                      overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
+                      overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
+         		}
+             };
+      msg.json = JSON.stringify(msg);
+           console.log(msg.json);
+      socket.send(msg.json);
       } // sendTissueIDsToModule
 
 //----------------------------------------------------------------------------------------------------
@@ -447,7 +489,7 @@ var displayDiv;
       console.log(filterString)
       console.log("about to call fnFilter");
       tableRef.fnFilter(filterString, 0, true);
-      $("#tabs").tabs( "option", "active", 0);
+      $("#tabs").tabs( "option", "active", ClinicalTableTabNum);
       } // handleFilterClinicalDataTable 
 
 
@@ -527,10 +569,13 @@ var PCAModule = (function () {
   var firstTime = true;
   var pcaSelectedRegion;    // from brushing
   var d3PlotBrush;
-
+  var pcaTabNumber = 2;
+  var d3pcaDisplay;
+  
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
       pcaDisplay = $("#pcaDisplay");
+      d3pcaDisplay = d3.select("#pcaDisplay");
       pcaHandleWindowResize();
       broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
       //broadcastButton.button();
@@ -613,7 +658,7 @@ var PCAModule = (function () {
          pcaResults = JSON.parse(msg.payload);
          d3PcaScatterPlot(pcaResults);
          if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
-             $("#tabs").tabs( "option", "active", 1);
+             $("#tabs").tabs( "option", "active", pcaTabNumber);
          } // success
     else{
       console.log("pcaPlot about to call alert: " + msg)
@@ -697,8 +742,9 @@ var PCAModule = (function () {
      //console.log("xMax: " + xMax);   console.log("xMin: " + xMin);
      //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);
 
-     d3.select("svg").remove();  // so that append("svg") is not cumulative
 
+    d3pcaDisplay.select("svg").remove();  // so that append("svg") is not cumulative
+ 
      var xScale = d3.scale.linear()
                     .domain([xMin,xMax])
                     .range([padding, width - padding]);
@@ -706,6 +752,9 @@ var PCAModule = (function () {
      var yScale = d3.scale.linear()
                     .domain([yMin, yMax])
                     .range([height - padding, padding]); // note inversion 
+
+     var xTranslationForYAxis = xScale(0);
+     var yTranslationForXAxis = yScale(0);
 
      var xAxis = d3.svg.axis()
                    .scale(xScale)
@@ -717,17 +766,6 @@ var PCAModule = (function () {
                    .orient("left")
                    .ticks(5);
 
-     d3PlotBrush = d3.svg.brush()
-        .x(xScale)
-        .y(yScale)
-        .on("brushend", d3PlotBrushReader);
-
-     var svg = d3.select("#pcaDisplay")
-                 .append("svg")
-                 .attr("width", width)
-                 .attr("height", height)
-                 .call(d3PlotBrush);
-
      var tooltip = d3.select("body")
                      .attr("class", "tooltip")
                      .append("div")
@@ -736,7 +774,27 @@ var PCAModule = (function () {
                      .style("visibility", "hidden")
                      .text("a simple tooltip");
 
-     var circle = svg.selectAll("circle")
+     d3PlotBrush = d3.svg.brush()
+        .x(xScale)
+        .y(yScale)
+        .on("brushend", d3PlotBrushReader);
+
+     var PCAsvg = d3pcaDisplay.append("svg")
+                 .attr("width", width)
+                 .attr("height", height)
+                 .call(d3PlotBrush);
+
+     PCAsvg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0, " + yTranslationForXAxis + ")")
+        .call(xAxis);
+
+     PCAsvg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
+        .call(yAxis);
+
+     var circle = PCAsvg.append("g").selectAll("circle")
                      .data(dataset)
                      .enter()
                      .append("circle")
@@ -753,19 +811,7 @@ var PCAModule = (function () {
                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
       
-     var xTranslationForYAxis = xScale(0);
-     var yTranslationForXAxis = yScale(0);
-
-     svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0, " + yTranslationForXAxis + ")")
-        .call(xAxis);
-
-     svg.append("g")
-        .attr("class", "y axis")
-        .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
-        .call(yAxis);
-
+ 
      } // d3PcaScatterPlot
 
 
@@ -789,123 +835,82 @@ pca.init();
 </script>
 <script>
 //----------------------------------------------------------------------------------------------------
+var todoModule = (function () {
+
+var ToDoURL = "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/edit?usp=sharing"
+var ToDobutton;
+
+initializeUI = function(){
+    ToDobutton = $("#ToDoLink");
+    ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
+    };
+
+
+return{
+
+   init: function(){
+      onReadyFunctions.push(initializeUI);
+      }
+   };
+
+}); // DateAndTimeModule
+//----------------------------------------------------------------------------------------------------
+todo = todoModule();
+todo.init();
+
+</script>
+<script>
+//----------------------------------------------------------------------------------------------------
 var TimeLineModule = (function () {
 
      
 
      //--------------------------------------------------------------------------------------------------
-     var tabNumber = 2
-     var margin = {top: 10, right: 15, bottom: 30, left: 20}
+     var TimelineTabNumber = 3;
+     var TimeLineMargin = {top: 10, right: 15, bottom: 30, left: 20};
      var AlignBy = "--";
      var OrderBy = "--";
      var SidePlotEvent = "--";
      var TimeLineDisplay;
      var MainEvents = ["DOB","Encounter", "Diagnosis", "OR",  "MRI","Radiation", "Chemo","Progression",  "Status"]
      var MainEventColors = ["#17becf", "#d62728", "#8c564b","#ff7f0e", "#7f7f7f","#9467bd","#1f77b4","#2ca02c", "#bcbd22"]
-     var MainEventTextSpacing = [0, 70, 82, 85, 75, 72, 75, 75, 80]
-      var selectedRegion;    // from brushing
-     var d3PlotBrush;
+     var MainEventTextSpacing = [0, 70, 82, 85, 75, 72, 75, 75, 80];
+     var TimeLineSelectedRegion;    // from brushing
+     var TimeLined3PlotBrush;
      var dialog;
-        var broadcastButton;
-        var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
+     var TimeLinebroadcastButton;
+     var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
                             {Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
-                                           {Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
-                                        {Name:"FirstProgressionToDeath",Event1: "Progression", Event2: "Status", TimeScale: "Days"} ];
-      CalculatedEvents = d3.nest()
+                            {Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
+                            {Name:"FirstProgressionToDeath",Event1: "Progression", Event2: "Status", TimeScale: "Days"} ];
+         CalculatedEvents = d3.nest()
               .key(function(d) { return d.Name; })
               .map(CalculatedEvents, d3.map);
               
-             OneDay = 1000 *60 * 60*24,
-          color = d3.scale.ordinal().range(MainEventColors)
-          color.domain(MainEvents);
-           PatientHeight = 3;
+     var OneDay = 1000 *60 * 60*24;
+     var TimeLineColor = d3.scale.ordinal().range(MainEventColors).domain(MainEvents);
+     var PatientHeight = 3;
 
      var Events,EventsByID, FormatDate, EventTypes, ShowEvents;
-     var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update");
-     var InitialLoad=true;
+     var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update", "UpdateMenuOptions");
+     var TimeLineInitialLoad=true;
 
        
-      //--------------------------------------------------------------------------------------------
-       function OpenDialogForAddedEvents(MenuType) {
-          console.log("======== Dialog for Adding Events")
-          dialog = $( "#AddCalculatedEvent" ).dialog({
-                autoOpen: false,
-                title: "Calculate Event",
-                height: 300,
-                width: 400,
-                buttons: {
-                  "Create": function(){
-                            var value = CreateCalculatedEvent()
-                            
-                            if(MenuType == "OrderBy"){
-                                   OrderBy = value;
-                                   console.log("OrderBy is now: " + OrderBy);
-                                   OrderEvents();
-                              } else if (MenuType == "SidePlot"){
-                                   SidePlotEvent = value;
-                                   console.log("SidePlotEvent is now: " + SidePlotEvent);
-                              }
-                              dialog.dialog("close")
-                               UpdateMenuOptions();
-                               dispatch.Update(); 
-                               dispatch.DisplayPatients();
-                       },
-                  Cancel: function() { dialog.dialog( "close" ); UpdateCalculatedEvent("--");}
-                },
-                close: function() {}
-                
-         });
-           dialog.dialog( "open" );
-          console.log("open dialog")
-
-     }
-      //--------------------------------------------------------------------------------------------
-     function UpdateCalculatedEvent(value){
-               
-          }
         //--------------------------------------------------------------------------------------------
-       function CreateCalculatedEvent() {
-                          var Name = $( "#Name" ).val();
-                          var Event1 = $( "#Event1" ).val();
-                          var Event2 = $( "#Event2" ).val();
-                          var TimeScale = $( "#TimeScale").val();
-                         console.log("Calculated Event: ")
-                         console.log(Name); console.log(Event1); console.log(Event2); console.log(TimeScale);
-
-                          var valid = true;
-      
-                          valid = valid && EventTypes.has(Event1);
-                          valid = valid && EventTypes.has(Event2);
-                           valid = valid && ["Days", "Months", "Years"].indexOf(TimeScale) !== -1;
-  
-                          if ( valid ) {
-                            CalculatedEvents.set(Name, [{Name: Name, Event1: Event1, Event2: Event2,  TimeScale: TimeScale}])
-                            console.log("Calculated Events Added: " + Name)
-                            console.log(CalculatedEvents);
-                             dialog.dialog( "close" );
-                             return(Name);
-                          } else {
-                                 console.log("Invalid Calculated Event");
-                               return("--");
-                          }
-                   }
-
-      
-       //--------------------------------------------------------------------------------------------
-       initializeUI = function(){
+       function initializeUI(){
              console.log("========== initializing Timeline UI")
            TimeLineDisplay = $("#TimeLineDisplay");
            TimeLineHandleWindowResize();
-           broadcastButton = $("#SendSelectionToClinicalTable");
-              broadcastButton.click(broadcastSelection);
+           TimeLinebroadcastButton = $("#SendSelectionToClinicalTable");
+              TimeLinebroadcastButton.click(broadcastSelection);
            $(window).resize(TimeLineHandleWindowResize);
-           broadcastButton.prop("disabled",true);
+           TimeLinebroadcastButton.prop("disabled",true);
           
            dispatch.load();
       };
 
      //--------------------------------------------------------------------------------------------------     
-     getDateDiff = function(Event1, Event2, TimeScale){
+     function getDateDiff(Event1, Event2, TimeScale){
           console.log("Date Difference of " +Event2+ " - " + Event1 + " in " + TimeScale)          
           var DateDiff = []; var TimeScaleValue=1
           if(TimeScale==="Days"){TimeScaleValue=OneDay;}
@@ -933,7 +938,7 @@ var TimeLineModule = (function () {
      }
      
      //--------------------------------------------------------------------------------------------------     
-     getHorizontalBarSize = function(Patient){
+     function getHorizontalBarSize(Patient){
      
           console.log("Creating Horizontal BarPlot: ", Patient)
           var BarSizes = []
@@ -946,48 +951,74 @@ var TimeLineModule = (function () {
      }
      
       //--------------------------------------------------------------------------------------------
-     TimeLineHandleWindowResize = function(){
+     function TimeLineHandleWindowResize(){
+       	console.log("===== resizing Timeline window")
           TimeLineDisplay.width($(window).width() * 0.95);
            TimeLineDisplay.height($(window).height() * 0.80);
-          if(!InitialLoad) {dispatch.DisplayPatients();}
+          if(!TimeLineInitialLoad) {dispatch.DisplayPatients();}
      };
 
    //--------------------------------------------------------------------------------------------
-   broadcastSelection = function(){
-      console.log("broadcastSelection: " + selectedRegion);
-      x1=selectedRegion[0][0];
-      y1=selectedRegion[0][1];
-      x2=selectedRegion[1][0];
-      y2=selectedRegion[1][1];
+   function broadcastSelection(){
+      console.log("broadcastSelection: " + TimeLineSelectedRegion);
+      x1=TimeLineSelectedRegion[0][0];
+      y1=TimeLineSelectedRegion[0][1];
+      x2=TimeLineSelectedRegion[1][0];
+      y2=TimeLineSelectedRegion[1][1];
       ids = [];
-      console.log(selectedRegion)
-      console.log(Events)
+      
+      console.log(TimeLineSelectedRegion)
+      function LogTime(t){
+                     if(AlignBy === "--"){ 
+                               return t;
+                     } else{ var Dir = (t<0 ? -1 : 1); 
+                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2)
+                    }
+               }     
+  
       for(var i=0; i < Events.length; i++){
          event = Events[i];
-         if(event.PtNum >= y1/PatientHeight & event.PtNum <= y2/PatientHeight)
-            if(ids.indexOf(event.PatientID) === -1)
-            	ids.push(event.PatientID);
+         if(event.PtNum >= y1/PatientHeight & event.PtNum <= y2/PatientHeight){
+			// Patient within range
+            
+            if(event.date.length>1 ){
+                 if( (LogTime(event.date[0]-event.offset) >=x1 & LogTime(event.date[0]-event.offset) <= x2) ||
+	                 (LogTime(event.date[1]-event.offset) >=x1 & LogTime(event.date[1]-event.offset) <= x2) ){
+	                  // date endpoints within range
+	                
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            } else{
+                 if (LogTime(event.date-event.offset) >=x1 & LogTime(event.date-event.offset) <= x2) {
+	                  // date within range
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            }
+         }
       } // for i
-      if(ids.length > 0)
+    
+    if(ids.length > 0)
          sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
     };
 
 //--------------------------------------------------------------------------------------------
-  d3PlotBrushReader = function(){
+  function d3PlotBrushReader(){
      console.log("plotBrushReader");
-     selectedRegion = d3PlotBrush.extent();
+     TimeLineSelectedRegion = TimeLined3PlotBrush.extent();
      //console.log("region: " + pcaSelectedRegion);
-     y0 = selectedRegion[0][1];
-     y1 = selectedRegion[1][1];
+     y0 = TimeLineSelectedRegion[0][1];
+     y1 = TimeLineSelectedRegion[1][1];
      selectHeight = Math.abs(y0-y1);
      if(selectHeight > 1)
-        broadcastButton.prop("disabled", false);
+        TimeLinebroadcastButton.prop("disabled", false);
      else
-        broadcastButton.prop("disabled", true);
+        TimeLinebroadcastButton.prop("disabled", true);
      }; // d3PlotBrushReader
 
    //--------------------------------------------------------------------------------------------
-  sendIDsToModule = function(ids, moduleName, title){
+  function sendIDsToModule(ids, moduleName, title){
        callback = moduleName + title;
        msg = {cmd:"sendIDsToModule",
               callback: callback,
@@ -999,11 +1030,11 @@ var TimeLineModule = (function () {
       } // sendTissueIDsToModule
 
    //--------------------------------------------------------------------------------------------------     
-   handlePatientIDs = function(msg){
+   function handlePatientIDs(msg){
       console.log("Module.TimeLine: handlePatientIDs");
       console.log(msg)
-    $("#tabs").tabs( "option", "active", tabNumber);
- //       InitialLoad=true;
+    $("#tabs").tabs( "option", "active", TimelineTabNumber);
+ //       TimeLineInitialLoad=true;
      if(msg.status == "success"){
          patientIDs = msg.payload
          console.log("TimeLine handlePatientIds: " + patientIDs);
@@ -1020,10 +1051,10 @@ var TimeLineModule = (function () {
 
 
     //----------------------------------------------------------------------------------------------------
-    loadPatientDemoData = function(){
+    function loadPatientDemoData(){
 
        console.log("==== patientTimeLines  get Events from File");
-//       InitialLoad=true;
+//       TimeLineInitialLoad=true;
        cmd = "getCaisisPatientHistory";
        status = "request"
        callback = "DisplayPatientTimeLine"
@@ -1034,7 +1065,7 @@ var TimeLineModule = (function () {
        } // loadPatientDemoData
 
      //--------------------------------------------------------------------------------------------------
-     DisplayPatientTimeLine = function(msg) {
+     function DisplayPatientTimeLine(msg) {
          console.log("==== DisplayPatientTimeLine  Module.js document.ready");
           console.log(msg);
 
@@ -1091,10 +1122,12 @@ var TimeLineModule = (function () {
           })
 
           console.log("CaculatedEvents stored:", CalculatedEvents)
+          console.log("Events stored:", Events)
+          console.log("EventsByID stored:", EventsByID)
 
-          if(InitialLoad){
+          if(TimeLineInitialLoad){
                dispatch.LoadOptions();
-               InitialLoad=false;
+               TimeLineInitialLoad=false;
           }
           dispatch.DisplayPatients();
      }
@@ -1107,20 +1140,20 @@ var TimeLineModule = (function () {
           var width = $("#TimeLineDisplay").width();
           var height = $("#TimeLineDisplay").height();
           
-          var   TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.95*height - margin.top - margin.bottom)},
-                SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.95*height - margin.top - margin.bottom)},
+          var   TimeLineSize = {width: (0.8*width - TimeLineMargin.left - TimeLineMargin.right), height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)},
+                SideBarSize = {width: (0.2*width - TimeLineMargin.left - TimeLineMargin.right),  height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)},
                 legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
           var svg = d3.select("#TimeLineDisplay").append("svg")
-                   .attr("width", TimeLineSize.width + SideBarSize.width + 2*margin.left + 2*margin.right )
-                   .attr("height", SideBarSize.height + margin.top + margin.bottom + legendSize.height)
+                   .attr("width", TimeLineSize.width + SideBarSize.width + 2*TimeLineMargin.left + 2*TimeLineMargin.right )
+                   .attr("height", SideBarSize.height + TimeLineMargin.top + TimeLineMargin.bottom + legendSize.height)
                        ;
 
           var SidePlot = svg.append("g").attr("class", "SidePlotSVG")
-                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");     
+                  .attr("transform", "translate(" + TimeLineMargin.left + "," + TimeLineMargin.top + ")");     
              
           var TimeLine = svg.append("g").attr("class", "TimeLineSVG")
-                  .attr("transform", "translate(" + (SideBarSize.width+2*margin.left) + "," + margin.top + ")");
+                  .attr("transform", "translate(" + (SideBarSize.width+2*TimeLineMargin.left) + "," + TimeLineMargin.top + ")");
           
           
           var TextOffSet = d3.scale.ordinal()
@@ -1131,9 +1164,9 @@ var TimeLineModule = (function () {
           var legend = svg
                      .append("g")
                    .attr("class", "legend")
-                   .attr("transform", "translate(" + (SideBarSize.width+2* margin.left) + "," + (TimeLineSize.height+ margin.top + margin.bottom) + ")")
+                   .attr("transform", "translate(" + (SideBarSize.width+2* TimeLineMargin.left) + "," + (TimeLineSize.height+ TimeLineMargin.top + TimeLineMargin.bottom) + ")")
                     .selectAll(".legend")
-                     .data(color.domain().filter(function(d){
+                     .data(TimeLineColor.domain().filter(function(d){
                           return EventTypes.keys().indexOf(d) !== -1 })  )
               .enter().append("g")
             .attr("transform", function(d, i) { 
@@ -1142,7 +1175,7 @@ var TimeLineModule = (function () {
             legend.append("rect")
            .attr("width", 10)
            .attr("height", 10)
-           .style("fill", function(d) { return color(d)})
+           .style("fill", function(d) { return TimeLineColor(d)})
            .on("click", ToggleVisibleEvent);
 
             legend.append("text")
@@ -1161,12 +1194,12 @@ var TimeLineModule = (function () {
                    width = $("#TimeLineDisplay").width();
                     height = $("#TimeLineDisplay").height();
           
-                 TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.95*height - margin.top - margin.bottom)}
-                SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.95*height - margin.top - margin.bottom)}
+                 TimeLineSize = {width: (0.8*width - TimeLineMargin.left - TimeLineMargin.right), height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)}
+                SideBarSize = {width: (0.2*width - TimeLineMargin.left - TimeLineMargin.right),  height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)}
                 legendSize = {height: 0.05*height, width: TimeLineSize.width};
           
                svg.select(".legend")
-                   .attr("transform", "translate(" + (SideBarSize.width+2* margin.left) + "," + (TimeLineSize.height+ margin.top + margin.bottom) + ")")
+                   .attr("transform", "translate(" + (SideBarSize.width+2* TimeLineMargin.left) + "," + (TimeLineSize.height+ TimeLineMargin.top + TimeLineMargin.bottom) + ")")
           
                var y = d3.scale.linear().range([SideBarSize.height, 0]), 
                     yAxis = d3.svg.axis().scale(y).orient("left").ticks(0),          
@@ -1278,7 +1311,7 @@ var TimeLineModule = (function () {
                          .attr("width", function(d) { return Math.abs(x(d.width) - x(0));  })
                          .attr("height", function(d) { return PatientHeight; })
                          .attr("fill", function(d){ 
-                              var ColorShade =  d3.rgb(color(SidePlotEvent)); //d3.rgb("grey"); //
+                              var ColorShade =  d3.rgb(TimeLineColor(SidePlotEvent)); //d3.rgb("grey"); //
                               if(Categories.length>0){ 
                                    return ColorShade.brighter((Categories.indexOf(d.info) % 5)/2) };
                               return ColorShade;
@@ -1313,7 +1346,7 @@ var TimeLineModule = (function () {
                     y = d3.scale.linear().range([TimeLineSize.height, 0]), 
                     yAxis = d3.svg.axis().scale(y).orient("left").ticks(0)
                     ;
-               var LogTime = function(t){
+               function LogTime(t){
                      if(AlignBy === "--"){ 
                                return t;
                      } else{ var Dir = (t<0 ? -1 : 1); 
@@ -1348,12 +1381,12 @@ var TimeLineModule = (function () {
                y.domain([d3.min(Events,function(d) { return d.PtNum; }),d3.max(Events,function(d) { return PatientHeight*d.PtNum; })]);
 
 
-             d3PlotBrush = d3.svg.brush()
+             TimeLined3PlotBrush = d3.svg.brush()
                .x(x)
                .y(y)
                .on("brushend", d3PlotBrushReader);
 
-               TimeLine.call(d3PlotBrush);
+               TimeLine.call(TimeLined3PlotBrush);
 
 
             TimeLine.append("g")
@@ -1390,7 +1423,7 @@ var TimeLineModule = (function () {
                     .attr("x2", function(d) { return x(LogTime((d.date[1] - d.offset)/TimeScale));  })
                     .attr("y2", function(d) { return y(PatientHeight*d.PtNum+ EventOffset.get(d.Name)); })
                     .attr("stroke", function(d){ 
-                         var ColorShade = d3.rgb(color(d.Name)); 
+                         var ColorShade = d3.rgb(TimeLineColor(d.Name)); 
                          if(d3.keys(d).indexOf("Type") !== -1){ 
                               return ColorShade.brighter((EventTypes.get(d.Name).indexOf(d.Type) % 5)/2) };
                          return ColorShade;
@@ -1418,7 +1451,7 @@ var TimeLineModule = (function () {
                TimePoint.enter()
                     .append("circle")
                     .attr("class", "circle")
-                    .style("fill", function(d){ return color(d.Name) })
+                    .style("fill", function(d){ return TimeLineColor(d.Name) })
                     .attr("cx", function(d) {return x(LogTime((d.date -d.offset)/TimeScale)); })
                     .attr("cy", function(d) { return y(PatientHeight*d.PtNum); })
                     .attr("r", function(d) { return PatientHeight;})
@@ -1444,13 +1477,13 @@ var TimeLineModule = (function () {
               var width = $("#TimeLineDisplay").width();
                var height = $("#TimeLineDisplay").height();
           
-               var   TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.95*height - margin.top - margin.bottom)},
-                     SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.95*height - margin.top - margin.bottom)},
+               var   TimeLineSize = {width: (0.8*width - TimeLineMargin.left - TimeLineMargin.right), height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)},
+                     SideBarSize = {width: (0.2*width - TimeLineMargin.left - TimeLineMargin.right),  height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)},
                      legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
                console.log("======== load.Menu")
                  var  AlignByMenu = d3.select("#AlignByDiv")
-                   .attr("transform", "translate(" + (3*margin.left+SideBarSize.width+margin.right) + ",0)")
+                   .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
                     .append("g")
                      .append("select")
                     .on("change", function() {
@@ -1467,7 +1500,7 @@ var TimeLineModule = (function () {
                 ;
 
                  var  OrderByMenu = d3.select("#OrderByDiv")
-                   .attr("transform", "translate(" + (margin.left+SideBarSize.width+margin.left+margin.right) + ",0)")
+                   .attr("transform", "translate(" + (TimeLineMargin.left+SideBarSize.width+TimeLineMargin.left+TimeLineMargin.right) + ",0)")
                      .append("g")
                    .append("select")
                     .on("change", function() {
@@ -1492,7 +1525,7 @@ var TimeLineModule = (function () {
                 ;
                var  AddSideBarMenu = d3.select("#AddSideBar")
                     .style("display", "inline-block") 
-                    .style("width", (SideBarSize.width + 2*margin.left + margin.right) +"px" )
+                    .style("width", (SideBarSize.width + 2*TimeLineMargin.left + TimeLineMargin.right) +"px" )
                     .append("g")
                     .append("select")
                     .on("change", function() {SidePlotEvent = this.value; 
@@ -1541,14 +1574,8 @@ var TimeLineModule = (function () {
                          }
                     })
      
-          //--------------------------------------------------------------------------------------------------
-          dispatch.on("LoadOptions.Menu",  function(){
-               console.log("======== LoadOptions.Menu")     
-               UpdateMenuOptions()
-          })
-     
-          //--------------------------------------------------------------------------------------------------
-          UpdateMenuOptions = function(){
+         //--------------------------------------------------------------------------------------------------
+         dispatch.on("UpdateMenuOptions.Menu", function(){
      
             console.log("======== UpdateMenuOptions")
             console.log("CalculatedEvents keys: ", CalculatedEvents.keys())
@@ -1583,23 +1610,95 @@ var TimeLineModule = (function () {
                          .text(function(d) { return d})
            ;
                      
-               }
+        })
+        //--------------------------------------------------------------------------------------------------
+          dispatch.on("LoadOptions.Menu",  function(){
+               console.log("======== LoadOptions.Menu")     
+               dispatch.UpdateMenuOptions()
+          })
+     
+          
           //--------------------------------------------------------------------------------------------------
           dispatch.on("Update.Menu", function(){
                console.log("======== Update.Menu")
-               OrderByMenu.select("option")
-                         .property("value", OrderBy)
-               AddSideBarMenu.select("option")
-                         .property("value", SidePlotEvent)
-console.log("SideBarMenu: ", AddSideBarMenu)
-				
-               AlignByMenu.select("option")
-                         .property("value", AlignBy)
+                
+               OrderByMenu.selectAll("option")
+                         .each(function(d){console.log(d); if(d === OrderBy) return d3.select(this).attr("selected", "selected")})
+               AddSideBarMenu.selectAll("option")
+                         .each(function(d){console.log(d); if(d === SidePlotEvent) return d3.select(this).attr("selected", "selected")})				
+               AlignByMenu.selectAll("option")
+                         .each(function(d){console.log(d); if(d === AlignBy) return d3.select(this).attr("selected", "selected")})
           })
      })
+     //--------------------------------------------------------------------------------------------
+     function UpdateCalculatedEvent(value){
+               
+          }
+        //--------------------------------------------------------------------------------------------
+       function CreateCalculatedEvent() {
+                          var Name = $( "#Name" ).val();
+                          var Event1 = $( "#Event1" ).val();
+                          var Event2 = $( "#Event2" ).val();
+                          var TimeScale = $( "#TimeScale").val();
+                         console.log("Calculated Event: ")
+                         console.log(Name); console.log(Event1); console.log(Event2); console.log(TimeScale);
+
+                          var valid = true;
+      
+                          valid = valid && EventTypes.has(Event1);
+                          valid = valid && EventTypes.has(Event2);
+                           valid = valid && ["Days", "Months", "Years"].indexOf(TimeScale) !== -1;
+  
+                          if ( valid ) {
+                            CalculatedEvents.set(Name, [{Name: Name, Event1: Event1, Event2: Event2,  TimeScale: TimeScale}])
+                            console.log("Calculated Events Added: " + Name)
+                            console.log(CalculatedEvents);
+                             dialog.dialog( "close" );
+                             return(Name);
+                          } else {
+                                 console.log("Invalid Calculated Event");
+                               return("--");
+                          }
+                   }
+
+      
+      //--------------------------------------------------------------------------------------------
+       function OpenDialogForAddedEvents(MenuType) {
+          console.log("======== Dialog for Adding Events")
+          dialog = $( "#AddCalculatedEvent" ).dialog({
+                autoOpen: false,
+                title: "Calculate Event",
+                height: 300,
+                width: 400,
+                buttons: {
+                  "Create": function(){
+                            var value = CreateCalculatedEvent()
+                            
+                            if(MenuType == "OrderBy"){
+                                   OrderBy = value;
+                                   console.log("OrderBy is now: " + OrderBy);
+                                   OrderEvents();
+                              } else if (MenuType == "SidePlot"){
+                                   SidePlotEvent = value;
+                                   console.log("SidePlotEvent is now: " + SidePlotEvent);
+                              }
+                              dialog.dialog("close")
+                               dispatch.UpdateMenuOptions();
+                               dispatch.Update(); 
+                               dispatch.DisplayPatients();
+                       },
+                  Cancel: function() { dialog.dialog( "close" ); UpdateCalculatedEvent("--");}
+                },
+                close: function() {}
+                
+         });
+           dialog.dialog( "open" );
+          console.log("open dialog")
+
+     }
 
      //--------------------------------------------------------------------------------------------------
-     AlignEvents = function(){
+     function AlignEvents(){
      
           console.log("========Align Event: "+ AlignBy);
           Events.forEach(function(d){ d.offset = 0; d.showPatient=true;})
@@ -1624,7 +1723,7 @@ console.log("SideBarMenu: ", AddSideBarMenu)
      }     
 
      //--------------------------------------------------------------------------------------------------
-     OrderEvents = function(){
+     function OrderEvents(){
      
           console.log("========Order Event: "+ OrderBy);
           var PatientOrderBy = []
@@ -1656,7 +1755,7 @@ console.log("SideBarMenu: ", AddSideBarMenu)
           console.log(PatientOrderBy)
      }     
      //--------------------------------------------------------------------------------------------------
-     OrderBySidePlot = function(){
+     function OrderBySidePlot(){
      
           console.log("========Order by SidePlot: "+ SidePlotEvent);
           var PatientOrderBy = [], Categories = [];
@@ -1789,7 +1888,7 @@ console.log("SideBarMenu: ", AddSideBarMenu)
           return true;
      }
      //--------------------------------------------------------------------------------------------------     
-     ToggleVisibleEvent =  function(d){
+     function ToggleVisibleEvent(d){
          
          var hide = false;
          var newFilters = [];
@@ -1837,6 +1936,414 @@ PatientTimeLine.init();
 </script>
 
 
+
+<script>
+//----------------------------------------------------------------------------------------------------
+var SavedSelectionModule = (function (){
+     
+     var nodecount_i;
+     var height;
+     var root;
+    
+    var	tree, diagonal;
+	var SaveSelectedDisplay;
+    var InitialLoad;
+    var SaveSelectedsvg;
+    var CurrentSelection;
+    var SelectionNames= [];
+  
+//--------------------------------------------------------------------------------------------
+  function handleWindowResize(){
+      SaveSelectedDisplay.width($(window).width() * 0.95);
+      SaveSelectedDisplay.height($(window).height() * 0.95);
+     }; // handleWindowResize
+
+   
+//----------------------------------------------------------------------------------------------------
+	function initializeSelectionUI(){			     
+	 console.log("====== Initializing Selection UI")
+
+        nodecount_i=0;
+         var margin = {top: 10, right: 15, bottom: 30, left: 20};
+        InitialLoad = true;
+	    SaveSelectedDisplay = $("#SavedSelectionTreeDiv");
+        handleWindowResize();
+        
+        height = SaveSelectedDisplay.height(); //200;      
+        var width = SaveSelectedDisplay.width(); //200;       
+         
+        tree = d3.layout.tree()
+         .size([(height-margin.top-margin.bottom), (width-margin.left-margin.right)]);
+     
+        diagonal = d3.svg.diagonal()
+         .projection(function(d) { return [d.y, d.x]; });
+          
+        SaveSelectedsvg = d3.select("#SavedSelectionTreeDiv").append("svg")
+         .attr("width", width)
+         .attr("height", height)
+         .append("g")
+             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+         $(window).resize(handleWindowResize);
+
+		// if date modified needs updated
+		//http://www.dynamicdrive.com/forums/archive/index.php/t-63637.html
+
+       };
+       
+//----------------------------------------------------------------------------------------------------
+     function testingAddSavedSelection() {
+       msg = {cmd:"test",
+              callback: "",
+              status:"request",
+              payload:{  name: "test set",
+         			PatientIDs : "random set of IDs here",
+         			Tab: "None",
+         			Settings: "gibberish"
+         		}
+             };
+        addSavedSelection(msg);
+
+}
+//----------------------------------------------------------------------------------------------------
+     function addSavedSelection(msg) {
+       
+       console.log("=== Saving Selection", msg)
+ 
+ 		var i=0;
+ 		var nameSuffix = ""
+ 		var nodeName =msg.payload.name 
+        while(SelectionNames.indexOf(nodeName.concat(nameSuffix)) !== -1){
+		    i++;
+		    nameSuffix = "_".concat(i)	
+		}
+       newNode = msg.payload
+       newNode.name = nodeName.concat(nameSuffix)
+       SelectionNames.push(newNode.name)
+       
+       if(CurrentSelection.children){ 
+            CurrentSelection.children.push(newNode);
+       } else { CurrentSelection.children = [newNode] }
+       
+       var currentNode = CurrentSelection
+       var update_id = CurrentSelection.id
+       while(currentNode.parent){ 
+          currentNode.parent.children[ currentNode.parent.children.indexOf(function(d) {  d.id ===update_id})] = currentNode;
+          currentNode = currentNode.parent
+        }
+        root = currentNode;
+       updateSavedSelection(root);
+       
+       CurrentSelection = CurrentSelection.children.filter(function(d){ return d.id === nodecount_i })[0]
+    console.log("new tree: ", root)
+    console.log("CurrentSelection: ", CurrentSelection)
+	}       
+
+
+//----------------------------------------------------------------------------------------------------
+function make_editable(d, field)
+{
+// code from https://gist.github.com/GerHobbelt/2653660
+
+    console.log("make_editable", arguments);
+ 
+    this
+      .on("mouseover", function() {
+        d3.select(this).style("fill", "red");
+      })
+      .on("mouseout", function() {
+        d3.select(this).style("fill", null);
+      })
+      .on("click", function(d) {
+        var p = this.parentNode;
+        console.log(this, arguments);
+ 
+        // inject a HTML form to edit the content here...
+ 
+        // bug in the getBBox logic here, but don't know what I've done wrong here;
+        // anyhow, the coordinates are completely off & wrong. :-((
+        var xy = this.getBBox();
+        var p_xy = p.getBBox();
+ 
+        xy.x -= p_xy.x;
+        xy.y -= p_xy.y;
+ 
+        var el = d3.select(this);
+        var p_el = d3.select(p);
+ 
+        var frm = p_el.append("foreignObject");
+ 
+        var inp = frm
+            .attr("x", xy.x)
+            .attr("y", xy.y)
+            .attr("width", 300)
+            .attr("height", 25)
+            .append("xhtml:form")
+                    .append("input")
+                        .attr("value", function() {
+                            // nasty spot to place this call, but here we are sure that the <input> tag is available
+                            // and is handily pointed at by 'this':
+                            this.focus();
+ 
+                            return d[field];
+                        })
+                        .attr("style", "width: 294px;")
+                        // make the form go away when you jump out (form looses focus) or hit ENTER:
+                        .on("blur", function() {
+                            console.log("blur", this, arguments);
+ 
+                            var txt = inp.node().value;
+ 
+                            d[field] = txt;
+                            el
+                                .text(function(d) { return d[field]; });
+ 
+                            // Note to self: frm.remove() will remove the entire <g> group! Remember the D3 selection logic!
+                            p_el.selectAll(function() { return this.getElementsByTagName("foreignObject"); }).remove();
+                        })
+                        .on("keydown", function() {
+                            console.log("keypress", this, arguments);
+ 
+                            // IE fix
+                            if (!d3.event)
+                                d3.event = window.event;
+ 
+                            var e = d3.event;
+                            if (e.keyCode == 13)
+                            {
+                                if (typeof(e.cancelBubble) !== 'undefined') // IE
+                                  e.cancelBubble = true;
+                                if (e.stopPropagation)
+                                  e.stopPropagation();
+                                e.preventDefault();
+ 
+                                var txt = inp.node().value;
+ 
+                                d[field] = txt;
+                                el
+                                    .text(function(d) { return d[field]; });
+ 
+                                // odd. Should work in Safari, but the debugger crashes on this instead.
+                                // Anyway, it SHOULD be here and it doesn't hurt otherwise.
+                                p_el.selectAll(function() { return this.getElementsByTagName("foreignObject"); }).remove();
+                            }
+                        });
+      });
+}
+//----------------------------------------------------------------------------------------------------
+     function updateSavedSelection(source) {
+       var duration = d3.event && d3.event.altKey ? 5000 : 500;
+     
+     var tooltip = d3.select("body")
+                .attr("class", "tooltip")
+                .append("div")
+                .style("position", "absolute")
+                .style("z-index", "20")
+                .style("visibility", "hidden")
+                ;
+     
+       // Compute the new tree layout.
+       var nodes = tree.nodes(root).reverse();
+       console.log("Nodes", nodes);
+       
+       // Normalize for fixed-depth.
+       nodes.forEach(function(d) { d.y = d.depth * 180; });
+     
+       // Update the nodes…
+       var node =  SaveSelectedsvg.selectAll("g.node")
+           .data(nodes, function(d) { return d.id || (d.id = ++nodecount_i); });
+     
+       // Enter any new nodes at the parent's previous position.
+       var nodeEnter = node.enter().append("g")
+           .attr("class", "node")
+           .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+            .on("click", function(d) { toggle(d); updateSavedSelection(d); });
+     
+       nodeEnter.append("circle")
+           .attr("r", 1e-6)
+           .style("fill", function(d) { return d._children ? "lightsteelblue" : "grey"; })
+           .on("mouseover", function(d){
+                  var settings = getSettingsString(d);
+                    tooltip.html(d.PatientIDs.length + " Patients from " + d.Tab + "<br></br>Settings: " + settings)
+                     return tooltip.style("visibility", "visible"); })
+           .on("mousemove", function(){return tooltip.style("top",
+                         (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+           .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+           ;
+     
+       nodeEnter.append("text")
+           .attr("class", "NodeName")
+           .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+           .attr("dy", "1em")
+           .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+           .text(function(d) { return d.name; })
+           .style("fill-opacity", 1e-6)
+           .call(make_editable, "NodeName");
+     
+       // Transition nodes to their new position.
+       var nodeUpdate = node.transition()
+           .duration(duration)
+           .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+     
+       nodeUpdate.select("circle")
+           .attr("r", 4.5)
+           .style("fill", function(d) { return d._children ? "lightsteelblue" : "grey"; });
+     
+       nodeUpdate.select("text")
+           .style("fill-opacity", 1);
+     
+       // Transition exiting nodes to the parent's new position.
+       var nodeExit = node.exit().transition()
+           .duration(duration)
+           .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+           .remove();
+     
+       nodeExit.select("circle")
+           .attr("r", 1e-6);
+     
+       nodeExit.select("text")
+           .style("fill-opacity", 1e-6);
+     
+       // Update the links…
+       var link = SaveSelectedsvg.selectAll("path.link")
+           .data(tree.links(nodes), function(d) { return d.target.id; });
+     
+       // Enter any new links at the parent's previous position.
+       link.enter().insert("path", "g")
+           .attr("class", "link")
+           .attr("d", function(d) {
+             var o = {x: source.x0, y: source.y0};
+             return diagonal({source: o, target: o});
+           })
+         .transition()
+           .duration(duration)
+           .attr("d", diagonal);
+     
+       // Transition links to their new position.
+       link.transition()
+           .duration(duration)
+           .attr("d", diagonal);
+     
+       // Transition exiting nodes to the parent's new position.
+       link.exit().transition()
+           .duration(duration)
+           .attr("d", function(d) {
+             var o = {x: source.x, y: source.y};
+             return diagonal({source: o, target: o});
+           })
+           .remove();
+     
+       // Stash the old positions for transition.
+       nodes.forEach(function(d) {
+         d.x0 = d.x;
+         d.y0 = d.y;
+       });
+     }
+     
+//----------------------------------------------------------------------------------------------------
+     // Toggle children.
+     function toggle(d) {
+       if (d.children) {
+         d._children = d.children;
+         d.children = null;
+       } else {
+         d.children = d._children;
+         d._children = null;
+       }
+     }
+//----------------------------------------------------------------------------------------------------
+    function getSettingsString(d){
+		console.log("change setting string: ",  d)
+		var SettingsString = d.Settings;
+		if(d.Tab === "ClinicalTable"){
+		   if(d.Settings.ageAtDxMin){
+		       SettingsString = "AgeDx [" + d.Settings.ageAtDxMin + ", " + d.Settings.ageAtDxMax + "] <br>"
+		                  + "Survival [" + d.Settings.overallSurvivalMin + ", " + d.Settings.overallSurvivalMax + "]";
+		    }
+		}
+		return SettingsString;
+		
+}
+//----------------------------------------------------------------------------------------------------
+    function loadPatientData(){
+
+       console.log("==== SavedSelection  get all PatientIDs from ClinicalTable");
+       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
+       status = "request"
+       callback = "SetupSavedSelectionTree"
+          filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
+          msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
+        // console.log(JSON.stringify(msg))
+       socket.send(JSON.stringify(msg));
+       } // loadPatientDemoData
+
+//----------------------------------------------------------------------------------------------------
+     function SetupSavedSelectionTree(msg){			     
+
+		console.log("===== Setup SavedSelection Tree")
+         console.log(msg)
+
+         var AllData = msg.payload
+         var PtIDs = []; 
+         for(var i=0;i<AllData.length; i++){
+         	if(PtIDs.indexOf(AllData[i].PatientID) === -1)
+         		PtIDs.push(AllData[i].PatientID)
+         }
+         console.log("All Patients: ", PtIDs)
+         root = {   "name": "All Patients",
+         			"PatientIDs" : PtIDs,
+         			"Tab": "ClinicalTable",
+         			"Settings": "None"
+         		}
+         
+         root.x0 = height / 2;
+         root.y0 = 0;
+             	
+         function toggleAll(d) {
+           if (d.children) {
+             d.children.forEach(toggleAll);
+             toggle(d);
+           }
+         }
+         
+       InitialLoad = false;
+       updateSavedSelection(root); 
+       CurrentSelection = root;
+       SelectionNames.push(root.name);
+  
+       console.log("root: ", root)
+      
+ //      testingAddSavedSelection()
+       
+     }     
+  
+//--------------------------------------------------------------------------------------------
+ //    function HandleWindowResize(){
+ //         Display.width($(window).width() * 0.95);
+ //         Display.height($(window).height() * 0.80);
+ //         if(!InitialLoad) {updateSavedSelection(root);}
+ //    };
+  
+//----------------------------------------------------------------------------------------------------
+     
+       return{
+     
+        init: function(){
+           onReadyFunctions.push(initializeSelectionUI);
+           addJavascriptMessageHandler("SetupSavedSelectionTree", SetupSavedSelectionTree);
+ 		   addJavascriptMessageHandler("addSelectionToTree", addSavedSelection);
+          socketConnectedFunctions.push(loadPatientData);
+           }
+        };
+     
+}); // SavedSelectionModule
+ 
+
+//----------------------------------------------------------------------------------------------------
+SavedSelection = SavedSelectionModule();
+SavedSelection.init();
+
+</script>
 <script>
 onReadyFunctions.push(function() {
     console.log("====== tabapps document ready");
@@ -1871,13 +2378,36 @@ onReadyFunctions.push(function() {
 
 
 
+
 <div id="tabs">
    <ul>
+     <li><a href="#DashboardDiv">Dashboard</a></li>
      <li><a href="#clinicalDataModuleDiv">Clinical Data</a></li>
      <li><a href="#pcaDiv">PCA</a></li>
      <li><a href="#patientTimeLinesDiv">Timelines</a></li>
      <li><a href="#todoDiv">Todo</a></li>
+     <li><a href="#SavedSelectionDiv">Saved Selection</a></li>
    </ul>
+
+<style>
+ul.UserDocs {
+    list-style-type: circle;
+}
+</style>
+
+
+<div id="DashboardDiv">
+<h3> Oncoscape </h3>
+   <p> Welcome to Oncoscape! </p>
+   <p> This page will include:</p>
+   <ul class="UserDocs">
+     <li> a welcome message</li>
+     <li> links to download vignettes </li>
+     <li> Explanation of available data </li>
+     <li> Tooltips/Tutorial </li>
+     <li> link to download/install software </li>
+   </ul>
+</div>
 
 <style>
 
@@ -2147,7 +2677,7 @@ th, td { white-space: nowrap; }
 	     <span id="AddSideBar">Features: </span>
 	     <span id="AlignByDiv">Align By: </span>
 	     <span id="OrderByDiv">Order By: </span>
-	     <button id="SaveImageDiv">Save Image </button>
+<!--	     <button id="SaveImageDiv">Save Image </button>  -->
        	 <button id="SendSelectionToClinicalTable">To Clinical Data... </button>
      </div>
      <div id="TimeLineDisplay">
@@ -2171,12 +2701,46 @@ th, td { white-space: nowrap; }
 
 <div id="todoDiv">
 <h3> google doc test </h3>
+   <button id=ToDoLink>Edit The Table</button>
    <iframe
       height="600px",
       width="95%",
-      src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml?widget=true&amp;headers=false">
+      src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false">  
    </iframe>
 </div>
+
+<style>
+.node circle {
+  cursor: pointer;
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.node text {
+  font-size: 11px;
+}
+
+path.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+</style>
+
+
+  <div id="SavedSelectionDiv">
+     <div id="SavedSelectionTreeDiv"></div>
+  <div id="SelectionBanner">
+    <div id="Acknowledgement">Created by Lisa McFerrin</div>
+    <script language="Javascript">
+		document.write("This page was last modified on: " + document.lastModified +"");
+	</script>
+  </div>
+
+  </div>
+  
+ 
 
 
 </div>

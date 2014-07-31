@@ -77,6 +77,22 @@ var ClinicalTableTabNum=1;
       msg.json = JSON.stringify(msg);
       //console.log(msg.json);
       socket.send(msg.json);
+      
+      msg = {cmd:"sendPatientIDsToSelectionTree",
+              callback: "addSelectionToTree",
+              status:"request",
+              payload:{  name: "table_filter",
+         			PatientIDs : currentIDs,
+         			Tab: "ClinicalTable",
+         			Settings: {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
+                      ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
+                      overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
+                      overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
+         		}
+             };
+      msg.json = JSON.stringify(msg);
+           console.log(msg.json);
+      socket.send(msg.json);
       } // sendTissueIDsToModule
 
 //----------------------------------------------------------------------------------------------------

@@ -10,10 +10,12 @@ var PCAModule = (function () {
   var pcaSelectedRegion;    // from brushing
   var d3PlotBrush;
   var pcaTabNumber = 2;
-
+  var d3pcaDisplay;
+  
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
       pcaDisplay = $("#pcaDisplay");
+      d3pcaDisplay = d3.select("#pcaDisplay");
       pcaHandleWindowResize();
       broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
       //broadcastButton.button();
@@ -180,8 +182,9 @@ var PCAModule = (function () {
      //console.log("xMax: " + xMax);   console.log("xMin: " + xMin);
      //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);
 
-     d3.select("svg").remove();  // so that append("svg") is not cumulative
 
+    d3pcaDisplay.select("svg").remove();  // so that append("svg") is not cumulative
+ 
      var xScale = d3.scale.linear()
                     .domain([xMin,xMax])
                     .range([padding, width - padding]);
@@ -189,6 +192,9 @@ var PCAModule = (function () {
      var yScale = d3.scale.linear()
                     .domain([yMin, yMax])
                     .range([height - padding, padding]); // note inversion 
+
+     var xTranslationForYAxis = xScale(0);
+     var yTranslationForXAxis = yScale(0);
 
      var xAxis = d3.svg.axis()
                    .scale(xScale)
@@ -200,17 +206,6 @@ var PCAModule = (function () {
                    .orient("left")
                    .ticks(5);
 
-     d3PlotBrush = d3.svg.brush()
-        .x(xScale)
-        .y(yScale)
-        .on("brushend", d3PlotBrushReader);
-
-     var svg = d3.select("#pcaDisplay")
-                 .append("svg")
-                 .attr("width", width)
-                 .attr("height", height)
-                 .call(d3PlotBrush);
-
      var tooltip = d3.select("body")
                      .attr("class", "tooltip")
                      .append("div")
@@ -219,7 +214,27 @@ var PCAModule = (function () {
                      .style("visibility", "hidden")
                      .text("a simple tooltip");
 
-     var circle = svg.selectAll("circle")
+     d3PlotBrush = d3.svg.brush()
+        .x(xScale)
+        .y(yScale)
+        .on("brushend", d3PlotBrushReader);
+
+     var PCAsvg = d3pcaDisplay.append("svg")
+                 .attr("width", width)
+                 .attr("height", height)
+                 .call(d3PlotBrush);
+
+     PCAsvg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0, " + yTranslationForXAxis + ")")
+        .call(xAxis);
+
+     PCAsvg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
+        .call(yAxis);
+
+     var circle = PCAsvg.append("g").selectAll("circle")
                      .data(dataset)
                      .enter()
                      .append("circle")
@@ -236,19 +251,7 @@ var PCAModule = (function () {
                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
       
-     var xTranslationForYAxis = xScale(0);
-     var yTranslationForXAxis = yScale(0);
-
-     svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0, " + yTranslationForXAxis + ")")
-        .call(xAxis);
-
-     svg.append("g")
-        .attr("class", "y axis")
-        .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
-        .call(yAxis);
-
+ 
      } // d3PcaScatterPlot
 
 

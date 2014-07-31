@@ -445,7 +445,17 @@ sendPatientIDsToModule <- function(WS, msg)
    return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success", payload=ids))
    sendOutput(DATA=return.msg, WS=WS)
 
-} # sendIDsToModule
+} # sendPatientIDsToModule
+#----------------------------------------------------------------------------------------------------
+sendPatientIDsToSelectionTree <- function(WS, msg)
+{
+   ids <- msg$payload$PatientIDs
+   printf("Oncoscape::sendPatientIDsToSelectionTree received %d patientIDs", length(ids));
+   #print(msg)
+   return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success", payload=msg$payload))
+   sendOutput(DATA=return.msg, WS=WS)
+
+} # sendPatientIDsToSelectionTree
 #----------------------------------------------------------------------------------------------------
 sendIDsToModule <- function(WS, msg)
 {
@@ -484,3 +494,4 @@ dataProviders <- function()
 #----------------------------------------------------------------------------------------------------
 addRMessageHandler("sendPatientIDsToModule", "sendPatientIDsToModule");
 addRMessageHandler("sendIDsToModule", "sendIDsToModule");
+addRMessageHandler("sendPatientIDsToSelectionTree", "sendPatientIDsToSelectionTree");

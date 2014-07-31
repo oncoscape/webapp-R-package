@@ -57,7 +57,12 @@ var filteredPatients = [];
 //----------------------------------------------------------------------------------------------------
 addJavascriptMessageHandler = function(cmd, func)
 {
-   dispatchOptions[cmd] = func
+   if(cmd in dispatchOptions){
+      alert("javascript message handler for '" +  cmd + " already set");
+      }
+   else{
+      dispatchOptions[cmd] = func
+      }
 }
 //----------------------------------------------------------------------------------------------------
 function getRandomFloat (min, max)
@@ -262,105 +267,162 @@ $(document).ready(function()
 //----------------------------------------------------------------------------------------------------
 var TimeLineModule = (function () {
 
-	
+     
 
-	//--------------------------------------------------------------------------------------------------
-	var margin = {top: 10, right: 15, bottom: 30, left: 20}
-	var AlignBy = "None";
-	var OrderBy = "None";
-	var SidePlotEvent = "None";
-	var TimeLineDisplay;
-	var MainEvents = ["DOB","Encounter", "Diagnosis", "OR",  "MRI","Radiation", "Chemo","Progression",  "Status"]
-	var MainEventColors = ["#17becf", "#d62728", "#8c564b","#ff7f0e", "#7f7f7f","#9467bd","#1f77b4","#2ca02c", "#bcbd22"]
-	var MainEventTextSpacing = [0, 70, 82, 85, 75, 72, 75, 75, 80]
- 	var selectedRegion;    // from brushing
-	var d3PlotBrush;
+     //--------------------------------------------------------------------------------------------------
+     var tabNumber = 2
+     var margin = {top: 10, right: 15, bottom: 30, left: 20}
+     var AlignBy = "--";
+     var OrderBy = "--";
+     var SidePlotEvent = "--";
+     var TimeLineDisplay;
+     var MainEvents = ["DOB","Encounter", "Diagnosis", "OR",  "MRI","Radiation", "Chemo","Progression",  "Status"]
+     var MainEventColors = ["#17becf", "#d62728", "#8c564b","#ff7f0e", "#7f7f7f","#9467bd","#1f77b4","#2ca02c", "#bcbd22"]
+     var MainEventTextSpacing = [0, 70, 82, 85, 75, 72, 75, 75, 80]
+      var selectedRegion;    // from brushing
+     var d3PlotBrush;
+     var dialog;
         var broadcastButton;
-   	var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
-	   							{Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
-						   		{Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
-								{Name:"FirstProgressionToDeath",Event1: "Progression", Event2: "Status", TimeScale: "Days"} ];
-	 CalculatedEvents = d3.nest()
-		    .key(function(d) { return d.Name; })
-	    	.map(CalculatedEvents, d3.map);
-	    	
-   		OneDay = 1000 *60 * 60*24,
-		color = d3.scale.ordinal().range(MainEventColors)
-		color.domain(MainEvents);
-	 	PatientHeight = 3;
+        var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
+                            {Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
+                                           {Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
+                                        {Name:"FirstProgressionToDeath",Event1: "Progression", Event2: "Status", TimeScale: "Days"} ];
+      CalculatedEvents = d3.nest()
+              .key(function(d) { return d.Name; })
+              .map(CalculatedEvents, d3.map);
+              
+             OneDay = 1000 *60 * 60*24,
+          color = d3.scale.ordinal().range(MainEventColors)
+          color.domain(MainEvents);
+           PatientHeight = 3;
 
-	var Events,EventsByID, FormatDate, EventTypes, ShowEvents;
-	var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update");
-	var InitialLoad=true;
+     var Events,EventsByID, FormatDate, EventTypes, ShowEvents;
+     var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update", "UpdateMenuOptions");
+     var InitialLoad=true;
 
-  	//--------------------------------------------------------------------------------------------
-  	initializeUI = function(){
-   		console.log("========== initializing Timeline UI")
-    	  TimeLineDisplay = $("#TimeLineDisplay");
-	      TimeLineHandleWindowResize();
-    	  broadcastButton = $("#broadcastSelectionToClinicalTable");
-	  	  broadcastButton.click(broadcastSelection);
-	      $(window).resize(TimeLineHandleWindowResize);
-    	  broadcastButton.prop("disabled",false);
-		
-		 dispatch.load();
+       
+        //--------------------------------------------------------------------------------------------
+       function initializeUI(){
+             console.log("========== initializing Timeline UI")
+           TimeLineDisplay = $("#TimeLineDisplay");
+           TimeLineHandleWindowResize();
+           broadcastButton = $("#SendSelectionToClinicalTable");
+              broadcastButton.click(broadcastSelection);
+           $(window).resize(TimeLineHandleWindowResize);
+           broadcastButton.prop("disabled",true);
+          
+           dispatch.load();
       };
 
-	//--------------------------------------------------------------------------------------------------	
-	getDateDiff = function(Event1, Event2, TimeScale){
-		console.log("Date Difference of " +Event2+ " - " + Event1 + " in " + TimeScale)		
-		var DateDiff = []; var TimeScaleValue=1
-		if(TimeScale==="Days"){TimeScaleValue=OneDay;}
-		else if(TimeScale ==="Months"){TimeScaleValue=OneDay*30.425}
-		else if(TimeScale==="Years"){ TimeScaleValue = OneDay*365.25}
-			
-		EventsByID.forEach(function(ID, Patient){
-			var dateDiff = 0;
-			if(Patient.has(Event1) && Patient.has(Event2) ){
-				dateDiff = (Patient.get(Event2).sort(DescendingDate)[0].date 
-						- Patient.get(Event1).sort(DescendingDate)[0].date )/TimeScaleValue
-					DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
-		}
-		})
-		return DateDiff;
-	}
-	
-	//--------------------------------------------------------------------------------------------------	
-	getHorizontalBarSize = function(Patient){
-	
-		var BarSizes = []
-		Patient.forEach(function(d){
-			BarSizes.push( {ID: d.ID, info: ~~d.value, Scale: d.Scale, xBar: 0, yBar: d.PtNum,  width: ~~d.value})
-		})	
-		return BarSizes;
-	}
-	
- 	//--------------------------------------------------------------------------------------------
-	TimeLineHandleWindowResize = function(){
-    	 TimeLineDisplay.width($(window).width() * 0.95);
-     	 TimeLineDisplay.height($(window).height() * 0.80);
-	     if(!InitialLoad) {dispatch.DisplayPatients();}
+     //--------------------------------------------------------------------------------------------------     
+     function getDateDiff(Event1, Event2, TimeScale){
+          console.log("Date Difference of " +Event2+ " - " + Event1 + " in " + TimeScale)          
+          var DateDiff = []; var TimeScaleValue=1
+          if(TimeScale==="Days"){TimeScaleValue=OneDay;}
+          else if(TimeScale ==="Months"){TimeScaleValue=OneDay*30.425}
+          else if(TimeScale==="Years"){ TimeScaleValue = OneDay*365.25}
+               
+          EventsByID.forEach(function(ID, Patient){
+               var dateDiff = 0; var date1, date2;
+               if(Patient.has(Event1) && Patient.has(Event2) ){
+                   if(Patient.get(Event1)[0].date.length >1){
+                        date1 = Patient.get(Event1).sort(AscendingStartDate)[0].date[0]
+                    } else{
+                         date1 = Patient.get(Event1).sort(AscendingDate)[0].date
+                    }
+                  if(Patient.get(Event2)[0].date.length >1){
+                        date2 = Patient.get(Event2).sort(AscendingStartDate)[0].date[0]
+                    } else{
+                         date2 = Patient.get(Event2).sort(AscendingDate)[0].date
+                    }
+                    dateDiff = (date2 - date1 )/TimeScaleValue
+                         DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
+          }
+          })
+          return DateDiff;
+     }
+     
+     //--------------------------------------------------------------------------------------------------     
+     function getHorizontalBarSize(Patient){
+     
+          console.log("Creating Horizontal BarPlot: ", Patient)
+          var BarSizes = []
+          Patient.forEach(function(d){
+               xBar = 0; barWidth = ~~d.value
+               if(d.value < 0){ xBar = ~~d.value; barWidth = Math.abs(d.value);  }
+               BarSizes.push( {ID: d.ID, info: ~~d.value, Scale: d.Scale, xBar: xBar, yBar: d.PtNum,  width: barWidth})
+          })     
+          return BarSizes;
+     }
+     
+      //--------------------------------------------------------------------------------------------
+     function TimeLineHandleWindowResize(){
+          TimeLineDisplay.width($(window).width() * 0.95);
+           TimeLineDisplay.height($(window).height() * 0.80);
+          if(!InitialLoad) {dispatch.DisplayPatients();}
      };
 
    //--------------------------------------------------------------------------------------------
-   broadcastSelection = function(){
+   function broadcastSelection(){
       console.log("broadcastSelection: " + selectedRegion);
       x1=selectedRegion[0][0];
       y1=selectedRegion[0][1];
       x2=selectedRegion[1][0];
       y2=selectedRegion[1][1];
       ids = [];
+      
+      console.log(selectedRegion)
+      function LogTime(t){
+                     if(AlignBy === "--"){ 
+                               return t;
+                     } else{ var Dir = (t<0 ? -1 : 1); 
+                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2)
+                    }
+               }     
+  
       for(var i=0; i < Events.length; i++){
          event = Events[i];
-         if(event.PatientNum >= x1 & event.PatientNum )
-            ids.push(event.PatientId[0]);
-         } // for i
-      if(ids.length > 0)
+         if(event.PtNum >= y1/PatientHeight & event.PtNum <= y2/PatientHeight){
+			// Patient within range
+            
+            if(event.date.length>1 ){
+                 if( (LogTime(event.date[0]-event.offset) >=x1 & LogTime(event.date[0]-event.offset) <= x2) ||
+	                 (LogTime(event.date[1]-event.offset) >=x1 & LogTime(event.date[1]-event.offset) <= x2) ){
+	                  // date endpoints within range
+	                
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            } else{
+                 if (LogTime(event.date-event.offset) >=x1 & LogTime(event.date-event.offset) <= x2) {
+	                  // date within range
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            }
+         }
+      } // for i
+    
+    if(ids.length > 0)
          sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
-      };
+    };
 
-  //--------------------------------------------------------------------------------------------
-  sendIDsToModule = function(ids, moduleName, title){
+//--------------------------------------------------------------------------------------------
+  function d3PlotBrushReader(){
+     console.log("plotBrushReader");
+     selectedRegion = d3PlotBrush.extent();
+     //console.log("region: " + pcaSelectedRegion);
+     y0 = selectedRegion[0][1];
+     y1 = selectedRegion[1][1];
+     selectHeight = Math.abs(y0-y1);
+     if(selectHeight > 1)
+        broadcastButton.prop("disabled", false);
+     else
+        broadcastButton.prop("disabled", true);
+     }; // d3PlotBrushReader
+
+   //--------------------------------------------------------------------------------------------
+  function sendIDsToModule(ids, moduleName, title){
        callback = moduleName + title;
        msg = {cmd:"sendIDsToModule",
               callback: callback,
@@ -368,21 +430,22 @@ var TimeLineModule = (function () {
               payload:{targetModule: moduleName,
                        ids: ids}
              };
-      socket.send(JSON.stringify(msg));
+     socket.send(JSON.stringify(msg));
       } // sendTissueIDsToModule
 
-   //--------------------------------------------------------------------------------------------------	
-   handlePatientIDs = function(msg){
+   //--------------------------------------------------------------------------------------------------     
+   function handlePatientIDs(msg){
       console.log("Module.TimeLine: handlePatientIDs");
       console.log(msg)
-      if(msg.status == "success"){
+    $("#tabs").tabs( "option", "active", tabNumber);
+ //       InitialLoad=true;
+     if(msg.status == "success"){
          patientIDs = msg.payload
          console.log("TimeLine handlePatientIds: " + patientIDs);
          payload = patientIDs
          msg = {cmd: "getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", 
                 payload: payload};
          socket.send(JSON.stringify(msg));
-         // $("#tabs").tabs( "option", "active", 7);
          }
       else{
          console.log("handlePatientIDs about to call alert: " + msg)
@@ -392,729 +455,879 @@ var TimeLineModule = (function () {
 
 
     //----------------------------------------------------------------------------------------------------
-    loadPatientDemoData = function(){
+    function loadPatientDemoData(){
 
        console.log("==== patientTimeLines  get Events from File");
+//       InitialLoad=true;
        cmd = "getCaisisPatientHistory";
        status = "request"
        callback = "DisplayPatientTimeLine"
-       msg = {cmd: cmd, callback: callback, status: "request", payload: ""};
+          filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
+          msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
         // console.log(JSON.stringify(msg))
        socket.send(JSON.stringify(msg));
        } // loadPatientDemoData
 
-	//--------------------------------------------------------------------------------------------------
-	DisplayPatientTimeLine = function(msg) {
-    	console.log("==== DisplayPatientTimeLine  Module.js document.ready");
-		console.log(msg);
+     //--------------------------------------------------------------------------------------------------
+     function DisplayPatientTimeLine(msg) {
+         console.log("==== DisplayPatientTimeLine  Module.js document.ready");
+          console.log(msg);
 
-	    console.log("==== DisplayPatientTimeLine  Events");	
-		Events = msg.payload;
-		console.log("Event count: " + Events.length);
+         console.log("==== DisplayPatientTimeLine  Events");     
+          Events = msg.payload;
+          console.log("Event count: " + Events.length);
          
-		parseDate = d3.time.format ("%m/%d/%Y").parse;
-		FormatDate = d3.time.format ("%x");
-	
-	  	Events.forEach(function(d) {
-     		d.Keep=true;
-	     	if(d.date instanceof Array){
-				for(var i=0;i<d.date.length;i++){ 
-					if(parseDate(d.date[i])===null || !isValidDate(d.date[i])){ 
-						console.log("Flag "+ d.date[i]); d.Keep = false;
-					}else{  d.date[i] = parseDate(d.date[i]); }
-	     	}}else{
-    	 		if(parseDate(d.date)===null || !isValidDate(d.date)){ console.log("Flag "+ d.date); d.Keep=false;
-	    	 	} else{d.date = parseDate(d.date); }
-	     	}
-	     	if(d.Name === "Death") d.Name="Status"
-    		d.showPatient = true;
-    		d.disabled = false;
-	    	d.offset = 0    });
-	
-		console.log("Remove Invalid Dates")
-		Events = Events.filter(function(d) {if(!d.Keep){ console.log(d.date)}
-			return d.Keep })
+          parseDate = d3.time.format ("%m/%d/%Y").parse;
+          FormatDate = d3.time.format ("%x");
+     
+            Events.forEach(function(d) {
+               d.Keep=true;
+               if(d.date instanceof Array){
+                    for(var i=0;i<d.date.length;i++){ 
+                         if(parseDate(d.date[i])===null || !isValidDate(d.date[i])){ 
+                              console.log("Flag "+ d.date[i]); d.Keep = false;
+                         }else{  d.date[i] = parseDate(d.date[i]); }
+               }}else{
+                    if(parseDate(d.date)===null || !isValidDate(d.date)){ console.log("Flag "+ d.date); d.Keep=false;
+                    } else{d.date = parseDate(d.date); }
+               }
+               if(d.Name === "Death") d.Name="Status"
+              d.showPatient = true;
+              d.disabled = false;
+              d.offset = 0    });
+     
+          console.log("Remove Invalid Dates")
+          Events = Events.filter(function(d) {if(!d.Keep){ console.log(d.date)}
+               return d.Keep })
 
-	 	EventsByID = d3.nest()
-		    .key(function(d) { return d.PatientID; })
-			.key(function(d) { return d.Name; })
-	    	.map(Events, d3.map);
+           EventsByID = d3.nest()
+              .key(function(d) { return d.PatientID; })
+               .key(function(d) { return d.Name; })
+              .map(Events, d3.map);
  
-		EventTypes = d3.map()
-		Events.forEach(function(d){
-			if(EventTypes.has(d.Name)){
-				if(EventTypes.get(d.Name).indexOf(d.Type) === -1){
-					EventTypes.get(d.Name).push(d.Type) 		 }
-			} else {
-				EventTypes.set(d.Name, [d.Type])
-			}
-		});		
-	
-		ShowEvents = EventTypes.keys();
+          EventTypes = d3.map()
+          Events.forEach(function(d){
+               if(EventTypes.has(d.Name)){
+                    if(EventTypes.get(d.Name).indexOf(d.Type) === -1){
+                         EventTypes.get(d.Name).push(d.Type)            }
+               } else {
+                    EventTypes.set(d.Name, [d.Type])
+               }
+          });          
+     
+          ShowEvents = EventTypes.keys();
 
-		if(InitialLoad){
-			dispatch.LoadOptions();
-			InitialLoad=false;
-		}
-		dispatch.DisplayPatients();
-	}
+          CalculatedEvents.forEach(function(key, entry){
+               var value = entry[0];
+               if(!EventTypes.has(value.Event1) ||  !EventTypes.has(value.Event2) ){
+                    console.log("Removing Calculated Event: " + key)
+                    CalculatedEvents.remove(key)
+               }
+          })
 
-	//--------------------------------------------------------------------------------------------------
-	dispatch.on("LoadOptions.AllDisplays", function(){
+          console.log("CaculatedEvents stored:", CalculatedEvents)
 
-		console.log("======== LoadOptions.AllDisplays")
-		
- 	    var width = $("#TimeLineDisplay").width();
- 	    var height = $("#TimeLineDisplay").height();
-		
-		var   TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.9*height - margin.top - margin.bottom)},
-    		  SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.9*height - margin.top - margin.bottom)},
-	    	  legendSize = {height: 0.1*height, width: TimeLineSize.width};
+          if(InitialLoad){
+               dispatch.LoadOptions();
+               InitialLoad=false;
+          }
+          dispatch.DisplayPatients();
+     }
 
-		var svg = d3.select("#TimeLineDisplay").append("svg")
-		    	.attr("width", TimeLineSize.width + SideBarSize.width + 2*margin.left + 2*margin.right )
-			    .attr("height", SideBarSize.height + margin.top + margin.bottom + legendSize.height)
-   				;
+     //--------------------------------------------------------------------------------------------------
+     dispatch.on("LoadOptions.AllDisplays", function(){
 
-		var SidePlot = svg.append("g").attr("class", "SidePlotSVG")
-	   		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");	
-   		
-		var TimeLine = svg.append("g").attr("class", "TimeLineSVG")
-   			.attr("transform", "translate(" + (SideBarSize.width+2*margin.left) + "," + margin.top + ")");
-		
-		var TextOffSet = d3.scale.ordinal()
-			.range(MainEventTextSpacing)
-			.domain(MainEvents);
+          console.log("======== LoadOptions.AllDisplays")
+          
+          var width = $("#TimeLineDisplay").width();
+          var height = $("#TimeLineDisplay").height();
+          
+          var   TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.95*height - margin.top - margin.bottom)},
+                SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.95*height - margin.top - margin.bottom)},
+                legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
-		console.log("==== Event Types")
-		var legend = svg
- 				.append("g")
-    			.attr("class", "legend")
-    			.attr("transform", "translate(" + (SideBarSize.width+2* margin.left) + "," + (TimeLineSize.height+ margin.top + margin.bottom) + ")")
-				.selectAll(".legend")
- 				.data(color.domain().filter(function(d){
- 					console.log(d); return EventTypes.keys().indexOf(d) !== -1 })  )
-	 	   .enter().append("g")
-    	   .attr("transform", function(d, i) { 
-	    	  	 return "translate(" + i*TextOffSet(d) + ",0)" })
-			;
-	  	legend.append("rect")
-    	  .attr("width", 10)
-	      .attr("height", 10)
-    	  .style("fill", function(d) { return color(d)})
-	      .on("click", ToggleVisibleEvent);
+          var svg = d3.select("#TimeLineDisplay").append("svg")
+                   .attr("width", TimeLineSize.width + SideBarSize.width + 2*margin.left + 2*margin.right )
+                   .attr("height", SideBarSize.height + margin.top + margin.bottom + legendSize.height)
+                       ;
 
-	  	legend.append("text")
-		  .attr("y", 9)
-		  .attr("x", 12)
-		  .style("font-size", 12)
-    	  .text(function(d) { return d; });
+          var SidePlot = svg.append("g").attr("class", "SidePlotSVG")
+                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");     
+             
+          var TimeLine = svg.append("g").attr("class", "TimeLineSVG")
+                  .attr("transform", "translate(" + (SideBarSize.width+2*margin.left) + "," + margin.top + ")");
+          
+          
+          var TextOffSet = d3.scale.ordinal()
+               .range(MainEventTextSpacing)
+               .domain(MainEvents);
 
-		//--------------------------------------------------------------------------------------------------
-		dispatch.on("DisplayPatients.SidePlotDisplay",  function(){
+          console.log("==== Event Types")
+          var legend = svg
+                     .append("g")
+                   .attr("class", "legend")
+                   .attr("transform", "translate(" + (SideBarSize.width+2* margin.left) + "," + (TimeLineSize.height+ margin.top + margin.bottom) + ")")
+                    .selectAll(".legend")
+                     .data(color.domain().filter(function(d){
+                          return EventTypes.keys().indexOf(d) !== -1 })  )
+              .enter().append("g")
+            .attr("transform", function(d, i) { 
+                      return "translate(" + i*TextOffSet(d) + ",0)" })
+               ;
+            legend.append("rect")
+           .attr("width", 10)
+           .attr("height", 10)
+           .style("fill", function(d) { return color(d)})
+           .on("click", ToggleVisibleEvent);
 
-			console.log("======== DisplayPatients.SidePlotDisplay")
-		
-			SidePlot.selectAll("g").remove();
+            legend.append("text")
+            .attr("y", 9)
+            .attr("x", 12)
+            .style("font-size", 12)
+           .text(function(d) { return d; });
 
-	    		width = $("#TimeLineDisplay").width();
- 	    		height = $("#TimeLineDisplay").height();
-		
-			  TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.9*height - margin.top - margin.bottom)}
-    		  SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.9*height - margin.top - margin.bottom)}
-	    	  legendSize = {height: 0.1*height, width: TimeLineSize.width};
-		
-			svg.select(".legend")
-    			.attr("transform", "translate(" + (SideBarSize.width+2* margin.left) + "," + (TimeLineSize.height+ margin.top + margin.bottom) + ")")
-		
-			var y = d3.scale.linear().range([SideBarSize.height, 0]), 
-				yAxis = d3.svg.axis().scale(y).orient("left").ticks(0),		
-				x = d3.scale.linear().range([0, SideBarSize.width]),
-				xAxis = d3.svg.axis().scale(x).orient("bottom")
-		 		y.domain(d3.extent(Events, function(d) { return PatientHeight*d.PtNum; }));
-						
-			var PatientOrderBy = []
-			var Categories = []
+          //--------------------------------------------------------------------------------------------------
+          dispatch.on("DisplayPatients.SidePlotDisplay",  function(){
 
-			if(SidePlotEvent === "None"){	return;	
-			} else if (CalculatedEvents.has(SidePlotEvent) ){
-				console.log(SidePlotEvent)
-				var event = CalculatedEvents.get(SidePlotEvent)[0]
-				 console.log(event)
-				 PatientOrderBy =  getHorizontalBarSize(getDateDiff(event.Event1,event.Event2,event.TimeScale)); 
+               console.log("======== DisplayPatients.SidePlotDisplay")
+          
+               SidePlot.selectAll("g").remove();
 
-//			}	else if(SidePlotEvent === "Survival"){
-//				PatientOrderBy = getHorizontalBarSize(getDateDiff("Diagnosis", "Status", "Days"))
-//				xAxis.ticks(3)
-//			} else if(SidePlotEvent === "AgeDx"){
-//				PatientOrderBy = getHorizontalBarSize(getDateDiff("DOB", "Diagnosis", "Years"))
-//				xAxis.ticks(5)
-//			} else if(SidePlotEvent === "Time to 1st Progression"){
-//				PatientOrderBy = getHorizontalBarSize(getDateDiff("Diagnosis","Progression", "Days"))
-//				xAxis.ticks(5)		
-//			} else if(SidePlotEvent === "1st Progression to Death"){
-//				PatientOrderBy = getHorizontalBarSize(getDateDiff("Progression", "Status", "Days"))
-//				xAxis.ticks(5)
-			} else if(["Chemo", "Radiation", "Diagnosis", "OR", "Status", "MRI"].indexOf(SidePlotEvent) !== -1){
-				//get number of categories
-				EventsByID.forEach(function(ID, Patient){
-					if(Patient.has(SidePlotEvent) && Patient.get(SidePlotEvent)[0].showPatient){
-						Patient.get(SidePlotEvent).forEach(function(k){
-						if(Categories.indexOf(k.Type) == -1){ Categories.push(k.Type)} })
-					}
-				})
-				Categories.sort();
-				console.log(Categories)
-				console.log(Categories.length)
-				var xWidth = 1/Categories.length;
-				EventsByID.forEach(function(ID, Patient){
-					if(!Patient.has(SidePlotEvent)){
-					} else if(Patient.get(SidePlotEvent)[0].showPatient){			
-						var xPos = Categories.indexOf(Patient.get(SidePlotEvent)[0].Type)
-						PatientOrderBy.push( {ID: ID,info:Patient.get(SidePlotEvent)[0].Type, yBar: Patient.get(SidePlotEvent)[0].PtNum,
-									 xBar: xPos * xWidth , width: xWidth})
-					}
-				})
-				xAxis.ticks(Categories.length)
-					.tickValues(makeArray(Categories.length,  function(i) { return i/Categories.length; }))
-					.tickFormat(function (d) {console.log(Categories[d*Categories.length]); return Categories[d*Categories.length]	})
-			} 
+                   width = $("#TimeLineDisplay").width();
+                    height = $("#TimeLineDisplay").height();
+          
+                 TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.95*height - margin.top - margin.bottom)}
+                SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.95*height - margin.top - margin.bottom)}
+                legendSize = {height: 0.05*height, width: TimeLineSize.width};
+          
+               svg.select(".legend")
+                   .attr("transform", "translate(" + (SideBarSize.width+2* margin.left) + "," + (TimeLineSize.height+ margin.top + margin.bottom) + ")")
+          
+               var y = d3.scale.linear().range([SideBarSize.height, 0]), 
+                    yAxis = d3.svg.axis().scale(y).orient("left").ticks(0),          
+                    x = d3.scale.linear().range([0, SideBarSize.width]),
+                    xAxis = d3.svg.axis().scale(x).orient("bottom")
+                     y.domain(d3.extent(Events, function(d) { return PatientHeight*d.PtNum; }));
+                              
+               var PatientOrderBy = []
+               var Categories = []
 
-			console.log("PatientOrderBy")
-			console.log(PatientOrderBy)
+               
+               console.log("Display Current Side Plot Event: " + SidePlotEvent)
 
- 			x.domain([0,d3.max(PatientOrderBy, function(d){ return d.xBar + d.width})]);
+               if(SidePlotEvent === "--"){     return;     
+               } else if (CalculatedEvents.has(SidePlotEvent) ){
+                    var event = CalculatedEvents.get(SidePlotEvent)[0]
+                     console.log("Using event: ", event)
+                     PatientOrderBy =  getHorizontalBarSize(getDateDiff(event.Event1,event.Event2,event.TimeScale)); 
+               } else if(["Chemo", "Radiation", "Diagnosis", "OR", "Status", "MRI"].indexOf(SidePlotEvent) !== -1){
+                    //get number of categories
+                    EventsByID.forEach(function(ID, Patient){
+                         if(Patient.has(SidePlotEvent) && Patient.get(SidePlotEvent)[0].showPatient){
+                              Patient.get(SidePlotEvent).forEach(function(k){
+                              if(Categories.indexOf(k.Type) == -1){ Categories.push(k.Type)} })
+                         }
+                    })
+                    Categories.sort();
+                    console.log(Categories)
+                    console.log(Categories.length)
+                    var xWidth = 1/Categories.length;
+                    EventsByID.forEach(function(ID, Patient){
+                         if(!Patient.has(SidePlotEvent)){
+                         } else if(Patient.get(SidePlotEvent)[0].showPatient){               
+                              var xPos = Categories.indexOf(Patient.get(SidePlotEvent)[0].Type)
+                              PatientOrderBy.push( {ID: ID,info:Patient.get(SidePlotEvent)[0].Type, yBar: Patient.get(SidePlotEvent)[0].PtNum,
+                                              xBar: xPos * xWidth , width: xWidth})
+                         }
+                    })
+                    xAxis.ticks(Categories.length)
+                         .tickValues(makeArray(Categories.length,  function(i) { return i/Categories.length; }))
+                         .tickFormat(function (d) {console.log(Categories[d*Categories.length]); return Categories[d*Categories.length]     })
+               } 
 
-		   var tooltip = d3.select("body")
-    		  .attr("class", "tooltip")
-	    	  .append("div")
-	    	  .style("position", "absolute")
-		      .style("z-index", "10")
-    		  .style("visibility", "hidden")
-	    	  .text("a simple tooltip");
-	
-		  	SidePlot.append("g")
-	    	  .attr("class", "x axis")
-		      .attr("transform", "translate(0," + (SideBarSize.height+10) + ")")
-    		  .call(xAxis)
-		      .selectAll("text")  
-			     .style("text-anchor", "end")
-			     .style("font-size", 12)
-      			 .attr("dy", ".55em")
-		      	 .attr("dx", "-.45em")
-    		 	 .attr("transform", function(d) {
-        			  return "rotate(-75)" 
-         			});
+               console.log("PatientOrderBy")
+               console.log(PatientOrderBy)
+
+                x.domain([d3.min([d3.min(PatientOrderBy, function(d){return d.width}),d3.min(PatientOrderBy, function(d){return d.xBar})]),
+                               d3.max(PatientOrderBy, function(d){ return d.xBar + d.width})]).nice();
+
+               console.log("SidePlotDomain: ", d3.min([d3.min(PatientOrderBy, function(d){return d.width}),d3.min(PatientOrderBy, function(d){return d.xBar})]),
+               d3.max(PatientOrderBy, function(d){ return d.xBar + d.width}) )
+
+ //            d3PlotBrush = d3.svg.brush()
+   //            .x(x)
+     //          .y(y)
+       //        .on("brushend", d3PlotBrushReader);
+
+          //     SidePlot.call(d3PlotBrush);
+
+             var tooltip = d3.select("body")
+                .attr("class", "tooltip")
+                .append("div")
+                .style("position", "absolute")
+                .style("z-index", "10")
+                .style("visibility", "hidden")
+                .text("a simple tooltip");
+     
+                 SidePlot.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + (SideBarSize.height+10) + ")")
+                .call(xAxis)
+                .selectAll("text")  
+                    .style("text-anchor", "end")
+                    .style("font-size", 12)
+                      .attr("dy", ".55em")
+                      .attr("dx", "-.45em")
+                     .attr("transform", function(d) {
+                         return "rotate(-75)" 
+                        });
  
-		  	SidePlot.append("g")
-    		  .attr("class", "y axis")
-	    	  .call(yAxis)
-	    	.append("text")
-		      .on("mouseover", function(d){
-		      	   tooltip.text("click to reorder by SidePlot value");
-		           return tooltip.style("visibility", "visible"); })
-			  .on("mousemove", function(){return tooltip.style("top",
-        			  (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-        	  .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
-			  .on("click", function(){
-			  		OrderBySidePlot(); 
-			  		dispatch.Update();
-			  		dispatch.DisplayPatients();})
-		      .attr("transform", "rotate(-90)")
-    		  .attr("y", 2)
-		      .attr("dy", "-.71em")
-    		  .style("font-size", 12)
-    		  .style("text-anchor", "end")
-		      .text(SidePlotEvent)
-		      ;
+                 SidePlot.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+              .append("text")
+                .on("mouseover", function(d){
+                        tooltip.text("click to reorder by SidePlot value");
+                     return tooltip.style("visibility", "visible"); })
+                 .on("mousemove", function(){return tooltip.style("top",
+                         (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+               .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+                 .on("click", function(){
+                           OrderBySidePlot(); 
+                           dispatch.Update();
+                           dispatch.DisplayPatients();})
+                .attr("transform", "rotate(-90)")
+                .attr("y", 2)
+                .attr("dy", "-.71em")
+                .style("font-size", 12)
+                .style("text-anchor", "end")
+                .text(SidePlotEvent)
+                ;
             
-			var BarPlot_Horiz = SidePlot.append("g").selectAll("rect")
-				.data(PatientOrderBy)
-				.enter()
-					.append("rect")
-					.attr("x", function(d) { return x(d.xBar);  })
-					.attr("y", function(d) { return y(PatientHeight*d.yBar); })
-					.attr("width", function(d) { return x(d.width);  })
-					.attr("height", function(d) { return PatientHeight; })
-					.attr("fill", function(d){ 
-						var ColorShade =  d3.rgb(color(SidePlotEvent)); //d3.rgb("grey"); //
-						if(Categories.length>0){ 
-							return ColorShade.brighter((Categories.indexOf(d.info) % 5)/2) };
-						return ColorShade;
-						})
-					.on("mouseover", function(d,i){
-    	    		   tooltip.text(d.ID + ": " + d.info);
-		           return tooltip.style("visibility", "visible");
-    		       })
-			      	.on("mousemove", function(){return tooltip.style("top",
-        			  (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-		      		.on("mouseout", function(){return tooltip.style("visibility", "hidden");})
-					;
-		})
+               var BarPlot_Horiz = SidePlot.append("g").selectAll("rect")
+                    .data(PatientOrderBy)
+                    .enter()
+                         .append("rect")
+                         .attr("x", function(d) { return x(d.xBar);  })
+                         .attr("y", function(d) { return y(PatientHeight*d.yBar); })
+                         .attr("width", function(d) { return Math.abs(x(d.width) - x(0));  })
+                         .attr("height", function(d) { return PatientHeight; })
+                         .attr("fill", function(d){ 
+                              var ColorShade =  d3.rgb(color(SidePlotEvent)); //d3.rgb("grey"); //
+                              if(Categories.length>0){ 
+                                   return ColorShade.brighter((Categories.indexOf(d.info) % 5)/2) };
+                              return ColorShade;
+                              })
+                         .on("mouseover", function(d,i){
+                          tooltip.text(d.ID + ": " + d.info);
+                     return tooltip.style("visibility", "visible");
+                     })
+                          .on("mousemove", function(){return tooltip.style("top",
+                         (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+                          .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+                         ;
+          })
 
-		//--------------------------------------------------------------------------------------------------
-		dispatch.on("DisplayPatients.TimeLineDisplay",  function(){
+          //--------------------------------------------------------------------------------------------------
+          dispatch.on("DisplayPatients.TimeLineDisplay",  function(){
 
-			console.log("======== DisplayPatients.TimeLineDisplay")
-			TimeLine.selectAll("g").remove();
+               console.log("======== DisplayPatients.TimeLineDisplay")
+               TimeLine.selectAll("g").remove();
 
 
-			 var tooltip = d3.select("body")
-    		  .attr("class", "tooltip")
-		      .append("div")
-    		  .style("position", "absolute")
-	    	  .style("z-index", "10")
-	    	  .style("visibility", "hidden")
-		      .text("a simple tooltip");
+                var tooltip = d3.select("body")
+                .attr("class", "tooltip")
+                .append("div")
+                .style("position", "absolute")
+                .style("z-index", "10")
+                .style("visibility", "hidden")
+                .text("a simple tooltip");
 
-			var EventOffset = d3.map({"Radiation": 1.5, "Chemo": -1.5})
-			var x,TimeScale, xTitle, xAxis, 
-				y = d3.scale.linear().range([TimeLineSize.height, 0]), 
-				yAxis = d3.svg.axis().scale(y).orient("left").ticks(0)
-				;
-			var LogTime = function(t){
-				 if(AlignBy === "None"){ 
-		 				return t;
-			 	} else{ var Dir = (t<0 ? -1 : 1); 
-					return Dir * Math.log(Math.abs(t)+1)/Math.log(2) 
-				}
-			}	
-		
-			if(OrderBy !== "None"){ OrderEvents();}
-			if(AlignBy === "None"){ 
-				 x = d3.time.scale().range([0, TimeLineSize.width]); TimeScale =1;
-				 Xtitle="Year";
-				 xAxis = d3.svg.axis().scale(x).orient("bottom")
-			} else{
-				AlignEvents();
-				 x =  d3.scale.linear().range([0, TimeLineSize.width])
-				 TimeScale = OneDay
-				 Xtitle = "Days"
-				 xAxis = d3.svg.axis().scale(x).orient("bottom")
-					.ticks(10)
-					.tickFormat(function (d) { 
-						var Dir = (d<0 ? -1 : 1); 
-						return Math.round(Dir * (Math.pow(2, (Math.abs(d)))-1) *100)/100})
-				}
+               var EventOffset = d3.map({"Radiation": 1.5, "Chemo": -1.5})
+               var x,TimeScale, xTitle, xAxis, 
+                    y = d3.scale.linear().range([TimeLineSize.height, 0]), 
+                    yAxis = d3.svg.axis().scale(y).orient("left").ticks(0)
+                    ;
+               function LogTime(t){
+                     if(AlignBy === "--"){ 
+                               return t;
+                     } else{ var Dir = (t<0 ? -1 : 1); 
+                         return Dir * Math.log(Math.abs(t)+1)/Math.log(2) 
+                    }
+               }     
+          
+               if(OrderBy !== "--"){ OrderEvents();}
+               if(AlignBy === "--"){ 
+                     x = d3.time.scale().range([0, TimeLineSize.width]); TimeScale =1;
+                     Xtitle="Year";
+                     xAxis = d3.svg.axis().scale(x).orient("bottom")
+               } else{
+                    AlignEvents();
+                     x =  d3.scale.linear().range([0, TimeLineSize.width])
+                     TimeScale = OneDay
+                     Xtitle = "Days"
+                     xAxis = d3.svg.axis().scale(x).orient("bottom")
+                         .ticks(10)
+                         .tickFormat(function (d) { 
+                              var Dir = (d<0 ? -1 : 1); 
+                              return Math.round(Dir * (Math.pow(2, (Math.abs(d)))-1) *100)/100})
+                    }
 
-			var EventMin	 = d3.min(Events.filter(function(d){ return d.showPatient && !d.disabled}), function(d){ 
-								var date = (d.date instanceof Array ? d.date.sort(DescendingDate)[0] : d.date);  return LogTime((date - d.offset)/TimeScale);})
-			var EventMax	 = d3.max(Events.filter(function(d){ return d.showPatient && !d.disabled}), function(d){ 
-								var date = (d.date instanceof Array ? d.date.sort(DescendingDate)[d.date.length-1] : d.date);  return LogTime((date - d.offset)/TimeScale);})
+               var EventMin      = d3.min(Events.filter(function(d){ return d.showPatient && !d.disabled}), function(d){ 
+                                        var date = (d.date instanceof Array ? d.date.sort(DescendingDate)[0] : d.date);  return LogTime((date - d.offset)/TimeScale);})
+               var EventMax      = d3.max(Events.filter(function(d){ return d.showPatient && !d.disabled}), function(d){ 
+                                        var date = (d.date instanceof Array ? d.date.sort(DescendingDate)[d.date.length-1] : d.date);  return LogTime((date - d.offset)/TimeScale);})
 
-			console.log("Min: " + EventMin + ", Max: "+ EventMax)
-			x.domain([EventMin, EventMax]);
-			y.domain([d3.min(Events,function(d) { return d.PtNum; }),d3.max(Events,function(d) { return PatientHeight*d.PtNum; })]);
+               console.log("Min: " + EventMin + ", Max: "+ EventMax)
+               x.domain([EventMin, EventMax]);
+               y.domain([d3.min(Events,function(d) { return d.PtNum; }),d3.max(Events,function(d) { return PatientHeight*d.PtNum; })]);
 
-		  TimeLine.append("g")
-    		  .attr("class", "x axis")
-	    	  .attr("transform", "translate(0," + TimeLineSize.height + ")")
-	    	  .call(xAxis)
-		     .append("text")
-	    	 .style("font-size", 12)
-	    	  .text(Xtitle);
+
+             d3PlotBrush = d3.svg.brush()
+               .x(x)
+               .y(y)
+               .on("brushend", d3PlotBrushReader);
+
+               TimeLine.call(d3PlotBrush);
+
+
+            TimeLine.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + TimeLineSize.height + ")")
+                .call(xAxis)
+               .append("text")
+               .style("font-size", 12)
+                .text(Xtitle);
  
-		  TimeLine.append("g")
-	    	  .attr("class", "y axis")
-		      .call(yAxis)
-	    	.append("text")
- 		   	  .attr("transform", "rotate(-90)")
-	    	  .attr("y", 2)
-	    	  .attr("dy", ".71em")
-		      .style("text-anchor", "end")
-	    	  .style("font-size", 12)
-	    	  .text("Patients");
+            TimeLine.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+              .append("text")
+                     .attr("transform", "rotate(-90)")
+                .attr("y", 2)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .style("font-size", 12)
+                .text("Patients");
       
-			var TimeSeries = TimeLine.append("g").selectAll("path")
-				.data(Events.filter(function(d){ return (d.date instanceof Array) && !d.disabled && d.showPatient}))
-			;
+               var TimeSeries = TimeLine.append("g").selectAll("path")
+                    .data(Events.filter(function(d){ return (d.date instanceof Array) && !d.disabled && d.showPatient}))
+               ;
 
-			console.log("TimeSeries")
-			console.log(TimeSeries)
+               console.log("TimeSeries")
+               console.log(TimeSeries)
 
-			TimeSeries.enter()
-				.append("line")
-				.attr("class", "path")
-				.attr("x1", function(d) { return x(LogTime((d.date[0] - d.offset)/TimeScale));  })
-				.attr("y1", function(d) { return y(PatientHeight*d.PtNum + EventOffset.get(d.Name)); })
-				.attr("x2", function(d) { return x(LogTime((d.date[1] - d.offset)/TimeScale));  })
-				.attr("y2", function(d) { return y(PatientHeight*d.PtNum+ EventOffset.get(d.Name)); })
-				.attr("stroke", function(d){ 
-					var ColorShade = d3.rgb(color(d.Name)); 
-					if(d3.keys(d).indexOf("Type") !== -1){ 
-						return ColorShade.brighter((EventTypes.get(d.Name).indexOf(d.Type) % 5)/2) };
-					return ColorShade;
-					})
-				.attr("stroke-width", PatientHeight*0.75)
-				.attr("data-legend",function(d) { return d.Name})
-				.on("mouseover", function(d,i){
-					var Type = ""; if(d3.keys(d).indexOf("Type") !== -1){ Type = d.Type}
-	        	   tooltip.text(d.PatientID + ": " + d.Name + " (" + FormatDate(d.date[0]) + ", "+ FormatDate(d.date[1]) + ") " + Type);
-	    	       return tooltip.style("visibility", "visible");
-    	    	   })
-	    	  	.on("mousemove", function(){return tooltip.style("top",
-    	    	  (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-		      	.on("mouseout", function(){return tooltip.style("visibility", "hidden");})
-				;
+               TimeSeries.enter()
+                    .append("line")
+                    .attr("class", "path")
+                    .attr("x1", function(d) { return x(LogTime((d.date[0] - d.offset)/TimeScale));  })
+                    .attr("y1", function(d) { return y(PatientHeight*d.PtNum + EventOffset.get(d.Name)); })
+                    .attr("x2", function(d) { return x(LogTime((d.date[1] - d.offset)/TimeScale));  })
+                    .attr("y2", function(d) { return y(PatientHeight*d.PtNum+ EventOffset.get(d.Name)); })
+                    .attr("stroke", function(d){ 
+                         var ColorShade = d3.rgb(color(d.Name)); 
+                         if(d3.keys(d).indexOf("Type") !== -1){ 
+                              return ColorShade.brighter((EventTypes.get(d.Name).indexOf(d.Type) % 5)/2) };
+                         return ColorShade;
+                         })
+                    .attr("stroke-width", PatientHeight*0.75)
+                    .attr("data-legend",function(d) { return d.Name})
+                    .on("mouseover", function(d,i){
+                         var Type = ""; if(d3.keys(d).indexOf("Type") !== -1){ Type = d.Type}
+                     tooltip.text(d.PatientID + ": " + d.Name + " (" + FormatDate(d.date[0]) + ", "+ FormatDate(d.date[1]) + ") " + Type);
+                     return tooltip.style("visibility", "visible");
+                     })
+                     .on("mousemove", function(){return tooltip.style("top",
+                    (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+                    ;
 
-			TimeSeries.exit().remove();
+               TimeSeries.exit().remove();
 
-			var TimePoint = TimeLine.append("g").selectAll("circle")
-				.data(Events.filter(function(d){ return !(d.date instanceof Array) && !d.disabled && d.showPatient}));
+               var TimePoint = TimeLine.append("g").selectAll("circle")
+                    .data(Events.filter(function(d){ return !(d.date instanceof Array) && !d.disabled && d.showPatient}));
 
-			console.log("TimePoint")
-			console.log(TimePoint)
-				
-			TimePoint.enter()
-				.append("circle")
-				.attr("class", "circle")
-				.style("fill", function(d){ return color(d.Name) })
-				.attr("cx", function(d) {return x(LogTime((d.date -d.offset)/TimeScale)); })
-				.attr("cy", function(d) { return y(PatientHeight*d.PtNum); })
-				.attr("r", function(d) { return PatientHeight;})
-				.attr("data-legend",function(d) { return d.Name})
-				.on("mouseover", function(d,i){
-					var Type = ""; if(d3.keys(d).indexOf("Type") !== -1){ Type = d.Type}
-	    	        tooltip.text(d.PatientID + ": " + d.Name + " (" + FormatDate(d.date) +") " + Type);
-	        	    return tooltip.style("visibility", "visible");
-		           })
-		      	.on("mousemove", function(){return tooltip.style("top",
-	    	      (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-	      		.on("mouseout", function(){return tooltip.style("visibility", "hidden");})
-			;
+               console.log("TimePoint")
+               console.log(TimePoint)
+                    
+               TimePoint.enter()
+                    .append("circle")
+                    .attr("class", "circle")
+                    .style("fill", function(d){ return color(d.Name) })
+                    .attr("cx", function(d) {return x(LogTime((d.date -d.offset)/TimeScale)); })
+                    .attr("cy", function(d) { return y(PatientHeight*d.PtNum); })
+                    .attr("r", function(d) { return PatientHeight;})
+                    .attr("data-legend",function(d) { return d.Name})
+                    .on("mouseover", function(d,i){
+                         var Type = ""; if(d3.keys(d).indexOf("Type") !== -1){ Type = d.Type}
+                      tooltip.text(d.PatientID + ": " + d.Name + " (" + FormatDate(d.date) +") " + Type);
+                      return tooltip.style("visibility", "visible");
+                     })
+                     .on("mousemove", function(){return tooltip.style("top",
+                    (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+               ;
 
-			TimePoint.exit().remove();				
+               TimePoint.exit().remove();                    
 
-			})
-		})
+               })
+          })
 
-		//--------------------------------------------------------------------------------------------------
-		dispatch.on("load.Menu", function(){
-	    
-	    	var width = $("#TimeLineDisplay").width();
-	 	    var height = $("#TimeLineDisplay").height();
-		
-			var   TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.9*height - margin.top - margin.bottom)},
-    			  SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.9*height - margin.top - margin.bottom)},
-	    		  legendSize = {height: 0.1*height, width: TimeLineSize.width};
+          //--------------------------------------------------------------------------------------------------
+          dispatch.on("load.Menu", function(){
+         
+              var width = $("#TimeLineDisplay").width();
+               var height = $("#TimeLineDisplay").height();
+          
+               var   TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.95*height - margin.top - margin.bottom)},
+                     SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.95*height - margin.top - margin.bottom)},
+                     legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
-			console.log("======== load.Menu")
-		  	var  AlignByMenu = d3.select("#AlignByDiv")
-    			.attr("transform", "translate(" + (3*margin.left+SideBarSize.width+margin.right) + ",0)")
-				.append("g")
-	 			.append("select")
-				.on("change", function() {
-					AlignBy = this.value; 
-					AlignEvents(); 
-					dispatch.DisplayPatients()});
-		  	;
-			AlignByMenu.selectAll("option")
-				.data(["None"])
-				.enter()
-					.append("option")
-					.attr("value", function(d){return d})
-					.text(function(d) { return d})
-      		;
+               console.log("======== load.Menu")
+                 var  AlignByMenu = d3.select("#AlignByDiv")
+                   .attr("transform", "translate(" + (3*margin.left+SideBarSize.width+margin.right) + ",0)")
+                    .append("g")
+                     .append("select")
+                    .on("change", function() {
+                         AlignBy = this.value; 
+                         AlignEvents(); 
+                         dispatch.DisplayPatients()});
+                 ;
+               AlignByMenu.selectAll("option")
+                    .data(["--"])
+                    .enter()
+                         .append("option")
+                         .attr("value", function(d){return d})
+                         .text(function(d) { return d})
+                ;
 
-		  	var  OrderByMenu = d3.select("#OrderByDiv")
- 				.append("g")
-    			.attr("transform", "translate(" + (margin.left+SideBarSize.width+margin.left+margin.right) + ",0)")
-	    		.append("select")
-				.on("change", function() {
-					OrderBy = this.value; 
-					OrderEvents(); 	
-					dispatch.DisplayPatients()});
-  			;
-			OrderByMenu.selectAll("option")
-				.data(["--"])
-				.enter()
-					.append("option")
-					.attr("value", function(d){return d})
-					.text(function(d) { return d})
-      		;
-			var  AddSideBarMenu = d3.select("#AddSideBar")
-				.style("display", "inline-block") 
-				.style("width", (SideBarSize.width + 2*margin.left + margin.right) +"px" )
-				.append("g")
-				.append("select")
-				.on("change", function() {SidePlotEvent = this.value; 
-										dispatch.DisplayPatients(); 
-										});
-			AddSideBarMenu.selectAll("option")
-				.data(["+Add"])
-				.enter()
-					.append("option")
-					.attr("value", function(d){return d})
-					.text(function(d) { return d})
-      		;
-	 		var  SaveImage = d3.select("#SaveImageDiv")
-				.on("click", function() {
-					console.log("========Save Image: ")
-		
-					var html = d3.select("svg")
-       						 .attr("version", 1.1)
-        					 .attr("xmlns", "http://www.w3.org/2000/svg")
-       						 .node().parentNode.innerHTML;
-				    var imgsrc = 'data:image/svg+xml;base64,'+ btoa(html);
-					var img = '<img src="'+imgsrc+'">';
-				
-					var canvas = document.querySelector("canvas"),
-    					context = canvas.getContext("2d");
+                 var  OrderByMenu = d3.select("#OrderByDiv")
+                   .attr("transform", "translate(" + (margin.left+SideBarSize.width+margin.left+margin.right) + ",0)")
+                     .append("g")
+                   .append("select")
+                    .on("change", function() {
+                         OrderBy = this.value; 
+                         if(OrderBy === "+Add"){
+                              console.log("== changing OrderBy with ", OrderBy)
+                              OpenDialogForAddedEvents("OrderBy");
+                         } else{
+                              console.log("== changing OrderBy ", OrderBy)
+                         OrderEvents();      
+                              dispatch.DisplayPatients();
+//                              dialog.dialog("destroy");
+                         }
+                    })
+                 ;
+               OrderByMenu.selectAll("option")
+                    .data(["--", "+Add"])
+                    .enter()
+                         .append("option")
+                         .attr("value", function(d){return d})
+                         .text(function(d) { return d})
+                ;
+               var  AddSideBarMenu = d3.select("#AddSideBar")
+                    .style("display", "inline-block") 
+                    .style("width", (SideBarSize.width + 2*margin.left + margin.right) +"px" )
+                    .append("g")
+                    .append("select")
+                    .on("change", function() {SidePlotEvent = this.value; 
+                         if(SidePlotEvent === "+Add"){
+                              console.log("== changing SideBar with ", SidePlotEvent)
+                              OpenDialogForAddedEvents("SidePlot");
+                         } else{ 
+                              console.log("== changing SideBar", SidePlotEvent)
+                                                  dispatch.DisplayPatients(); 
+//                         dialog.dialog("destroy");
+                         }
+                                                  });
+               AddSideBarMenu.selectAll("option")
+                    .data(["--", "+Add"])
+                    .enter()
+                         .append("option")
+                         .attr("value", function(d){return d})
+                         .text(function(d) { return d})
+                ;
+                var  SaveImage = d3.select("#SaveImageDiv")
+                    .on("click", function() {
+                         console.log("========Save Image: ")
+          
+                         var html = d3.select("svg")
+                                      .attr("version", 1.1)
+                                  .attr("xmlns", "http://www.w3.org/2000/svg")
+                                      .node().parentNode.innerHTML;
+                        var imgsrc = 'data:image/svg+xml;base64,'+ btoa(html);
+                         var img = '<img src="'+imgsrc+'">';
+                    
+                         var canvas = document.querySelector("canvas"),
+                             context = canvas.getContext("2d");
 
-					var image = new Image;
-					image.src = imgsrc;
-					image.onload = function() {
- 				 		context.drawImage(image, 0, 0);
-		
-						var canvasdata = canvas.toDataURL("image/png");
-						var pngimg = '<img src="'+canvasdata+'">'; 
+                         var image = new Image;
+                         image.src = imgsrc;
+                         image.onload = function() {
+                                context.drawImage(image, 0, 0);
+          
+                              var canvasdata = canvas.toDataURL("image/png");
+                              var pngimg = '<img src="'+canvasdata+'">'; 
 
- 					 	var a = document.createElement("a");
-							a.download = "test.png"
-	 						 a.href = canvasdata;
-  						a.click();
-					}
-				})
-	
-		//--------------------------------------------------------------------------------------------------
-		dispatch.on("LoadOptions.Menu",  function(){
-	
-		console.log("======== DisplayPatients.Menu")
-		    
-	      OrderByMenu.selectAll("option")
-				.data(d3.merge([["--"], CalculatedEvents.keys() ,EventTypes.keys()]))
-				.enter()
-					.append("option")
-					.attr("value", function(d){return d})
-					.text(function(d) { return d})
-	      	;
-	  
-	  		AlignByMenu.selectAll("option")
-				.data(d3.merge([["None"],EventTypes.keys()]))
-				.enter()
-					.append("option")
-					.attr("value", function(d){return d})
-					.text(function(d) { return d})
-	      ;
-	      
-	      AddSideBarMenu.selectAll("option")
-				.data(d3.merge([["+Add"], CalculatedEvents.keys(), ["Radiation", "Chemo", "Diagnosis", "OR", "MRI", "Status"]]))
-				.enter()
-					.append("option")
-					.attr("value", function(d){return d})
-					.text(function(d) { return d})
-	      ;
-	      		
-			})
-		dispatch.on("Update.Menu", function(){
-			OrderByMenu.select("option")
-					.text(function(d) { return OrderBy})
-		})
-	})
+                                var a = document.createElement("a");
+                                   a.download = "test.png"
+                                     a.href = canvasdata;
+                                a.click();
+                         }
+                    })
+     
+         //--------------------------------------------------------------------------------------------------
+         dispatch.on("UpdateMenuOptions.Menu", function(){
+     
+            console.log("======== UpdateMenuOptions")
+            console.log("CalculatedEvents keys: ", CalculatedEvents.keys())
+            console.log("EventTypes keys: ",EventTypes.keys())
+            console.log("OrderByMenu: ", OrderByMenu)
+     
+          OrderByMenu.selectAll("option").remove()     
+          AlignByMenu.selectAll("option").remove()
+          AddSideBarMenu.selectAll("option").remove()
+              
+           OrderByMenu.selectAll("option")
+                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys() ,EventTypes.keys()]))
+                    .enter()
+                         .append("option")
+                         .attr("value", function(d){return d})
+                         .text(function(d) { return d})
+                ;
+       
+                 AlignByMenu.selectAll("option")
+                    .data(d3.merge([["--"],EventTypes.keys()]))
+                    .enter()
+                         .append("option")
+                         .attr("value", function(d){return d})
+                         .text(function(d) { return d})
+           ;
+           
+           AddSideBarMenu.selectAll("option")
+                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys(), ["Radiation", "Chemo", "Diagnosis", "OR", "MRI", "Status"].filter(function(d){console.log(d, EventTypes.has(d)); return EventTypes.has(d) })]))
+                    .enter()
+                         .append("option")
+                         .attr("value", function(d){return d})
+                         .text(function(d) { return d})
+           ;
+                     
+        })
+        //--------------------------------------------------------------------------------------------------
+          dispatch.on("LoadOptions.Menu",  function(){
+               console.log("======== LoadOptions.Menu")     
+               dispatch.UpdateMenuOptions()
+          })
+     
+          
+          //--------------------------------------------------------------------------------------------------
+          dispatch.on("Update.Menu", function(){
+               console.log("======== Update.Menu")
+                
+               OrderByMenu.selectAll("option")
+                         .each(function(d){console.log(d); if(d === OrderBy) return d3.select(this).attr("selected", "selected")})
+               AddSideBarMenu.selectAll("option")
+                         .each(function(d){console.log(d); if(d === SidePlotEvent) return d3.select(this).attr("selected", "selected")})				
+               AlignByMenu.selectAll("option")
+                         .each(function(d){console.log(d); if(d === AlignBy) return d3.select(this).attr("selected", "selected")})
+          })
+     })
+     //--------------------------------------------------------------------------------------------
+     function UpdateCalculatedEvent(value){
+               
+          }
+        //--------------------------------------------------------------------------------------------
+       function CreateCalculatedEvent() {
+                          var Name = $( "#Name" ).val();
+                          var Event1 = $( "#Event1" ).val();
+                          var Event2 = $( "#Event2" ).val();
+                          var TimeScale = $( "#TimeScale").val();
+                         console.log("Calculated Event: ")
+                         console.log(Name); console.log(Event1); console.log(Event2); console.log(TimeScale);
 
-	//--------------------------------------------------------------------------------------------------
-	AlignEvents = function(){
-	
-		console.log("========Align Event: "+ AlignBy);
-		Events.forEach(function(d){ d.offset = 0; d.showPatient=true;})
-		EventsByID.forEach(function(ID, Patient){
-					Patient.forEach(function(id, event){event.showPatient = true; event.offset=0;})})
+                          var valid = true;
+      
+                          valid = valid && EventTypes.has(Event1);
+                          valid = valid && EventTypes.has(Event2);
+                           valid = valid && ["Days", "Months", "Years"].indexOf(TimeScale) !== -1;
+  
+                          if ( valid ) {
+                            CalculatedEvents.set(Name, [{Name: Name, Event1: Event1, Event2: Event2,  TimeScale: TimeScale}])
+                            console.log("Calculated Events Added: " + Name)
+                            console.log(CalculatedEvents);
+                             dialog.dialog( "close" );
+                             return(Name);
+                          } else {
+                                 console.log("Invalid Calculated Event");
+                               return("--");
+                          }
+                   }
 
-		if (AlignBy === "AgeDx"){ 
-		} else if(EventTypes.keys().indexOf(AlignBy) !== -1){
-			EventsByID.forEach(function(ID, Patient){
-				if( Patient.has(AlignBy)){
-					var MinPatientAlignBy = d3.min(Patient.get(AlignBy), function(d) {var date = (d.date instanceof Array ? d3.min(d.date) : d.date);  return date})
-					Events.filter(function(d){return d.PatientID === ID})
-						.forEach(function(d){ d.offset = MinPatientAlignBy;})
-				}
-				else{		// hide Patients that can't be aligned
-					Events.filter(function(d){return d.PatientID === ID})
-							.forEach(function(d){ d.showPatient = false; d.offset=0;})
-					Patient.forEach(function(id, event){event.showPatient = false; event.offset=0;})
-				}
-			})
-		}
-	}	
+      
+      //--------------------------------------------------------------------------------------------
+       function OpenDialogForAddedEvents(MenuType) {
+          console.log("======== Dialog for Adding Events")
+          dialog = $( "#AddCalculatedEvent" ).dialog({
+                autoOpen: false,
+                title: "Calculate Event",
+                height: 300,
+                width: 400,
+                buttons: {
+                  "Create": function(){
+                            var value = CreateCalculatedEvent()
+                            
+                            if(MenuType == "OrderBy"){
+                                   OrderBy = value;
+                                   console.log("OrderBy is now: " + OrderBy);
+                                   OrderEvents();
+                              } else if (MenuType == "SidePlot"){
+                                   SidePlotEvent = value;
+                                   console.log("SidePlotEvent is now: " + SidePlotEvent);
+                              }
+                              dialog.dialog("close")
+                               dispatch.UpdateMenuOptions();
+                               dispatch.Update(); 
+                               dispatch.DisplayPatients();
+                       },
+                  Cancel: function() { dialog.dialog( "close" ); UpdateCalculatedEvent("--");}
+                },
+                close: function() {}
+                
+         });
+           dialog.dialog( "open" );
+          console.log("open dialog")
 
-	//--------------------------------------------------------------------------------------------------
-	OrderEvents = function(){
-	
-		console.log("========Order Event: "+ OrderBy);
-		var PatientOrderBy = []
+     }
 
-		if(OrderBy === "Survival"){  PatientOrderBy = getDateDiff("Diagnosis", "Status", "")
-		} else if(OrderBy === "AgeDx"){  PatientOrderBy = getDateDiff("DOB", "Diagnosis", "")
-		} else if(OrderBy === "TimeToProgression"){ PatientOrderBy = getDateDiff("Diagnosis", "Progression", "")
-		} else if(EventTypes.keys().indexOf(OrderBy) !== -1){
-			EventsByID.forEach(function(ID, Patient){
-				if( Patient.has(OrderBy)){
-					PatientOrderBy.push(d3.min(Patient.get(OrderBy), function(d) 
-						{var date = (d.date instanceof Array ? d3.min(d.date) : d.date);   
-							return {ID: ID, value: date} }))
-				} else{
-					PatientOrderBy.push({ID: ID, value: 0} )
-				}   })
-		} 
-	
-		PatientOrderBy.sort(DescendingValues).forEach(function(Ordered, i){
-					Events.filter(function(d){return d.PatientID === Ordered.ID})
-							.forEach(function(d){ d.PtNum = i})
-					if(EventsByID.has(Ordered.ID)){EventsByID.get(Ordered.ID)
-							.forEach(function(d){ d.PtNum = i})}
-			})
-		
-		console.log("Reordered")
-		console.log(PatientOrderBy)
-	}	
-	//--------------------------------------------------------------------------------------------------
-	OrderBySidePlot = function(){
-	
-		console.log("========Order by SidePlot: "+ SidePlotEvent);
-		var PatientOrderBy = [], Categories = [];
+     //--------------------------------------------------------------------------------------------------
+     function AlignEvents(){
+     
+          console.log("========Align Event: "+ AlignBy);
+          Events.forEach(function(d){ d.offset = 0; d.showPatient=true;})
+          EventsByID.forEach(function(ID, Patient){
+                         Patient.forEach(function(id, event){event.showPatient = true; event.offset=0;})})
 
-		OrderBy = "--";
-		if(CalculatedEvents.has(SidePlotEvent) ){
-			 var event = CalculatedEvents.get(SidePlotEvent)[0]
-			 console.log(event)
-			 PatientOrderBy = getDateDiff(event.Event1,event.Event2,""); OrderBy=SidePlotEvent;
-		
-		} else if(EventTypes.keys().indexOf(SidePlotEvent) !== -1){
+          if (AlignBy === "AgeDx"){ 
+          } else if(EventTypes.keys().indexOf(AlignBy) !== -1){
+               EventsByID.forEach(function(ID, Patient){
+                    if( Patient.has(AlignBy)){
+                         var MinPatientAlignBy = d3.min(Patient.get(AlignBy), function(d) {var date = (d.date instanceof Array ? d3.min(d.date) : d.date);  return date})
+                         Events.filter(function(d){return d.PatientID === ID})
+                              .forEach(function(d){ d.offset = MinPatientAlignBy;})
+                    }
+                    else{          // hide Patients that can't be aligned
+                         Events.filter(function(d){return d.PatientID === ID})
+                                   .forEach(function(d){ d.showPatient = false; d.offset=0;})
+                         Patient.forEach(function(id, event){event.showPatient = false; event.offset=0;})
+                    }
+               })
+          }
+     }     
 
-			EventsByID.forEach(function(ID, Patient){
-				if(Patient.has(SidePlotEvent) && Patient.get(SidePlotEvent)[0].showPatient){
-					Patient.get(SidePlotEvent).forEach(function(k){
-						if(Categories.indexOf(k.Type) == -1){ Categories.push(k.Type)}
-					})
-					PatientOrderBy.push({ID:ID, value: Patient.get(SidePlotEvent)[0].Type})
-				}
-			})
-			
-			Categories.sort();
-			console.log(Categories)
-			console.log(Categories.length)
-		
-			PatientOrderBy.forEach(function(d,i){
-				d.value = Categories.indexOf(d.value)
-			})
-			
-		}
-		
-		PatientOrderBy.sort(DescendingValues).forEach(function(Ordered, i){
-					Events.filter(function(d){return d.PatientID === Ordered.ID})
-							.forEach(function(d){ d.PtNum = i})
-					if(EventsByID.has(Ordered.ID)){EventsByID.get(Ordered.ID)
-							.forEach(function(d){ d.PtNum = i})}
-			})
-		
-		
-		console.log("Reordered")
-		console.log(PatientOrderBy)
-	}	
+     //--------------------------------------------------------------------------------------------------
+     function OrderEvents(){
+     
+          console.log("========Order Event: "+ OrderBy);
+          var PatientOrderBy = []
 
-	//--------------------------------------------------------------------------------------------------
-	function DescendingDate(a,b) {
-	  if (a.date > b.date)
-	     return -1;
-	  if (a.date < b.date)
-	    return 1;
-	  return 0;
-	}
-	//--------------------------------------------------------------------------------------------------
-	function DescendingValues(a,b) {
-	  if (a.value > b.value)
-	     return -1;
-	  if (a.value < b.value)
-	    return 1;
-	  return 0;
-	}
-	//--------------------------------------------------------------------------------------------------
-	function makeArray(count, content) {
-	   var result = [];
-	   if(typeof(content) == "function") {
-	      for(var i=0; i<count; i++) {
-	         result.push(content(i));
-	      }
-	   } else {
-	      for(var i=0; i<count; i++) {
-	         result.push(content);
-	      }
-	   }
-	   return result;
-	}
-	//--------------------------------------------------------------------------------------------------
-	function isValidDate(text) {
-		//eg text = '2/30/2011';
-	
-		var comp = text.split('/');
-		var m = parseInt(comp[0], 10);
-		var d = parseInt(comp[1], 10);
-		var y = parseInt(comp[2], 10);
-		var date = new Date(y,m-1,d);
-	
-		if (date.getFullYear() !== y || date.getMonth() + 1 !== m || date.getDate() !== d){
-			console.log("Invalid Format Month/Day/Year " + text + ": " + m + "/" + d+ "/" + y)
-	        return false;
-		}
-			
-		// check month and year
-		if(y < 1000 || y > 3000 || m == 0 || m > 12){
-			console.log("Invalid Month/Year: " + m + "/" + y)
-	        return false;
-		}
-	    var monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
-	
-	    // Adjust Days for leap years
-	    if(y % 400 == 0 || (y % 100 != 0 && y % 4 == 0))
-	        monthLength[1] = 29;
-	
-	    // Check the range of the day
-	    if( d <= 0 || d > monthLength[m - 1]){
-			console.log("Invalid Day/Month: " + d+ "/" + m)    
-	     	return false;
-		}
-		
-		return true;
-	}
-	//--------------------------------------------------------------------------------------------------	
-	ToggleVisibleEvent =  function(d){
-	    
-	    var hide = false;
-	    var newFilters = [];
-	 
-	    ShowEvents.forEach(function (f) {
-	      if (d === f) {  
-	      	hide = true;
-	      	console.log("Hiding " + d);
-	      	Events.forEach(function(D){ 
-	      		if(D.Name === d) {D.disabled=true}});
-	      } else { newFilters.push(f);}
-	    });
-	
-	     // Hide the shape or show it
-		if (hide) {  d3.select(this).style("opacity", 0.2);
-	    } else {
-	      d3.select(this).style("opacity", 1);
-	      newFilters.push(d);
-	      Events.forEach(function(D){ 
-	      		if(D.Name === d) {D.disabled=false}});
-	     }
-		ShowEvents = newFilters;
-		dispatch.DisplayPatients();
-	}
-	//--------------------------------------------------------------------------------------------------
-	
-	//--------------------------------------------------------------------------------------------------
+
+          if(CalculatedEvents.has(OrderBy) ){
+                var event = CalculatedEvents.get(OrderBy)[0]
+                console.log(event)
+                PatientOrderBy = getDateDiff(event.Event1,event.Event2,""); 
+          } else if(EventTypes.keys().indexOf(OrderBy) !== -1){
+               EventsByID.forEach(function(ID, Patient){
+                    if( Patient.has(OrderBy)){
+                         PatientOrderBy.push(d3.min(Patient.get(OrderBy), function(d) 
+                              {var date = (d.date instanceof Array ? d3.min(d.date) : d.date);   
+                                   return {ID: ID, value: date} }))
+                    } else{
+                         PatientOrderBy.push({ID: ID, value: 0} )
+                    }   })
+          } 
+     
+          PatientOrderBy.sort(DescendingValues).forEach(function(Ordered, i){
+                         Events.filter(function(d){return d.PatientID === Ordered.ID})
+                                   .forEach(function(d){ d.PtNum = i})
+                         if(EventsByID.has(Ordered.ID)){EventsByID.get(Ordered.ID)
+                                   .forEach(function(d){ d.PtNum = i})}
+               })
+          
+          console.log("Reordered")
+          console.log(PatientOrderBy)
+     }     
+     //--------------------------------------------------------------------------------------------------
+     function OrderBySidePlot(){
+     
+          console.log("========Order by SidePlot: "+ SidePlotEvent);
+          var PatientOrderBy = [], Categories = [];
+
+          OrderBy = "--";
+          if(CalculatedEvents.has(SidePlotEvent) ){
+                var event = CalculatedEvents.get(SidePlotEvent)[0]
+                console.log(event)
+                PatientOrderBy = getDateDiff(event.Event1,event.Event2,""); OrderBy=SidePlotEvent;
+          
+          } else if(EventTypes.keys().indexOf(SidePlotEvent) !== -1){
+
+               EventsByID.forEach(function(ID, Patient){
+                    if(Patient.has(SidePlotEvent) && Patient.get(SidePlotEvent)[0].showPatient){
+                         Patient.get(SidePlotEvent).forEach(function(k){
+                              if(Categories.indexOf(k.Type) == -1){ Categories.push(k.Type)}
+                         })
+                         PatientOrderBy.push({ID:ID, value: Patient.get(SidePlotEvent)[0].Type})
+                    }
+               })
+               
+               Categories.sort();
+               console.log(Categories)
+               console.log(Categories.length)
+          
+               PatientOrderBy.forEach(function(d,i){
+                    d.value = Categories.indexOf(d.value)
+               })
+               
+          }
+          
+          PatientOrderBy.sort(DescendingValues).forEach(function(Ordered, i){
+                         Events.filter(function(d){return d.PatientID === Ordered.ID})
+                                   .forEach(function(d){ d.PtNum = i})
+                         if(EventsByID.has(Ordered.ID)){EventsByID.get(Ordered.ID)
+                                   .forEach(function(d){ d.PtNum = i})}
+               })
+          
+          
+          console.log("Reordered")
+          console.log(PatientOrderBy)
+     }     
+
+     //--------------------------------------------------------------------------------------------------
+     function DescendingDate(a,b) {
+       if (a.date > b.date)
+          return -1;
+       if (a.date < b.date)
+         return 1;
+       return 0;
+     }
+    //--------------------------------------------------------------------------------------------------
+     function DescendingStartDate(a,b) {
+       if (a.date[0] > b.date[0])
+          return -1;
+       if (a.date[0] < b.date[0])
+         return 1;
+       return 0;
+     }
+     //--------------------------------------------------------------------------------------------------
+     function AscendingDate(a,b) {
+       if (a.date < b.date)
+          return -1;
+       if (a.date > b.date)
+         return 1;
+       return 0;
+     }
+    //--------------------------------------------------------------------------------------------------
+     function AscendingStartDate(a,b) {
+       if (a.date[0] < b.date[0])
+          return -1;
+       if (a.date[0] > b.date[0])
+         return 1;
+       return 0;
+     }
+     //--------------------------------------------------------------------------------------------------
+     function DescendingValues(a,b) {
+       if (a.value > b.value)
+          return -1;
+       if (a.value < b.value)
+         return 1;
+       return 0;
+     }
+     //--------------------------------------------------------------------------------------------------
+     function makeArray(count, content) {
+        var result = [];
+        if(typeof(content) == "function") {
+           for(var i=0; i<count; i++) {
+              result.push(content(i));
+           }
+        } else {
+           for(var i=0; i<count; i++) {
+              result.push(content);
+           }
+        }
+        return result;
+     }
+     //--------------------------------------------------------------------------------------------------
+     function isValidDate(text) {
+          //eg text = '2/30/2011';
+     
+          var comp = text.split('/');
+          var m = parseInt(comp[0], 10);
+          var d = parseInt(comp[1], 10);
+          var y = parseInt(comp[2], 10);
+          var date = new Date(y,m-1,d);
+     
+          if (date.getFullYear() !== y || date.getMonth() + 1 !== m || date.getDate() !== d){
+               console.log("Invalid Format Month/Day/Year " + text + ": " + m + "/" + d+ "/" + y)
+             return false;
+          }
+               
+          // check month and year
+          if(y < 1000 || y > 3000 || m == 0 || m > 12){
+               console.log("Invalid Month/Year: " + m + "/" + y)
+             return false;
+          }
+         var monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+     
+         // Adjust Days for leap years
+         if(y % 400 == 0 || (y % 100 != 0 && y % 4 == 0))
+             monthLength[1] = 29;
+     
+         // Check the range of the day
+         if( d <= 0 || d > monthLength[m - 1]){
+               console.log("Invalid Day/Month: " + d+ "/" + m)    
+               return false;
+          }
+          
+          return true;
+     }
+     //--------------------------------------------------------------------------------------------------     
+     function ToggleVisibleEvent(d){
+         
+         var hide = false;
+         var newFilters = [];
+      
+         ShowEvents.forEach(function (f) {
+           if (d === f) {  
+                hide = true;
+                console.log("Hiding " + d);
+                Events.forEach(function(D){ 
+                     if(D.Name === d) {D.disabled=true}});
+           } else { newFilters.push(f);}
+         });
+     
+          // Hide the shape or show it
+          if (hide) {  d3.select(this).style("opacity", 0.2);
+         } else {
+           d3.select(this).style("opacity", 1);
+           newFilters.push(d);
+           Events.forEach(function(D){ 
+                     if(D.Name === d) {D.disabled=false}});
+          }
+          ShowEvents = newFilters;
+          dispatch.DisplayPatients();
+     }
+     //--------------------------------------------------------------------------------------------------
+     
+     //--------------------------------------------------------------------------------------------------
 
   return{
    init: function(){
-   		console.log("========== initializing PatientModule")
-		onReadyFunctions.push(initializeUI);
-		
-		addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
-    	addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
- 	
-	    socketConnectedFunctions.push(loadPatientDemoData);
+             console.log("========== initializing PatientModule")
+          onReadyFunctions.push(initializeUI);
+          
+          addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
+         addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
+      
+         socketConnectedFunctions.push(loadPatientDemoData);
    }
   };
 
@@ -1165,6 +1378,7 @@ PatientTimeLine.init();
   } 
 
 
+
 </style>
 
 <canvas width="960" height="500" style="display:none"></canvas>
@@ -1175,11 +1389,24 @@ PatientTimeLine.init();
 	     <span id="AlignByDiv">Align By: </span>
 	     <span id="OrderByDiv">Order By: </span>
 	     <button id="SaveImageDiv">Save Image </button>
-       	 <button id="broadcastSelectionToClinicalTable">To Clinical Data... </button>
+       	 <button id="SendSelectionToClinicalTable">To Clinical Data... </button>
      </div>
      <div id="TimeLineDisplay">
      <span id="SideBarPlot" class="resizeable"></span>
      <span id="patientTimeLinesDisplay" class="resizeable"></span>
+     </div>
+     
+     <div id="AddCalculatedEvent"  style="display:none">
+     <form>
+          <label for="Name">Name</label>
+          <input type="text" id="Name" value="e.g. Survival"><br>
+          <label for="Event1">Event 1</label>
+          <input type="text" id="Event1" value="(legend)"><br>
+          <label for="Event2">Event 2</label>
+          <input type="text" id="Event2" value="(legend)"><br>
+          <label for="TimeScale"> Time Scale</label>
+          <input type="text" id="TimeScale" value="Days, Months, Years"><br>
+	</form>
      </div>
 </div>
 

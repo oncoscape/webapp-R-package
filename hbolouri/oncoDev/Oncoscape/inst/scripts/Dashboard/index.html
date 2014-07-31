@@ -34,6 +34,9 @@
    <script src="http://s3.amazonaws.com/oncoscape/js/jquery.multi-select.js" type="text/javascript"></script>
    <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
+	<script type="text/javascript" src="http://mbostock.github.io/d3/talk/20111018/d3/d3.js"></script>
+	<script type="text/javascript" src="http://mbostock.github.io/d3/talk/20111018/d3/d3.layout.js"></script>
+	<!-- d3.layout.js -->
 
 <script>
 
@@ -264,13 +267,24 @@ $(document).ready(function()
 </script>
 
 <body>
-<div id="todoDiv">
-<h3> google doc test </h3>
-   <iframe
-      height="600px",
-      width="95%",
-      src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml?widget=true&amp;headers=false">
-   </iframe>
+<style>
+ul.UserDocs {
+    list-style-type: circle;
+}
+</style>
+
+
+<div id="DashboardDiv">
+<h3> Oncoscape </h3>
+   <p> Welcome to Oncoscape! </p>
+   <p> This page will include:</p>
+   <ul class="UserDocs">
+     <li> a welcome message</li>
+     <li> links to download vignettes </li>
+     <li> Explanation of available data </li>
+     <li> Tooltips/Tutorial </li>
+     <li> link to download/install software </li>
+   </ul>
 </div>
 
 </body>

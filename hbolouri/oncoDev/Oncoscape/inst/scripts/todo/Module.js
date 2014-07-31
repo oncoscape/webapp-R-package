@@ -1,44 +1,26 @@
 <script>
 //----------------------------------------------------------------------------------------------------
-var DateAndTimeModule = (function () {
+var todoModule = (function () {
 
-var _button;
-var _timeDisplay;
+var ToDoURL = "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/edit?usp=sharing"
+var ToDobutton;
 
-_initializeUI = function(){
-    _button = $("#requestDateButton");
-    _button.click(_requestTime);
-    _timeDisplay = $("#dateDisplay");
+initializeUI = function(){
+    ToDobutton = $("#ToDoLink");
+    ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
     };
 
-_requestTime = function(){
-   msg = {cmd: "fetchDateAndTimeString", status: "request", payload: "empty"}
-   msg.json = JSON.stringify(msg);
-   socket.send(msg.json);
-   };
-
-_displayTime = function(msg){
-   result = msg.payload;
-   _timeDisplay.text(result);
-   };
 
 return{
 
-   getTime: function(){
-      return _timeDisplay.text()
-      },
-
-   requestTime: _requestTime,
-
    init: function(){
-      onReadyFunctions.push(_initializeUI);
-      addJavascriptMessageHandler("dateAndTimeString", _displayTime);
+      onReadyFunctions.push(initializeUI);
       }
    };
 
 }); // DateAndTimeModule
 //----------------------------------------------------------------------------------------------------
-dtm = DateAndTimeModule();
-dtm.init();
+todo = todoModule();
+todo.init();
 
 </script>

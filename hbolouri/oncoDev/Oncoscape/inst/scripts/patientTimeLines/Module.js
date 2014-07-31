@@ -5,35 +5,34 @@ var TimeLineModule = (function () {
      define(JAVASCRIPT_FORMAT, format)
 
      //--------------------------------------------------------------------------------------------------
-     var TimelineTabNumber = 3
-     var margin = {top: 10, right: 15, bottom: 30, left: 20}
+     var TimelineTabNumber = 3;
+     var TimeLineMargin = {top: 10, right: 15, bottom: 30, left: 20};
      var AlignBy = "--";
      var OrderBy = "--";
      var SidePlotEvent = "--";
      var TimeLineDisplay;
      var MainEvents = ["DOB","Encounter", "Diagnosis", "OR",  "MRI","Radiation", "Chemo","Progression",  "Status"]
      var MainEventColors = ["#17becf", "#d62728", "#8c564b","#ff7f0e", "#7f7f7f","#9467bd","#1f77b4","#2ca02c", "#bcbd22"]
-     var MainEventTextSpacing = [0, 70, 82, 85, 75, 72, 75, 75, 80]
-      var selectedRegion;    // from brushing
-     var d3PlotBrush;
+     var MainEventTextSpacing = [0, 70, 82, 85, 75, 72, 75, 75, 80];
+     var TimeLineSelectedRegion;    // from brushing
+     var TimeLined3PlotBrush;
      var dialog;
-        var broadcastButton;
-        var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
+     var TimeLinebroadcastButton;
+     var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
                             {Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
-                                           {Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
-                                        {Name:"FirstProgressionToDeath",Event1: "Progression", Event2: "Status", TimeScale: "Days"} ];
-      CalculatedEvents = d3.nest()
+                            {Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
+                            {Name:"FirstProgressionToDeath",Event1: "Progression", Event2: "Status", TimeScale: "Days"} ];
+         CalculatedEvents = d3.nest()
               .key(function(d) { return d.Name; })
               .map(CalculatedEvents, d3.map);
               
-             OneDay = 1000 *60 * 60*24,
-          color = d3.scale.ordinal().range(MainEventColors)
-          color.domain(MainEvents);
-           PatientHeight = 3;
+     var OneDay = 1000 *60 * 60*24;
+     var TimeLineColor = d3.scale.ordinal().range(MainEventColors).domain(MainEvents);
+     var PatientHeight = 3;
 
      var Events,EventsByID, FormatDate, EventTypes, ShowEvents;
      var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update", "UpdateMenuOptions");
-     var InitialLoad=true;
+     var TimeLineInitialLoad=true;
 
        
         //--------------------------------------------------------------------------------------------
@@ -41,10 +40,10 @@ var TimeLineModule = (function () {
              console.log("========== initializing Timeline UI")
            TimeLineDisplay = $("#TimeLineDisplay");
            TimeLineHandleWindowResize();
-           broadcastButton = $("#SendSelectionToClinicalTable");
-              broadcastButton.click(broadcastSelection);
+           TimeLinebroadcastButton = $("#SendSelectionToClinicalTable");
+              TimeLinebroadcastButton.click(broadcastSelection);
            $(window).resize(TimeLineHandleWindowResize);
-           broadcastButton.prop("disabled",true);
+           TimeLinebroadcastButton.prop("disabled",true);
           
            dispatch.load();
       };
@@ -92,21 +91,22 @@ var TimeLineModule = (function () {
      
       //--------------------------------------------------------------------------------------------
      function TimeLineHandleWindowResize(){
+       	console.log("===== resizing Timeline window")
           TimeLineDisplay.width($(window).width() * 0.95);
            TimeLineDisplay.height($(window).height() * 0.80);
-          if(!InitialLoad) {dispatch.DisplayPatients();}
+          if(!TimeLineInitialLoad) {dispatch.DisplayPatients();}
      };
 
    //--------------------------------------------------------------------------------------------
    function broadcastSelection(){
-      console.log("broadcastSelection: " + selectedRegion);
-      x1=selectedRegion[0][0];
-      y1=selectedRegion[0][1];
-      x2=selectedRegion[1][0];
-      y2=selectedRegion[1][1];
+      console.log("broadcastSelection: " + TimeLineSelectedRegion);
+      x1=TimeLineSelectedRegion[0][0];
+      y1=TimeLineSelectedRegion[0][1];
+      x2=TimeLineSelectedRegion[1][0];
+      y2=TimeLineSelectedRegion[1][1];
       ids = [];
       
-      console.log(selectedRegion)
+      console.log(TimeLineSelectedRegion)
       function LogTime(t){
                      if(AlignBy === "--"){ 
                                return t;
@@ -145,15 +145,15 @@ var TimeLineModule = (function () {
 //--------------------------------------------------------------------------------------------
   function d3PlotBrushReader(){
      console.log("plotBrushReader");
-     selectedRegion = d3PlotBrush.extent();
+     TimeLineSelectedRegion = TimeLined3PlotBrush.extent();
      //console.log("region: " + pcaSelectedRegion);
-     y0 = selectedRegion[0][1];
-     y1 = selectedRegion[1][1];
+     y0 = TimeLineSelectedRegion[0][1];
+     y1 = TimeLineSelectedRegion[1][1];
      selectHeight = Math.abs(y0-y1);
      if(selectHeight > 1)
-        broadcastButton.prop("disabled", false);
+        TimeLinebroadcastButton.prop("disabled", false);
      else
-        broadcastButton.prop("disabled", true);
+        TimeLinebroadcastButton.prop("disabled", true);
      }; // d3PlotBrushReader
 
    //--------------------------------------------------------------------------------------------
@@ -173,7 +173,7 @@ var TimeLineModule = (function () {
       console.log("Module.TimeLine: handlePatientIDs");
       console.log(msg)
     $("#tabs").tabs( "option", "active", TimelineTabNumber);
- //       InitialLoad=true;
+ //       TimeLineInitialLoad=true;
      if(msg.status == "success"){
          patientIDs = msg.payload
          console.log("TimeLine handlePatientIds: " + patientIDs);
@@ -193,7 +193,7 @@ var TimeLineModule = (function () {
     function loadPatientDemoData(){
 
        console.log("==== patientTimeLines  get Events from File");
-//       InitialLoad=true;
+//       TimeLineInitialLoad=true;
        cmd = "getCaisisPatientHistory";
        status = "request"
        callback = "DisplayPatientTimeLine"
@@ -264,9 +264,9 @@ var TimeLineModule = (function () {
           console.log("Events stored:", Events)
           console.log("EventsByID stored:", EventsByID)
 
-          if(InitialLoad){
+          if(TimeLineInitialLoad){
                dispatch.LoadOptions();
-               InitialLoad=false;
+               TimeLineInitialLoad=false;
           }
           dispatch.DisplayPatients();
      }
@@ -279,20 +279,20 @@ var TimeLineModule = (function () {
           var width = $("#TimeLineDisplay").width();
           var height = $("#TimeLineDisplay").height();
           
-          var   TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.95*height - margin.top - margin.bottom)},
-                SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.95*height - margin.top - margin.bottom)},
+          var   TimeLineSize = {width: (0.8*width - TimeLineMargin.left - TimeLineMargin.right), height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)},
+                SideBarSize = {width: (0.2*width - TimeLineMargin.left - TimeLineMargin.right),  height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)},
                 legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
           var svg = d3.select("#TimeLineDisplay").append("svg")
-                   .attr("width", TimeLineSize.width + SideBarSize.width + 2*margin.left + 2*margin.right )
-                   .attr("height", SideBarSize.height + margin.top + margin.bottom + legendSize.height)
+                   .attr("width", TimeLineSize.width + SideBarSize.width + 2*TimeLineMargin.left + 2*TimeLineMargin.right )
+                   .attr("height", SideBarSize.height + TimeLineMargin.top + TimeLineMargin.bottom + legendSize.height)
                        ;
 
           var SidePlot = svg.append("g").attr("class", "SidePlotSVG")
-                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");     
+                  .attr("transform", "translate(" + TimeLineMargin.left + "," + TimeLineMargin.top + ")");     
              
           var TimeLine = svg.append("g").attr("class", "TimeLineSVG")
-                  .attr("transform", "translate(" + (SideBarSize.width+2*margin.left) + "," + margin.top + ")");
+                  .attr("transform", "translate(" + (SideBarSize.width+2*TimeLineMargin.left) + "," + TimeLineMargin.top + ")");
           
           
           var TextOffSet = d3.scale.ordinal()
@@ -303,9 +303,9 @@ var TimeLineModule = (function () {
           var legend = svg
                      .append("g")
                    .attr("class", "legend")
-                   .attr("transform", "translate(" + (SideBarSize.width+2* margin.left) + "," + (TimeLineSize.height+ margin.top + margin.bottom) + ")")
+                   .attr("transform", "translate(" + (SideBarSize.width+2* TimeLineMargin.left) + "," + (TimeLineSize.height+ TimeLineMargin.top + TimeLineMargin.bottom) + ")")
                     .selectAll(".legend")
-                     .data(color.domain().filter(function(d){
+                     .data(TimeLineColor.domain().filter(function(d){
                           return EventTypes.keys().indexOf(d) !== -1 })  )
               .enter().append("g")
             .attr("transform", function(d, i) { 
@@ -314,7 +314,7 @@ var TimeLineModule = (function () {
             legend.append("rect")
            .attr("width", 10)
            .attr("height", 10)
-           .style("fill", function(d) { return color(d)})
+           .style("fill", function(d) { return TimeLineColor(d)})
            .on("click", ToggleVisibleEvent);
 
             legend.append("text")
@@ -333,12 +333,12 @@ var TimeLineModule = (function () {
                    width = $("#TimeLineDisplay").width();
                     height = $("#TimeLineDisplay").height();
           
-                 TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.95*height - margin.top - margin.bottom)}
-                SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.95*height - margin.top - margin.bottom)}
+                 TimeLineSize = {width: (0.8*width - TimeLineMargin.left - TimeLineMargin.right), height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)}
+                SideBarSize = {width: (0.2*width - TimeLineMargin.left - TimeLineMargin.right),  height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)}
                 legendSize = {height: 0.05*height, width: TimeLineSize.width};
           
                svg.select(".legend")
-                   .attr("transform", "translate(" + (SideBarSize.width+2* margin.left) + "," + (TimeLineSize.height+ margin.top + margin.bottom) + ")")
+                   .attr("transform", "translate(" + (SideBarSize.width+2* TimeLineMargin.left) + "," + (TimeLineSize.height+ TimeLineMargin.top + TimeLineMargin.bottom) + ")")
           
                var y = d3.scale.linear().range([SideBarSize.height, 0]), 
                     yAxis = d3.svg.axis().scale(y).orient("left").ticks(0),          
@@ -450,7 +450,7 @@ var TimeLineModule = (function () {
                          .attr("width", function(d) { return Math.abs(x(d.width) - x(0));  })
                          .attr("height", function(d) { return PatientHeight; })
                          .attr("fill", function(d){ 
-                              var ColorShade =  d3.rgb(color(SidePlotEvent)); //d3.rgb("grey"); //
+                              var ColorShade =  d3.rgb(TimeLineColor(SidePlotEvent)); //d3.rgb("grey"); //
                               if(Categories.length>0){ 
                                    return ColorShade.brighter((Categories.indexOf(d.info) % 5)/2) };
                               return ColorShade;
@@ -520,12 +520,12 @@ var TimeLineModule = (function () {
                y.domain([d3.min(Events,function(d) { return d.PtNum; }),d3.max(Events,function(d) { return PatientHeight*d.PtNum; })]);
 
 
-             d3PlotBrush = d3.svg.brush()
+             TimeLined3PlotBrush = d3.svg.brush()
                .x(x)
                .y(y)
                .on("brushend", d3PlotBrushReader);
 
-               TimeLine.call(d3PlotBrush);
+               TimeLine.call(TimeLined3PlotBrush);
 
 
             TimeLine.append("g")
@@ -562,7 +562,7 @@ var TimeLineModule = (function () {
                     .attr("x2", function(d) { return x(LogTime((d.date[1] - d.offset)/TimeScale));  })
                     .attr("y2", function(d) { return y(PatientHeight*d.PtNum+ EventOffset.get(d.Name)); })
                     .attr("stroke", function(d){ 
-                         var ColorShade = d3.rgb(color(d.Name)); 
+                         var ColorShade = d3.rgb(TimeLineColor(d.Name)); 
                          if(d3.keys(d).indexOf("Type") !== -1){ 
                               return ColorShade.brighter((EventTypes.get(d.Name).indexOf(d.Type) % 5)/2) };
                          return ColorShade;
@@ -590,7 +590,7 @@ var TimeLineModule = (function () {
                TimePoint.enter()
                     .append("circle")
                     .attr("class", "circle")
-                    .style("fill", function(d){ return color(d.Name) })
+                    .style("fill", function(d){ return TimeLineColor(d.Name) })
                     .attr("cx", function(d) {return x(LogTime((d.date -d.offset)/TimeScale)); })
                     .attr("cy", function(d) { return y(PatientHeight*d.PtNum); })
                     .attr("r", function(d) { return PatientHeight;})
@@ -616,13 +616,13 @@ var TimeLineModule = (function () {
               var width = $("#TimeLineDisplay").width();
                var height = $("#TimeLineDisplay").height();
           
-               var   TimeLineSize = {width: (0.8*width - margin.left - margin.right), height: (0.95*height - margin.top - margin.bottom)},
-                     SideBarSize = {width: (0.2*width - margin.left - margin.right),  height: (0.95*height - margin.top - margin.bottom)},
+               var   TimeLineSize = {width: (0.8*width - TimeLineMargin.left - TimeLineMargin.right), height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)},
+                     SideBarSize = {width: (0.2*width - TimeLineMargin.left - TimeLineMargin.right),  height: (0.95*height - TimeLineMargin.top - TimeLineMargin.bottom)},
                      legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
                console.log("======== load.Menu")
                  var  AlignByMenu = d3.select("#AlignByDiv")
-                   .attr("transform", "translate(" + (3*margin.left+SideBarSize.width+margin.right) + ",0)")
+                   .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
                     .append("g")
                      .append("select")
                     .on("change", function() {
@@ -639,7 +639,7 @@ var TimeLineModule = (function () {
                 ;
 
                  var  OrderByMenu = d3.select("#OrderByDiv")
-                   .attr("transform", "translate(" + (margin.left+SideBarSize.width+margin.left+margin.right) + ",0)")
+                   .attr("transform", "translate(" + (TimeLineMargin.left+SideBarSize.width+TimeLineMargin.left+TimeLineMargin.right) + ",0)")
                      .append("g")
                    .append("select")
                     .on("change", function() {
@@ -664,7 +664,7 @@ var TimeLineModule = (function () {
                 ;
                var  AddSideBarMenu = d3.select("#AddSideBar")
                     .style("display", "inline-block") 
-                    .style("width", (SideBarSize.width + 2*margin.left + margin.right) +"px" )
+                    .style("width", (SideBarSize.width + 2*TimeLineMargin.left + TimeLineMargin.right) +"px" )
                     .append("g")
                     .append("select")
                     .on("change", function() {SidePlotEvent = this.value; 
