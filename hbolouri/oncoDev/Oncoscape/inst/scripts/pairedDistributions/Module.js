@@ -187,10 +187,14 @@ var PairedDistributionsModule = (function () {
   	 console.log(d3.values(data.pop2).length);
   	 
   	 for(i = 0; i < d3.values(data.pop1).length; i++){
-  	 	dataset.push({patient: d3.keys(data.pop1)[i], value: d3.values(data.pop1)[i], pop: "pop1"});
+  	 	if (d3.values(data.pop1)[i]!=null){
+  	 		dataset.push({patient: d3.keys(data.pop1)[i], value: d3.values(data.pop1)[i], pop: "pop1"});
+  	 		}
   	 }
   	 for(i = 0; i < d3.values(data.pop2).length; i++){
-  	 	dataset.push({patient: d3.keys(data.pop2)[i], value: d3.values(data.pop2)[i], pop: "pop2"});
+  	 	if (d3.values(data.pop2)[i]!=null){
+  	 		dataset.push({patient: d3.keys(data.pop2)[i], value: d3.values(data.pop2)[i], pop: "pop2"});
+  	 		}
   	 }
   
 //      dataset = [{patient: "TCGA.02.04", value: 3, pop: "pop1"},
