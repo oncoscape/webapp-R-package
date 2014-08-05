@@ -13,7 +13,7 @@ var TimeLineModule = (function () {
      var TimeLineDisplay;
      var MainEvents = ["DOB","Encounter", "Diagnosis", "OR",  "MRI","Radiation", "Chemo","Progression",  "Status"]
      var MainEventColors = ["#17becf", "#d62728", "#8c564b","#ff7f0e", "#7f7f7f","#9467bd","#1f77b4","#2ca02c", "#bcbd22"]
-     var MainEventTextSpacing = [0, 70, 82, 85, 75, 72, 75, 75, 80];
+     var MainEventTextSpacing = [0, 70, 82, 87, 75, 80, 78, 75, 80];
      var TimeLineSelectedRegion;    // from brushing
      var TimeLined3PlotBrush;
      var dialog;
@@ -49,7 +49,7 @@ var TimeLineModule = (function () {
       };
 
      //--------------------------------------------------------------------------------------------------     
-     function getDateDiff(Event1, Event2, TimeScale){
+     function getDateDiff(Name, Event1, Event2, TimeScale){
           console.log("Date Difference of " +Event2+ " - " + Event1 + " in " + TimeScale)          
           var DateDiff = []; var TimeScaleValue=1
           if(TimeScale==="Days"){TimeScaleValue=OneDay;}
@@ -58,20 +58,22 @@ var TimeLineModule = (function () {
                
           EventsByID.forEach(function(ID, Patient){
                var dateDiff = 0; var date1, date2;
-               if(Patient.has(Event1) && Patient.has(Event2) ){
-                   if(Patient.get(Event1)[0].date.length >1){
-                        date1 = Patient.get(Event1).sort(AscendingStartDate)[0].date[0]
-                    } else{
-                         date1 = Patient.get(Event1).sort(AscendingDate)[0].date
-                    }
-                  if(Patient.get(Event2)[0].date.length >1){
-                        date2 = Patient.get(Event2).sort(AscendingStartDate)[0].date[0]
-                    } else{
-                         date2 = Patient.get(Event2).sort(AscendingDate)[0].date
-                    }
-                    dateDiff = (date2 - date1 )/TimeScaleValue
-                         DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
-          }
+                if( Name=== "Survival" & (!Patient.has("Status") | Patient.get("Status")[0].Type !== "Dead")) {
+                     dateDiff = null;
+                } else{
+                  if(Patient.has(Event1) && Patient.has(Event2) ){
+                     if(Patient.get(Event1)[0].date.length >1){
+                         date1 = Patient.get(Event1).sort(AscendingStartDate)[0].date[0] }
+                     else{ date1 = Patient.get(Event1).sort(AscendingDate)[0].date         }
+                     if(Patient.get(Event2)[0].date.length >1){
+                        date2 = Patient.get(Event2).sort(AscendingStartDate)[0].date[0] }
+                     else{ date2 = Patient.get(Event2).sort(AscendingDate)[0].date         }
+                    
+                     dateDiff = (date2 - date1 )/TimeScaleValue
+//                    DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
+                   }else{ dateDiff=null;}
+               }
+            DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
           })
           return DateDiff;
      }
@@ -227,8 +229,12 @@ var TimeLineModule = (function () {
                     } else{d.date = parseDate(d.date); }
                }
                if(d.Name === "Death") d.Name="Status"
-              d.showPatient = true;
+               console.log(ShowEvents);
               d.disabled = false;
+              if(ShowEvents){
+               if(ShowEvents.indexOf(d.Name) === -1){  d.disabled = true;} }
+
+             d.showPatient = true;
               d.offset = 0    });
      
           console.log("Remove Invalid Dates")
@@ -250,8 +256,7 @@ var TimeLineModule = (function () {
                }
           });          
      
-          ShowEvents = EventTypes.keys();
-
+ 
           CalculatedEvents.forEach(function(key, entry){
                var value = entry[0];
                if(!EventTypes.has(value.Event1) ||  !EventTypes.has(value.Event2) ){
@@ -265,6 +270,7 @@ var TimeLineModule = (function () {
           console.log("EventsByID stored:", EventsByID)
 
           if(TimeLineInitialLoad){
+               ShowEvents = EventTypes.keys();
                dispatch.LoadOptions();
                TimeLineInitialLoad=false;
           }
@@ -292,7 +298,7 @@ var TimeLineModule = (function () {
                   .attr("transform", "translate(" + TimeLineMargin.left + "," + TimeLineMargin.top + ")");     
              
           var TimeLine = svg.append("g").attr("class", "TimeLineSVG")
-                  .attr("transform", "translate(" + (SideBarSize.width+2*TimeLineMargin.left) + "," + TimeLineMargin.top + ")");
+                  .attr("transform", "translate(" + (SideBarSize.width+2*TimeLineMargin.left + TimeLineMargin.right) + "," + TimeLineMargin.top + ")");
           
           
           var TextOffSet = d3.scale.ordinal()
@@ -303,7 +309,7 @@ var TimeLineModule = (function () {
           var legend = svg
                      .append("g")
                    .attr("class", "legend")
-                   .attr("transform", "translate(" + (SideBarSize.width+2* TimeLineMargin.left) + "," + (TimeLineSize.height+ TimeLineMargin.top + TimeLineMargin.bottom) + ")")
+                   .attr("transform", "translate(" + (SideBarSize.width+2* TimeLineMargin.left + TimeLineMargin.right) + "," + (TimeLineSize.height+ TimeLineMargin.top + TimeLineMargin.bottom) + ")")
                     .selectAll(".legend")
                      .data(TimeLineColor.domain().filter(function(d){
                           return EventTypes.keys().indexOf(d) !== -1 })  )
@@ -338,14 +344,22 @@ var TimeLineModule = (function () {
                 legendSize = {height: 0.05*height, width: TimeLineSize.width};
           
                svg.select(".legend")
-                   .attr("transform", "translate(" + (SideBarSize.width+2* TimeLineMargin.left) + "," + (TimeLineSize.height+ TimeLineMargin.top + TimeLineMargin.bottom) + ")")
+                   .attr("transform", "translate(" + (SideBarSize.width+2* TimeLineMargin.left+TimeLineMargin.right) + "," + (TimeLineSize.height+ TimeLineMargin.top + TimeLineMargin.bottom) + ")")
+          
+               svg.attr("width", TimeLineSize.width + SideBarSize.width + 2*TimeLineMargin.left + 2*TimeLineMargin.right )
+                   .attr("height", SideBarSize.height + TimeLineMargin.top + TimeLineMargin.bottom + legendSize.height)
+                       ;
+               TimeLine.attr("transform", "translate(" + (SideBarSize.width+2*TimeLineMargin.left + TimeLineMargin.right) + "," + TimeLineMargin.top + ")");
+  
           
                var y = d3.scale.linear().range([SideBarSize.height, 0]), 
                     yAxis = d3.svg.axis().scale(y).orient("left").ticks(0),          
                     x = d3.scale.linear().range([0, SideBarSize.width]),
                     xAxis = d3.svg.axis().scale(x).orient("bottom")
-                     y.domain(d3.extent(Events, function(d) { return PatientHeight*d.PtNum; }));
-                              
+                    y.domain([d3.min(Events,function(d) { return PatientHeight*d.PtNum; })-PatientHeight,d3.max(Events,function(d) { return PatientHeight*d.PtNum; })+PatientHeight]);
+//                  y.domain(d3.extent(Events, function(d) { return PatientHeight*d.PtNum; }));
+//                   y.domain([d3.min(Events,function(d) { return d.PtNum; }),d3.max(Events,function(d) { return PatientHeight*d.PtNum; })]);
+                             
                var PatientOrderBy = []
                var Categories = []
 
@@ -356,7 +370,8 @@ var TimeLineModule = (function () {
                } else if (CalculatedEvents.has(SidePlotEvent) ){
                     var event = CalculatedEvents.get(SidePlotEvent)[0]
                      console.log("Using event: ", event)
-                     PatientOrderBy =  getHorizontalBarSize(getDateDiff(event.Event1,event.Event2,event.TimeScale)); 
+                     PatientOrderBy =  getHorizontalBarSize(getDateDiff(SidePlotEvent, event.Event1,event.Event2,event.TimeScale)); 
+                    
                } else if(["Chemo", "Radiation", "Diagnosis", "OR", "Status", "MRI"].indexOf(SidePlotEvent) !== -1){
                     //get number of categories
                     EventsByID.forEach(function(ID, Patient){
@@ -398,6 +413,8 @@ var TimeLineModule = (function () {
 
           //     SidePlot.call(d3PlotBrush);
 
+//			var HorizLine = svg.append("g").attr("class", "rect")
+
              var tooltip = d3.select("body")
                 .attr("class", "tooltip")
                 .append("div")
@@ -408,7 +425,7 @@ var TimeLineModule = (function () {
      
                  SidePlot.append("g")
                 .attr("class", "x axis")
-                .attr("transform", "translate(0," + (SideBarSize.height+10) + ")")
+                .attr("transform", "translate(0," + (SideBarSize.height+TimeLineMargin.top) + ")")
                 .call(xAxis)
                 .selectAll("text")  
                     .style("text-anchor", "end")
@@ -517,7 +534,7 @@ var TimeLineModule = (function () {
 
                console.log("Min: " + EventMin + ", Max: "+ EventMax)
                x.domain([EventMin, EventMax]);
-               y.domain([d3.min(Events,function(d) { return d.PtNum; }),d3.max(Events,function(d) { return PatientHeight*d.PtNum; })]);
+               y.domain([d3.min(Events,function(d) { return PatientHeight*d.PtNum; })-PatientHeight,d3.max(Events,function(d) { return PatientHeight*d.PtNum; })+PatientHeight]);
 
 
              TimeLined3PlotBrush = d3.svg.brush()
@@ -871,7 +888,7 @@ var TimeLineModule = (function () {
           if(CalculatedEvents.has(OrderBy) ){
                 var event = CalculatedEvents.get(OrderBy)[0]
                 console.log(event)
-                PatientOrderBy = getDateDiff(event.Event1,event.Event2,""); 
+                PatientOrderBy = getDateDiff(OrderBy, event.Event1,event.Event2,""); 
           } else if(EventTypes.keys().indexOf(OrderBy) !== -1){
                EventsByID.forEach(function(ID, Patient){
                     if( Patient.has(OrderBy)){
@@ -890,6 +907,8 @@ var TimeLineModule = (function () {
                                    .forEach(function(d){ d.PtNum = i})}
                })
           
+          
+          
           console.log("Reordered")
           console.log(PatientOrderBy)
      }     
@@ -903,7 +922,7 @@ var TimeLineModule = (function () {
           if(CalculatedEvents.has(SidePlotEvent) ){
                 var event = CalculatedEvents.get(SidePlotEvent)[0]
                 console.log(event)
-                PatientOrderBy = getDateDiff(event.Event1,event.Event2,""); OrderBy=SidePlotEvent;
+                PatientOrderBy = getDateDiff(SidePlotEvent, event.Event1,event.Event2,""); OrderBy=SidePlotEvent;
           
           } else if(EventTypes.keys().indexOf(SidePlotEvent) !== -1){
 
