@@ -102,6 +102,7 @@ var PairedDistributionsModule = (function () {
       // console.log(msg);
       if(msg.status == "success"){
          pairedDistributionsResults = msg.payload;
+         console.log(msg.payload);
          d3PairedDistributionsScatterPlot(pairedDistributionsResults);
          if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
              $("#tabs").tabs( "option", "active", 1);
@@ -158,20 +159,51 @@ var PairedDistributionsModule = (function () {
      console.log("chooseColor, no match for id " + id);
      return("black");
      };
+  //-------------------------------------------------------------------------------------------   
+  getX = function(pop){
+  	pop = pop + "";
+  	if (pop == "pop1"){
+  		return (Math.floor(Math.random() * xMax/3)) + xMax/2;
+  		}else{
+  		return (Math.floor(Math.random() * -xMax/3)) - xMax/2;
+  		}
+  };
+  //-------------------------------------------------------------------------------------------   
+  getColor = function(pop){
+  	pop = pop + "";
+  	if (pop == "pop1"){
+  		return 'red';
+  		}else{
+  		return 'blue';
+  		}
+  };
   //-------------------------------------------------------------------------------------------
-  d3PairedDistributionsScatterPlot = function(dataset) {
+  d3PairedDistributionsScatterPlot = function(data) {
+  
+  	 //console.log(d3.values(dataset.pop2));
+  	 
+  	 dataset = [];
+  	 
+  	 console.log(d3.values(data.pop2).length);
+  	 
+  	 for(i = 0; i < d3.values(data.pop1).length; i++){
+  	 	dataset.push({patient: d3.keys(data.pop1)[i], value: d3.values(data.pop1)[i], pop: "pop1"});
+  	 }
+  	 for(i = 0; i < d3.values(data.pop2).length; i++){
+  	 	dataset.push({patient: d3.keys(data.pop2)[i], value: d3.values(data.pop2)[i], pop: "pop2"});
+  	 }
+  
+//      dataset = [{patient: "TCGA.02.04", value: 3, pop: "pop1"},
+//                 {patient: "TCGA.02.05", value: 6.7, pop: "pop1"},
+//                 {patient: "TCGA.02.06", value: 1.5, pop: "pop2"},
+//                 {patient: "TCGA.02.07", value: 4.8, pop: "pop2"}];
 
      pairedDistributionsBroadcastButton.prop("disabled",true);
      var padding = 50;
      var width = $("#pairedDistributionsDisplay").width();
      var height = $("#pairedDistributionsDisplay").height();
      
-     var p1Max = d3.max(d3.values(dataset.pop1));
-     var p2Max = d3.max(d3.values(dataset.pop2));
-     var max = Math.max(p1Max,p2Max);
-
-       // todo:  after finding min and max, determine largest of each axis in abs value
-       // todo:  then find next larger even number, use that throughout
+     var max = d3.max(dataset, function(d) { return +d.value;} );
      
      xMax = 40
      xMin = -40
@@ -219,66 +251,19 @@ var PairedDistributionsModule = (function () {
                      .style("visibility", "hidden")
                      .text("a simple tooltip");
 
-//      var circle = svg.selectAll("circle")
-//                      .data(dataset)
-//                      .enter()
-//                      .append("circle")
-//                      .attr("cx", function(d) {return 0;})
-//                      .attr("cy", function(d) {return yScale(d3.values(dataset.pop1));})
-//                      .attr("r", function(d) { return 30;})
-//                      .style("fill", function(d) {return(chooseColor(d))});
-//                      //.style("fill", function(d) { return "blue"})
-//                      .on("mouseover", function(d,i){
-//                          tooltip.text(d.id);
-//                          return tooltip.style("visibility", "visible");
-//                          })
-//                     .on("mousemove", function(){return tooltip.style("top",
-//                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-//                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
-      
-//       var circle = svg.selectAll("circle")
-//                      .data(dataset)
-//                      .enter()
-//                      .append("circle")
-//                      .attr("cx", 0)
-//                      .attr("cy", function(d) {return yScale(d3.values(d.pop1));})
-//                      .attr("r", 5)
-//                      .style("fill", function(d) {return(chooseColor(d))})
-//                      //.style("fill", function(d) { return "blue"})
-//                      .on("mouseover", function(d,i){
-//                          tooltip.text(d.id);
-//                          return tooltip.style("visibility", "visible");
-//                          })
-//                     .on("mousemove", function(){return tooltip.style("top",
-//                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-//                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
-                  
-    var circle1 = svg.selectAll("circle")
-        			.data(d3.values(dataset.pop1))
+
+    var circle = svg.selectAll("circle")
+        			.data(dataset)
    					.enter()
    					.append("circle")
-   					.attr("cx", function(d){return xScale(Math.floor(Math.random() * xMax)-xMax/2);})
-   					.attr("cy", function(d) {return yScale(d);})
+   					.attr("cx", function(d) {return xScale(getX(d.pop));})
+   					.attr("cy", function(d) {return yScale(d.value);})
    					.attr("r", 5)
-//                     .style("fill", function(d) {return(chooseColor(d))});
-                 	.on("mouseover", function(d,i){tooltip.text(d.id); return tooltip.style("visibility", "visible");})
-                	.on("mousemove", function(){return tooltip.style("top",
-                           (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-                	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
-//                 	
-//     var circle2 = svg.selectAll("circle")
-//         			.data(dataset.pop2)
-//    					.enter()
-//    					.append("circle")
-//    					.attr("cx", function(d){return xScale(Math.floor(Math.random() * xMax)-xMax/2);})
-//    					.attr("cy", function(d) {return yScale(d);})
-//    					.attr("r", 5)
-// //                     .style("fill", function(d) {return(chooseColor(d))});
+                    .style("fill", function(d){return getColor(d.pop);});
 //                  	.on("mouseover", function(d,i){tooltip.text(d.id); return tooltip.style("visibility", "visible");})
 //                 	.on("mousemove", function(){return tooltip.style("top",
 //                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
 //                 	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
-            
       
      var xTranslationForYAxis = xScale(0);
      var yTranslationForXAxis = yScale(0);
@@ -292,10 +277,6 @@ var PairedDistributionsModule = (function () {
         .attr("class", "y axis")
         .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
         .call(yAxis);
-
-//      svg.append("g")
-//         .attr("class", "brush")
-//         .call(d3PlotBrush);
 
      }; // d3PairedDistributionsScatterPlot
 
