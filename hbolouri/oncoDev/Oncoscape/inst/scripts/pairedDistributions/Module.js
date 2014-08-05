@@ -163,9 +163,9 @@ var PairedDistributionsModule = (function () {
   getX = function(pop){
   	pop = pop + "";
   	if (pop == "pop1"){
-  		return (Math.floor(Math.random() * xMax/3)) + xMax/2;
+  		return (Math.floor(Math.random() * xMax/3)) + xMax/4;
   		}else{
-  		return (Math.floor(Math.random() * -xMax/3)) - xMax/2;
+  		return (Math.floor(Math.random() * -xMax/3)) - xMax/4;
   		}
   };
   //-------------------------------------------------------------------------------------------   
@@ -262,7 +262,7 @@ var PairedDistributionsModule = (function () {
    					.append("circle")
    					.attr("cx", function(d) {return xScale(getX(d.pop));})
    					.attr("cy", function(d) {return yScale(d.value);})
-   					.attr("r", 5)
+   					.attr("r", 4)
                     .style("fill", function(d){return getColor(d.pop);})
                  	.on("mouseover", function(d,i){tooltip.text(d.patient); return tooltip.style("visibility", "visible");})
                 	.on("mousemove", function(){return tooltip.style("top",
