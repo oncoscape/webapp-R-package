@@ -263,11 +263,11 @@ var PairedDistributionsModule = (function () {
    					.attr("cx", function(d) {return xScale(getX(d.pop));})
    					.attr("cy", function(d) {return yScale(d.value);})
    					.attr("r", 5)
-                    .style("fill", function(d){return getColor(d.pop);});
-//                  	.on("mouseover", function(d,i){tooltip.text(d.id); return tooltip.style("visibility", "visible");})
-//                 	.on("mousemove", function(){return tooltip.style("top",
-//                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-//                 	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+                    .style("fill", function(d){return getColor(d.pop);})
+                 	.on("mouseover", function(d,i){tooltip.text(d.patient); return tooltip.style("visibility", "visible");})
+                	.on("mousemove", function(){return tooltip.style("top",
+                           (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+                	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
       
      var xTranslationForYAxis = xScale(0);
      var yTranslationForXAxis = yScale(0);
