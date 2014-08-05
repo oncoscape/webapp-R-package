@@ -93,24 +93,24 @@ var PairedDistributionsModule = (function () {
                        ids: ids}
              };
       socket.send(JSON.stringify(msg));
-      } // sendTissueIDsToModule
+      }; // sendTissueIDsToModule
 
 
   //--------------------------------------------------------------------------------------------
   pairedDistributionsPlot = function(msg){
       console.log("==== pairedDistributionsPlot");
-      console.log(msg);
-      //if(msg.status == "success"){
-      //   pairedDistributionsResults = JSON.parse(msg.payload);
-      //   d3PairedDistributionsScatterPlot(pairedDistributionsResults);
-      //   if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
-      //       $("#tabs").tabs( "option", "active", 1);
-      //   } // success
-    //else{
-    //  console.log("pairedDistributionsPlot about to call alert: " + msg)
-    //  alert(msg.payload)
-    //  }
-    // firstTime = false;
+      // console.log(msg);
+      if(msg.status == "success"){
+         pairedDistributionsResults = msg.payload;
+         d3PairedDistributionsScatterPlot(pairedDistributionsResults);
+         if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
+             $("#tabs").tabs( "option", "active", 1);
+         } // success
+    else{
+      console.log("pairedDistributionsPlot about to call alert: " + msg)
+      alert(msg.payload)
+      }
+     firstTime = false;
      };
 
   //--------------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ var PairedDistributionsModule = (function () {
 
   //-------------------------------------------------------------------------------------------
   chooseColor = function(d){
-     id = d.id[0];
+     id = d;
      for(var i=0; i<patientClassification.length; i++){
         if (id == patientClassification[i].rowname[0]){
           result = patientClassification[i].color[0]
@@ -157,7 +157,7 @@ var PairedDistributionsModule = (function () {
         } // for i
      console.log("chooseColor, no match for id " + id);
      return("black");
-     }
+     };
   //-------------------------------------------------------------------------------------------
   d3PairedDistributionsScatterPlot = function(dataset) {
 
@@ -165,27 +165,22 @@ var PairedDistributionsModule = (function () {
      var padding = 50;
      var width = $("#pairedDistributionsDisplay").width();
      var height = $("#pairedDistributionsDisplay").height();
+     
+     var p1Max = d3.max(d3.values(dataset.pop1));
+     var p2Max = d3.max(d3.values(dataset.pop2));
+     var max = Math.max(p1Max,p2Max);
 
-     var xMax = d3.max(dataset, function(d) { return +d.PC1;} );
-     var xMin = d3.min(dataset, function(d) { return +d.PC1;} );
-     var yMax = d3.max(dataset, function(d) { return +d.PC2;} );
-     var yMin = d3.min(dataset, function(d) { return +d.PC2;} );
- 
        // todo:  after finding min and max, determine largest of each axis in abs value
        // todo:  then find next larger even number, use that throughout
      
-     xMax = xMax * 1.1
-     xMin = xMin * 1.1
      xMax = 40
      xMin = -40
-     yMax = 30
-     yMin = -30
-
-     //console.log("xMax: " + xMax);   console.log("xMin: " + xMin);
-     //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);
+     yMax = max * 1.1
+     yMin = 0
 
      d3.select("svg").remove();  // so that append("svg") is not cumulative
 
+//flip axis
      var xScale = d3.scale.linear()
                     .domain([xMin,xMax])
                     .range([padding, width - padding]);
@@ -197,12 +192,13 @@ var PairedDistributionsModule = (function () {
      var xAxis = d3.svg.axis()
                    .scale(xScale)
                    .orient("bottom")
-                   .ticks(5);
+                   .ticks(0);
 
      var yAxis = d3.svg.axis()
                    .scale(yScale)
                    .orient("left")
                    .ticks(5);
+
 
      d3PlotBrush = d3.svg.brush()
         .x(xScale)
@@ -223,22 +219,66 @@ var PairedDistributionsModule = (function () {
                      .style("visibility", "hidden")
                      .text("a simple tooltip");
 
-     var circle = svg.selectAll("circle")
-                     .data(dataset)
-                     .enter()
-                     .append("circle")
-                     .attr("cx", function(d,i) {return xScale(d.PC1);})
-                     .attr("cy", function(d,i) {return yScale(d.PC2);})
-                     .attr("r", function(d) { return 3;})
-                     .style("fill", function(d) {return(chooseColor(d))})
-                     //.style("fill", function(d) { return "blue"})
-                     .on("mouseover", function(d,i){
-                         tooltip.text(d.id);
-                         return tooltip.style("visibility", "visible");
-                         })
-                    .on("mousemove", function(){return tooltip.style("top",
+//      var circle = svg.selectAll("circle")
+//                      .data(dataset)
+//                      .enter()
+//                      .append("circle")
+//                      .attr("cx", function(d) {return 0;})
+//                      .attr("cy", function(d) {return yScale(d3.values(dataset.pop1));})
+//                      .attr("r", function(d) { return 30;})
+//                      .style("fill", function(d) {return(chooseColor(d))});
+//                      //.style("fill", function(d) { return "blue"})
+//                      .on("mouseover", function(d,i){
+//                          tooltip.text(d.id);
+//                          return tooltip.style("visibility", "visible");
+//                          })
+//                     .on("mousemove", function(){return tooltip.style("top",
+//                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+//                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+      
+//       var circle = svg.selectAll("circle")
+//                      .data(dataset)
+//                      .enter()
+//                      .append("circle")
+//                      .attr("cx", 0)
+//                      .attr("cy", function(d) {return yScale(d3.values(d.pop1));})
+//                      .attr("r", 5)
+//                      .style("fill", function(d) {return(chooseColor(d))})
+//                      //.style("fill", function(d) { return "blue"})
+//                      .on("mouseover", function(d,i){
+//                          tooltip.text(d.id);
+//                          return tooltip.style("visibility", "visible");
+//                          })
+//                     .on("mousemove", function(){return tooltip.style("top",
+//                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+//                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+                  
+    var circle1 = svg.selectAll("circle")
+        			.data(d3.values(dataset.pop1))
+   					.enter()
+   					.append("circle")
+   					.attr("cx", function(d){return xScale(Math.floor(Math.random() * xMax)-xMax/2);})
+   					.attr("cy", function(d) {return yScale(d);})
+   					.attr("r", 5)
+//                     .style("fill", function(d) {return(chooseColor(d))});
+                 	.on("mouseover", function(d,i){tooltip.text(d.id); return tooltip.style("visibility", "visible");})
+                	.on("mousemove", function(){return tooltip.style("top",
                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-                    .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+                	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+//                 	
+//     var circle2 = svg.selectAll("circle")
+//         			.data(dataset.pop2)
+//    					.enter()
+//    					.append("circle")
+//    					.attr("cx", function(d){return xScale(Math.floor(Math.random() * xMax)-xMax/2);})
+//    					.attr("cy", function(d) {return yScale(d);})
+//    					.attr("r", 5)
+// //                     .style("fill", function(d) {return(chooseColor(d))});
+//                  	.on("mouseover", function(d,i){tooltip.text(d.id); return tooltip.style("visibility", "visible");})
+//                 	.on("mousemove", function(){return tooltip.style("top",
+//                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+//                 	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+            
       
      var xTranslationForYAxis = xScale(0);
      var yTranslationForXAxis = yScale(0);
@@ -253,11 +293,11 @@ var PairedDistributionsModule = (function () {
         .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
         .call(yAxis);
 
-     //svg.append("g")
-     //   .attr("class", "brush")
-     //   .call(d3PlotBrush);
+//      svg.append("g")
+//         .attr("class", "brush")
+//         .call(d3PlotBrush);
 
-     } // d3PairedDistributionsScatterPlot
+     }; // d3PairedDistributionsScatterPlot
 
 
   //--------------------------------------------------------------------------------------------
