@@ -386,7 +386,7 @@ getCaisisPatientHistory <- function(WS, msg)
 
    patientHistoryProvider <- DATA.PROVIDERS$patientHistoryEvents
    events <- getEvents(patientHistoryProvider, patient.ids=patientIDs)
-   if(is.na(patientIDs))
+   if(all(is.na(patientIDs)))
        patient.count <- "all"
    else
        patient.count <- length(patientIDs)
