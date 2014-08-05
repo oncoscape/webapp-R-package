@@ -835,32 +835,6 @@ pca.init();
 </script>
 <script>
 //----------------------------------------------------------------------------------------------------
-var todoModule = (function () {
-
-var ToDoURL = "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/edit?usp=sharing"
-var ToDobutton;
-
-initializeUI = function(){
-    ToDobutton = $("#ToDoLink");
-    ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
-    };
-
-
-return{
-
-   init: function(){
-      onReadyFunctions.push(initializeUI);
-      }
-   };
-
-}); // DateAndTimeModule
-//----------------------------------------------------------------------------------------------------
-todo = todoModule();
-todo.init();
-
-</script>
-<script>
-//----------------------------------------------------------------------------------------------------
 var TimeLineModule = (function () {
 
      
@@ -2377,7 +2351,32 @@ onReadyFunctions.push(function() {
 </script>
 
 
+<script>
+//----------------------------------------------------------------------------------------------------
+var todoModule = (function () {
 
+var ToDoURL = "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/edit?usp=sharing"
+var ToDobutton;
+
+initializeUI = function(){
+    ToDobutton = $("#ToDoLink");
+    ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
+    };
+
+
+return{
+
+   init: function(){
+      onReadyFunctions.push(initializeUI);
+      }
+   };
+
+}); // DateAndTimeModule
+//----------------------------------------------------------------------------------------------------
+todo = todoModule();
+todo.init();
+
+</script>
 
 <div id="tabs">
    <ul>
@@ -2385,8 +2384,8 @@ onReadyFunctions.push(function() {
      <li><a href="#clinicalDataModuleDiv">Clinical Data</a></li>
      <li><a href="#pcaDiv">PCA</a></li>
      <li><a href="#patientTimeLinesDiv">Timelines</a></li>
-     <li><a href="#todoDiv">Todo</a></li>
      <li><a href="#SavedSelectionDiv">Saved Selection</a></li>
+     <li><a href="#todoDiv">Todo</a></li>
    </ul>
 
 <style>
@@ -2699,15 +2698,6 @@ th, td { white-space: nowrap; }
      </div>
 </div>
 
-<div id="todoDiv">
-<h3> google doc test </h3>
-   <button id=ToDoLink>Edit The Table</button>
-   <iframe
-      height="600px",
-      width="95%",
-      src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false">  
-   </iframe>
-</div>
 
 <style>
 .node circle {
@@ -2742,6 +2732,15 @@ path.link {
   
  
 
+<div id="todoDiv">
+<h3> google doc test </h3>
+   <button id=ToDoLink>Edit The Table</button>
+   <iframe
+      height="600px",
+      width="95%",
+      src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false">  
+   </iframe>
+</div>
 
 </div>
 

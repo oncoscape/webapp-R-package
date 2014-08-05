@@ -1,6 +1,7 @@
 patientHistoryTable: tbl://tcgaGBM/tbl.ptHistory.RData
 #patientHistoryEvents: caisisEvents:///Users/pshannon/s/data/hamid/repo/hbolouri/oncoDev/Oncoscape/inst/explorations/tcgaPatientHistoryToEventList/testTCGApatientHistory.RData
-patientHistoryEvents: caisisEvents:///Volumes/homes/Lisa/oncoscape/hbolouri/oncoDev/Oncoscape/inst/explorations/tcgaPatientHistoryToEventList/testTCGApatientHistory_7-28-14.RData
+#patientHistoryEvents: caisisEvents:///Volumes/homes/Lisa/oncoscape/hbolouri/oncoDev/Oncoscape/inst/explorations/tcgaPatientHistoryToEventList/testTCGApatientHistory_7-28-14.RData
+patientHistoryEvents: caisisEvents:///tcgaGBM/testTCGApatientHistory_7-28-14.RData
 #patientHistoryEvents: caisisEvents:///tcgaGBM/tcgaPatientHistory583.RData
 mRNA: pkg://tcgaGBM/mrnaGBM.RData
 patientClassification: pkg://tcgaGBM/tbl.dzSubTypes.RData
