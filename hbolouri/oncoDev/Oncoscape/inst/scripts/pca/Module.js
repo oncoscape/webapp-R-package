@@ -183,7 +183,7 @@ var PCAModule = (function () {
      //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);
 
 
-    d3pcaDisplay.select("svg").remove();  // so that append("svg") is not cumulative
+     d3pcaDisplay.select("#pcaSVG").remove();  // so that append("svg") is not cumulative
  
      var xScale = d3.scale.linear()
                     .domain([xMin,xMax])
@@ -219,22 +219,23 @@ var PCAModule = (function () {
         .y(yScale)
         .on("brushend", d3PlotBrushReader);
 
-     var PCAsvg = d3pcaDisplay.append("svg")
+     var svg = d3pcaDisplay.append("svg")
+                 .attr("id", "pcaSVG")
                  .attr("width", width)
                  .attr("height", height)
                  .call(d3PlotBrush);
 
-     PCAsvg.append("g")
+     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0, " + yTranslationForXAxis + ")")
         .call(xAxis);
 
-     PCAsvg.append("g")
+     svg.append("g")
         .attr("class", "y axis")
         .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
         .call(yAxis);
 
-     var circle = PCAsvg.append("g").selectAll("circle")
+     var circle = svg.append("g").selectAll("circle")
                      .data(dataset)
                      .enter()
                      .append("circle")

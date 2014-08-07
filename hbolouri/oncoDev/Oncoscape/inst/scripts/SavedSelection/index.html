@@ -34,8 +34,7 @@
    <script src="http://s3.amazonaws.com/oncoscape/js/jquery.multi-select.js" type="text/javascript"></script>
    <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
-<!--	<script type="text/javascript" src="http://mbostock.github.io/d3/talk/20111018/d3/d3.js"></script>
--->	<script type="text/javascript" src="http://mbostock.github.io/d3/talk/20111018/d3/d3.layout.js"></script>
+	<script type="text/javascript" src="http://mbostock.github.io/d3/talk/20111018/d3/d3.layout.js"></script>
 	 
 
 <script>
@@ -280,6 +279,7 @@ var SavedSelectionModule = (function (){
     var InitialLoad;
     var SaveSelectedsvg;
     var CurrentSelection;
+    var SelectionNames= [];
   
 //--------------------------------------------------------------------------------------------
   function handleWindowResize(){
@@ -315,8 +315,8 @@ var SavedSelectionModule = (function (){
 
          $(window).resize(handleWindowResize);
 
-//		$("#ModuleUpdated").document.lastModified;
-//		document.write("<i>Last updated "+document.lastModified+"<I>");
+		// if date modified needs updated
+		//http://www.dynamicdrive.com/forums/archive/index.php/t-63637.html
 
        };
        
@@ -338,24 +338,142 @@ var SavedSelectionModule = (function (){
      function addSavedSelection(msg) {
        
        console.log("=== Saving Selection", msg)
-       
+ 
+ 		var i=0;
+ 		var nameSuffix = ""
+ 		var nodeName =msg.payload.name 
+        while(SelectionNames.indexOf(nodeName.concat(nameSuffix)) !== -1){
+		    i++;
+		    nameSuffix = "_".concat(i)	
+		}
        newNode = msg.payload
+       newNode.name = nodeName.concat(nameSuffix)
+       SelectionNames.push(newNode.name)
+       
        if(CurrentSelection.children){ 
             CurrentSelection.children.push(newNode);
        } else { CurrentSelection.children = [newNode] }
-              
-    console.log("new tree: ", root)
+       
+       var currentNode = CurrentSelection
+       var update_id = CurrentSelection.id
+       while(currentNode.parent){ 
+          currentNode.parent.children[ currentNode.parent.children.indexOf(function(d) {  d.id ===update_id})] = currentNode;
+          currentNode = currentNode.parent
+        }
+        root = currentNode;
        updateSavedSelection(root);
-       CurrentSelection = CurrentSelection.children.filter(function(d){ return d.id === nodecount_i })
+       
+       CurrentSelection = CurrentSelection.children.filter(function(d){ return d.id === nodecount_i })[0]
+    console.log("new tree: ", root)
     console.log("CurrentSelection: ", CurrentSelection)
 	}       
 
+
+//----------------------------------------------------------------------------------------------------
+function make_editable(d, field)
+{
+// code from https://gist.github.com/GerHobbelt/2653660
+
+    console.log("make_editable", arguments);
+ 
+    this
+      .on("mouseover", function() {
+        d3.select(this).style("fill", "red");
+      })
+      .on("mouseout", function() {
+        d3.select(this).style("fill", null);
+      })
+      .on("click", function(d) {
+        var p = this.parentNode;
+        console.log(this, arguments);
+ 
+        // inject a HTML form to edit the content here...
+ 
+        // bug in the getBBox logic here, but don't know what I've done wrong here;
+        // anyhow, the coordinates are completely off & wrong. :-((
+        var xy = this.getBBox();
+        var p_xy = p.getBBox();
+ 
+        xy.x -= p_xy.x;
+        xy.y -= p_xy.y;
+ 
+        var el = d3.select(this);
+        var p_el = d3.select(p);
+ 
+        var frm = p_el.append("foreignObject");
+ 
+        var inp = frm
+            .attr("x", xy.x)
+            .attr("y", xy.y)
+            .attr("width", 300)
+            .attr("height", 25)
+            .append("xhtml:form")
+                    .append("input")
+                        .attr("value", function() {
+                            // nasty spot to place this call, but here we are sure that the <input> tag is available
+                            // and is handily pointed at by 'this':
+                            this.focus();
+ 
+                            return d[field];
+                        })
+                        .attr("style", "width: 294px;")
+                        // make the form go away when you jump out (form looses focus) or hit ENTER:
+                        .on("blur", function() {
+                            console.log("blur", this, arguments);
+ 
+                            var txt = inp.node().value;
+ 
+                            d[field] = txt;
+                            el
+                                .text(function(d) { return d[field]; });
+ 
+                            // Note to self: frm.remove() will remove the entire <g> group! Remember the D3 selection logic!
+                            p_el.selectAll(function() { return this.getElementsByTagName("foreignObject"); }).remove();
+                        })
+                        .on("keydown", function() {
+                            console.log("keypress", this, arguments);
+ 
+                            // IE fix
+                            if (!d3.event)
+                                d3.event = window.event;
+ 
+                            var e = d3.event;
+                            if (e.keyCode == 13)
+                            {
+                                if (typeof(e.cancelBubble) !== 'undefined') // IE
+                                  e.cancelBubble = true;
+                                if (e.stopPropagation)
+                                  e.stopPropagation();
+                                e.preventDefault();
+ 
+                                var txt = inp.node().value;
+ 
+                                d[field] = txt;
+                                el
+                                    .text(function(d) { return d[field]; });
+ 
+                                // odd. Should work in Safari, but the debugger crashes on this instead.
+                                // Anyway, it SHOULD be here and it doesn't hurt otherwise.
+                                p_el.selectAll(function() { return this.getElementsByTagName("foreignObject"); }).remove();
+                            }
+                        });
+      });
+}
 //----------------------------------------------------------------------------------------------------
      function updateSavedSelection(source) {
        var duration = d3.event && d3.event.altKey ? 5000 : 500;
      
+     var tooltip = d3.select("body")
+                .attr("class", "tooltip")
+                .append("div")
+                .style("position", "absolute")
+                .style("z-index", "20")
+                .style("visibility", "hidden")
+                ;
+     
        // Compute the new tree layout.
        var nodes = tree.nodes(root).reverse();
+       console.log("Nodes", nodes);
        
        // Normalize for fixed-depth.
        nodes.forEach(function(d) { d.y = d.depth * 180; });
@@ -368,18 +486,28 @@ var SavedSelectionModule = (function (){
        var nodeEnter = node.enter().append("g")
            .attr("class", "node")
            .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-           .on("click", function(d) { toggle(d); updateSavedSelection(d); });
+            .on("click", function(d) { toggle(d); updateSavedSelection(d); });
      
        nodeEnter.append("circle")
            .attr("r", 1e-6)
-           .style("fill", function(d) { return d._children ? "lightsteelblue" : "grey"; });
+           .style("fill", function(d) { return d._children ? "lightsteelblue" : "grey"; })
+           .on("mouseover", function(d){
+                  var settings = getSettingsString(d);
+                    tooltip.html(d.PatientIDs.length + " Patients from " + d.Tab + "<br></br>Settings: " + settings)
+                     return tooltip.style("visibility", "visible"); })
+           .on("mousemove", function(){return tooltip.style("top",
+                         (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+           .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+           ;
      
        nodeEnter.append("text")
+           .attr("class", "NodeName")
            .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
-           .attr("dy", ".35em")
+           .attr("dy", "1em")
            .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
            .text(function(d) { return d.name; })
-           .style("fill-opacity", 1e-6);
+           .style("fill-opacity", 1e-6)
+           .call(make_editable, "NodeName");
      
        // Transition nodes to their new position.
        var nodeUpdate = node.transition()
@@ -452,7 +580,19 @@ var SavedSelectionModule = (function (){
          d._children = null;
        }
      }
-
+//----------------------------------------------------------------------------------------------------
+    function getSettingsString(d){
+		console.log("change setting string: ",  d)
+		var SettingsString = d.Settings;
+		if(d.Tab === "ClinicalTable"){
+		   if(d.Settings.ageAtDxMin){
+		       SettingsString = "AgeDx [" + d.Settings.ageAtDxMin + ", " + d.Settings.ageAtDxMax + "] <br>"
+		                  + "Survival [" + d.Settings.overallSurvivalMin + ", " + d.Settings.overallSurvivalMax + "]";
+		    }
+		}
+		return SettingsString;
+		
+}
 //----------------------------------------------------------------------------------------------------
     function loadPatientData(){
 
@@ -481,15 +621,13 @@ var SavedSelectionModule = (function (){
          console.log("All Patients: ", PtIDs)
          root = {   "name": "All Patients",
          			"PatientIDs" : PtIDs,
-         			"Tab": "Clinical Table",
+         			"Tab": "ClinicalTable",
          			"Settings": "None"
          		}
          
          root.x0 = height / 2;
          root.y0 = 0;
-         
-      	console.log("root: ", root)
-     	
+             	
          function toggleAll(d) {
            if (d.children) {
              d.children.forEach(toggleAll);
@@ -500,8 +638,11 @@ var SavedSelectionModule = (function (){
        InitialLoad = false;
        updateSavedSelection(root); 
        CurrentSelection = root;
-       
-       testingAddSavedSelection()
+       SelectionNames.push(root.name);
+  
+       console.log("root: ", root)
+      
+ //      testingAddSavedSelection()
        
      }     
   
@@ -519,6 +660,7 @@ var SavedSelectionModule = (function (){
         init: function(){
            onReadyFunctions.push(initializeSelectionUI);
            addJavascriptMessageHandler("SetupSavedSelectionTree", SetupSavedSelectionTree);
+ 		   addJavascriptMessageHandler("addSelectionToTree", addSavedSelection);
           socketConnectedFunctions.push(loadPatientData);
            }
         };
@@ -534,21 +676,36 @@ SavedSelection.init();
 <body>
 
 <style>
+.node circle {
+  cursor: pointer;
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
 
+.node text {
+  font-size: 11px;
+}
 
+path.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
 </style>
 
 
   <div id="SavedSelectionDiv">
      <div id="SavedSelectionTreeDiv"></div>
-  </div>
-  <footer>
+  <div id="SelectionBanner">
     <div id="Acknowledgement">Created by Lisa McFerrin</div>
     <script language="Javascript">
 		document.write("This page was last modified on: " + document.lastModified +"");
 	</script>
-  </footer>
+  </div>
 
+  </div>
+  
  
 
 </body>

@@ -22,20 +22,26 @@
            href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
 
    <link   rel="stylesheet" type="text/css"
-          href="http://cdn.datatables.net/colreorder/1.1.0/css/dataTables.colReorder.min.css"></script>
+           href="http://cdn.datatables.net/colreorder/1.1.0/css/dataTables.colReorder.min.css"></script>
 
    <!-- img src="//cdn.datatables.net/colreorder/1.1.0/images/insert.png" -->
    <script src="//cdn.datatables.net/colreorder/1.1.0/js/dataTables.colReorder.min.js"></script>
+   <script src="//cdn.datatables.net/colvis/1.1.0/js/dataTables.colVis.min.js"></script>
 
-    <script src="http://s3.amazonaws.com/oncoscape/js/jquery.multi-select.js" type="text/javascript"></script>
-    <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+   <link   rel="stylesheet" type="text/css"
+           href="http://cdn.datatables.net/colvis/1.1.0/css/dataTables.colVis.css"></script>
+
+   <script src="http://s3.amazonaws.com/oncoscape/js/jquery.multi-select.js" type="text/javascript"></script>
+   <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
 
 <script>
 
-//
-// declare these includes first
-//
+</script>
+</head>
+
+
+<script>
 var socket;
 var dispatchOptions = {};
 var socketConnectedFunctions = [];
@@ -46,73 +52,19 @@ var onReadyFunctions = [];
 // object will be created with members {.mode, .reportSession, .filteredPatients}
 //
 //var labkey = {labkeyOncoscape};
-var filteredPatients = [];
 
+var filteredPatients = [];
 //----------------------------------------------------------------------------------------------------
 addJavascriptMessageHandler = function(cmd, func)
 {
-   dispatchOptions[cmd] = func
+   if(cmd in dispatchOptions){
+      alert("javascript message handler for '" +  cmd + " already set");
+      }
+   else{
+      dispatchOptions[cmd] = func
+      }
 }
 //----------------------------------------------------------------------------------------------------
-</script>
-</head>
-
-
-<body>
-<script>
-//----------------------------------------------------------------------------------------------------
-var DateAndTimeModule = (function () {
-
-var _button;
-var _timeDisplay;
-
-_initializeUI = function(){
-    _button = $("#requestDateButton");
-    _button.click(_requestTime);
-    _timeDisplay = $("#dateDisplay");
-    };
-
-_requestTime = function(){
-   msg = {cmd: "fetchDateAndTimeString", status: "request", payload: "empty"}
-   msg.json = JSON.stringify(msg);
-   socket.send(msg.json);
-   };
-
-_displayTime = function(msg){
-   result = msg.payload;
-   _timeDisplay.text(result);
-   };
-
-return{
-
-   getTime: function(){
-      return _timeDisplay.text()
-      },
-
-   requestTime: _requestTime,
-
-   init: function(){
-      onReadyFunctions.push(_initializeUI);
-      addJavascriptMessageHandler("dateAndTimeString", _displayTime);
-      }
-   };
-
-}); // DateAndTimeModule
-//----------------------------------------------------------------------------------------------------
-dtm = DateAndTimeModule();
-dtm.init();
-
-</script>
-
-<div id="dateAndTimeDiv">
-<h3> get date and time (simple demo and test)</h3>
-
-    <button id="requestDateButton">get date and time from Oncoscape R server </button>
-    <span id="dateDisplay"></span>
-</div>
-
-<script>
-//--------------------------------------------------------------------------------------------------
 function getRandomFloat (min, max)
 {
     return Math.random() * (max - min) + min;
@@ -310,6 +262,59 @@ $(document).ready(function()
 })
 //--------------------------------------------------------------------------------------------------
 </script>
+
+<script>
+//----------------------------------------------------------------------------------------------------
+var DateAndTimeModule = (function () {
+
+var _button;
+var _timeDisplay;
+
+_initializeUI = function(){
+    _button = $("#requestDateButton");
+    _button.click(_requestTime);
+    _timeDisplay = $("#dateDisplay");
+    };
+
+_requestTime = function(){
+   msg = {cmd: "fetchDateAndTimeString", status: "request", payload: "empty"}
+   msg.json = JSON.stringify(msg);
+   socket.send(msg.json);
+   };
+
+_displayTime = function(msg){
+   result = msg.payload;
+   _timeDisplay.text(result);
+   };
+
+return{
+
+   getTime: function(){
+      return _timeDisplay.text()
+      },
+
+   requestTime: _requestTime,
+
+   init: function(){
+      onReadyFunctions.push(_initializeUI);
+      addJavascriptMessageHandler("dateAndTimeString", _displayTime);
+      }
+   };
+
+}); // DateAndTimeModule
+//----------------------------------------------------------------------------------------------------
+dtm = DateAndTimeModule();
+dtm.init();
+
+</script>
+<body>
+
+<div id="dateAndTimeDiv">
+<h3> get date and time (simple demo and test)</h3>
+
+    <button id="requestDateButton">get date and time from Oncoscape R server </button>
+    <span id="dateDisplay"></span>
+</div>
 
 </body>
 </html>

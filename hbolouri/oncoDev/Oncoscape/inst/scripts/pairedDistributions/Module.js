@@ -199,11 +199,6 @@ var PairedDistributionsModule = (function () {
   	 		}
   	 }
   
-//      dataset = [{patient: "TCGA.02.04", value: 3, pop: "pop1"},
-//                 {patient: "TCGA.02.05", value: 6.7, pop: "pop1"},
-//                 {patient: "TCGA.02.06", value: 1.5, pop: "pop2"},
-//                 {patient: "TCGA.02.07", value: 4.8, pop: "pop2"}];
-
      pairedDistributionsBroadcastButton.prop("disabled",true);
      var padding = 50;
      var width = $("#pairedDistributionsDisplay").width();
@@ -216,9 +211,10 @@ var PairedDistributionsModule = (function () {
      yMax = max * 1.1
      yMin = 0
 
-     d3.select("svg").remove();  // so that append("svg") is not cumulative
+        // select our svg by identifier, remove it
+     d3.select("#pairedDistributionsSVG").remove()
 
-//flip axis
+        //flip axis
      var xScale = d3.scale.linear()
                     .domain([xMin,xMax])
                     .range([padding, width - padding]);
@@ -245,6 +241,7 @@ var PairedDistributionsModule = (function () {
 
      var svg = d3.select("#pairedDistributionsDisplay")
                  .append("svg")
+                 .attr("id", "pairedDistributionsSVG")
                  .attr("width", width)
                  .attr("height", height)
                  .call(d3PlotBrush);
