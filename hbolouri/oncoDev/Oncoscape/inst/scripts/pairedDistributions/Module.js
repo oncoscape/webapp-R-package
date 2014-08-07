@@ -104,8 +104,10 @@ var PairedDistributionsModule = (function () {
          pairedDistributionsResults = msg.payload;
          console.log(msg.payload);
          d3PairedDistributionsScatterPlot(pairedDistributionsResults);
-         if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
-             $("#tabs").tabs( "option", "active", 1);
+         // tab activation not needed here - pshannon (7 aug 2014)
+         //tabIndex = $('#tabs a[href="#pairedDistributionsDiv"]').parent().index();
+         //if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
+         //    $("#tabs").tabs( "option", "active", tabIndex);
          } // success
     else{
       console.log("pairedDistributionsPlot about to call alert: " + msg)
