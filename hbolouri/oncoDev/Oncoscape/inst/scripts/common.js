@@ -32,6 +32,12 @@ function getRandomInt (min, max)
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 //----------------------------------------------------------------------------------------------------
+String.prototype.beginsWith = function (string) 
+{
+    return(this.toLowerCase().indexOf(string.toLowerCase()) === 0);
+};
+//----------------------------------------------------------------------------------------------------
+// from http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 function openCenteredBrowserWindow(url, title, w, h) {
     // Fixes dual-screen position                         Most browsers      Firefox
     var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
@@ -44,11 +50,11 @@ function openCenteredBrowserWindow(url, title, w, h) {
     var top = ((height / 2) - (h / 2)) + dualScreenTop;
     var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
 
-    // Puts focus on the newWindow
     if (window.focus) {
-        newWindow.focus();
-    }
-}
+       newWindow.focus();
+       }
+
+} // openCenteredBrowserWindow
 //----------------------------------------------------------------------------------------------------
 dispatchMessage = function(msg)
 {
