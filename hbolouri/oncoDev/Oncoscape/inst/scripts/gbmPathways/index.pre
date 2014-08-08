@@ -1,7 +1,7 @@
 include(../index.common)
 include(../common.js)
 include(../m4-workarounds.txt)
-include(code.js)
+include(Module.js)
 <body>
 include(widget.html)
 </body>
