@@ -25,10 +25,13 @@ var PairedDistributionsModule = (function () {
 
   //--------------------------------------------------------------------------------------------
   requestRandomPairedDistributions = function(){
+  	 var dropDown = document.getElementById('numberOfPopulationDropDown');
+  	 var numberOfPopulations = dropDown.options[dropDown.selectedIndex].text;
+  	 console.log("Number of Populations: " + numberOfPopulations);
      msg = {cmd: "calculatePairedDistributionsOfPatientHistoryData",
             callback:  "pairedDistributionsPlot",
             status: "request", 
-            payload: {mode:"test", attribute:"FirstProgression"}};
+            payload: {mode:"test", attribute:"FirstProgression", popCount: numberOfPopulations}};
 
      socket.send(JSON.stringify(msg));
      };
@@ -181,6 +184,8 @@ var PairedDistributionsModule = (function () {
   };
   //-------------------------------------------------------------------------------------------
   d3PairedDistributionsScatterPlot = function(data) {
+  
+  	
   
   	 //console.log(d3.values(dataset.pop2));
   	 
