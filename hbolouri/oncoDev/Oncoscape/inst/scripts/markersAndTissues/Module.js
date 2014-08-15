@@ -9,17 +9,21 @@ var markersAndTissuesModule = (function () {
   var searchBox;
   var mouseOverReadout;
   var edgeSelectionOn = false;
-  var edgesFromSelectedButton, hideEdgesButton;
+  var edgesFromSelectedButton, hideEdgesButton, showEdgesButton;
   var edgeTypeSelector;
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
       cyDiv = $("#cyMarkersDiv");
-      edgesFromSelectedButton = $("#cyMarkersShowEdgesFromSelectedButton");
-      edgesFromSelectedButton.click(showEdgesFromSelectedNodes);
 
-      //hideEdgesButton = $("#cyMarkersHideEdgesButton");
-      //hideEdgesButton.click(hideAllEdges)
+      showEdgesButton = $("#cyMarkersShowEdgesButton");
+      showEdgesButton.click(showEdges);
+
+      //edgesFromSelectedButton = $("#cyMarkersShowEdgesFromSelectedButton");
+      //edgesFromSelectedButton.click(showEdgesFromSelectedNodes);
+
+      hideEdgesButton = $("#cyMarkersHideEdgesButton");
+      hideEdgesButton.click(hideAllEdges)
 
       //showEdgesButton = $("#cyMarkersShowEdgesButton");
       //showEdgesButton.click(showAllEdges)
@@ -28,7 +32,7 @@ var markersAndTissuesModule = (function () {
       searchBox = $("#markersAndTissuesSearchBox");
 
       edgeTypeSelector = $("#markersEdgeTypeSelector");
-      edgeTypeSelector.change(newEdgeTypeSelection);
+      //edgeTypeSelector.change(newEdgeTypeSelection);
 
       mouseOverReadout = $("#markersAndSamplesMouseOverReadoutDiv")
       loadNetwork();
@@ -110,7 +114,7 @@ var markersAndTissuesModule = (function () {
 
 
    //----------------------------------------------------------------------------------------------------
-   function newEdgeTypeSelection (){
+   function hiddennewEdgeTypeSelection (){
  
       var edgeTypesToDisplay = edgeTypeSelector.val();
       if(edgeTypesToDisplay == null){
@@ -197,9 +201,49 @@ var markersAndTissuesModule = (function () {
       }
 
    //----------------------------------------------------------------------------------------------------
+   function showEdges(){
+
+      var edgeTypesToDisplay = edgeTypeSelector.val();
+      if(edgeTypesToDisplay == null){
+         hideAllEdges();
+         return;
+         }
+
+      var selectedNodes = selectedNodeIDs(cwMarkers);
+
+      console.log(" newEdgeTypeSelection (" + edgeTypesToDisplay.length + 
+                  "), selectedNodes: " + selectedNodes.length);
+
+      if(edgeTypesToDisplay.length == 0){
+          hideAllEdges()
+          console.log("no edgeTypes selected")
+          return;
+          }
+
+      if(selectedNodes.length == 0) { // show edges to and from all nodes
+        for(var i=0; i < edgeTypesToDisplay.length; i++){
+          edgeType = edgeTypesToDisplay[i];
+          filterString = 'edge[edgeType="' + edgeType + '"]';
+          console.log("filter string: " + filterString);
+          cwMarkers.filter(filterString).show();
+          } // for edgeType
+        } // no selected nodes
+      else{
+        showEdgesForSelectedNodes(cwMarkers, edgeTypesToDisplay);
+        }
+      } // showEdges
+
+
+   //----------------------------------------------------------------------------------------------------
    function showEdgesFromSelectedNodes(){
 
       var selectedNodes = cwMarkers.filter('node:selected');
+      var edgeTypesToDisplay = edgeTypeSelector.val();
+
+      if(selectedNodes.length == 0) {
+         return;
+         }
+
       for(var n=0; n < selectedNodes.length; n++){
          node = selectedNodes[n];
          nodeID = node.data().id;
