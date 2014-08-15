@@ -107,7 +107,7 @@ var gbmPathwaysModule = (function () {
 
 
    //----------------------------------------------------------------------------------------------------
-   nodeNames = function(){
+   function nodeNames(){
      nodes = cwGBM.filter("node:visible");
      result = [];
      for(var i=0; i < nodes.length; i++){
