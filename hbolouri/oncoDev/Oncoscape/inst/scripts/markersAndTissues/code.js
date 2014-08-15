@@ -71,7 +71,7 @@ loadMarkersAndTissuesNetwork = function() {
    cwMarkers = $("#cyMarkersDiv");
    cwMarkers.cytoscape({
        elements: network.elements,
-       style: vizmap[0].style,
+       style: vizmap[3].style,
        showOverlay: false,
        minZoom: 0.01,
        maxZoom: 8.0,
