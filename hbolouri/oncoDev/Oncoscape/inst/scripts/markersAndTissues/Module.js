@@ -5,11 +5,12 @@ var cwMarkers;  // move this back inside module when debugging is done
 var markersAndTissuesModule = (function () {
 
   var cyDiv;
-  var zoomSelectedButton;
+  //var zoomSelectedButton;
   var searchBox;
   var mouseOverReadout;
   var edgeSelectionOn = false;
-  var edgesFromSelectedButton, hideEdgesButton, showEdgesButton;
+  //var edgesFromSelectedButton
+  var hideEdgesButton, showEdgesButton;
   var edgeTypeSelector;
 
   //--------------------------------------------------------------------------------------------
@@ -28,7 +29,7 @@ var markersAndTissuesModule = (function () {
       //showEdgesButton = $("#cyMarkersShowEdgesButton");
       //showEdgesButton.click(showAllEdges)
 
-      zoomSelectedButton  = $("#cyMarkersZoomSelectedButton");
+      //zoomSelectedButton  = $("#cyMarkersZoomSelectedButton");
       searchBox = $("#markersAndTissuesSearchBox");
 
       edgeTypeSelector = $("#markersEdgeTypeSelector");
@@ -77,26 +78,13 @@ var markersAndTissuesModule = (function () {
            var edge = evt.cyTarget;
            mouseOverReadout.text(edge.data().canonicalName);
            });
-        //cwMarkers.on('select', 'edge', function(evt){
-        //   var edge = evt.cyTarget;
-        //   console.log("selected edge");
-        //   var pmid = edge.data().pmid;
-        //   console.log("pmid: " + pmid);
-        //   openCenteredBrowserWindow("http://www.ncbi.nlm.nih.gov/pubmed/?term=" + pmid, "pubmed abstract", 800, 600)
-        //   });
-        //$("#cwMarkersMovieButton").button()
-        //zoomSelectedButton.button();
-        //zoomSelectedButton.click(zoomSelection);
         searchBox.keydown(doSearch);
-        //$("#cwMarkersMovieButton").click(cwMarkerstogglePlayMovie);
-        //$("#gbmPathwaysSearchBox").keydown(readGbmPathwaysSearchBox);
 
         cwMarkers.edges().unselectify();
         console.log("cwMarkers.reset");
         cwMarkers.reset();
         handleWindowResize();
         hideAllEdges();
-        //requestNanoStringExpressionData();
         } // cy.ready
        })
     .cytoscapePanzoom({ });   // need to learn about options
@@ -202,6 +190,8 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
    function showEdges(){
+
+      hideAllEdges();   // is this wise?
 
       var edgeTypesToDisplay = edgeTypeSelector.val();
       if(edgeTypesToDisplay == null){
