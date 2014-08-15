@@ -3,16 +3,10 @@
 //----------------------------------------------------------------------------------------------------
 var SavedSelectionModule = (function (){
      
-     var nodecount_i;
-     var height;
-     var root;
-    
-    var	tree, diagonal;
-	var SaveSelectedDisplay;
-    var InitialLoad;
-    var SaveSelectedsvg;
+    var SelectionTableRef;
+    var SaveSelectedDisplay;
     var CurrentSelection;
-    var SelectionNames= [];
+//    var SelectionNames= [];
   
 //--------------------------------------------------------------------------------------------
   function handleWindowResize(){
@@ -25,81 +19,73 @@ var SavedSelectionModule = (function (){
 	function initializeSelectionUI(){			     
 	 console.log("====== Initializing Selection UI")
 
-        nodecount_i=0;
          var margin = {top: 10, right: 15, bottom: 30, left: 20};
-        InitialLoad = true;
-	    SaveSelectedDisplay = $("#SavedSelectionTreeDiv");
+ 	    SaveSelectedDisplay = $("#SavedSelectionTableDiv");
         handleWindowResize();
         
-        height = SaveSelectedDisplay.height(); //200;      
+        var height = SaveSelectedDisplay.height(); //200;      
         var width = SaveSelectedDisplay.width(); //200;       
          
-        tree = d3.layout.tree()
-         .size([(height-margin.top-margin.bottom), (width-margin.left-margin.right)]);
-     
-        diagonal = d3.svg.diagonal()
-         .projection(function(d) { return [d.y, d.x]; });
-          
-        SaveSelectedsvg = d3.select("#SavedSelectionTreeDiv").append("svg")
-         .attr("width", width)
-         .attr("height", height)
-         .append("g")
-             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
          $(window).resize(handleWindowResize);
+         displaySelectionTable();
 
+//        if(typeof(window.tabsAppRunning) == "undefined") {
+//      		$("#ModuleDate").text(fetchHeader("Module.js") );
+//        } else {
+//            $("#ModuleDate").text(fetchHeader("../../tabsApp/Module.js") );
+//        }
 		// if date modified needs updated
 		//http://www.dynamicdrive.com/forums/archive/index.php/t-63637.html
 
        };
-       
-//----------------------------------------------------------------------------------------------------
-     function testingAddSavedSelection() {
-       msg = {cmd:"test",
-              callback: "",
-              status:"request",
-              payload:{  name: "test set",
-         			PatientIDs : "random set of IDs here",
-         			Tab: "None",
-         			Settings: "gibberish"
-         		}
-             };
-        addSavedSelection(msg);
 
-}
 //----------------------------------------------------------------------------------------------------
-     function addSavedSelection(msg) {
-       
-       console.log("=== Saving Selection", msg)
- 
- 		var i=0;
- 		var nameSuffix = ""
- 		var nodeName =msg.payload.name 
-        while(SelectionNames.indexOf(nodeName.concat(nameSuffix)) !== -1){
-		    i++;
-		    nameSuffix = "_".concat(i)	
-		}
-       newNode = msg.payload
-       newNode.name = nodeName.concat(nameSuffix)
-       SelectionNames.push(newNode.name)
-       
-       if(CurrentSelection.children){ 
-            CurrentSelection.children.push(newNode);
-       } else { CurrentSelection.children = [newNode] }
-       
-       var currentNode = CurrentSelection
-       var update_id = CurrentSelection.id
-       while(currentNode.parent){ 
-          currentNode.parent.children[ currentNode.parent.children.indexOf(function(d) {  d.id ===update_id})] = currentNode;
-          currentNode = currentNode.parent
+  function displaySelectionTable(){
+     console.log("----displaySelectionTable");
+     tblColumnNames = ["Name","N","FromTab", "Settings", "PatientIDs"];
+     columnTitles = [];
+     for(var i=0; i < tblColumnNames.length; i++){
+        columnTitles.push({sTitle: tblColumnNames[i]});
         }
-        root = currentNode;
-       updateSavedSelection(root);
-       
-       CurrentSelection = CurrentSelection.children.filter(function(d){ return d.id === nodecount_i })[0]
-    console.log("new tree: ", root)
-    console.log("CurrentSelection: ", CurrentSelection)
-	}       
+     
+     console.log(columnTitles);
+
+     SaveSelectedDisplay.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="SelectionTable"></table>');
+     $("#SelectionTable").dataTable({
+        "sDom": "Rlfrtip",
+         sDom: 'C<"clear">lfrtip',
+        "aoColumns": columnTitles,
+	    "sScrollX": "100px",
+        "iDisplayLength": 25,
+         bPaginate: true,
+        "scrollX": true,
+        "fnInitComplete": function(){
+            $(".display_results").show();
+            }
+         }); // dataTable
+
+     console.log("displayTable adding data to table");
+     SelectionTableRef = $("#SelectionTable").dataTable();
+     
+      $('#SelectionTable tbody')
+            .on( 'click', 'tr', function () {
+               $(this).toggleClass('selected'); })
+            
+               ;
+   
+   
+      //http://datatables.net/examples/api/select_row.html
+ 
+//    $('#button').click( function () {
+//        alert( table.rows('.selected').data().length +' row(s) selected' );
+//    } );
+     
+     
+     
+     }; // displayTable
+
+      
 
 
 //----------------------------------------------------------------------------------------------------
@@ -192,158 +178,34 @@ function make_editable(d, field)
                         });
       });
 }
-//----------------------------------------------------------------------------------------------------
-     function updateSavedSelection(source) {
-       var duration = d3.event && d3.event.altKey ? 5000 : 500;
-     
-     var tooltip = d3.select("body")
-                .attr("class", "tooltip")
-                .append("div")
-                .style("position", "absolute")
-                .style("z-index", "20")
-                .style("visibility", "hidden")
-                ;
-     
-       // Compute the new tree layout.
-       var nodes = tree.nodes(root).reverse();
-       console.log("Nodes", nodes);
-       
-       // Normalize for fixed-depth.
-       nodes.forEach(function(d) { d.y = d.depth * 180; });
-     
-       // Update the nodes…
-       var node =  SaveSelectedsvg.selectAll("g.node")
-           .data(nodes, function(d) { return d.id || (d.id = ++nodecount_i); });
-     
-       // Enter any new nodes at the parent's previous position.
-       var nodeEnter = node.enter().append("g")
-           .attr("class", "node")
-           .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-            .on("click", function(d) { toggle(d); updateSavedSelection(d); });
-     
-       nodeEnter.append("circle")
-           .attr("r", 1e-6)
-           .style("fill", function(d) { return d._children ? "lightsteelblue" : "grey"; })
-           .on("mouseover", function(d){
-                  var settings = getSettingsString(d);
-                    tooltip.html(d.PatientIDs.length + " Patients from " + d.Tab + "<br></br>Settings: " + settings)
-                     return tooltip.style("visibility", "visible"); })
-           .on("mousemove", function(){return tooltip.style("top",
-                         (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-           .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
-           ;
-     
-       nodeEnter.append("text")
-           .attr("class", "NodeName")
-           .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
-           .attr("dy", "1em")
-           .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-           .text(function(d) { return d.name; })
-           .style("fill-opacity", 1e-6)
-           .call(make_editable, "NodeName");
-     
-       // Transition nodes to their new position.
-       var nodeUpdate = node.transition()
-           .duration(duration)
-           .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
-     
-       nodeUpdate.select("circle")
-           .attr("r", 4.5)
-           .style("fill", function(d) { return d._children ? "lightsteelblue" : "grey"; });
-     
-       nodeUpdate.select("text")
-           .style("fill-opacity", 1);
-     
-       // Transition exiting nodes to the parent's new position.
-       var nodeExit = node.exit().transition()
-           .duration(duration)
-           .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
-           .remove();
-     
-       nodeExit.select("circle")
-           .attr("r", 1e-6);
-     
-       nodeExit.select("text")
-           .style("fill-opacity", 1e-6);
-     
-       // Update the links…
-       var link = SaveSelectedsvg.selectAll("path.link")
-           .data(tree.links(nodes), function(d) { return d.target.id; });
-     
-       // Enter any new links at the parent's previous position.
-       link.enter().insert("path", "g")
-           .attr("class", "link")
-           .attr("d", function(d) {
-             var o = {x: source.x0, y: source.y0};
-             return diagonal({source: o, target: o});
-           })
-         .transition()
-           .duration(duration)
-           .attr("d", diagonal);
-     
-       // Transition links to their new position.
-       link.transition()
-           .duration(duration)
-           .attr("d", diagonal);
-     
-       // Transition exiting nodes to the parent's new position.
-       link.exit().transition()
-           .duration(duration)
-           .attr("d", function(d) {
-             var o = {x: source.x, y: source.y};
-             return diagonal({source: o, target: o});
-           })
-           .remove();
-     
-       // Stash the old positions for transition.
-       nodes.forEach(function(d) {
-         d.x0 = d.x;
-         d.y0 = d.y;
-       });
-     }
-     
-//----------------------------------------------------------------------------------------------------
-     // Toggle children.
-     function toggle(d) {
-       if (d.children) {
-         d._children = d.children;
-         d.children = null;
-       } else {
-         d.children = d._children;
-         d._children = null;
-       }
-     }
-//----------------------------------------------------------------------------------------------------
-    function getSettingsString(d){
-		console.log("change setting string: ",  d)
-		var SettingsString = d.Settings;
-		if(d.Tab === "ClinicalTable"){
-		   if(d.Settings.ageAtDxMin){
-		       SettingsString = "AgeDx [" + d.Settings.ageAtDxMin + ", " + d.Settings.ageAtDxMax + "] <br>"
-		                  + "Survival [" + d.Settings.overallSurvivalMin + ", " + d.Settings.overallSurvivalMax + "]";
-		    }
-		}
-		return SettingsString;
-		
-}
+
 //----------------------------------------------------------------------------------------------------
     function loadPatientData(){
 
        console.log("==== SavedSelection  get all PatientIDs from ClinicalTable");
        cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
        status = "request"
-       callback = "SetupSavedSelectionTree"
+       callback = "SetupSavedSelection"
           filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
           msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
-        // console.log(JSON.stringify(msg))
-       socket.send(JSON.stringify(msg));
+          socket.send(JSON.stringify(msg));
+      
+//       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
+  //     status = "request"
+    //   callback = "testingAddSavedSelection"
+      //    filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
+        //  msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
+          //socket.send(JSON.stringify(msg));
+       
+        
        } // loadPatientDemoData
 
 //----------------------------------------------------------------------------------------------------
-     function SetupSavedSelectionTree(msg){			     
+     function SetupSavedSelection(msg){			     
 
-		console.log("===== Setup SavedSelection Tree")
+		console.log("===== Setup SavedSelection")
          console.log(msg)
+         InitialLoad = false;
 
          var AllData = msg.payload
          var PtIDs = []; 
@@ -352,32 +214,116 @@ function make_editable(d, field)
          		PtIDs.push(AllData[i].PatientID)
          }
          console.log("All Patients: ", PtIDs)
-         root = {   "name": "All Patients",
-         			"PatientIDs" : PtIDs,
-         			"Tab": "ClinicalTable",
-         			"Settings": "None"
+
+         var NewSelection = {   
+                    userID: getUserID(),
+                    selectionname: "All Patients",
+         			PatientIDs : PtIDs,
+         			Tab: "ClinicalTable",
+         			Settings: "None"
          		}
-         
-         root.x0 = height / 2;
-         root.y0 = 0;
-             	
-         function toggleAll(d) {
-           if (d.children) {
-             d.children.forEach(toggleAll);
-             toggle(d);
-           }
-         }
-         
-       InitialLoad = false;
-       updateSavedSelection(root); 
-       CurrentSelection = root;
-       SelectionNames.push(root.name);
-  
-       console.log("root: ", root)
-      
- //      testingAddSavedSelection()
+           
+        cmd = "addNewUserSelection"
+        status = "request"
+        callback = "addSelectionToTable"
+
+       msg = {cmd: cmd, callback: callback, status: status, payload: NewSelection};
+       
+       console.log(JSON.stringify(msg.payload.userID))
+       socket.send(JSON.stringify(msg));
+ 
        
      }     
+ //----------------------------------------------------------------------------------------------------
+     function testingAddSavedSelection(msg) {
+
+		console.log("===== testing Add Saved Selection")
+         console.log(msg)
+
+         var AllData = msg.payload
+         var PtIDs = []; 
+         for(var i=0;i<AllData.length; i++){
+         	if(PtIDs.indexOf(AllData[i].PatientID) === -1)
+         		PtIDs.push(AllData[i].PatientID)
+         }
+ 
+      randomsubset = [];
+      for(i=0;i<6;i++){ randomsubset.push(PtIDs[getRandomInt (0, PtIDs.length) ])}
+
+    console.log("Subset Patients: ",randomsubset)      
+
+         var NewSelection = {   
+                    userID: getUserID(),
+                    selectionname: "test",
+         			PatientIDs : randomsubset,
+         			Tab: "ClinicalTable",
+         			Settings: "randomsubset"
+         		}
+           
+        cmd = "addNewUserSelection"
+        status = "request"
+        callback = "addSelectionToTable"
+
+       msg = {cmd: cmd, callback: callback, status: status, payload: NewSelection};
+
+      msg.json = JSON.stringify(msg);
+           console.log(msg.json);
+      socket.send(msg.json);
+ 
+}
+
+//----------------------------------------------------------------------------------------------------
+    function addSelectionToTable(msg){
+    
+ 		console.log("===== Add Selection To Table")
+        console.log(msg)
+  
+         if(msg.status !== "error"){
+
+            settings = msg.payload.settings;
+            if(typeof settings !== "string"){
+              settings=  JSON.stringify(settings)
+            }
+            N = msg.payload.patientIDs.length
+            AsRow = [msg.payload.selectionname,N, msg.payload.tab,settings, msg.payload.patientIDs]
+ 
+            SelectionTableRef.fnAddData(AsRow);
+       }
+    
+    }
+
+    //--------------------------------------------------------------------------------------------
+     getSelectionbyName = function(selectionname, callback){
+               
+               msg = {cmd:"getUserSelectPatientHistory",
+              callback: callback,
+              status:"request",
+              payload:{userID: getUserID(),
+                       selectionname: value}
+             };
+     
+        socket.send(JSON.stringify(msg));
+               
+    }
+        //--------------------------------------------------------------------------------------------
+     getSelectionNames = function(){
+             
+        var rows = SelectionTableRef._('tr', {"filter":"applied"});   // cryptic, no?
+        var currentNames = []
+        for(var i=0; i < rows.length; i++) 
+          currentNames.push(rows[i][0]);
+      console.log(currentNames.length + " selection names being reported")
+
+        currentNames;
+}
+//getSelectionNames = function(callback){
+//  msg = {cmd:"getUserSelectionnames",
+//   callback: callback,
+//   status:"request",
+//   payload:{userID: getUserID()}
+//  };
+//  socket.send(JSON.stringify(msg));         
+//}
   
 //--------------------------------------------------------------------------------------------
  //    function HandleWindowResize(){
@@ -392,15 +338,15 @@ function make_editable(d, field)
      
         init: function(){
            onReadyFunctions.push(initializeSelectionUI);
-           addJavascriptMessageHandler("SetupSavedSelectionTree", SetupSavedSelectionTree);
- 		   addJavascriptMessageHandler("addSelectionToTree", addSavedSelection);
+           addJavascriptMessageHandler("SetupSavedSelection", SetupSavedSelection);
+   		   addJavascriptMessageHandler("addSelectionToTable", addSelectionToTable);
+  		   addJavascriptMessageHandler("testingAddSavedSelection", testingAddSavedSelection);
           socketConnectedFunctions.push(loadPatientData);
            }
         };
      
 }); // SavedSelectionModule
  
-
 //----------------------------------------------------------------------------------------------------
 SavedSelection = SavedSelectionModule();
 SavedSelection.init();

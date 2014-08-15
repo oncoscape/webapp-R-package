@@ -17,6 +17,8 @@ Collate: Oncoscape.R
          LocalFileCaisisEventsHistoryProvider.R
          Data2DProvider.R
          LocalFileData2DProvider.R
+         UserSettingsProvider.R
+         UserSelectPatientProvider.R
          DataProviderBridge.R
          AnalysisBridge.R
          NanoStringExpressionData.R

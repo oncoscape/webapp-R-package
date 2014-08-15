@@ -315,6 +315,11 @@ var SavedSelectionModule = (function (){
 
          $(window).resize(handleWindowResize);
 
+        if(typeof(window.tabsAppRunning) == "undefined") {
+      		$("#ModuleDate").text(fetchHeader("Module.js") );
+        } else {
+            $("#ModuleDate").text(fetchHeader("../../tabsApp/Module.js") );
+        }
 		// if date modified needs updated
 		//http://www.dynamicdrive.com/forums/archive/index.php/t-63637.html
 
@@ -594,6 +599,36 @@ function make_editable(d, field)
 		
 }
 //----------------------------------------------------------------------------------------------------
+
+function fetchHeader(url) {
+    wch = 'Last-Modified'
+    try {
+        var req=new XMLHttpRequest();
+        req.open("HEAD", url, false);
+        req.send(null);
+        if(req.status== 200){
+            return req.getResponseHeader(wch);
+        }
+        else return false;
+    } catch(er) {
+        return er.message;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+    function getSettingsString(d){
+		console.log("change setting string: ",  d)
+		var SettingsString = d.Settings;
+		if(d.Tab === "ClinicalTable"){
+		   if(d.Settings.ageAtDxMin){
+		       SettingsString = "AgeDx [" + d.Settings.ageAtDxMin + ", " + d.Settings.ageAtDxMax + "] <br>"
+		                  + "Survival [" + d.Settings.overallSurvivalMin + ", " + d.Settings.overallSurvivalMax + "]";
+		    }
+		}
+		return SettingsString;
+		
+}
+//----------------------------------------------------------------------------------------------------
     function loadPatientData(){
 
        console.log("==== SavedSelection  get all PatientIDs from ClinicalTable");
@@ -699,9 +734,12 @@ path.link {
      <div id="SavedSelectionTreeDiv"></div>
   <div id="SelectionBanner">
     <div id="Acknowledgement">Created by Lisa McFerrin</div>
-    <script language="Javascript">
+ <!--   <script language="Javascript">
 		document.write("This page was last modified on: " + document.lastModified +"");
 	</script>
+--> <div id="DateUpdated"> Last modified: 
+    <span id="ModuleDate"> </span>
+    </div>
   </div>
 
   </div>

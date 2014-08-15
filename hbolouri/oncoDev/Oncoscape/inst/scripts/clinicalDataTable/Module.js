@@ -11,6 +11,9 @@ var ClinicalTableTabNum=1;
 
    //--------------------------------------------------------------------------------------------
    function initializeUI(){
+      SaveSelectedButton = $("#toSavedSelectionButton");
+      SaveSelectedButton.click(function(){sendCurrentIDsToSelection()});
+
       pcaButton = $("#toPCAButton");
       pcaButton.click(function(){sendCurrentIDsToModule("PCA")});
       timeLinesButton = $("#toTimeLinesButton")
@@ -59,6 +62,37 @@ var ClinicalTableTabNum=1;
     $("#toTimeLinesButton").prop("disabled",false);
     };
 
+  //--------------------------------------------------------------------------------------------
+   function sendCurrentIDsToSelection () {
+      console.log("entering sendCurrentIDsToSelection");
+      var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
+      var currentIDs = []
+      for(var i=0; i < rows.length; i++) 
+          currentIDs.push(rows[i][0]);
+      console.log(currentIDs.length + " patientIDs going to SavedSelection")
+      
+      var NewSelection = {   
+                    "userID": getUserID(),
+                    "selectionname": "ClinicalTable",
+         			"PatientIDs" : currentIDs,
+         			"Tab": "ClinicalTable",
+         			"Settings": {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
+                      ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
+                      overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
+                      overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
+         		}
+ 
+ 
+      msg = {cmd:"addNewUserSelection",
+             callback: "addSelectionToTable",
+               status:"request",
+              payload: NewSelection 
+             };
+      msg.json = JSON.stringify(msg);
+           console.log(msg.json);
+      socket.send(msg.json);
+      } // sendTissueIDsToModule
+
    //--------------------------------------------------------------------------------------------
    function sendCurrentIDsToModule (moduleName) {
       console.log("entering sendCurrentIDsToModule");
@@ -78,21 +112,6 @@ var ClinicalTableTabNum=1;
       //console.log(msg.json);
       socket.send(msg.json);
       
-      msg = {cmd:"sendPatientIDsToSelectionTree",
-              callback: "addSelectionToTree",
-              status:"request",
-              payload:{  name: "table_filter",
-         			PatientIDs : currentIDs,
-         			Tab: "ClinicalTable",
-         			Settings: {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
-                      ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
-                      overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
-                      overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
-         		}
-             };
-      msg.json = JSON.stringify(msg);
-           console.log(msg.json);
-      socket.send(msg.json);
       } // sendTissueIDsToModule
 
 //----------------------------------------------------------------------------------------------------

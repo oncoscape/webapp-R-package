@@ -220,7 +220,7 @@ $(document).ready(function()
     {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-    }
+     }
     else
     if (labkey.mode == "WS")
     {

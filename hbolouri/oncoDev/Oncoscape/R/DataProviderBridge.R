@@ -8,6 +8,12 @@ addRMessageHandler("DataProviderBridge.ping",         "DataProviderBridgePing") 
 #addRMessageHandler("get_MSK_GBM_mRNA_Data",           "get_MSK_GBM_mRNA_Data")
 #addRMessageHandler("get_MSK_GBM_mRNA_Average",        "get_MSK_GBM_mRNA_Average")
 addRMessageHandler("getTabularPatientHistory",         "getTabularPatientHistory")
+addRMessageHandler("createNewUserID",                  "createNewUserID")
+addRMessageHandler("UserIDexists",                     "UserIDexists")
+addRMessageHandler("addNewUserToList",                 "addNewUserToList")
+addRMessageHandler("getUserSelectionnames",            "getUserSelectionnames")
+addRMessageHandler("getUserSelection",                 "getUserSelectPatientHistory")
+addRMessageHandler("addNewUserSelection",              "addUserSelectPatientHistory")
 addRMessageHandler("filterPatientHistory",             "filterPatientHistory")
 addRMessageHandler("getPatientClassification",         "getPatientClassification")
 addRMessageHandler("getCaisisPatientHistory",          "getCaisisPatientHistory")          # uses eventList (multi-flat, list of lists)
@@ -401,6 +407,297 @@ getCaisisPatientHistory <- function(WS, msg)
    sendOutput(DATA=toJSON(return.msg), WS=WS)
 
 } # getCaisisPatientHistory
+#----------------------------------------------------------------------------------------------------
+createNewUserID <- function(WS, msg)
+{
+   printf("===== generate new User ID")
+             
+   category.name <- "UserIDmap"
+
+   printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(USER.SETTINGS))
+    
+   if(!category.name %in% ls(USER.SETTINGS)){
+       error.message <- "Oncoscape DataProviderBridge error:  no patientSelectionHistory Provider defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+    }
+
+     userID <- msg$payload
+
+     if(nchar(userID)==0 | is.na(userID)){
+  	   NewID <- sample(c(1,2), 36, replace=T)
+	   NewID[which(NewID==1)] <- sample(LETTERS, length(which(NewID==1)), replace=T)
+	   NewID[which(NewID==2)] <- sample(0:9, length(which(NewID==2)), replace=T)
+	 
+       userID <- paste(NewID, collapse="")
+     }
+
+   AccountSettingsProvider <- USER.SETTINGS$UserIDmap
+   while(userID %in% userIDs(AccountSettingsProvider)){
+       	 NewID <- sample(c(1,2), 36, replace=T)
+	     NewID[which(NewID==1)] <- sample(LETTERS, length(which(NewID==1)), replace=T)
+	     NewID[which(NewID==2)] <- sample(0:9, length(which(NewID==2)), replace=T)
+	 
+         userID <- paste(NewID, collapse="")
+    }
+
+    payload <- list(userID = userID)
+
+    return.msg <- list(cmd=msg$callback, payload=payload, status="success")
+    
+    sendOutput(DATA=toJSON(return.msg), WS=WS)
+}
+#----------------------------------------------------------------------------------------------------
+UserIDexists <- function(WS, msg)
+{
+   printf("===== checking User ID")
+             
+   category.name <- "UserIDmap"
+
+   printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(USER.SETTINGS))
+    
+   if(!category.name %in% ls(USER.SETTINGS)){
+       error.message <- "Oncoscape DataProviderBridge error:  no patientSelectionHistory Provider defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+    }
+
+     userID <- msg$payload
+     UserStatus <- FALSE;
+
+   AccountSettingsProvider <- USER.SETTINGS$UserIDmap
+   if(userID %in% userIDs(AccountSettingsProvider)){
+       	  UserStatus = TRUE
+    }
+
+    return.msg <- list(cmd=msg$callback, payload=UserStatus, status="success")
+    
+    sendOutput(DATA=toJSON(return.msg), WS=WS)
+}
+
+#----------------------------------------------------------------------------------------------------
+addNewUserToList <- function(WS, msg)
+{
+  # only allows for 1 username at a time
+  # 
+   printf("===== Add User ID to List")
+             
+   callback <- msg$callback
+   payload <- msg$payload
+   
+   userID <- payload[["userID"]]
+   username <- payload[["username"]]
+   
+   printf("Adding ID %s and name %s to list", userID, username)
+   
+   if(nchar(userID)==0)
+       userID = NA
+ 
+    if(is.na(userID)){
+       error.message <- "Oncoscape DataProviderBridge error:  no userID defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+    }
+
+   category.name <- "UserIDmap"
+
+   printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(USER.SETTINGS))
+   printf("--- username: %s", username);
+    
+   if(!category.name %in% ls(USER.SETTINGS)){
+       error.message <- "Oncoscape DataProviderBridge error:  no patientSelectionHistory Provider defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+    }
+       
+   previousUsers <- NumUsers(USER.SETTINGS$UserIDmap)
+
+   USER.SETTINGS$UserIDmap <- addUserID(USER.SETTINGS$UserIDmap, userID=userID, username=username)
+   updatedUsers <- NumUsers(USER.SETTINGS$UserIDmap)
+
+   addedUsers <- updatedUsers - previousUsers
+   
+   printf("added %d (== %d) users with username: %s", length(userID), addedUsers, username)
+   
+   return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(userID=userID, username= username))
+
+   printf("DataProviderBridge.R, addNewUserToList responding to '%s' with '%s'", msg$cmd, msg$callback);
+   
+   sendOutput(DATA=toJSON(return.msg), WS=WS)
+
+} # getCaisisPatientHistory
+#----------------------------------------------------------------------------------------------------
+getUserSelectionnames <- function(WS, msg)
+{
+  # only allows for 1 username at a time
+  # 
+  
+   callback <- msg$callback
+   userID <- msg$payload$userID
+   if(nchar(userID)==0)
+       userID = NA
+
+  if(is.na(userID)){
+       error.message <- "Oncoscape DataProviderBridge error:  no userID defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       }
+
+   category.name <- "PatientSelectionHistory"
+
+   printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(USER.SETTINGS))
+   printf("--- userID: %s", userID);
+    
+   if(!category.name %in% ls(USER.SETTINGS)){
+       error.message <- "Oncoscape DataProviderBridge error:  no patientSelectionHistory Provider defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       }
+
+   patientSelectionHistoryProvider <- USER.SETTINGS$PatientSelectionHistory
+   selectionnames <- getSelectionnames(patientSelectionHistoryProvider, userID=userID)
+
+    selection.count <- length(selectionnames)
+   
+   printf("found %d (== %d) saved selections for user: %s", length(selectionnames), selection.count, userID)
+   
+   return.cmd = msg$callback
+   return.msg <- list(cmd=msg$callback, callback="", status="success", payload=selectionnames)
+
+   printf("DataProviderBridge.R, getUserSelectPatientHistory responding to '%s' with '%s'", msg$cmd, msg$callback);
+   
+   sendOutput(DATA=toJSON(return.msg), WS=WS)
+
+} # getUserSelectPatientHistory
+#----------------------------------------------------------------------------------------------------
+getUserSelectPatientHistory <- function(WS, msg)
+{
+  # only allows for 1 username at a time
+  # 
+  
+   callback <- msg$callback
+   userID <- msg$payload$userID
+   if(nchar(userID)==0)
+       userID = NA
+   selectionnames <- msg$payload$selectionnames
+   if(all(nchar(selectionnames))==0)
+       selectionnames = NA
+
+   category.name <- "PatientSelectionHistory"
+
+   printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(USER.SETTINGS))
+   printf("--- username: %s", username);
+    
+   if(!category.name %in% ls(USER.SETTINGS)){
+       error.message <- "Oncoscape DataProviderBridge error:  no patientSelectionHistory Provider defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       }
+
+   patientSelectionHistoryProvider <- USER.SETTINGS$PatientSelectionHistory
+   selections <- getSelection(patientSelectionHistoryProvider, userID=userID, selectionnames=selectionnames)
+
+   if(all(is.na(selectionnames)))
+       selection.count <- "all"
+   else
+       selection.count <- length(selectionnames)
+   
+   printf("found %d (== %d) saved selections for user: %s", length(selections), selection.count, userID)
+   
+   return.cmd = msg$callback
+   return.msg <- list(cmd=msg$callback, callback="", status="success", payload=selections)
+
+   printf("DataProviderBridge.R, getUserSelectPatientHistory responding to '%s' with '%s'", msg$cmd, msg$callback);
+   
+   sendOutput(DATA=toJSON(return.msg), WS=WS)
+
+} # getUserSelectPatientHistory
+#----------------------------------------------------------------------------------------------------
+addUserSelectPatientHistory <- function(WS, msg)
+{
+  # only allows for 1 username at a time
+  # 
+   printf("===== Add User Selection to Patient History")
+   printf("for userID %s", msg$payload$userID)
+                
+   callback <- msg$callback
+   userID <- msg$payload$userID
+   if(nchar(userID)==0)
+       userID = NA
+   selectionname <- msg$payload$selectionname
+   if(nchar(selectionname)==0)
+       selectionname = NA
+   patientIDs <- msg$payload$PatientIDs
+   if(all(nchar(patientIDs)==0))
+       patientIDs = NA
+
+
+  if(is.na(userID)){
+       error.message <- "Oncoscape DataProviderBridge error:  no userID defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+  }  
+  if(all(is.na(patientIDs))){
+       error.message <- "Oncoscape DataProviderBridge error:  no patient IDs defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+  }  
+  
+  selection <- list(selectionname = selectionname, 
+                    patientIDs = patientIDs, 
+                    tab = msg$payload$Tab, 
+                    settings = msg$payload$Settings)
+
+   category.name <- "PatientSelectionHistory"
+
+   printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(USER.SETTINGS))
+   printf("--- userID: %s", userID);
+    
+   if(!category.name %in% ls(USER.SETTINGS)){
+       error.message <- "Oncoscape DataProviderBridge error:  no patientSelectionHistory Provider defined"
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+    }
+       
+   if(!(userID %in% userIDsWithSelection(USER.SETTINGS$PatientSelectionHistory))){
+       USER.SETTINGS$PatientSelectionHistory<- addUserIDforSelection(USER.SETTINGS$PatientSelectionHistory, userID)
+   }
+
+  printf("Current User length: %d", NumUsersWithSelection(USER.SETTINGS$PatientSelectionHistory))
+  printf("Current User Selection length: %d", NumUserSelections(USER.SETTINGS$PatientSelectionHistory, userID))
+  previousSelection <-  NumUserSelections(USER.SETTINGS$PatientSelectionHistory, userID)
+  
+   		i=0; 
+        while(!ValidSelectionname(USER.SETTINGS$PatientSelectionHistory, userID=userID, selectionname=selectionname)){
+		    i=i+1;
+		    selectionname = paste(selectionname,i, sep="_")
+		}
+  
+  USER.SETTINGS$PatientSelectionHistory <- addSelection(USER.SETTINGS$PatientSelectionHistory, userID=userID, selectionname=selectionname,
+                                  patientIDs = patientIDs, tab = msg$payload$Tab, settings = msg$payload$Settings)
+
+   if(previousSelection >= NumUserSelections(USER.SETTINGS$PatientSelectionHistory, userID)){
+       error.message <- "Oncoscape DataProviderBridge error:  could not add saved selection"
+       print(error.message)
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       printf("DataProviderBridge.R, addUserSelectPatientHistory responding to '%s' with '%s'", msg$cmd, msg$callback);
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+   } else {
+    
+       printf("added %s saved selection for user: %s", selectionname, userID)
+   
+        SavedSelectionRow <- list(selectionname = selectionname,
+                          tab = msg$payload$Tab, 
+                          settings = msg$payload$Settings, 
+                          patientIDs = patientIDs);
+
+        return.cmd = msg$callback
+        return.msg <- list(cmd=msg$callback, callback="", status="success", payload=SavedSelectionRow)
+
+        printf("DataProviderBridge.R, addUserSelectPatientHistory responding to '%s' with '%s'", msg$cmd, msg$callback); 
+        sendOutput(DATA=toJSON(return.msg), WS=WS)
+   }
+} # addUserSelectPatientHistory
 #----------------------------------------------------------------------------------------------------
 # this message handler requires that a "patientHistoryTable" is in DATA.PROVIDERS
 # no support here yet for a "patientHistoryEvents" data source

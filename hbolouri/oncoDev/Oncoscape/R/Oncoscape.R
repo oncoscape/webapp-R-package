@@ -19,6 +19,7 @@ setGeneric ("close", signature="self", function (self) standardGeneric ("close")
 printf <- function(...) print(noquote(sprintf(...)))
 dispatchMap <- new.env(parent=emptyenv())
 DATA.PROVIDERS <- new.env(parent=emptyenv())
+USER.SETTINGS <-  new.env(parent=emptyenv())
 #---------------------------------------------------------------------------------------------------
 addRMessageHandler <- function(key, function.name)
 {
@@ -148,6 +149,13 @@ addRMessageHandler <- function(key, function.name)
 
 } # .setupDataProviders
 #---------------------------------------------------------------------------------------------------
+.setupUserSettings <- function(path = "")
+{ 
+       USER.SETTINGS$UserIDmap <- UserSettingsProvider(path);
+       USER.SETTINGS$PatientSelectionHistory <- UserSelectPatientProvider(path);
+       
+} # .setupUserSettings
+#---------------------------------------------------------------------------------------------------
 # constructor
 Oncoscape = function(htmlFile, mode="websockets", port=7681, openBrowser=TRUE,  manifest=NA) {
 
@@ -170,6 +178,8 @@ Oncoscape = function(htmlFile, mode="websockets", port=7681, openBrowser=TRUE,  
       .oldLoadData()
    else 
       .setupDataProviders(manifest)
+   
+   .setupUserSettings()
    
    oncoscape
    } # ctor

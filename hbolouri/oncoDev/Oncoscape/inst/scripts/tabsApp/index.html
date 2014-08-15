@@ -265,7 +265,7 @@ $(document).ready(function()
     {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-    }
+     }
     else
     if (labkey.mode == "WS")
     {
@@ -336,16 +336,93 @@ onReadyFunctions.push(function() {
 //----------------------------------------------------------------------------------------------------
 var DashboardModule = (function () {
 
+     var username = "Guest"
+     var userID = null
+
+//----------------------------------------------------------------------------------------------------
+      function CreateNewUser(){
+      
+         console.log("======= creating new guest user")
+  
+            userID = Math.random().toString(36).substring(7)
+           console.log(userID);
+
+ //         msg = {cmd:"createNewUserID",
+ //                callback: "addNewUserSettings",
+ //                status:"request",
+ //                payload:""
+ //               };
+ //         socket.send(JSON.stringify(msg));
+       
+      }
+//----------------------------------------------------------------------------------------------------
      function DashboardInitializeUI(){
 
-      };
+           CreateNewUser();
+       };
+//----------------------------------------------------------------------------------------------------
+      getUserID = function(){
+           console.log("Sending User ID: ", userID)
+           return userID;
+      }      
 
+//----------------------------------------------------------------------------------------------------
+     function addNewUser(){
+              
+            msg = {cmd:"addNewUserToList",
+                 callback: "DisplayUserInfo",
+                 status:"request",
+                 payload: { userID: userID, username: username}
+                };
+                console.log(JSON.stringify(msg))
+          socket.send(JSON.stringify(msg));
+ 
+       
+    }
+ 
+//----------------------------------------------------------------------------------------------------
+     function addNewUserSettings(msg){
      
+         console.log("===== adding User Settings to ID")
+         console.log(msg)
+
+         if(msg.status === "success"){
+           userID = msg.payload.userID
+         console.log("created userID: ", userID)
+         
+            msg = {cmd:"addNewUserToList",
+                 callback: "DisplayUserInfo",
+                 status:"request",
+                 payload: { userID: userID, username: username}
+                };
+                console.log(JSON.stringify(msg))
+          socket.send(JSON.stringify(msg));
+ 
+         }
+    }
+         
+//----------------------------------------------------------------------------------------------------
+    function DisplayUserInfo(msg){
+    
+        console.log("===== Display User Information")
+        console.log(msg)
+         
+         if(msg.status === "success"){
+           userID = msg.payload.userID
+           username = msg.payload.username
+        
+           document.getElementById("UserName").innerHTML = username;
+        }
+    }
+     
+//----------------------------------------------------------------------------------------------------
 return{
 
    init: function(){
       onReadyFunctions.push(DashboardInitializeUI);
-//      addJavascriptMessageHandler("String", displayTime);
+      socketConnectedFunctions.push(addNewUser);
+      addJavascriptMessageHandler("addNewUserSettings", addNewUserSettings);
+      addJavascriptMessageHandler("DisplayUserInfo", DisplayUserInfo);
       }
    };
 
@@ -368,6 +445,9 @@ var ClinicalTableTabNum=1;
 
    //--------------------------------------------------------------------------------------------
    function initializeUI(){
+      SaveSelectedButton = $("#toSavedSelectionButton");
+      SaveSelectedButton.click(function(){sendCurrentIDsToSelection()});
+
       pcaButton = $("#toPCAButton");
       pcaButton.click(function(){sendCurrentIDsToModule("PCA")});
       timeLinesButton = $("#toTimeLinesButton")
@@ -416,6 +496,37 @@ var ClinicalTableTabNum=1;
     $("#toTimeLinesButton").prop("disabled",false);
     };
 
+  //--------------------------------------------------------------------------------------------
+   function sendCurrentIDsToSelection () {
+      console.log("entering sendCurrentIDsToSelection");
+      var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
+      var currentIDs = []
+      for(var i=0; i < rows.length; i++) 
+          currentIDs.push(rows[i][0]);
+      console.log(currentIDs.length + " patientIDs going to SavedSelection")
+      
+      var NewSelection = {   
+                    "userID": getUserID(),
+                    "selectionname": "ClinicalTable",
+         			"PatientIDs" : currentIDs,
+         			"Tab": "ClinicalTable",
+         			"Settings": {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
+                      ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
+                      overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
+                      overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
+         		}
+ 
+ 
+      msg = {cmd:"addNewUserSelection",
+             callback: "addSelectionToTable",
+               status:"request",
+              payload: NewSelection 
+             };
+      msg.json = JSON.stringify(msg);
+           console.log(msg.json);
+      socket.send(msg.json);
+      } // sendTissueIDsToModule
+
    //--------------------------------------------------------------------------------------------
    function sendCurrentIDsToModule (moduleName) {
       console.log("entering sendCurrentIDsToModule");
@@ -435,21 +546,6 @@ var ClinicalTableTabNum=1;
       //console.log(msg.json);
       socket.send(msg.json);
       
-      msg = {cmd:"sendPatientIDsToSelectionTree",
-              callback: "addSelectionToTree",
-              status:"request",
-              payload:{  name: "table_filter",
-         			PatientIDs : currentIDs,
-         			Tab: "ClinicalTable",
-         			Settings: {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
-                      ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
-                      overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
-                      overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
-         		}
-             };
-      msg.json = JSON.stringify(msg);
-           console.log(msg.json);
-      socket.send(msg.json);
       } // sendTissueIDsToModule
 
 //----------------------------------------------------------------------------------------------------
@@ -880,6 +976,7 @@ var TimeLineModule = (function () {
      var TimeLined3PlotBrush;
      var dialog;
      var TimeLinebroadcastButton;
+     var TimeLineSelectionButton;
      var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
                             {Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
                             {Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
@@ -895,6 +992,7 @@ var TimeLineModule = (function () {
      var Events,EventsByID, FormatDate, EventTypes, ShowEvents;
      var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update", "UpdateMenuOptions");
      var TimeLineInitialLoad=true;
+     var PatientSelections;
 
        
         //--------------------------------------------------------------------------------------------
@@ -903,9 +1001,16 @@ var TimeLineModule = (function () {
            TimeLineDisplay = $("#TimeLineDisplay");
            TimeLineHandleWindowResize();
            TimeLinebroadcastButton = $("#SendSelectionToClinicalTable");
-              TimeLinebroadcastButton.click(broadcastSelection);
+              TimeLinebroadcastButton.click(timelineBroadcastSelection);
+          TimeLineSelectionButton = $("#timelineSaveSelection");
+              TimeLineSelectionButton.click(function(){
+                  var selectionname = prompt("Please enter a selection name", "e.g. high survival")
+                  if (selectionname != null & selectionname !== "e.g. high survival") 
+                      timelineBroadcastSelection(selectionname);
+              });
            $(window).resize(TimeLineHandleWindowResize);
            TimeLinebroadcastButton.prop("disabled",true);
+           TimeLineSelectionButton.prop("disabled",true);
           
            dispatch.load();
       };
@@ -962,7 +1067,7 @@ var TimeLineModule = (function () {
      };
 
    //--------------------------------------------------------------------------------------------
-   function broadcastSelection(){
+   function timelineBroadcastSelection(selectionname){
       console.log("broadcastSelection: " + TimeLineSelectedRegion);
       x1=TimeLineSelectedRegion[0][0];
       y1=TimeLineSelectedRegion[0][1];
@@ -1003,21 +1108,27 @@ var TimeLineModule = (function () {
       } // for i
     
     if(ids.length > 0)
-         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+ //        sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+         if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
+         settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
+         sendTimelineCurrentIDsToSelection(ids,selectionname, settings);
     };
 
 //--------------------------------------------------------------------------------------------
-  function d3PlotBrushReader(){
+  function timelineD3PlotBrushReader(){
      console.log("plotBrushReader");
      TimeLineSelectedRegion = TimeLined3PlotBrush.extent();
      //console.log("region: " + pcaSelectedRegion);
      y0 = TimeLineSelectedRegion[0][1];
      y1 = TimeLineSelectedRegion[1][1];
      selectHeight = Math.abs(y0-y1);
-     if(selectHeight > 1)
+     if(selectHeight > 1){
+        TimeLineSelectionButton.prop("disabled", false);
         TimeLinebroadcastButton.prop("disabled", false);
-     else
+     } else {
+        TimeLineSelectionButton.prop("disabled", true);
         TimeLinebroadcastButton.prop("disabled", true);
+     }
      }; // d3PlotBrushReader
 
    //--------------------------------------------------------------------------------------------
@@ -1030,6 +1141,30 @@ var TimeLineModule = (function () {
                        ids: ids}
              };
      socket.send(JSON.stringify(msg));
+      } // sendTissueIDsToModule
+
+  //--------------------------------------------------------------------------------------------
+   function sendTimelineCurrentIDsToSelection (ids,selectionname, settings) {
+      console.log("entering sendTimelineCurrentIDsToSelection");
+       console.log(ids.length + " patientIDs going to SavedSelection")
+      
+      var NewSelection = {   
+                    "userID": getUserID(),
+                    "selectionname": selectionname,
+         			"PatientIDs" : ids,
+         			"Tab": "Timeline",
+         			"Settings": settings
+         		}
+ 
+ 
+      msg = {cmd:"addNewUserSelection",
+             callback: "addSelectionToTable",
+               status:"request",
+              payload: NewSelection 
+             };
+      msg.json = JSON.stringify(msg);
+           console.log(msg.json);
+      socket.send(msg.json);
       } // sendTissueIDsToModule
 
    //--------------------------------------------------------------------------------------------------     
@@ -1065,6 +1200,7 @@ var TimeLineModule = (function () {
           msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
         // console.log(JSON.stringify(msg))
        socket.send(JSON.stringify(msg));
+              
        } // loadPatientDemoData
 
      //--------------------------------------------------------------------------------------------------
@@ -1091,8 +1227,11 @@ var TimeLineModule = (function () {
                     } else{d.date = parseDate(d.date); }
                }
                if(d.Name === "Death") d.Name="Status"
-               console.log(ShowEvents);
-              d.disabled = false;
+               d.disabled = false;
+              if(ShowEvents){
+               if(ShowEvents.indexOf(d.Name) === -1){  d.disabled = true;} }
+
+             d.showPatient = true;
               if(ShowEvents){
                if(ShowEvents.indexOf(d.Name) === -1){  d.disabled = true;} }
 
@@ -1359,6 +1498,7 @@ var TimeLineModule = (function () {
                 .style("visibility", "hidden")
                 .text("a simple tooltip");
 
+ 
                var EventOffset = d3.map({"Radiation": 1.5, "Chemo": -1.5})
                var x,TimeScale, xTitle, xAxis, 
                     y = d3.scale.linear().range([TimeLineSize.height, 0]), 
@@ -1402,7 +1542,7 @@ var TimeLineModule = (function () {
              TimeLined3PlotBrush = d3.svg.brush()
                .x(x)
                .y(y)
-               .on("brushend", d3PlotBrushReader);
+               .on("brushend", timelineD3PlotBrushReader);
 
                TimeLine.call(TimeLined3PlotBrush);
 
@@ -1426,7 +1566,11 @@ var TimeLineModule = (function () {
                 .style("font-size", 12)
                 .text("Patients");
       
-               var TimeSeries = TimeLine.append("g").selectAll("path")
+              var Hoverbar = TimeLine.append("g")
+                .attr("class", "hoverbar")
+
+ 
+                var TimeSeries = TimeLine.append("g").selectAll("path")
                     .data(Events.filter(function(d){ return (d.date instanceof Array) && !d.disabled && d.showPatient}))
                ;
 
@@ -1449,13 +1593,22 @@ var TimeLineModule = (function () {
                     .attr("stroke-width", PatientHeight*0.75)
                     .attr("data-legend",function(d) { return d.Name})
                     .on("mouseover", function(d,i){
+                        Hoverbar.append("rect")
+                            .attr("x", 0)
+                            .attr("y", y(d.PtNum*PatientHeight))
+                            .attr("width", TimeLineSize.width)
+                            .attr("height", PatientHeight)
+                            .style("fill", "grey").style("opacity", 0.3);
+                           
                          var Type = ""; if(d3.keys(d).indexOf("Type") !== -1){ Type = d.Type}
                      tooltip.text(d.PatientID + ": " + d.Name + " (" + FormatDate(d.date[0]) + ", "+ FormatDate(d.date[1]) + ") " + Type);
                      return tooltip.style("visibility", "visible");
                      })
                      .on("mousemove", function(){return tooltip.style("top",
                     (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+                     .on("mouseout", function(){
+                        Hoverbar.select("rect").remove();
+                        return tooltip.style("visibility", "hidden");})
                     ;
 
                TimeSeries.exit().remove();
@@ -1475,13 +1628,20 @@ var TimeLineModule = (function () {
                     .attr("r", function(d) { return PatientHeight;})
                     .attr("data-legend",function(d) { return d.Name})
                     .on("mouseover", function(d,i){
+                         Hoverbar.append("rect")
+                            .attr("x", 0)
+                            .attr("y", y(d.PtNum*PatientHeight))
+                            .attr("width", TimeLineSize.width)
+                            .attr("height", PatientHeight)
+                            .style("fill", "grey").style("opacity", 0.3);
+
                          var Type = ""; if(d3.keys(d).indexOf("Type") !== -1){ Type = d.Type}
                       tooltip.text(d.PatientID + ": " + d.Name + " (" + FormatDate(d.date) +") " + Type);
                       return tooltip.style("visibility", "visible");
                      })
                      .on("mousemove", function(){return tooltip.style("top",
                     (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-                     .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+                     .on("mouseout", function(){ Hoverbar.select("rect").remove();return tooltip.style("visibility", "hidden");})
                ;
 
                TimePoint.exit().remove();                    
@@ -1500,6 +1660,23 @@ var TimeLineModule = (function () {
                      legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
                console.log("======== load.Menu")
+//              var  PatientMenu = d3.select("#PatientSetDiv")
+ //                  .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
+   //                 .append("g")
+     //                .append("select")
+       //              .attr("multiple", "multiple")
+         //            .on("change", function() {
+           //             getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
+             //            })
+               //  ;
+ 
+ //d3.select("input").property("checked", true).each(change);
+//<label><input type="checkbox"> Sort values</label>
+
+//  <label><input type="radio" name="dataset" value="apples" checked> Apples</label>
+//  <label><input type="radio" name="dataset" value="oranges"> Oranges</label>
+
+
                  var  AlignByMenu = d3.select("#AlignByDiv")
                    .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
                     .append("g")
@@ -1627,7 +1804,8 @@ var TimeLineModule = (function () {
                          .attr("value", function(d){return d})
                          .text(function(d) { return d})
            ;
-                     
+           
+     
         })
         //--------------------------------------------------------------------------------------------------
           dispatch.on("LoadOptions.Menu",  function(){
@@ -1641,14 +1819,42 @@ var TimeLineModule = (function () {
                console.log("======== Update.Menu")
                 
                OrderByMenu.selectAll("option")
-                         .each(function(d){console.log(d); if(d === OrderBy) return d3.select(this).attr("selected", "selected")})
+                         .each(function(d){if(d === OrderBy) return d3.select(this).attr("selected", "selected")})
                AddSideBarMenu.selectAll("option")
-                         .each(function(d){console.log(d); if(d === SidePlotEvent) return d3.select(this).attr("selected", "selected")})				
+                         .each(function(d){if(d === SidePlotEvent) return d3.select(this).attr("selected", "selected")})				
                AlignByMenu.selectAll("option")
-                         .each(function(d){console.log(d); if(d === AlignBy) return d3.select(this).attr("selected", "selected")})
+                         .each(function(d){if(d === AlignBy) return d3.select(this).attr("selected", "selected")})
           })
      })
-     //--------------------------------------------------------------------------------------------
+     
+    //--------------------------------------------------------------------------------------------
+     function UpdateSelectionMenu(){
+    
+          PatientMenu.selectAll("option")
+                    .data(getSelectionNames())
+                    .enter()
+                         .append("option")
+                         .attr("value", function(d){return d})
+                         .text(function(d) { return d})
+                ;
+     }
+                     
+    //--------------------------------------------------------------------------------------------
+     function FilterTimelinePatients(msg){
+    
+        console.log("=======Updating Patient Selection")
+        console.log(msg)
+        
+        selections = msg.payload
+        
+         patientIDs = selections.patientIDs
+         console.log("TimeLine Filter PatientIds: " + patientIDs);
+         payload = patientIDs
+         msg = {cmd: "getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", 
+                payload: payload};
+         socket.send(JSON.stringify(msg));
+     }
+    //--------------------------------------------------------------------------------------------
      function UpdateCalculatedEvent(value){
                
           }
@@ -1711,8 +1917,7 @@ var TimeLineModule = (function () {
                 
          });
            dialog.dialog( "open" );
-          console.log("open dialog")
-
+ 
      }
 
      //--------------------------------------------------------------------------------------------------
@@ -1939,12 +2144,12 @@ var TimeLineModule = (function () {
 
   return{
    init: function(){
-             console.log("========== initializing PatientModule")
           onReadyFunctions.push(initializeUI);
           
           addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
          addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
-      
+         addJavascriptMessageHandler("UpdateSelectionList", UpdateSelectionMenu);
+         addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
          socketConnectedFunctions.push(loadPatientDemoData);
    }
   };
@@ -2113,16 +2318,10 @@ gbmPathway.init();
 //----------------------------------------------------------------------------------------------------
 var SavedSelectionModule = (function (){
      
-     var nodecount_i;
-     var height;
-     var root;
-    
-    var	tree, diagonal;
-	var SaveSelectedDisplay;
-    var InitialLoad;
-    var SaveSelectedsvg;
+    var SelectionTableRef;
+    var SaveSelectedDisplay;
     var CurrentSelection;
-    var SelectionNames= [];
+//    var SelectionNames= [];
   
 //--------------------------------------------------------------------------------------------
   function handleWindowResize(){
@@ -2135,81 +2334,73 @@ var SavedSelectionModule = (function (){
 	function initializeSelectionUI(){			     
 	 console.log("====== Initializing Selection UI")
 
-        nodecount_i=0;
          var margin = {top: 10, right: 15, bottom: 30, left: 20};
-        InitialLoad = true;
-	    SaveSelectedDisplay = $("#SavedSelectionTreeDiv");
+ 	    SaveSelectedDisplay = $("#SavedSelectionTableDiv");
         handleWindowResize();
         
-        height = SaveSelectedDisplay.height(); //200;      
+        var height = SaveSelectedDisplay.height(); //200;      
         var width = SaveSelectedDisplay.width(); //200;       
          
-        tree = d3.layout.tree()
-         .size([(height-margin.top-margin.bottom), (width-margin.left-margin.right)]);
-     
-        diagonal = d3.svg.diagonal()
-         .projection(function(d) { return [d.y, d.x]; });
-          
-        SaveSelectedsvg = d3.select("#SavedSelectionTreeDiv").append("svg")
-         .attr("width", width)
-         .attr("height", height)
-         .append("g")
-             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
          $(window).resize(handleWindowResize);
+         displaySelectionTable();
 
+//        if(typeof(window.tabsAppRunning) == "undefined") {
+//      		$("#ModuleDate").text(fetchHeader("Module.js") );
+//        } else {
+//            $("#ModuleDate").text(fetchHeader("../../tabsApp/Module.js") );
+//        }
 		// if date modified needs updated
 		//http://www.dynamicdrive.com/forums/archive/index.php/t-63637.html
 
        };
-       
-//----------------------------------------------------------------------------------------------------
-     function testingAddSavedSelection() {
-       msg = {cmd:"test",
-              callback: "",
-              status:"request",
-              payload:{  name: "test set",
-         			PatientIDs : "random set of IDs here",
-         			Tab: "None",
-         			Settings: "gibberish"
-         		}
-             };
-        addSavedSelection(msg);
 
-}
 //----------------------------------------------------------------------------------------------------
-     function addSavedSelection(msg) {
-       
-       console.log("=== Saving Selection", msg)
- 
- 		var i=0;
- 		var nameSuffix = ""
- 		var nodeName =msg.payload.name 
-        while(SelectionNames.indexOf(nodeName.concat(nameSuffix)) !== -1){
-		    i++;
-		    nameSuffix = "_".concat(i)	
-		}
-       newNode = msg.payload
-       newNode.name = nodeName.concat(nameSuffix)
-       SelectionNames.push(newNode.name)
-       
-       if(CurrentSelection.children){ 
-            CurrentSelection.children.push(newNode);
-       } else { CurrentSelection.children = [newNode] }
-       
-       var currentNode = CurrentSelection
-       var update_id = CurrentSelection.id
-       while(currentNode.parent){ 
-          currentNode.parent.children[ currentNode.parent.children.indexOf(function(d) {  d.id ===update_id})] = currentNode;
-          currentNode = currentNode.parent
+  function displaySelectionTable(){
+     console.log("----displaySelectionTable");
+     tblColumnNames = ["Name","N","FromTab", "Settings", "PatientIDs"];
+     columnTitles = [];
+     for(var i=0; i < tblColumnNames.length; i++){
+        columnTitles.push({sTitle: tblColumnNames[i]});
         }
-        root = currentNode;
-       updateSavedSelection(root);
-       
-       CurrentSelection = CurrentSelection.children.filter(function(d){ return d.id === nodecount_i })[0]
-    console.log("new tree: ", root)
-    console.log("CurrentSelection: ", CurrentSelection)
-	}       
+     
+     console.log(columnTitles);
+
+     SaveSelectedDisplay.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="SelectionTable"></table>');
+     $("#SelectionTable").dataTable({
+        "sDom": "Rlfrtip",
+         sDom: 'C<"clear">lfrtip',
+        "aoColumns": columnTitles,
+	    "sScrollX": "100px",
+        "iDisplayLength": 25,
+         bPaginate: true,
+        "scrollX": true,
+        "fnInitComplete": function(){
+            $(".display_results").show();
+            }
+         }); // dataTable
+
+     console.log("displayTable adding data to table");
+     SelectionTableRef = $("#SelectionTable").dataTable();
+     
+      $('#SelectionTable tbody')
+            .on( 'click', 'tr', function () {
+               $(this).toggleClass('selected'); })
+            
+               ;
+   
+   
+      //http://datatables.net/examples/api/select_row.html
+ 
+//    $('#button').click( function () {
+//        alert( table.rows('.selected').data().length +' row(s) selected' );
+//    } );
+     
+     
+     
+     }; // displayTable
+
+      
 
 
 //----------------------------------------------------------------------------------------------------
@@ -2302,158 +2493,34 @@ function make_editable(d, field)
                         });
       });
 }
-//----------------------------------------------------------------------------------------------------
-     function updateSavedSelection(source) {
-       var duration = d3.event && d3.event.altKey ? 5000 : 500;
-     
-     var tooltip = d3.select("body")
-                .attr("class", "tooltip")
-                .append("div")
-                .style("position", "absolute")
-                .style("z-index", "20")
-                .style("visibility", "hidden")
-                ;
-     
-       // Compute the new tree layout.
-       var nodes = tree.nodes(root).reverse();
-       console.log("Nodes", nodes);
-       
-       // Normalize for fixed-depth.
-       nodes.forEach(function(d) { d.y = d.depth * 180; });
-     
-       // Update the nodes…
-       var node =  SaveSelectedsvg.selectAll("g.node")
-           .data(nodes, function(d) { return d.id || (d.id = ++nodecount_i); });
-     
-       // Enter any new nodes at the parent's previous position.
-       var nodeEnter = node.enter().append("g")
-           .attr("class", "node")
-           .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-            .on("click", function(d) { toggle(d); updateSavedSelection(d); });
-     
-       nodeEnter.append("circle")
-           .attr("r", 1e-6)
-           .style("fill", function(d) { return d._children ? "lightsteelblue" : "grey"; })
-           .on("mouseover", function(d){
-                  var settings = getSettingsString(d);
-                    tooltip.html(d.PatientIDs.length + " Patients from " + d.Tab + "<br></br>Settings: " + settings)
-                     return tooltip.style("visibility", "visible"); })
-           .on("mousemove", function(){return tooltip.style("top",
-                         (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-           .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
-           ;
-     
-       nodeEnter.append("text")
-           .attr("class", "NodeName")
-           .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
-           .attr("dy", "1em")
-           .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-           .text(function(d) { return d.name; })
-           .style("fill-opacity", 1e-6)
-           .call(make_editable, "NodeName");
-     
-       // Transition nodes to their new position.
-       var nodeUpdate = node.transition()
-           .duration(duration)
-           .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
-     
-       nodeUpdate.select("circle")
-           .attr("r", 4.5)
-           .style("fill", function(d) { return d._children ? "lightsteelblue" : "grey"; });
-     
-       nodeUpdate.select("text")
-           .style("fill-opacity", 1);
-     
-       // Transition exiting nodes to the parent's new position.
-       var nodeExit = node.exit().transition()
-           .duration(duration)
-           .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
-           .remove();
-     
-       nodeExit.select("circle")
-           .attr("r", 1e-6);
-     
-       nodeExit.select("text")
-           .style("fill-opacity", 1e-6);
-     
-       // Update the links…
-       var link = SaveSelectedsvg.selectAll("path.link")
-           .data(tree.links(nodes), function(d) { return d.target.id; });
-     
-       // Enter any new links at the parent's previous position.
-       link.enter().insert("path", "g")
-           .attr("class", "link")
-           .attr("d", function(d) {
-             var o = {x: source.x0, y: source.y0};
-             return diagonal({source: o, target: o});
-           })
-         .transition()
-           .duration(duration)
-           .attr("d", diagonal);
-     
-       // Transition links to their new position.
-       link.transition()
-           .duration(duration)
-           .attr("d", diagonal);
-     
-       // Transition exiting nodes to the parent's new position.
-       link.exit().transition()
-           .duration(duration)
-           .attr("d", function(d) {
-             var o = {x: source.x, y: source.y};
-             return diagonal({source: o, target: o});
-           })
-           .remove();
-     
-       // Stash the old positions for transition.
-       nodes.forEach(function(d) {
-         d.x0 = d.x;
-         d.y0 = d.y;
-       });
-     }
-     
-//----------------------------------------------------------------------------------------------------
-     // Toggle children.
-     function toggle(d) {
-       if (d.children) {
-         d._children = d.children;
-         d.children = null;
-       } else {
-         d.children = d._children;
-         d._children = null;
-       }
-     }
-//----------------------------------------------------------------------------------------------------
-    function getSettingsString(d){
-		console.log("change setting string: ",  d)
-		var SettingsString = d.Settings;
-		if(d.Tab === "ClinicalTable"){
-		   if(d.Settings.ageAtDxMin){
-		       SettingsString = "AgeDx [" + d.Settings.ageAtDxMin + ", " + d.Settings.ageAtDxMax + "] <br>"
-		                  + "Survival [" + d.Settings.overallSurvivalMin + ", " + d.Settings.overallSurvivalMax + "]";
-		    }
-		}
-		return SettingsString;
-		
-}
+
 //----------------------------------------------------------------------------------------------------
     function loadPatientData(){
 
        console.log("==== SavedSelection  get all PatientIDs from ClinicalTable");
        cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
        status = "request"
-       callback = "SetupSavedSelectionTree"
+       callback = "SetupSavedSelection"
           filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
           msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
-        // console.log(JSON.stringify(msg))
-       socket.send(JSON.stringify(msg));
+          socket.send(JSON.stringify(msg));
+      
+//       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
+  //     status = "request"
+    //   callback = "testingAddSavedSelection"
+      //    filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
+        //  msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
+          //socket.send(JSON.stringify(msg));
+       
+        
        } // loadPatientDemoData
 
 //----------------------------------------------------------------------------------------------------
-     function SetupSavedSelectionTree(msg){			     
+     function SetupSavedSelection(msg){			     
 
-		console.log("===== Setup SavedSelection Tree")
+		console.log("===== Setup SavedSelection")
          console.log(msg)
+         InitialLoad = false;
 
          var AllData = msg.payload
          var PtIDs = []; 
@@ -2462,32 +2529,116 @@ function make_editable(d, field)
          		PtIDs.push(AllData[i].PatientID)
          }
          console.log("All Patients: ", PtIDs)
-         root = {   "name": "All Patients",
-         			"PatientIDs" : PtIDs,
-         			"Tab": "ClinicalTable",
-         			"Settings": "None"
+
+         var NewSelection = {   
+                    userID: getUserID(),
+                    selectionname: "All Patients",
+         			PatientIDs : PtIDs,
+         			Tab: "ClinicalTable",
+         			Settings: "None"
          		}
-         
-         root.x0 = height / 2;
-         root.y0 = 0;
-             	
-         function toggleAll(d) {
-           if (d.children) {
-             d.children.forEach(toggleAll);
-             toggle(d);
-           }
-         }
-         
-       InitialLoad = false;
-       updateSavedSelection(root); 
-       CurrentSelection = root;
-       SelectionNames.push(root.name);
-  
-       console.log("root: ", root)
-      
- //      testingAddSavedSelection()
+           
+        cmd = "addNewUserSelection"
+        status = "request"
+        callback = "addSelectionToTable"
+
+       msg = {cmd: cmd, callback: callback, status: status, payload: NewSelection};
+       
+       console.log(JSON.stringify(msg.payload.userID))
+       socket.send(JSON.stringify(msg));
+ 
        
      }     
+ //----------------------------------------------------------------------------------------------------
+     function testingAddSavedSelection(msg) {
+
+		console.log("===== testing Add Saved Selection")
+         console.log(msg)
+
+         var AllData = msg.payload
+         var PtIDs = []; 
+         for(var i=0;i<AllData.length; i++){
+         	if(PtIDs.indexOf(AllData[i].PatientID) === -1)
+         		PtIDs.push(AllData[i].PatientID)
+         }
+ 
+      randomsubset = [];
+      for(i=0;i<6;i++){ randomsubset.push(PtIDs[getRandomInt (0, PtIDs.length) ])}
+
+    console.log("Subset Patients: ",randomsubset)      
+
+         var NewSelection = {   
+                    userID: getUserID(),
+                    selectionname: "test",
+         			PatientIDs : randomsubset,
+         			Tab: "ClinicalTable",
+         			Settings: "randomsubset"
+         		}
+           
+        cmd = "addNewUserSelection"
+        status = "request"
+        callback = "addSelectionToTable"
+
+       msg = {cmd: cmd, callback: callback, status: status, payload: NewSelection};
+
+      msg.json = JSON.stringify(msg);
+           console.log(msg.json);
+      socket.send(msg.json);
+ 
+}
+
+//----------------------------------------------------------------------------------------------------
+    function addSelectionToTable(msg){
+    
+ 		console.log("===== Add Selection To Table")
+        console.log(msg)
+  
+         if(msg.status !== "error"){
+
+            settings = msg.payload.settings;
+            if(typeof settings !== "string"){
+              settings=  JSON.stringify(settings)
+            }
+            N = msg.payload.patientIDs.length
+            AsRow = [msg.payload.selectionname,N, msg.payload.tab,settings, msg.payload.patientIDs]
+ 
+            SelectionTableRef.fnAddData(AsRow);
+       }
+    
+    }
+
+    //--------------------------------------------------------------------------------------------
+     getSelectionbyName = function(selectionname, callback){
+               
+               msg = {cmd:"getUserSelectPatientHistory",
+              callback: callback,
+              status:"request",
+              payload:{userID: getUserID(),
+                       selectionname: value}
+             };
+     
+        socket.send(JSON.stringify(msg));
+               
+    }
+        //--------------------------------------------------------------------------------------------
+     getSelectionNames = function(){
+             
+        var rows = SelectionTableRef._('tr', {"filter":"applied"});   // cryptic, no?
+        var currentNames = []
+        for(var i=0; i < rows.length; i++) 
+          currentNames.push(rows[i][0]);
+      console.log(currentNames.length + " selection names being reported")
+
+        currentNames;
+}
+//getSelectionNames = function(callback){
+//  msg = {cmd:"getUserSelectionnames",
+//   callback: callback,
+//   status:"request",
+//   payload:{userID: getUserID()}
+//  };
+//  socket.send(JSON.stringify(msg));         
+//}
   
 //--------------------------------------------------------------------------------------------
  //    function HandleWindowResize(){
@@ -2502,15 +2653,15 @@ function make_editable(d, field)
      
         init: function(){
            onReadyFunctions.push(initializeSelectionUI);
-           addJavascriptMessageHandler("SetupSavedSelectionTree", SetupSavedSelectionTree);
- 		   addJavascriptMessageHandler("addSelectionToTree", addSavedSelection);
+           addJavascriptMessageHandler("SetupSavedSelection", SetupSavedSelection);
+   		   addJavascriptMessageHandler("addSelectionToTable", addSelectionToTable);
+  		   addJavascriptMessageHandler("testingAddSavedSelection", testingAddSavedSelection);
           socketConnectedFunctions.push(loadPatientData);
            }
         };
      
 }); // SavedSelectionModule
  
-
 //----------------------------------------------------------------------------------------------------
 SavedSelection = SavedSelectionModule();
 SavedSelection.init();
@@ -2886,8 +3037,7 @@ todo.init();
      <li><a href="#clinicalDataModuleDiv">Clinical Data</a></li>
      <li><a href="#pcaDiv">PCA</a></li>
      <li><a href="#patientTimeLinesDiv">Timelines</a></li>
-     <li><a href="#gbmPathwaysDiv">GBM Pathways</a></li>
-     <li><a href="#SavedSelectionDiv">Saved Selection</a></li>
+     <li><a href="#SavedSelectionDiv">My Selections</a></li>
      <li><a href="#pairedDistributionsDiv">Paired Distributions</a></li>
      <li><a href="#todoDiv">Todo</a></li>
    </ul>
@@ -2903,6 +3053,9 @@ ul.UserDocs {
 <div id="DashboardDiv">
 <h3> Oncoscape </h3>
    <p> Welcome to Oncoscape! </p>
+   <p> You are logged in as: 
+       <span id="UserName"> </span>
+   </p>
    <p> This page will include:</p>
    <ul class="UserDocs">
      <li> a welcome message</li>
@@ -3073,6 +3226,7 @@ th, td { white-space: nowrap; }
            </div>
 
           <div id="clinicalDataTableOutboundButtonDiv" style="display: inline-block">
+             <button id="toSavedSelectionButton" class="tblClinicalControlButton" type="button">Save Selection</button>
              <button id="toMarkersAndTissuesButton" class="tblClinicalControlButton" type="button">Markers &amp; Tissues</button>
              <button id="toGBMPathwaysButton" class="tblClinicalControlButton" type="button">GBM Pathways</button>
              <button id="toPCAButton" class="tblClinicalControlButton" type="button">PCA</button>
@@ -3179,10 +3333,12 @@ th, td { white-space: nowrap; }
 <div id="patientTimeLinesDiv">
 	<div id="ArrangeDataDiv">
 	     <span id="AddSideBar">Features: </span>
+	     <span id="PatientSetDiv">Patient Set:</span>
 	     <span id="AlignByDiv">Align By: </span>
 	     <span id="OrderByDiv">Order By: </span>
-<!--	     <button id="SaveImageDiv">Save Image </button>  -->
+<!--	     <button id="SaveImageDiv">Save Image </button> 
        	 <button id="SendSelectionToClinicalTable">To Clinical Data... </button>
+  -->      	 <button id="timelineSaveSelection">Save Selection</button>
      </div>
      <div id="TimeLineDisplay">
       </div>
@@ -11771,88 +11927,83 @@ curatedGBMVizmap = [ {
 
 </script>
 <style>
-
-div {
-   display: block;
-   }
-
-#cyGbmPathways {
-  background-color: #DDD;
-  height: 400px;
-  width: 600px;
-  position: relative;
-  margin-top: 0px;
-  margin-left: 0px;
-  border: 1px solid #aaa;
-  padding: 0px;
-  display:block;
-  margin-bottom: 0px;
-  }
-
-#gbmPathwaysMouseOverReadoutDiv{
-  border: 1px solid #aaa;
-  width: 800px;
-  height: 20px;
-  }
-
-#gbmPathwaysButtonDiv{
-  margin-top: 1px;
-  margin-bottom: 1px;
-  }
-
-.fubar{
-   font-size:8pt !important;
+table.dataTable tbody tr.selected {
+  background-color: #b0bed9;
 }
-</style>
-
-<div id="gbmPathwaysDiv">
-   <div id="gbmPathwaysMouseOverReadoutDiv"></div>
-   <div id="gbmPathwaysButtonDiv">
-      <label for="select">Select a sample:</label>
-      <select id="sampleSelector"></select>
-      <button id="cwGBMMovieButton" class="fubar">Movie</button>
-      <!-- button id="clearSamplesButton">Clear Sample Selector</button -->
-      <button id="cwGBMZoomSelectedButton" class="fubar">Zoom Selected</button>
-      <button id="cwGBMViewAbstractsButton" class="fubar">Enable Abstracts</button>
-      <input type="text" id="gbmPathwaysSearchBox"></input>
-   </div>
-   <div id="cyGbmPathways"></div>
-</div>
-
-
-
-
-
-<style>
-.node circle {
-  cursor: pointer;
-  fill: #fff;
-  stroke: steelblue;
-  stroke-width: 1.5px;
+table.dataTable.stripe tbody tr.odd.selected, table.dataTable.display tbody tr.odd.selected {
+  background-color: #abb9d3;
 }
-
-.node text {
-  font-size: 11px;
+table.dataTable.hover tbody tr:hover.selected,
+table.dataTable.hover tbody tr.odd:hover.selected,
+table.dataTable.hover tbody tr.even:hover.selected, table.dataTable.display tbody tr:hover.selected,
+table.dataTable.display tbody tr.odd:hover.selected,
+table.dataTable.display tbody tr.even:hover.selected {
+  background-color: #a9b7d1;
 }
-
-path.link {
-  fill: none;
-  stroke: #ccc;
-  stroke-width: 1.5px;
+table.dataTable.order-column tbody tr.selected > .sorting_1,
+table.dataTable.order-column tbody tr.selected > .sorting_2,
+table.dataTable.order-column tbody tr.selected > .sorting_3, table.dataTable.display tbody tr.selected > .sorting_1,
+table.dataTable.display tbody tr.selected > .sorting_2,
+table.dataTable.display tbody tr.selected > .sorting_3 {
+  background-color: #acbad4;
+}
+table.dataTable.display tbody tr.odd.selected > .sorting_1, table.dataTable.order-column.stripe tbody tr.odd.selected > .sorting_1 {
+  background-color: #a6b3cd;
+}
+table.dataTable.display tbody tr.odd.selected > .sorting_2, table.dataTable.order-column.stripe tbody tr.odd.selected > .sorting_2 {
+  background-color: #a7b5ce;
+}
+table.dataTable.display tbody tr.odd.selected > .sorting_3, table.dataTable.order-column.stripe tbody tr.odd.selected > .sorting_3 {
+  background-color: #a9b6d0;
+table.dataTable.display tbody tr.even.selected > .sorting_1, table.dataTable.order-column.stripe tbody tr.even.selected > .sorting_1 {
+  background-color: #acbad4;
+}
+table.dataTable.display tbody tr.even.selected > .sorting_2, table.dataTable.order-column.stripe tbody tr.even.selected > .sorting_2 {
+  background-color: #adbbd6;
+}
+table.dataTable.display tbody tr.even.selected > .sorting_3, table.dataTable.order-column.stripe tbody tr.even.selected > .sorting_3 {
+  background-color: #afbdd8;
+}
+table.dataTable.display tbody tr:hover.selected > .sorting_1,
+table.dataTable.display tbody tr.odd:hover.selected > .sorting_1,
+table.dataTable.display tbody tr.even:hover.selected > .sorting_1, table.dataTable.order-column.hover tbody tr:hover.selected > .sorting_1,
+table.dataTable.order-column.hover tbody tr.odd:hover.selected > .sorting_1,
+table.dataTable.order-column.hover tbody tr.even:hover.selected > .sorting_1 {
+  background-color: #a1aec7;
+}
+table.dataTable.display tbody tr:hover.selected > .sorting_2,
+table.dataTable.display tbody tr.odd:hover.selected > .sorting_2,
+table.dataTable.display tbody tr.even:hover.selected > .sorting_2, table.dataTable.order-column.hover tbody tr:hover.selected > .sorting_2,
+table.dataTable.order-column.hover tbody tr.odd:hover.selected > .sorting_2,
+table.dataTable.order-column.hover tbody tr.even:hover.selected > .sorting_2 {
+  background-color: #a2afc8;
+}
+table.dataTable.display tbody tr:hover.selected > .sorting_3,
+table.dataTable.display tbody tr.odd:hover.selected > .sorting_3,
+table.dataTable.display tbody tr.even:hover.selected > .sorting_3, table.dataTable.order-column.hover tbody tr:hover.selected > .sorting_3,
+table.dataTable.order-column.hover tbody tr.odd:hover.selected > .sorting_3,
+table.dataTable.order-column.hover tbody tr.even:hover.selected > .sorting_3 {
+  background-color: #a4b2cb;
 }
 </style>
 
 
   <div id="SavedSelectionDiv">
-     <div id="SavedSelectionTreeDiv"></div>
-  <div id="SelectionBanner">
-    <div id="Acknowledgement">Created by Lisa McFerrin</div>
-    <script language="Javascript">
-		document.write("This page was last modified on: " + document.lastModified +"");
-	</script>
-  </div>
 
-  </div>
+    <h3>Saved Selections: Patients</h3>
+     <div id="SavedSelectionTableDiv">
+     
+     <div id="SelectionBanner">
+       <div id="Acknowledgement">Created by Lisa McFerrin</div>
+       <!--   <script language="Javascript">
+		document.write("This page was last modified on: " + document.lastModified +"");
+	          </script>
+-->    <div id="DateUpdated"> Last modified: 
+           <span id="ModuleDate"> </span>
+       </div>
+     </div>
+
+   </div>
   
  
 
