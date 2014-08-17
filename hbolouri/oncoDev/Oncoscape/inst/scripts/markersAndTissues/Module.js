@@ -7,7 +7,6 @@ var markersAndTissuesModule = (function () {
   var cyDiv;
   //var zoomSelectedButton;
   var searchBox;
-  var mouseOverReadout;
   var edgeSelectionOn = false;
   //var edgesFromSelectedButton
   var hideEdgesButton, showEdgesButton;
@@ -35,7 +34,6 @@ var markersAndTissuesModule = (function () {
       edgeTypeSelector = $("#markersEdgeTypeSelector");
       //edgeTypeSelector.change(newEdgeTypeSelection);
 
-      mouseOverReadout = $("#markersAndSamplesMouseOverReadoutDiv")
       loadNetwork();
       $(".chosen-select").chosen();
       //var config = {
@@ -71,14 +69,30 @@ var markersAndTissuesModule = (function () {
      ready: function() {
         console.log("cwMarkers ready");
         cwMarkers = this;
-        cwMarkers.on('mouseover', 'node', function(evt){
-           var node = evt.cyTarget;
-           mouseOverReadout.text(node.data().label);
-           })
-        cwMarkers.on('mouseover', 'edge', function(evt){
-           var edge = evt.cyTarget;
-           mouseOverReadout.text(edge.data().canonicalName);
-           });
+        cwMarkers.elements().qtip({
+            content: function() {
+              return (this.data().canonicalName);
+              //return ('Example qTip on ele ' + this.id() + ": ");
+              },
+            position: {
+              my: 'top center',
+              at: 'bottom center'
+              },
+            show: {
+              event: 'mouseover'
+              },
+            hide: {
+              event: 'mouseout'
+              },
+            style: {
+              classes: 'qtip-bootstrap',
+              tip: {
+                 width: 16,
+                 height: 8
+                }
+              }
+            }); // qtip
+
         searchBox.keydown(doSearch);
 
         cwMarkers.edges().unselectify();
