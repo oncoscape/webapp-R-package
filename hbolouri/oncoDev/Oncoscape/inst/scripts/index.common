@@ -35,6 +35,10 @@
    <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
    <script src="http://s3.amazonaws.com/oncoscape/js/chosen.jquery.min.js" type="text/javascript"></script>
    <link href="http://s3.amazonaws.com/oncoscape/css/chosen.min.css" media="screen" rel="stylesheet" type="text/css">
+   <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.js"></script>
+   <script src="http://s3.amazonaws.com/oncoscape/js/cytoscape.js-qtip.js"></script>
+   <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.css">
+
 	 
 
 <script>
