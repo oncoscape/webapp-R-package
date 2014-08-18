@@ -1,5 +1,5 @@
 <script>
-include(../markersAndTissues/mutAndCopyNumber-network.cyjs)
+include(../markersAndTissues/mutCn834Genes304Patients.cyjs)
 include(../markersAndTissues/mutAndCopyNumber-vizmap.json)
 
 </script>
@@ -28,14 +28,21 @@ div {
 
   }
 
+#markersAndTissuesSearchBox{
+  border: 1px solid #aaa;
+  width: 100px;
+  height: 20px;
+  }
+
 #markersAndSamplesMouseOverReadoutDiv{
   border: 1px solid #aaa;
   width: 800px;
   height: 20px;
   }
 
-#cyMarkersShowEdgesButton{
-   font-size:10pt
+
+#cyMarkersClearSelectionButton #cyMarkersHideEdgesButton #cyMarkersShowEdgesButton #cyMarkersShowAllEdgesButton {
+   font-size:8pt  !important;
    }
 
 #markersAndTissuesbuttonDiv{
@@ -61,13 +68,15 @@ div {
 <div id="markersAndTissuesDiv">
    <div id="markersAndTissuesButtonDiv">
        &nbsp; Search: <input type="text" id="markersAndTissuesSearchBox"></input>
-      <button id="cyMarkersHideEdgesButton" class="oncoscapeButton">Hide Edges</button>
+      <button id="cyMarkersClearSelectionButton" class="markersAndTissuesButton">Clear Selection</button>
+      <button id="cyMarkersHideEdgesButton" class="markersAndTissuesButton">Hide Edges</button>
         <select class="chosen-select" data-placeholder="Select edge types to display" multiple id="markersEdgeTypeSelector">
             <option value="mutantIn">Mutation</option>
             <option value="copyNumberGain">Copy Number Gain</option>
             <option value="copyNumberLoss">Copy Number Loss</option>
        </select>
-      <button id="cyMarkersShowEdgesButton" class="oncoscapeButton">Show Edges</button>
+      <button id="cyMarkersShowEdgesButton" class="markersAndTissuesButton">Show Edges</button>
+      <button id="cyMarkersShowAllEdgesButton" class="markersAndTissuesButton">Show All Edges</button>
 
 
    </div>
