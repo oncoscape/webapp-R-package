@@ -35,6 +35,10 @@
    <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
    <script src="http://s3.amazonaws.com/oncoscape/js/chosen.jquery.min.js" type="text/javascript"></script>
    <link href="http://s3.amazonaws.com/oncoscape/css/chosen.min.css" media="screen" rel="stylesheet" type="text/css">
+   <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.js"></script>
+   <script src="http://s3.amazonaws.com/oncoscape/js/cytoscape.js-qtip.js"></script>
+   <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.css">
+
 	 
 
 <script>
@@ -265,7 +269,7 @@ $(document).ready(function()
     {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-    }
+     }
     else
     if (labkey.mode == "WS")
     {
@@ -299,7 +303,7 @@ ul.UserDocs {
 
 <div id="DashboardDiv">
 <h3> Oncoscape </h3>
-   <p> Welcome to Oncoscape!  &nbsp; (version 1.1.17, <i>15 aug 2014</i>)</p>
+   <p> Welcome to Oncoscape!  &nbsp; (version 1.1.18, <i>17 aug 2014</i>)</p>
    <p> You are logged in as: 
        <span id="UserName"> </span>
    </p>
