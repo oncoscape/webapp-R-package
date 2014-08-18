@@ -25,6 +25,8 @@ Collate: Oncoscape.R
          dateAndTime.R
          PCA.R
          PLSR.R
+         UserSelectPatientProvider.R
+         UserSettingsProvider.R
          NetworkCuration.R
          survival.R
          zzz.R
