@@ -34,12 +34,20 @@ markersAndTissuesVizmap = [ {
   {"selector" : "node[label = 'Classical']",         "css": {"font-size" : 80, "width": 0.0}}, 
 
 
-  {
-    "selector" : "node:selected",
+
+   {"selector" : "node[subType = 'Proneural']",   "css" : {"background-color" : "blue"}},
+   {"selector" : "node[subType = 'Neural']",      "css" : {"background-color" : "turquoise"}},
+   {"selector" : "node[subType = 'Mesenchymal']", "css" : {"background-color" : "darkgreen"}},
+   {"selector" : "node[subType = 'Classical']",   "css" : {"background-color" : "red"}}, 
+   {"selector" : "node[subType = 'G-CIMP']",      "css" : {"background-color" : "purple"} }, 
+
+
+  {"selector" : "node:selected",
     "css" : {
       "background-color" : "rgb(255,255,0)"
     }
-  }, {
+  }, 
+{
     "selector" : "edge",
     "css" : {
       "target-arrow-shape" : "none",
