@@ -1641,7 +1641,7 @@ curatedGBMpathways = {
       },
       "position" : {
         "x" : -12.0,
-        "y" : 3309.0
+        "y" : 3609.0
       },
       "selected" : false
     }, {
@@ -2154,7 +2154,7 @@ curatedGBMpathways = {
       },
       "position" : {
         "x" : -684.0,
-        "y" : 3309.0
+        "y" : 3609.0
       },
       "selected" : false
     }, {
@@ -2325,7 +2325,7 @@ curatedGBMpathways = {
       },
       "position" : {
         "x" : 2748.0,
-        "y" : 3309.0
+        "y" : 3609.0
       },
       "selected" : false
     }, {
@@ -2933,7 +2933,7 @@ curatedGBMpathways = {
       },
       "position" : {
         "x" : -1576.0,
-        "y" : 3309.0
+        "y" : 3609.0
       },
       "selected" : false
     }, {
