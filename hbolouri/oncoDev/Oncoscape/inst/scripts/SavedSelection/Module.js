@@ -6,7 +6,6 @@ var SavedSelectionModule = (function (){
     var SelectionTableRef;
     var SaveSelectedDisplay;
     var CurrentSelection;
-//    var SelectionNames= [];
   
 //--------------------------------------------------------------------------------------------
   function handleWindowResize(){
@@ -30,6 +29,8 @@ var SavedSelectionModule = (function (){
          $(window).resize(handleWindowResize);
          displaySelectionTable();
 
+     $("#addRandomSelection").click(loadPatientData);
+
 //        if(typeof(window.tabsAppRunning) == "undefined") {
 //      		$("#ModuleDate").text(fetchHeader("Module.js") );
 //        } else {
@@ -43,19 +44,19 @@ var SavedSelectionModule = (function (){
 //----------------------------------------------------------------------------------------------------
   function displaySelectionTable(){
      console.log("----displaySelectionTable");
-     tblColumnNames = ["Name","N","FromTab", "Settings", "PatientIDs"];
-     columnTitles = [];
-     for(var i=0; i < tblColumnNames.length; i++){
-        columnTitles.push({sTitle: tblColumnNames[i]});
+     SelectionTblColumnNames = ["Name","N","FromTab", "Settings", "PatientIDs"];
+     SelectionColumnTitles = [];
+     for(var i=0; i < SelectionTblColumnNames.length; i++){
+        SelectionColumnTitles.push({sTitle: SelectionTblColumnNames[i]});
         }
      
-     console.log(columnTitles);
+//     console.log(columnTitles);
 
      SaveSelectedDisplay.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="SelectionTable"></table>');
      $("#SelectionTable").dataTable({
         "sDom": "Rlfrtip",
          sDom: 'C<"clear">lfrtip',
-        "aoColumns": columnTitles,
+        "aoColumns": SelectionColumnTitles,
 	    "sScrollX": "100px",
         "iDisplayLength": 25,
          bPaginate: true,
@@ -70,132 +71,36 @@ var SavedSelectionModule = (function (){
      
       $('#SelectionTable tbody')
             .on( 'click', 'tr', function () {
-               $(this).toggleClass('selected'); })
-            
+               $(this).toggleClass('selected'); })         
                ;
-   
-   
-      //http://datatables.net/examples/api/select_row.html
  
+      SelectionTableRef.fnSetColumnVis( 4, false );
+
+      //http://datatables.net/examples/api/select_row.html
 //    $('#button').click( function () {
 //        alert( table.rows('.selected').data().length +' row(s) selected' );
 //    } );
      
-     
-     
      }; // displayTable
 
-      
-
-
-//----------------------------------------------------------------------------------------------------
-function make_editable(d, field)
-{
-// code from https://gist.github.com/GerHobbelt/2653660
-
-    console.log("make_editable", arguments);
- 
-    this
-      .on("mouseover", function() {
-        d3.select(this).style("fill", "red");
-      })
-      .on("mouseout", function() {
-        d3.select(this).style("fill", null);
-      })
-      .on("click", function(d) {
-        var p = this.parentNode;
-        console.log(this, arguments);
- 
-        // inject a HTML form to edit the content here...
- 
-        // bug in the getBBox logic here, but don't know what I've done wrong here;
-        // anyhow, the coordinates are completely off & wrong. :-((
-        var xy = this.getBBox();
-        var p_xy = p.getBBox();
- 
-        xy.x -= p_xy.x;
-        xy.y -= p_xy.y;
- 
-        var el = d3.select(this);
-        var p_el = d3.select(p);
- 
-        var frm = p_el.append("foreignObject");
- 
-        var inp = frm
-            .attr("x", xy.x)
-            .attr("y", xy.y)
-            .attr("width", 300)
-            .attr("height", 25)
-            .append("xhtml:form")
-                    .append("input")
-                        .attr("value", function() {
-                            // nasty spot to place this call, but here we are sure that the <input> tag is available
-                            // and is handily pointed at by 'this':
-                            this.focus();
- 
-                            return d[field];
-                        })
-                        .attr("style", "width: 294px;")
-                        // make the form go away when you jump out (form looses focus) or hit ENTER:
-                        .on("blur", function() {
-                            console.log("blur", this, arguments);
- 
-                            var txt = inp.node().value;
- 
-                            d[field] = txt;
-                            el
-                                .text(function(d) { return d[field]; });
- 
-                            // Note to self: frm.remove() will remove the entire <g> group! Remember the D3 selection logic!
-                            p_el.selectAll(function() { return this.getElementsByTagName("foreignObject"); }).remove();
-                        })
-                        .on("keydown", function() {
-                            console.log("keypress", this, arguments);
- 
-                            // IE fix
-                            if (!d3.event)
-                                d3.event = window.event;
- 
-                            var e = d3.event;
-                            if (e.keyCode == 13)
-                            {
-                                if (typeof(e.cancelBubble) !== 'undefined') // IE
-                                  e.cancelBubble = true;
-                                if (e.stopPropagation)
-                                  e.stopPropagation();
-                                e.preventDefault();
- 
-                                var txt = inp.node().value;
- 
-                                d[field] = txt;
-                                el
-                                    .text(function(d) { return d[field]; });
- 
-                                // odd. Should work in Safari, but the debugger crashes on this instead.
-                                // Anyway, it SHOULD be here and it doesn't hurt otherwise.
-                                p_el.selectAll(function() { return this.getElementsByTagName("foreignObject"); }).remove();
-                            }
-                        });
-      });
-}
 
 //----------------------------------------------------------------------------------------------------
     function loadPatientData(){
 
        console.log("==== SavedSelection  get all PatientIDs from ClinicalTable");
+//       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
+//       status = "request"
+//       callback = "SetupSavedSelection"
+//          filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
+//          msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
+//          socket.send(JSON.stringify(msg));
+      
        cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
        status = "request"
-       callback = "SetupSavedSelection"
+       callback = "testingAddSavedSelection"
           filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
           msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
           socket.send(JSON.stringify(msg));
-      
-//       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
-  //     status = "request"
-    //   callback = "testingAddSavedSelection"
-      //    filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
-        //  msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
-          //socket.send(JSON.stringify(msg));
        
         
        } // loadPatientDemoData
@@ -214,9 +119,10 @@ function make_editable(d, field)
          		PtIDs.push(AllData[i].PatientID)
          }
          console.log("All Patients: ", PtIDs)
+         tempUserID = "tempUserID"; //getUserID()
 
          var NewSelection = {   
-                    userID: getUserID(),
+                    userID: tempUserID,
                     selectionname: "All Patients",
          			PatientIDs : PtIDs,
          			Tab: "ClinicalTable",
@@ -252,8 +158,9 @@ function make_editable(d, field)
 
     console.log("Subset Patients: ",randomsubset)      
 
+         tempUserID = "tempUserID"; //getUserID()
          var NewSelection = {   
-                    userID: getUserID(),
+                    userID: tempUserID,
                     selectionname: "test",
          			PatientIDs : randomsubset,
          			Tab: "ClinicalTable",
@@ -287,19 +194,20 @@ function make_editable(d, field)
             N = msg.payload.patientIDs.length
             AsRow = [msg.payload.selectionname,N, msg.payload.tab,settings, msg.payload.patientIDs]
  
-            SelectionTableRef.fnAddData(AsRow);
+            SelectionTableRef.fnAddData(AsRow);            
+            SelectionTableRef.fnAdjustColumnSizing();
+            SelectionTableRef.fnDraw();
        }
     
     }
-
     //--------------------------------------------------------------------------------------------
      getSelectionbyName = function(selectionname, callback){
                
-               msg = {cmd:"getUserSelectPatientHistory",
+            msg = {cmd:"getUserSelectPatientHistory",
               callback: callback,
               status:"request",
               payload:{userID: getUserID(),
-                       selectionname: value}
+                       selectionname: selectionname}
              };
      
         socket.send(JSON.stringify(msg));
@@ -307,30 +215,19 @@ function make_editable(d, field)
     }
         //--------------------------------------------------------------------------------------------
      getSelectionNames = function(){
+           
+        if(typeof(SelectionTableRef) == "undefined") return ""
              
         var rows = SelectionTableRef._('tr', {"filter":"applied"});   // cryptic, no?
+//       var rows = SelectionTableRef.rows().data()
         var currentNames = []
         for(var i=0; i < rows.length; i++) 
           currentNames.push(rows[i][0]);
-      console.log(currentNames.length + " selection names being reported")
+      
+        console.log(currentNames.length + " selection names being reported")
 
-        currentNames;
-}
-//getSelectionNames = function(callback){
-//  msg = {cmd:"getUserSelectionnames",
-//   callback: callback,
-//   status:"request",
-//   payload:{userID: getUserID()}
-//  };
-//  socket.send(JSON.stringify(msg));         
-//}
-  
-//--------------------------------------------------------------------------------------------
- //    function HandleWindowResize(){
- //         Display.width($(window).width() * 0.95);
- //         Display.height($(window).height() * 0.80);
- //         if(!InitialLoad) {updateSavedSelection(root);}
- //    };
+       return currentNames;
+      }
   
 //----------------------------------------------------------------------------------------------------
      
@@ -341,9 +238,12 @@ function make_editable(d, field)
            addJavascriptMessageHandler("SetupSavedSelection", SetupSavedSelection);
    		   addJavascriptMessageHandler("addSelectionToTable", addSelectionToTable);
   		   addJavascriptMessageHandler("testingAddSavedSelection", testingAddSavedSelection);
-          socketConnectedFunctions.push(loadPatientData);
+
+           if(typeof(window.tabsAppRunning) == "undefined") {
+                socketConnectedFunctions.push(loadPatientData);
            }
-        };
+        }
+      };
      
 }); // SavedSelectionModule
  

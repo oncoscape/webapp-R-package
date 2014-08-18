@@ -34,8 +34,6 @@ var TimeLineModule = (function () {
      var Events,EventsByID, FormatDate, EventTypes, ShowEvents;
      var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update", "UpdateMenuOptions");
      var TimeLineInitialLoad=true;
-     var PatientSelections;
-
        
         //--------------------------------------------------------------------------------------------
        function initializeUI(){
@@ -43,7 +41,7 @@ var TimeLineModule = (function () {
            TimeLineDisplay = $("#TimeLineDisplay");
            TimeLineHandleWindowResize();
            TimeLinebroadcastButton = $("#SendSelectionToClinicalTable");
-              TimeLinebroadcastButton.click(timelineBroadcastSelection);
+              TimeLinebroadcastButton.click(timelineSelectionToClinicalTable);
           TimeLineSelectionButton = $("#timelineSaveSelection");
               TimeLineSelectionButton.click(function(){
                   var selectionname = prompt("Please enter a selection name", "e.g. high survival")
@@ -82,7 +80,8 @@ var TimeLineModule = (function () {
 //                    DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
                    }else{ dateDiff=null;}
                }
-            DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
+               console.log(Patient.get(Patient.keys()[0])[0])
+            DateDiff.push( {ID: ID,PtNum: Patient.get(Patient.keys()[0])[0].PtNum, value: dateDiff, Scale: TimeScale})
           })
           return DateDiff;
      }
@@ -154,6 +153,53 @@ var TimeLineModule = (function () {
          if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
          settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
          sendTimelineCurrentIDsToSelection(ids,selectionname, settings);
+    };
+   //--------------------------------------------------------------------------------------------
+   function timelineSelectionToClinicalTable(){
+      console.log("broadcastSelection: " + TimeLineSelectedRegion);
+      x1=TimeLineSelectedRegion[0][0];
+      y1=TimeLineSelectedRegion[0][1];
+      x2=TimeLineSelectedRegion[1][0];
+      y2=TimeLineSelectedRegion[1][1];
+      ids = [];
+      
+      console.log(TimeLineSelectedRegion)
+      function LogTime(t){
+                     if(AlignBy === "--"){ 
+                               return t;
+                     } else{ var Dir = (t<0 ? -1 : 1); 
+                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2)
+                    }
+               }     
+  
+      for(var i=0; i < Events.length; i++){
+         event = Events[i];
+         if(event.PtNum >= y1/PatientHeight & event.PtNum <= y2/PatientHeight){
+			// Patient within range
+            
+            if(event.date.length>1 ){
+                 if( (LogTime(event.date[0]-event.offset) >=x1 & LogTime(event.date[0]-event.offset) <= x2) ||
+	                 (LogTime(event.date[1]-event.offset) >=x1 & LogTime(event.date[1]-event.offset) <= x2) ){
+	                  // date endpoints within range
+	                
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            } else{
+                 if (LogTime(event.date-event.offset) >=x1 & LogTime(event.date-event.offset) <= x2) {
+	                  // date within range
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            }
+         }
+      } // for i
+    
+    if(ids.length > 0)
+         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+//         if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
+  //       settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
+    //     sendTimelineCurrentIDsToSelection(ids,selectionname, settings);
     };
 
 //--------------------------------------------------------------------------------------------
@@ -698,15 +744,31 @@ var TimeLineModule = (function () {
                      legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
                console.log("======== load.Menu")
-//              var  PatientMenu = d3.select("#PatientSetDiv")
- //                  .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
-   //                 .append("g")
-     //                .append("select")
-       //              .attr("multiple", "multiple")
-         //            .on("change", function() {
-           //             getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
-             //            })
-               //  ;
+               var PatientMenu = d3.select("#PatientSetDiv")
+                   .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
+                    .append("g")
+                     .append("select")
+   //                  .attr("multiple", "multiple")
+                     .on("click",function(d){
+                         console.log(d);
+                         UpdateSelectionMenu()})
+                     .on("change", function() {
+                        getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
+                         })
+                 ;
+                 
+                  PatientMenu.selectAll("option")
+                        .data(getSelectionNames())
+                        .enter()
+                         .append("option")
+                         .attr("value", function(d){return d})
+                         .text(function(d) { return d})
+                ;
+                 //--------------------------------------------------------------------------------------------
+               function UpdateSelectionMenu(){
+                   
+                  
+                }
  
  //d3.select("input").property("checked", true).each(change);
 //<label><input type="checkbox"> Sort values</label>
@@ -864,19 +926,7 @@ var TimeLineModule = (function () {
                          .each(function(d){if(d === AlignBy) return d3.select(this).attr("selected", "selected")})
           })
      })
-     
-    //--------------------------------------------------------------------------------------------
-     function UpdateSelectionMenu(){
-    
-          PatientMenu.selectAll("option")
-                    .data(getSelectionNames())
-                    .enter()
-                         .append("option")
-                         .attr("value", function(d){return d})
-                         .text(function(d) { return d})
-                ;
-     }
-                     
+                          
     //--------------------------------------------------------------------------------------------
      function FilterTimelinePatients(msg){
     
@@ -1186,7 +1236,7 @@ var TimeLineModule = (function () {
           
           addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
          addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
-         addJavascriptMessageHandler("UpdateSelectionList", UpdateSelectionMenu);
+//         addJavascriptMessageHandler("UpdateSelectionList", UpdateSelectionMenu);
          addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
          socketConnectedFunctions.push(loadPatientDemoData);
    }

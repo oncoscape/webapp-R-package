@@ -8,8 +8,12 @@ onReadyFunctions.push(function() {
             console.log("tabs.activate");
             console.log(" ==== tab.activate, tableRef.fnAdjustColumnSizing");
             var tableRef = $("#clinicalTable").dataTable();
+            var tableRef2 = $("#SelectionTable").dataTable();
             if (tableRef.length > 0) {
                tableRef.fnAdjustColumnSizing();
+              } // if
+            if (tableRef2.length > 0) {
+               tableRef2.fnAdjustColumnSizing();
               } // if
             console.log(" ==== tab.activate, possible cyjs resize and fit");
             if(typeof(cwMarkers) != "undefined") {

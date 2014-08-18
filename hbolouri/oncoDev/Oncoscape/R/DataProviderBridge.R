@@ -667,13 +667,13 @@ addUserSelectPatientHistory <- function(WS, msg)
   printf("Current User Selection length: %d", NumUserSelections(USER.SETTINGS$PatientSelectionHistory, userID))
   previousSelection <-  NumUserSelections(USER.SETTINGS$PatientSelectionHistory, userID)
   
-   		i=0; 
-        while(!ValidSelectionname(USER.SETTINGS$PatientSelectionHistory, userID=userID, selectionname=selectionname)){
+   		i=0; ValidSelectionName = selectionname
+        while(!ValidSelectionname(USER.SETTINGS$PatientSelectionHistory, userID=userID, selectionname=ValidSelectionName)){
 		    i=i+1;
-		    selectionname = paste(selectionname,i, sep="_")
+		    ValidSelectionName = paste(selectionname,i, sep="_")
 		}
   
-  USER.SETTINGS$PatientSelectionHistory <- addSelection(USER.SETTINGS$PatientSelectionHistory, userID=userID, selectionname=selectionname,
+  USER.SETTINGS$PatientSelectionHistory <- addSelection(USER.SETTINGS$PatientSelectionHistory, userID=userID, selectionname=ValidSelectionName,
                                   patientIDs = patientIDs, tab = msg$payload$Tab, settings = msg$payload$Settings)
 
    if(previousSelection >= NumUserSelections(USER.SETTINGS$PatientSelectionHistory, userID)){
@@ -684,9 +684,9 @@ addUserSelectPatientHistory <- function(WS, msg)
        sendOutput(DATA=toJSON(return.msg), WS=WS)
    } else {
     
-       printf("added %s saved selection for user: %s", selectionname, userID)
+       printf("added %s saved selection for user: %s", ValidSelectionName, userID)
    
-        SavedSelectionRow <- list(selectionname = selectionname,
+        SavedSelectionRow <- list(selectionname = ValidSelectionName,
                           tab = msg$payload$Tab, 
                           settings = msg$payload$Settings, 
                           patientIDs = patientIDs);

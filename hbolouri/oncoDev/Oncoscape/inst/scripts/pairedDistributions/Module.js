@@ -24,7 +24,7 @@ var PairedDistributionsModule = (function () {
       };
 
   //--------------------------------------------------------------------------------------------
-  requestRandomPairedDistributions = function(){
+  function requestRandomPairedDistributions(){
   	 var dropDown = document.getElementById('numberOfPopulationDropDown');
   	 var numberOfPopulations = dropDown.options[dropDown.selectedIndex].text;
   	 console.log("Number of Populations: " + numberOfPopulations);
@@ -37,12 +37,12 @@ var PairedDistributionsModule = (function () {
      };
 
   //--------------------------------------------------------------------------------------------
-  runDemo = function(){
+  function runDemo(){
      requestRandomPairedDistributions();
      };
 
   //--------------------------------------------------------------------------------------------
-  getPatientClassification = function(){
+  function getPatientClassification(){
      payload = "";
      msg = {cmd: "getPatientClassification", callback: "handlePatientClassification", 
             status: "request", payload: payload};
@@ -50,7 +50,7 @@ var PairedDistributionsModule = (function () {
      };
 
   //--------------------------------------------------------------------------------------------
-  handlePatientClassification = function(msg){
+  function handlePatientClassification(msg){
      console.log("=== handlePatientClassification");
      //console.log(msg)
      if(msg.status == "success"){
@@ -63,14 +63,14 @@ var PairedDistributionsModule = (function () {
       }; // handlePatientIDs
 
   //--------------------------------------------------------------------------------------------
-  pairedDistributionsHandleWindowResize = function(){
+  function pairedDistributionsHandleWindowResize(){
      pairedDistributionsDisplay.width($(window).width() * 0.95);
      pairedDistributionsDisplay.height($(window).height() * 0.80);
      if(!firstTime) {d3PairedDistributionsScatterPlot(pairedDistributionsResults);}
      };
 
    //--------------------------------------------------------------------------------------------
-   pairedDistributionsBroadcastSelection = function(){
+   function pairedDistributionsBroadcastSelection(){
       console.log("pairedDistributionsBroadcastSelection: " + pairedDistributionsSelectedRegion);
       x1=pairedDistributionsSelectedRegion[0][0];
       y1=pairedDistributionsSelectedRegion[0][1];
@@ -87,7 +87,7 @@ var PairedDistributionsModule = (function () {
       };
 
   //--------------------------------------------------------------------------------------------
-  sendIDsToModule = function(ids, moduleName, title){
+  function sendIDsToModule(ids, moduleName, title){
        callback = moduleName + title;
        msg = {cmd:"sendIDsToModule",
               callback: callback,
@@ -100,7 +100,7 @@ var PairedDistributionsModule = (function () {
 
 
   //--------------------------------------------------------------------------------------------
-  pairedDistributionsPlot = function(msg){
+  function pairedDistributionsPlot(msg){
       console.log("==== pairedDistributionsPlot");
       // console.log(msg);
       if(msg.status == "success"){
@@ -120,7 +120,7 @@ var PairedDistributionsModule = (function () {
      };
 
   //--------------------------------------------------------------------------------------------
-  handlePatientIDs = function(msg){
+  function handlePatientIDs(msg){
       console.log("Module.pairedDistributions: handlePatientIDs");
       //console.log(msg)
       if(msg.status == "success"){
@@ -138,7 +138,7 @@ var PairedDistributionsModule = (function () {
      }; // handlePatientIDs
 
   //--------------------------------------------------------------------------------------------
-  d3PlotBrushReader = function(){
+  function d3PlotBrushReader(){
      console.log("plotBrushReader");
      pairedDistributionsSelectedRegion = d3PlotBrush.extent();
      //console.log("region: " + pairedDistributionsSelectedRegion);
@@ -153,7 +153,7 @@ var PairedDistributionsModule = (function () {
      }; // d3PlotBrushReader
 
   //-------------------------------------------------------------------------------------------
-  chooseColor = function(d){
+  function chooseColor(d){
      id = d;
      for(var i=0; i<patientClassification.length; i++){
         if (id == patientClassification[i].rowname[0]){
@@ -165,7 +165,7 @@ var PairedDistributionsModule = (function () {
      return("black");
      };
   //-------------------------------------------------------------------------------------------   
-  getX = function(pop){
+  function getX(pop){
   	pop = pop + "";
   	if (pop == "pop1"){
   		return ((Math.random() * xMax/3)) + xMax/4;
@@ -174,7 +174,7 @@ var PairedDistributionsModule = (function () {
   		}
   };
   //-------------------------------------------------------------------------------------------   
-  getColor = function(pop){
+  function getColor(pop){
   	pop = pop + "";
   	if (pop == "pop1"){
   		return 'red';
@@ -183,7 +183,7 @@ var PairedDistributionsModule = (function () {
   		}
   };
   //-------------------------------------------------------------------------------------------
-  d3PairedDistributionsScatterPlot = function(data) {
+  function d3PairedDistributionsScatterPlot(data) {
   
   	
   
