@@ -264,10 +264,10 @@ var markersAndTissuesModule = (function () {
          for(var e=0; e < edgeTypes.length; e++){
             edgeType = edgeTypes[e];
             filterString = '[edgeType="' + edgeType + '"][source="' + nodeID + '"]';
-            console.log("filter string: " + filterString);
+            //console.log("filter string: " + filterString);
             cw.edges(filterString).show();
             filterString = '[edgeType="' + edgeType + '"][target="' + nodeID + '"]';
-            console.log("filter string: " + filterString);
+            //console.log("filter string: " + filterString);
             cw.edges(filterString).show();
             } // for e
          } // for n
