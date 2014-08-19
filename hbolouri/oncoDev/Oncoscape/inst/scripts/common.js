@@ -200,6 +200,17 @@ function setupFilteredPatients()
     }
 }
 //--------------------------------------------------------------------------------------------------
+// the nginx proxy server, used by fhcrc IT for the publicly-visible version of Oncoscape
+// times out web sockets at 90 seconds.
+// this function, when called more often that that, will keep the websocket open.
+keepAlive = function()
+{   
+    console.log("keep alive"); 
+    msg = {cmd: "keepAlive", callback: "", status:"request", payload:""}
+    socket.send(JSON.stringify(msg));
+
+} // keepAlive
+//--------------------------------------------------------------------------------------------------
 $(document).ready(function()
 {
     console.log("==== index.common document.ready #1");
@@ -216,11 +227,11 @@ $(document).ready(function()
     // labkeyWS - labkey launched Oncoscape; local R must be run with WS
     // labkeyRS - labkey launched oncoscape; Rserve is used
     //
-    if (typeof labkey == "undefined")
-    {
+    if (typeof labkey == "undefined") {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-     }
+        setInterval(keepAlive, 30000);
+        }
     else
     if (labkey.mode == "WS")
     {
@@ -242,4 +253,6 @@ $(document).ready(function()
     setupFilteredPatients();
 })
 //--------------------------------------------------------------------------------------------------
+
+
 </script>
