@@ -174,7 +174,7 @@ var ClinicalTableTabNum=1;
         } // if more than one id
 
       console.log("---- clinicalDataTable2.handleFilterClinicalDataTable");
-      console.log(filterString)
+      //console.log(filterString)
       console.log("about to call fnFilter");
       tableRef.fnFilter(filterString, 0, true);
       $("#tabs").tabs( "option", "active", ClinicalTableTabNum);
