@@ -196,12 +196,12 @@ var PCAModule = (function () {
      var xTranslationForYAxis = xScale(0);
      var yTranslationForXAxis = yScale(0);
 
-     var xAxis = d3.svg.axis()
+     var pcaXAxis = d3.svg.axis()
                    .scale(xScale)
-                   .orient("bottom")
+                   .orient("top")
                    .ticks(5);
 
-     var yAxis = d3.svg.axis()
+     var pcaYAxis = d3.svg.axis()
                    .scale(yScale)
                    .orient("left")
                    .ticks(5);
@@ -228,12 +228,12 @@ var PCAModule = (function () {
      svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0, " + yTranslationForXAxis + ")")
-        .call(xAxis);
+        .call(pcaXAxis);
 
      svg.append("g")
         .attr("class", "y axis")
         .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
-        .call(yAxis);
+        .call(pcaYAxis);
 
      var circle = svg.append("g").selectAll("circle")
                      .data(dataset)
