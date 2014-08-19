@@ -9,6 +9,15 @@ var PairedDistributionsModule = (function () {
   var firstTime = true;
   var pairedDistributionsSelectedRegion;    // from brushing
   var d3PlotBrush;
+  var numberOfPopulations;
+  var xMax;
+  var pop;
+  var x = 0;
+  var currentName;
+  var nameCount = 0;
+  var currentPopulationForColor;
+  var currentColor;
+  
 
   //--------------------------------------------------------------------------------------------
   function initializeUI (){
@@ -26,7 +35,7 @@ var PairedDistributionsModule = (function () {
   //--------------------------------------------------------------------------------------------
   function requestRandomPairedDistributions(){
   	 var dropDown = document.getElementById('numberOfPopulationDropDown');
-  	 var numberOfPopulations = dropDown.options[dropDown.selectedIndex].text;
+  	 numberOfPopulations = dropDown.options[dropDown.selectedIndex].text;
   	 console.log("Number of Populations: " + numberOfPopulations);
      msg = {cmd: "calculatePairedDistributionsOfPatientHistoryData",
             callback:  "pairedDistributionsPlot",
@@ -52,7 +61,6 @@ var PairedDistributionsModule = (function () {
   //--------------------------------------------------------------------------------------------
   function handlePatientClassification(msg){
      console.log("=== handlePatientClassification");
-     //console.log(msg)
      if(msg.status == "success"){
         patientClassification = JSON.parse(msg.payload)
         console.log("got classification, length " + patientClassification.length);
@@ -102,10 +110,9 @@ var PairedDistributionsModule = (function () {
   //--------------------------------------------------------------------------------------------
   function pairedDistributionsPlot(msg){
       console.log("==== pairedDistributionsPlot");
-      // console.log(msg);
+      console.log(msg.payload);
       if(msg.status == "success"){
          pairedDistributionsResults = msg.payload;
-         console.log(msg.payload);
          d3PairedDistributionsScatterPlot(pairedDistributionsResults);
          // tab activation not needed here - pshannon (7 aug 2014)
          //tabIndex = $('#tabs a[href="#pairedDistributionsDiv"]').parent().index();
@@ -165,113 +172,139 @@ var PairedDistributionsModule = (function () {
      return("black");
      };
   //-------------------------------------------------------------------------------------------   
-  function getX(pop){
-  	pop = pop + "";
-  	if (pop == "pop1"){
-  		return ((Math.random() * xMax/3)) + xMax/4;
-  		}else{
-  		return (Math.floor(Math.random() * -xMax/3)) - xMax/4;
+  getX = function(data){
+  	if(pop!=null&&pop!=data.name){
+  		x = x + xMax/numberOfPopulations
   		}
+  	pop = data.name;
+  	return ((Math.random() * (xMax/numberOfPopulations-xMax/(4*numberOfPopulations)))) + x + xMax/(8*numberOfPopulations);
   };
   //-------------------------------------------------------------------------------------------   
-  function getColor(pop){
-  	pop = pop + "";
-  	if (pop == "pop1"){
-  		return 'red';
-  		}else{
-  		return 'blue';
-  		}
+  getNameX = function(){
+  	x = x + xMax/numberOfPopulations 
+  	return (x + xMax/(2*numberOfPopulations));
+  };
+  //-------------------------------------------------------------------------------------------   
+  getName = function(name){
+  	return ("Population" + " " + name);
+  };
+  //------------------------------------------------------------------------------------------- 
+  getValues = function(data){
+  	var values = [];
+  	for(i = 0; i < data.values.length; i++){
+		var array1 = data[i].values;
+		values = values.concat(array1);
+	}
+	return values;
+  };
+  //-------------------------------------------------------------------------------------------   
+  getColor = function(population){
+  	console.log("called");
+  	if(currentPopulationForColor!=(population.name)||currentPopulationForColor==null){
+  		var letters = '0123456789ABCDEF'.split('');
+    	currentColor = '#';
+    	for (var i = 0; i < 6; i++ ) {
+        currentColor += letters[Math.floor(Math.random() * 16)];
+    	}
+    	console.log("switched color");
+    	currentPopulationForColor = population.name;
+    }
+    return currentColor;
   };
   //-------------------------------------------------------------------------------------------
   function d3PairedDistributionsScatterPlot(data) {
-  
-  	
-  
-  	 //console.log(d3.values(dataset.pop2));
-  	 
-  	 dataset = [];
-  	 
-  	 console.log(d3.values(data.pop2).length);
-  	 
-  	 for(i = 0; i < d3.values(data.pop1).length; i++){
-  	 	if (d3.values(data.pop1)[i]!=null){
-  	 		dataset.push({patient: d3.keys(data.pop1)[i], value: d3.values(data.pop1)[i], pop: "pop1"});
-  	 		}
-  	 }
-  	 for(i = 0; i < d3.values(data.pop2).length; i++){
-  	 	if (d3.values(data.pop2)[i]!=null){
-  	 		dataset.push({patient: d3.keys(data.pop2)[i], value: d3.values(data.pop2)[i], pop: "pop2"});
-  	 		}
-  	 }
-  
-     pairedDistributionsBroadcastButton.prop("disabled",true);
-     var padding = 50;
-     var width = $("#pairedDistributionsDisplay").width();
-     var height = $("#pairedDistributionsDisplay").height();
-     
-     var max = d3.max(dataset, function(d) { return +d.value;} );
-     
-     xMax = 40
-     xMin = -40
-     yMax = max * 1.1
-     yMin = 0
+
+    pairedDistributionsBroadcastButton.prop("disabled",true);
+    var padding = 50;
+    var width = $("#pairedDistributionsDisplay").width();
+    var height = $("#pairedDistributionsDisplay").height();
+
+	var max = d3.max(data, function(d) { return +d.value;} );
+    xMax = 40
+    xMin = 0
+    yMax = max * 1.1
+    yMin = 0
 
         // select our svg by identifier, remove it
-     d3.select("#pairedDistributionsSVG").remove()
+    d3.select("#pairedDistributionsSVG").remove()
 
         //flip axis
-     var xScale = d3.scale.linear()
+    var xScale = d3.scale.linear()
                     .domain([xMin,xMax])
                     .range([padding, width - padding]);
 
-     var yScale = d3.scale.linear()
+    var yScale = d3.scale.linear()
                     .domain([yMin, yMax])
                     .range([height - padding, padding]); // note inversion 
 
-     var xAxis = d3.svg.axis()
+    var xAxis = d3.svg.axis()
                    .scale(xScale)
                    .orient("bottom")
                    .ticks(0);
 
-     var yAxis = d3.svg.axis()
+    var yAxis = d3.svg.axis()
                    .scale(yScale)
                    .orient("left")
                    .ticks(5);
 
 
-     d3PlotBrush = d3.svg.brush()
+    d3PlotBrush = d3.svg.brush()
         .x(xScale)
         .y(yScale)
         .on("brushend", d3PlotBrushReader);
 
-     var svg = d3.select("#pairedDistributionsDisplay")
+    var svg = d3.select("#pairedDistributionsDisplay")
                  .append("svg")
                  .attr("id", "pairedDistributionsSVG")
                  .attr("width", width)
                  .attr("height", height)
                  .call(d3PlotBrush);
 
-     var tooltip = d3.select("body")
+    var tooltip = d3.select("body")
                      .attr("class", "tooltip")
                      .append("div")
                      .style("position", "absolute")
                      .style("z-index", "10")
                      .style("visibility", "hidden")
                      .text("a simple tooltip");
-
-
+	
     var circle = svg.selectAll("circle")
-        			.data(dataset)
+        			.data(data)
    					.enter()
    					.append("circle")
-   					.attr("cx", function(d) {return xScale(getX(d.pop));})
+   					.attr("cx", function(d) {return xScale(getX(d));})
    					.attr("cy", function(d) {return yScale(d.value);})
    					.attr("r", 3)
-                    .style("fill", function(d){return getColor(d.pop);})
-                 	.on("mouseover", function(d,i){tooltip.text(d.patient); return tooltip.style("visibility", "visible");})
+                    .style("fill", function(d){return getColor(d);})
+                 	.on("mouseover", function(d,i){tooltip.text(d.ID); return tooltip.style("visibility", "visible");})
                 	.on("mousemove", function(){return tooltip.style("top",
                            (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
                 	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+                	
+                	
+    x = -xMax/numberOfPopulations;
+    pop = null;
+    currentPopulationForColor = null;
+    currentColor = null;
+    
+    var texts = svg.selectAll("text")
+                .data(data)
+                .enter();
+
+	for(i=0;i<numberOfPopulations;i++){
+		texts.append("text")
+    		.text(getName(i + 1))
+    		.attr("y",yScale(-10))
+        	.attr("x", xScale(getNameX()))
+        	.attr("font-size",15)
+        	.attr("font-family","serif")
+        	.attr("text-anchor","middle");
+        }
+     
+     currentName = null;
+     nameCount = 0;
+     x = 0;
+
       
      var xTranslationForYAxis = xScale(0);
      var yTranslationForXAxis = yScale(0);
