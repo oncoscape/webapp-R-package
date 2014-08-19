@@ -88,19 +88,19 @@ var SavedSelectionModule = (function (){
     function loadPatientData(){
 
        console.log("==== SavedSelection  get all PatientIDs from ClinicalTable");
-//       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
-//       status = "request"
-//       callback = "SetupSavedSelection"
-//          filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
-//          msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
-//          socket.send(JSON.stringify(msg));
-      
        cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
        status = "request"
-       callback = "testingAddSavedSelection"
+       callback = "SetupSavedSelection"
           filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
           msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
           socket.send(JSON.stringify(msg));
+      
+//       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
+//       status = "request"
+//       callback = "testingAddSavedSelection"
+//          filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
+//          msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
+//          socket.send(JSON.stringify(msg));
        
         
        } // loadPatientDemoData

@@ -1709,30 +1709,28 @@ var TimeLineModule = (function () {
                      legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
                console.log("======== load.Menu")
-               var PatientMenu = d3.select("#PatientSetDiv")
-                   .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
-                    .append("g")
-                     .append("select")
+  //             var PatientMenu = d3.select("#PatientSetDiv")
+    //               .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
+      //              .append("g")
+        //             .append("select")
    //                  .attr("multiple", "multiple")
-                     .on("click",function(d){
-                         UpdateSelectionMenu()})
-                     .on("change", function() {
-                        getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
-                         })
-                 ;
+          //           .on("click",function(d){
+            //             UpdateSelectionMenu()})
+              //       .on("change", function() {
+                //        getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
+                  //       })
+                // ;
                  
-                  PatientMenu.selectAll("option")
-                        .data(getSelectionNames())
-                        .enter()
-                         .append("option")
-                         .attr("value", function(d){return d})
-                         .text(function(d) { return d})
-                ;
+ //                 PatientMenu.selectAll("option")
+   //                     .data(getSelectionNames())
+     //                   .enter()
+       //                  .append("option")
+         //                .attr("value", function(d){return d})
+           //              .text(function(d) { return d})
+             //   ;
                  //--------------------------------------------------------------------------------------------
-               function UpdateSelectionMenu(){
-                   
-                  
-                }
+//               function UpdateSelectionMenu(){           
+//                }
  
  //d3.select("input").property("checked", true).each(change);
 //<label><input type="checkbox"> Sort values</label>
@@ -2772,19 +2770,19 @@ var SavedSelectionModule = (function (){
     function loadPatientData(){
 
        console.log("==== SavedSelection  get all PatientIDs from ClinicalTable");
-//       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
-//       status = "request"
-//       callback = "SetupSavedSelection"
-//          filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
-//          msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
-//          socket.send(JSON.stringify(msg));
-      
        cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
        status = "request"
-       callback = "testingAddSavedSelection"
+       callback = "SetupSavedSelection"
           filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
           msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
           socket.send(JSON.stringify(msg));
+      
+//       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
+//       status = "request"
+//       callback = "testingAddSavedSelection"
+//          filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
+//          msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
+//          socket.send(JSON.stringify(msg));
        
         
        } // loadPatientDemoData
@@ -3609,7 +3607,7 @@ th, td { white-space: nowrap; }
 <div id="patientTimeLinesDiv">
 	<div id="ArrangeDataDiv">
 	     <span id="AddSideBar">Features: </span>
-	     <span id="PatientSetDiv">Patient Set:</span>
+<!--	     <span id="PatientSetDiv">Patient Set:</span> -->
 	     <span id="AlignByDiv">Align By: </span>
 	     <span id="OrderByDiv">Order By: </span>
 <!--	     <button id="SaveImageDiv">Save Image </button> 
