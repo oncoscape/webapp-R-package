@@ -707,7 +707,9 @@ calculatePairedDistributionsOfPatientHistoryData <- function(WS, msg)
    
    callback <- msg$callback
    attribute.of.interest <- msg$payload[["attribute"]]
-
+   numberOfPopulations <- msg$payload[["popCount"]]
+   
+   
       # define the basic error message, to which details can be added
    error.msg <- "Error.  DataProviderBridge::calculatePairedDistributionsOfPatientHistoryData"
 
@@ -738,33 +740,57 @@ calculatePairedDistributionsOfPatientHistoryData <- function(WS, msg)
        return()
        }
 
-   all.ids <- tbl$ID
+	all.ids <- tbl$ID
+   
+	dataset<-list()
+   
+	if(testing){  # generate random populations
+		full.count <- length(all.ids) #ID list length
+		population.sizes <- as.integer(full.count/10) #determine pop size
+		count <- 1;
+		for(i in 1:numberOfPopulations){
+			population.IDs<- all.ids[sample(1:full.count, population.sizes)] #grab some IDs
+			population.name <- sprintf("pop%d", i)  # name pop
+			for(j in 1:population.sizes){
+      			random.value <- sample(1:100, 1) # grab random number
+      			dataset[[count]] <- list(name=population.name, ID=population.IDs[j], value=random.value)
+      			count <- 1 + count
+      		}
+      	}
+    }
 
-   if(testing){  # generate two random populations
-      full.count <- length(all.ids)
-      population.sizes <- as.integer(full.count/10)
-      population.1 <- all.ids[sample(1:full.count, population.sizes)]
-      population.2 <- all.ids[sample(1:full.count, population.sizes)]
-        # eliminate overlap
-      population.2 <- setdiff(population.2, population.1)
-      }
-   else {
-      population.1 <- msg$payload$pop1
-      population.2 <- msg$payload$pop2
-      population.1 <- intersect(population.1, all.ids)
-      population.2 <- intersect(population.2, all.ids)
-      }
+   #if(testing){  # generate two random populations
+    #  full.count <- length(all.ids)
+    #  population.sizes <- as.integer(full.count/10)
+    #  population.1 <- all.ids[sample(1:full.count, population.sizes)]
+    #  population.2 <- all.ids[sample(1:full.count, population.sizes)]
+    #    # eliminate overlap
+    #  population.2 <- setdiff(population.2, population.1)
+    #  }
+   #else {
+    #  population.1 <- msg$payload$pop1
+    #  population.2 <- msg$payload$pop2
+    #  population.1 <- intersect(population.1, all.ids)
+    #  population.2 <- intersect(population.2, all.ids)
+    #  }
+
+	#for(i in 1:max){
+	#	population.name <- sprintf("pop%d", i)  # dumb name, but maybe adequate
+	#	random.values <- sample(1:100, 10)                     # grab 10 numbers 1:100 at random
+	#	payload[[i]] <- list(name=population.name, values=random.values)
+    #}
+
       
    populations.error <- FALSE
-   if(length(population.1) < 1){
-      error.msg <- sprintf("%s. population.1 has no members", error.msg)
-      populations.error <- TRUE
-      }
+   #if(length(population.1) < 1){
+   #   error.msg <- sprintf("%s. population.1 has no members", error.msg)
+   #   populations.error <- TRUE
+   #   }
 
-   if(length(population.2) < 1){
-      error.msg <- sprintf("%s. population.2 has no members", error.msg)
-      populations.error <- TRUE
-      }
+   #if(length(population.2) < 1){
+   #   error.msg <- sprintf("%s. population.2 has no members", error.msg)
+   #   populations.error <- TRUE
+   #   }
       
    if(populations.error){    
       return.msg <- list(cmd=msg$callback, payload=error.msg, status="error")
@@ -772,20 +798,19 @@ calculatePairedDistributionsOfPatientHistoryData <- function(WS, msg)
       return()
       }
                               
-   pop.indices.1 <- match(population.1, all.ids)
-   pop.indices.2 <- match(population.2, all.ids)
+   #pop.indices.1 <- match(population.1, all.ids)
+   #pop.indices.2 <- match(population.2, all.ids)
       
-   printf("pop.indices.1: %d", length(pop.indices.1))
-   printf("pop.indices.2: %d", length(pop.indices.2))
+   #printf("pop.indices.1: %d", length(pop.indices.1))
+   #printf("pop.indices.2: %d", length(pop.indices.2))
    
-   vals.1 <- as.numeric(tbl[pop.indices.1, attribute.of.interest])
-   vals.2 <- as.numeric(tbl[pop.indices.2, attribute.of.interest])
+   #vals.1 <- as.numeric(tbl[pop.indices.1, attribute.of.interest])
+   #vals.2 <- as.numeric(tbl[pop.indices.2, attribute.of.interest])
 
-   names(vals.1) <- tbl$ID[pop.indices.1]
-   names(vals.2) <- tbl$ID[pop.indices.2]
+   #names(vals.1) <- tbl$ID[pop.indices.1]
+   #names(vals.2) <- tbl$ID[pop.indices.2]
    
-   return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(pop1=vals.1,
-                                                                                    pop2=vals.2))
+   return.msg <- list(cmd=msg$callback, callback="", status="success", payload = dataset)
    sendOutput(DATA=toJSON(return.msg), WS=WS)   
 
 } # calculatePairedDistributionsOfPatientHistoryData
