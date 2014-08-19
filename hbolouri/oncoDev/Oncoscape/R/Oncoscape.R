@@ -369,7 +369,8 @@ receiveMessage <- function(DATA, isRaw=TRUE)
     #browser()
     #x <- 99
     all.required.fields.present <- length(intersect(required.fields, names(msg))) == length(required.fields)
-    printf("receivedMessage, all.required.fields.present: %s", all.required.fields.present)
+    printf("receivedMessage, all.required.fields.present: %s, '%s'", all.required.fields.present,
+           msg$cmd)
     if(!all.required.fields.present){
         message(" -- receiveMessage ERROR! -- socket request does not have required fields: cmd, status, payload")
         print(sort(names(msg)))
@@ -377,6 +378,9 @@ receiveMessage <- function(DATA, isRaw=TRUE)
         return(NULL)
         }
 
+    if(msg$cmd =="keepAlive")
+        return(NULL)
+    
     complete.fields <- c(required.fields, "callback")
     missing.fields <- setdiff(required.fields, names(msg))
     printf("missing.fields? %s", paste(missing.fields, collapse=", "))
