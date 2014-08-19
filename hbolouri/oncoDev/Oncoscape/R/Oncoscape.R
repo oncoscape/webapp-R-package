@@ -165,9 +165,13 @@ Oncoscape = function(htmlFile, mode="websockets", port=7681, openBrowser=TRUE,  
        htmlFile.fullPath = system.file(package="Oncoscape", "scripts", "sample.html");
        }
    else {
-      htmlFile.fullPath <- system.file(package="Oncoscape", "scripts", htmlFile);
-      stopifnot(file.exists(htmlFile.fullPath))
-      }
+       htmlFile.fullPath <- system.file(package="Oncoscape", "scripts", htmlFile);
+       if(!file.exists(htmlFile.fullPath)){
+          printf("--- error from Oncoscape constructor");
+          printf("htmlFile '%s' cannot be read, fullPath: '%s'", htmlFile, htmlFile.fullPath);
+          stop();
+          }
+      } # else
    dummy.server <- new.env()
    oncoscape <- new("Oncoscape", server=dummy.server,
                     htmlFile=htmlFile.fullPath,
