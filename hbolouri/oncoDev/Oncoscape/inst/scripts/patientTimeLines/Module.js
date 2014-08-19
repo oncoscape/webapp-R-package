@@ -743,30 +743,28 @@ var TimeLineModule = (function () {
                      legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
                console.log("======== load.Menu")
-               var PatientMenu = d3.select("#PatientSetDiv")
-                   .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
-                    .append("g")
-                     .append("select")
+  //             var PatientMenu = d3.select("#PatientSetDiv")
+    //               .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
+      //              .append("g")
+        //             .append("select")
    //                  .attr("multiple", "multiple")
-                     .on("click",function(d){
-                         UpdateSelectionMenu()})
-                     .on("change", function() {
-                        getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
-                         })
-                 ;
+          //           .on("click",function(d){
+            //             UpdateSelectionMenu()})
+              //       .on("change", function() {
+                //        getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
+                  //       })
+                // ;
                  
-                  PatientMenu.selectAll("option")
-                        .data(getSelectionNames())
-                        .enter()
-                         .append("option")
-                         .attr("value", function(d){return d})
-                         .text(function(d) { return d})
-                ;
+ //                 PatientMenu.selectAll("option")
+   //                     .data(getSelectionNames())
+     //                   .enter()
+       //                  .append("option")
+         //                .attr("value", function(d){return d})
+           //              .text(function(d) { return d})
+             //   ;
                  //--------------------------------------------------------------------------------------------
-               function UpdateSelectionMenu(){
-                   
-                  
-                }
+//               function UpdateSelectionMenu(){           
+//                }
  
  //d3.select("input").property("checked", true).each(change);
 //<label><input type="checkbox"> Sort values</label>
