@@ -223,7 +223,7 @@ var PairedDistributionsModule = (function () {
     xMax = 40
     xMin = 0
     yMax = max * 1.1
-    yMin = 0
+    yMin = -10
 
         // select our svg by identifier, remove it
     d3.select("#pairedDistributionsSVG").remove()
@@ -294,7 +294,7 @@ var PairedDistributionsModule = (function () {
 	for(i=0;i<numberOfPopulations;i++){
 		texts.append("text")
     		.text(getName(i + 1))
-    		.attr("y",yScale(-10))
+    		.attr("y",yScale(-5))
         	.attr("x", xScale(getNameX()))
         	.attr("font-size",15)
         	.attr("font-family","serif")
