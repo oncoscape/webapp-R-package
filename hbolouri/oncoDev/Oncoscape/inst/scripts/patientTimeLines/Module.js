@@ -235,22 +235,14 @@ var TimeLineModule = (function () {
        console.log(ids.length + " patientIDs going to SavedSelection")
       
       var NewSelection = {   
-                    "userID": getUserID(),
                     "selectionname": selectionname,
          			"PatientIDs" : ids,
          			"Tab": "Timeline",
          			"Settings": settings
          		}
  
+          addSelection(NewSelection, callback="");
  
-      msg = {cmd:"addNewUserSelection",
-             callback: "addSelectionToTable",
-               status:"request",
-              payload: NewSelection 
-             };
-      msg.json = JSON.stringify(msg);
-//           console.log(msg.json);
-      socket.send(msg.json);
       } // sendTissueIDsToModule
 
    //--------------------------------------------------------------------------------------------------     
@@ -743,28 +735,31 @@ var TimeLineModule = (function () {
                      legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
                console.log("======== load.Menu")
-  //             var PatientMenu = d3.select("#PatientSetDiv")
-    //               .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
-      //              .append("g")
-        //             .append("select")
+               var PatientMenu = d3.select("#PatientSetDiv")
+                    .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
+                    .append("g")
+                     .append("select")
    //                  .attr("multiple", "multiple")
-          //           .on("click",function(d){
-            //             UpdateSelectionMenu()})
-              //       .on("change", function() {
-                //        getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
-                  //       })
-                // ;
+                     .on("focus",function(d){
+                          UpdateSelectionMenu()})
+                     .on("change", function() {
+                        getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
+                         })
+                 ;
+                
                  
- //                 PatientMenu.selectAll("option")
-   //                     .data(getSelectionNames())
-     //                   .enter()
-       //                  .append("option")
-         //                .attr("value", function(d){return d})
-           //              .text(function(d) { return d})
-             //   ;
                  //--------------------------------------------------------------------------------------------
-//               function UpdateSelectionMenu(){           
-//                }
+               function UpdateSelectionMenu(){           
+                  
+                      PatientMenu.selectAll("option")
+                           .data(getSelectionNames(), function(d){return d;})
+                           .enter()
+                             .append("option")
+                             .attr("value", function(d){return d})
+                             .text(function(d) { return d})
+                        ;
+//                        PatientMenu.selectAll("option").exit().remove()
+                }
  
  //d3.select("input").property("checked", true).each(change);
 //<label><input type="checkbox"> Sort values</label>
@@ -901,6 +896,8 @@ var TimeLineModule = (function () {
                          .text(function(d) { return d})
            ;
            
+           UpdateSelectionMenu();
+     
      
         })
         //--------------------------------------------------------------------------------------------------
@@ -927,15 +924,18 @@ var TimeLineModule = (function () {
      function FilterTimelinePatients(msg){
     
         console.log("=======Updating Patient Selection")
-        console.log(msg)
+//        console.log(msg.payload)
         
-        selections = msg.payload
-        
-         patientIDs = selections.patientIDs
+ //       selections = msg.payload
+//         patientIDs = selections.patientIDs
         // console.log("TimeLine Filter PatientIds: " + patientIDs);
-         payload = patientIDs
-         msg = {cmd: "getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", 
-                payload: payload};
+      patientIDs = []
+      selections = msg.payload;
+      console.log(d3.values(selections))
+      d3.values(selections).forEach(function(d){ console.log(d); d.patientIDs.forEach(function(id){patientIDs.push(id)})})
+      
+         msg = {cmd:"getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", payload: patientIDs};
+console.log(msg)
          socket.send(JSON.stringify(msg));
      }
     //--------------------------------------------------------------------------------------------
@@ -1232,6 +1232,9 @@ var TimeLineModule = (function () {
 //         addJavascriptMessageHandler("UpdateSelectionList", UpdateSelectionMenu);
          addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
          socketConnectedFunctions.push(loadPatientDemoData);
+   },
+   RefreshSelectionMenu: function(){
+       dispatch.UpdateMenuOptions();
    }
   };
 

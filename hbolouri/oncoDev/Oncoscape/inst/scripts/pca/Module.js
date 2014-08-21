@@ -11,6 +11,7 @@ var PCAModule = (function () {
   var d3PlotBrush;
   var pcaTabNumber = 2;
   var d3pcaDisplay;
+  var pcaTextDisplay;
   
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -22,6 +23,8 @@ var PCAModule = (function () {
       broadcastButton.click(pcaBroadcastSelection);
       $(window).resize(pcaHandleWindowResize);
       broadcastButton.prop("disabled",true);
+      
+      pcaTextDisplay = $("#pcaTextDisplay");
       };
 
   //--------------------------------------------------------------------------------------------
@@ -47,12 +50,51 @@ var PCAModule = (function () {
      if(msg.status == "success"){
         patientClassification = JSON.parse(msg.payload)
         console.log("got classification, length " + patientClassification.length);
+        
+        drawLegend();
         }
      else{
        alert("error!" + msg.payload)
        }
       }; // handlePatientIDs
+ //--------------------------------------------------------------------------------------------
+  function drawLegend () {
 
+  console.log("==== draw legend: ", patientClassification) 
+
+    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG");
+    
+    var TextOffset =  [0, 70, 82, 87, 75, 80, 78, 75, 80];
+
+result = patientClassification[i].color[0]
+
+   var ClassificationCategories = [];
+   patientClassification.forEach(function(ID, Patient){
+        if(ClassificationCategories.indexOf(Patient.color[0]) == -1){ ClassificationCategories.push(Patient.color[0])} })
+                        
+
+    var legend = Legendsvg
+                   .append("g")
+                   .attr("class", "legend")
+                   .selectAll(".legend")
+                     .data(ClassificationCategories)
+                     .enter().append("g")
+                     .attr("transform", function(d, i) { 
+                        return "translate(" + i*TextOffset(d) + ",0)" })
+                ;
+    legend.append("circle")
+           .attr("width", 10)
+           .attr("height", 10)
+           .style("fill", function(d) { return chooseColor(d)})
+
+    legend.append("text")
+            .attr("y", 9)
+            .attr("x", 12)
+            .style("font-size", 12)
+            .text(function(d) { return d; });
+    
+
+  }
   //--------------------------------------------------------------------------------------------
   function pcaHandleWindowResize () {
      pcaDisplay.width($(window).width() * 0.95);
@@ -228,12 +270,22 @@ var PCAModule = (function () {
      svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0, " + yTranslationForXAxis + ")")
-        .call(pcaXAxis);
+        .call(xAxis)
+        .append("text")
+        .style("font-size", 14)
+        .text("PC1");
 
      svg.append("g")
         .attr("class", "y axis")
         .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
-        .call(pcaYAxis);
+        .call(yAxis)
+        .append("text")
+//            .attr("transform", "rotate(-90)")
+              .attr("y", 10)
+              .attr("dy", ".71em")
+             .style("font-size", 14)
+            .style("text-anchor", "end") //start, middle
+            .text("PC2");
 
      var circle = svg.append("g").selectAll("circle")
                      .data(dataset)

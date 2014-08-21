@@ -29,7 +29,7 @@ var SavedSelectionModule = (function (){
          $(window).resize(handleWindowResize);
          displaySelectionTable();
 
-     $("#addRandomSelection").click(loadPatientData);
+     $("#addRandomSelection").click(addRandomSelectionData);
 
 //        if(typeof(window.tabsAppRunning) == "undefined") {
 //      		$("#ModuleDate").text(fetchHeader("Module.js") );
@@ -93,23 +93,25 @@ var SavedSelectionModule = (function (){
        callback = "SetupSavedSelection"
           filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
           msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
-          socket.send(JSON.stringify(msg));
-      
-//       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
-//       status = "request"
-//       callback = "testingAddSavedSelection"
-//          filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
-//          msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
-//          socket.send(JSON.stringify(msg));
-       
+          socket.send(JSON.stringify(msg));      
         
+       } // loadPatientDemoData
+//----------------------------------------------------------------------------------------------------
+    function addRandomSelectionData(){
+
+       cmd = "getCaisisPatientHistory"; //sendCurrentIDsToModule
+       status = "request"
+       callback = "testingAddSavedSelection"
+          filename = "" // was 'BTC_clinicaldata_6-18-14.RData', now learned from manifest file
+          msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
+          socket.send(JSON.stringify(msg));
        } // loadPatientDemoData
 
 //----------------------------------------------------------------------------------------------------
      function SetupSavedSelection(msg){			     
 
 		console.log("===== Setup SavedSelection")
-         console.log(msg)
+//         console.log(msg)
          InitialLoad = false;
 
          var AllData = msg.payload
@@ -118,25 +120,16 @@ var SavedSelectionModule = (function (){
          	if(PtIDs.indexOf(AllData[i].PatientID) === -1)
          		PtIDs.push(AllData[i].PatientID)
          }
-         console.log("All Patients: ", PtIDs)
-         tempUserID = "tempUserID"; //getUserID()
-
+//         console.log("All Patients: ", PtIDs)
+ 
          var NewSelection = {   
-                    userID: tempUserID,
                     selectionname: "All Patients",
          			PatientIDs : PtIDs,
          			Tab: "ClinicalTable",
          			Settings: "None"
          		}
            
-        cmd = "addNewUserSelection"
-        status = "request"
-        callback = "addSelectionToTable"
-
-       msg = {cmd: cmd, callback: callback, status: status, payload: NewSelection};
-       
-       console.log(JSON.stringify(msg.payload.userID))
-       socket.send(JSON.stringify(msg));
+         addSelection(NewSelection)
  
        
      }     
@@ -156,93 +149,69 @@ var SavedSelectionModule = (function (){
       randomsubset = [];
       for(i=0;i<6;i++){ randomsubset.push(PtIDs[getRandomInt (0, PtIDs.length) ])}
 
-    console.log("Subset Patients: ",randomsubset)      
+ //   console.log("Subset Patients: ",randomsubset)      
 
-         tempUserID = "tempUserID"; //getUserID()
          var NewSelection = {   
-                    userID: tempUserID,
                     selectionname: "test",
          			PatientIDs : randomsubset,
          			Tab: "ClinicalTable",
          			Settings: "randomsubset"
          		}
            
-        cmd = "addNewUserSelection"
-        status = "request"
-        callback = "addSelectionToTable"
-
-       msg = {cmd: cmd, callback: callback, status: status, payload: NewSelection};
-
-      msg.json = JSON.stringify(msg);
-           console.log(msg.json);
-      socket.send(msg.json);
- 
+          addSelection(NewSelection)
 }
 
-//----------------------------------------------------------------------------------------------------
-    function addSelectionToTable(msg){
-    
- 		console.log("===== Add Selection To Table")
-        console.log(msg)
-  
-         if(msg.status !== "error"){
-
-            settings = msg.payload.settings;
-            if(typeof settings !== "string"){
-              settings=  JSON.stringify(settings)
-            }
-            N = msg.payload.patientIDs.length
-            AsRow = [msg.payload.selectionname,N, msg.payload.tab,settings, msg.payload.patientIDs]
- 
-            SelectionTableRef.fnAddData(AsRow);            
-            SelectionTableRef.fnAdjustColumnSizing();
-            SelectionTableRef.fnDraw();
-       }
-    
-    }
-    //--------------------------------------------------------------------------------------------
-     getSelectionbyName = function(selectionname, callback){
-               
-            msg = {cmd:"getUserSelectPatientHistory",
-              callback: callback,
-              status:"request",
-              payload:{userID: getUserID(),
-                       selectionname: selectionname}
-             };
-     
-        socket.send(JSON.stringify(msg));
-               
-    }
         //--------------------------------------------------------------------------------------------
-     getSelectionNames = function(){
+//     getSelectionNames = function(){
            
-        if(typeof(SelectionTableRef) == "undefined") return ""
+//        if(typeof(SelectionTableRef) == "undefined") return ""
              
-        var rows = SelectionTableRef._('tr', {"filter":"applied"});   // cryptic, no?
+//        var rows = SelectionTableRef._('tr', {"filter":"applied"});   // cryptic, no?
 //       var rows = SelectionTableRef.rows().data()
-        var currentNames = []
-        for(var i=0; i < rows.length; i++) 
-          currentNames.push(rows[i][0]);
+//        var currentNames = []
+//        for(var i=0; i < rows.length; i++) 
+//          currentNames.push(rows[i][0]);
       
-        console.log(currentNames.length + " selection names being reported")
+//        console.log(currentNames.length + " selection names being reported")
 
-       return currentNames;
-      }
+//       return currentNames;
+//      }
   
 //----------------------------------------------------------------------------------------------------
      
        return{
      
+        //----------------------------------------------------------------------------------------------------
+        addSelectionToTable: function(msg){
+    
+        		console.log("===== Add Selection To Table")
+                console.log(msg)
+  
+                if(msg.status !== "error"){
+                     settings = msg.payload.settings;
+                     if(typeof settings !== "string"){
+                        settings=  JSON.stringify(settings)
+                     }
+                     N = msg.payload.patientIDs.length
+                     AsRow = [msg.payload.selectionname,N, msg.payload.tab,settings, msg.payload.patientIDs]
+ 
+                     SelectionTableRef.fnAddData(AsRow);            
+                     SelectionTableRef.fnAdjustColumnSizing();
+                     SelectionTableRef.fnDraw();
+               } 
+        },
+        //----------------------------------------------------------------------------------------------------
         init: function(){
            onReadyFunctions.push(initializeSelectionUI);
            addJavascriptMessageHandler("SetupSavedSelection", SetupSavedSelection);
-   		   addJavascriptMessageHandler("addSelectionToTable", addSelectionToTable);
+   		   addJavascriptMessageHandler("addSelectionToTable", SavedSelection.addSelectionToTable);
   		   addJavascriptMessageHandler("testingAddSavedSelection", testingAddSavedSelection);
 
-           if(typeof(window.tabsAppRunning) == "undefined") {
-                socketConnectedFunctions.push(loadPatientData);
-           }
+        socketConnectedFunctions.push(loadPatientData);
         }
+        
+       
+         
       };
      
 }); // SavedSelectionModule

@@ -465,16 +465,6 @@ sendPatientIDsToModule <- function(WS, msg)
 
 } # sendPatientIDsToModule
 #----------------------------------------------------------------------------------------------------
-sendPatientIDsToSelectionTree <- function(WS, msg)
-{
-   ids <- msg$payload$PatientIDs
-   printf("Oncoscape::sendPatientIDsToSelectionTree received %d patientIDs", length(ids));
-   #print(msg)
-   return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success", payload=msg$payload))
-   sendOutput(DATA=return.msg, WS=WS)
-
-} # sendPatientIDsToSelectionTree
-#----------------------------------------------------------------------------------------------------
 sendIDsToModule <- function(WS, msg)
 {
    target <- msg$payload$targetModule
@@ -487,6 +477,18 @@ sendIDsToModule <- function(WS, msg)
    sendOutput(DATA=return.msg, WS=WS)
 
 } # sendIDsToModule
+#----------------------------------------------------------------------------------------------------
+getModuleModificationDate <- function(WS, msg)
+{
+  folder <- msg$payload
+  ModuleDate <- as.character(as.Date(file.info(paste("..",folder, sep="/"))$mtime))
+
+   return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success", payload=ModuleDate))
+   sendOutput(DATA=return.msg, WS=WS)
+
+  
+  
+}
 #----------------------------------------------------------------------------------------------------
 startWebApp <- function(file="tabsApp/index.html", port=7777L, mode="websockets", openBrowser=TRUE,
                         manifest=system.file(package="Oncoscape", "scripts", "tabsApp", "manifest.txt"))
@@ -512,4 +514,4 @@ dataProviders <- function()
 #----------------------------------------------------------------------------------------------------
 addRMessageHandler("sendPatientIDsToModule", "sendPatientIDsToModule");
 addRMessageHandler("sendIDsToModule", "sendIDsToModule");
-addRMessageHandler("sendPatientIDsToSelectionTree", "sendPatientIDsToSelectionTree");
+addRMessageHandler("getModuleModificationDate", "getModuleModificationDate");

@@ -4,8 +4,9 @@ var ClinicalTableModule = (function () {
 
 var currentIDs;   // assign this to the full content in the tbl on startup
 var tableRef;
-var pcaButton;
-var timeLinesButton;
+//var pcaButton;
+//var timeLinesButton;
+var PatientMenu;
 var displayDiv;
 var ClinicalTableTabNum=1;
 
@@ -14,9 +15,18 @@ var ClinicalTableTabNum=1;
       SaveSelectedButton = $("#toSavedSelectionButton");
       SaveSelectedButton.click(function(){sendCurrentIDsToSelection()});
 
-      pcaButton = $("#toPCAButton");
+      PatientMenu = d3.select("#useSavedSelectionButton")
+            .append("g")
+            .append("select")
+            .on("focus",function(d){ ctbl.UpdateSelectionMenu()})
+            .on("change", function() {
+                   getSelectionbyName(this.value, callback="ChangeTablePatientSelection"); 
+            })
+            ;
+                 
+      var pcaButton = $("#toPCAButton");
       pcaButton.click(function(){sendCurrentIDsToModule("PCA")});
-      timeLinesButton = $("#toTimeLinesButton")
+      var timeLinesButton = $("#toTimeLinesButton")
       timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines")});
       displayDiv = $("#clinicalDataTableDiv");
       $(window).resize(handleWindowResize);
@@ -62,6 +72,7 @@ var ClinicalTableTabNum=1;
     $("#toTimeLinesButton").prop("disabled",false);
     };
 
+
   //--------------------------------------------------------------------------------------------
    function sendCurrentIDsToSelection () {
       console.log("entering sendCurrentIDsToSelection");
@@ -72,7 +83,6 @@ var ClinicalTableTabNum=1;
       console.log(currentIDs.length + " patientIDs going to SavedSelection")
       
       var NewSelection = {   
-                    "userID": getUserID(),
                     "selectionname": "ClinicalTable",
          			"PatientIDs" : currentIDs,
          			"Tab": "ClinicalTable",
@@ -82,15 +92,16 @@ var ClinicalTableTabNum=1;
                       overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
          		}
  
- 
-      msg = {cmd:"addNewUserSelection",
-             callback: "addSelectionToTable",
-               status:"request",
-              payload: NewSelection 
-             };
-      msg.json = JSON.stringify(msg);
-           console.log(msg.json);
-      socket.send(msg.json);
+       addSelection(NewSelection);
+       
+//      msg = {cmd:"addNewUserSelection",
+//             callback: "addSelectionToTable",
+//               status:"request",
+//              payload: NewSelection 
+//             };
+//      msg.json = JSON.stringify(msg);
+//           console.log(msg.json);
+//      socket.send(msg.json);
       } // sendTissueIDsToModule
 
    //--------------------------------------------------------------------------------------------
@@ -139,7 +150,28 @@ var ClinicalTableTabNum=1;
       socket.send(msg.json);
       } // readAndApplyClinicalTableFilters 
 
+    //--------------------------------------------------------------------------------------------
+    function SendSelectionToFilterTable(msg){
+       console.log("==== Send Selection IDs to Filter Table")
+       
+      if(msg.status != "success"){
+         alert("SendSelectioToFilterTable error: " + msg.payload);
+         return;
+         }
 
+      var payload = {
+           ids: mes.payload.patientIDs,
+           count: msg.payload.patientIDs.length
+         }
+
+	var	msg = {
+		   cmd: "handleFilterPatientHistory",
+		   callback: "",
+		   status: "success",
+		   payload : payload
+		}
+       handleFilterPatientHistory(msg);
+    }
    //--------------------------------------------------------------------------------------------
    function handleFilterPatientHistory(msg) {
       console.log("=== handleFilterPatientHistory");
@@ -235,8 +267,23 @@ var ClinicalTableTabNum=1;
       addJavascriptMessageHandler("handlePatientHistory", displayTable);
       addJavascriptMessageHandler("handleFilterPatientHistory", handleFilterPatientHistory);
       addJavascriptMessageHandler("PatientHistoryHandlePatientIDs", handleFilterPatientHistory);
+      addJavascriptMessageHandler("ChangeTablePatientSelection", SendSelectionToFilterTable)
       socketConnectedFunctions.push(requestData);
-      }
+      },
+    
+    //--------------------------------------------------------------------------------------------
+    UpdateSelectionMenu: function(){           
+                  
+      PatientMenu.selectAll("option")
+                 .data(getSelectionNames(), function(d){return d;})
+                 .enter()
+                        .append("option")
+                        .attr("value", function(d){return d})
+                        .text(function(d) { return d})
+                ;
+     }
+
+
     }; // returned object
 
   }); // DateAndTimeModule

@@ -33,8 +33,12 @@
 
    <script src="http://s3.amazonaws.com/oncoscape/js/jquery.multi-select.js" type="text/javascript"></script>
    <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+   <script src="http://s3.amazonaws.com/oncoscape/js/chosen.jquery.min.js" type="text/javascript"></script>
+   <link href="http://s3.amazonaws.com/oncoscape/css/chosen.min.css" media="screen" rel="stylesheet" type="text/css">
+   <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.js"></script>
+   <script src="http://s3.amazonaws.com/oncoscape/js/cytoscape.js-qtip.js"></script>
+   <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.css">
 
-	<script type="text/javascript" src="http://mbostock.github.io/d3/talk/20111018/d3/d3.layout.js"></script>
 	 
 
 <script>
@@ -76,6 +80,30 @@ function getRandomInt (min, max)
 {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+//----------------------------------------------------------------------------------------------------
+String.prototype.beginsWith = function (string) 
+{
+    return(this.toLowerCase().indexOf(string.toLowerCase()) === 0);
+};
+//----------------------------------------------------------------------------------------------------
+// from http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
+function openCenteredBrowserWindow(url, title, w, h) {
+    // Fixes dual-screen position                         Most browsers      Firefox
+    var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+    var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+    width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+    height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+    var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+    var top = ((height / 2) - (h / 2)) + dualScreenTop;
+    var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+    if (window.focus) {
+       newWindow.focus();
+       }
+
+} // openCenteredBrowserWindow
 //----------------------------------------------------------------------------------------------------
 dispatchMessage = function(msg)
 {
@@ -241,7 +269,7 @@ $(document).ready(function()
     {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-    }
+     }
     else
     if (labkey.mode == "WS")
     {
@@ -267,6 +295,134 @@ $(document).ready(function()
 
 <script>
 //----------------------------------------------------------------------------------------------------
+var UserSettingsModule = (function () {
+
+     var username = "Guest"
+     var userID = null
+     var SelectionNames = [];
+     
+//----------------------------------------------------------------------------------------------------
+//======= PUBLIC FUNCTIONS ==========
+//----------------------------------------------------------------------------------------------------
+      getUserID = function(){
+           console.log("Sending User ID: ", userID)
+           return userID;
+      }      
+//----------------------------------------------------------------------------------------------------
+      getUsername = function(){
+           console.log("Sending Username: ", username)
+           return username;
+      }      
+
+    //--------------------------------------------------------------------------------------------
+     addSelection = function(NewSelection){
+  
+           //Check NewSelection values for completeness/accuracy
+           // should have selectionnames, patientIDs, Tab, and Settings
+           
+           NewSelection.userID = getUserID() 
+     
+           msg = {cmd: "addNewUserSelection",
+                  callback: "UpdateSelectionListeners",
+                  status:"request",
+                  payload: NewSelection 
+                 };
+ 
+           msg.json = JSON.stringify(msg);
+//           console.log(msg.json);
+           socket.send(msg.json);
+     }
+    //--------------------------------------------------------------------------------------------
+     getSelectionbyName = function(selectionname, callback){
+               
+			if(SelectionNames.indexOf(selectionname) == -1){
+   			     alert("Error: ",selectionname, " not in list")
+                  return;
+			} else{
+  
+                msg = {cmd:"getUserSelection",
+                  callback: callback,
+                  status:"request",
+                  payload:{userID: getUserID(),
+                           selectionname: selectionname}
+                  };
+     
+                 console.log(JSON.stringify(msg));
+                  socket.send(JSON.stringify(msg));
+          }     
+    }
+
+   //--------------------------------------------------------------------------------------------
+     getSelectionNames = function(){
+
+            return SelectionNames;
+     }
+
+//----------------------------------------------------------------------------------------------------
+//======= PRIVATE FUNCTIONS ==========
+//----------------------------------------------------------------------------------------------------
+      function CreateNewUser(){
+      
+         console.log("======= creating new guest user")
+  
+            userID = Math.random().toString(36).substring(7)
+            console.log(userID);
+      }
+//----------------------------------------------------------------------------------------------------
+     function UserSettingsInitializeUI(){
+
+           CreateNewUser();
+       };
+
+//----------------------------------------------------------------------------------------------------
+     function addNewUser(){
+              
+            msg = {cmd:"addNewUserToList",
+                 callback: "DisplayUserInfo",
+                 status:"request",
+                 payload: { userID: userID, username: username}
+                };
+                console.log(JSON.stringify(msg))
+          socket.send(JSON.stringify(msg));
+     }
+ 
+         
+
+//----------------------------------------------------------------------------------------------------
+    function UpdateSelectionListeners(msg){
+    
+        console.log("===== Updating JS Selection Lists")
+        console.log(msg)
+         
+         if(msg.status === "success"){
+           SelectionNames.push(msg.payload.selectionname)  
+           
+           if(typeof(SavedSelection) != "undefined")  SavedSelection.addSelectionToTable(msg);
+           if(typeof(PatientTimeLine) != "undefined") PatientTimeLine.RefreshSelectionMenu()
+           if(typeof(ctbl) != "undefined") ctbl.UpdateSelectionMenu()
+         }
+     }
+  
+ 
+     
+//----------------------------------------------------------------------------------------------------
+return{
+
+   init: function(){
+      onReadyFunctions.push(UserSettingsInitializeUI);
+      socketConnectedFunctions.push(addNewUser);
+     addJavascriptMessageHandler("UpdateSelectionListeners", UpdateSelectionListeners);
+      }
+   };
+
+}); // DateAndTimeModule
+//----------------------------------------------------------------------------------------------------
+UserSettings = UserSettingsModule();
+UserSettings.init();
+
+</script>
+<script>
+//----------------------------------------------------------------------------------------------------
 var TimeLineModule = (function () {
 
      
@@ -285,6 +441,7 @@ var TimeLineModule = (function () {
      var TimeLined3PlotBrush;
      var dialog;
      var TimeLinebroadcastButton;
+     var TimeLineSelectionButton;
      var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
                             {Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
                             {Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
@@ -300,7 +457,6 @@ var TimeLineModule = (function () {
      var Events,EventsByID, FormatDate, EventTypes, ShowEvents;
      var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update", "UpdateMenuOptions");
      var TimeLineInitialLoad=true;
-
        
         //--------------------------------------------------------------------------------------------
        function initializeUI(){
@@ -308,9 +464,16 @@ var TimeLineModule = (function () {
            TimeLineDisplay = $("#TimeLineDisplay");
            TimeLineHandleWindowResize();
            TimeLinebroadcastButton = $("#SendSelectionToClinicalTable");
-              TimeLinebroadcastButton.click(broadcastSelection);
+              TimeLinebroadcastButton.click(timelineSelectionToClinicalTable);
+          TimeLineSelectionButton = $("#timelineSaveSelection");
+              TimeLineSelectionButton.click(function(){
+                  var selectionname = prompt("Please enter a selection name", "e.g. high survival")
+                  if (selectionname != null & selectionname !== "e.g. high survival") 
+                      timelineBroadcastSelection(selectionname);
+              });
            $(window).resize(TimeLineHandleWindowResize);
            TimeLinebroadcastButton.prop("disabled",true);
+           TimeLineSelectionButton.prop("disabled",true);
           
            dispatch.load();
       };
@@ -340,7 +503,8 @@ var TimeLineModule = (function () {
 //                    DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
                    }else{ dateDiff=null;}
                }
-            DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
+
+            DateDiff.push( {ID: ID,PtNum: Patient.get(Patient.keys()[0])[0].PtNum, value: dateDiff, Scale: TimeScale})
           })
           return DateDiff;
      }
@@ -348,7 +512,7 @@ var TimeLineModule = (function () {
      //--------------------------------------------------------------------------------------------------     
      function getHorizontalBarSize(Patient){
      
-          console.log("Creating Horizontal BarPlot: ", Patient)
+//          console.log("Creating Horizontal BarPlot: ", Patient)
           var BarSizes = []
           Patient.forEach(function(d){
                xBar = 0; barWidth = ~~d.value
@@ -360,22 +524,67 @@ var TimeLineModule = (function () {
      
       //--------------------------------------------------------------------------------------------
      function TimeLineHandleWindowResize(){
-       	console.log("===== resizing Timeline window")
+//       	console.log("===== resizing Timeline window")
           TimeLineDisplay.width($(window).width() * 0.95);
            TimeLineDisplay.height($(window).height() * 0.80);
           if(!TimeLineInitialLoad) {dispatch.DisplayPatients();}
      };
 
    //--------------------------------------------------------------------------------------------
-   function broadcastSelection(){
-      console.log("broadcastSelection: " + TimeLineSelectedRegion);
+   function timelineBroadcastSelection(selectionname){
+ //     console.log("broadcastSelection: " + TimeLineSelectedRegion);
       x1=TimeLineSelectedRegion[0][0];
       y1=TimeLineSelectedRegion[0][1];
       x2=TimeLineSelectedRegion[1][0];
       y2=TimeLineSelectedRegion[1][1];
       ids = [];
       
-      console.log(TimeLineSelectedRegion)
+      function LogTime(t){
+                     if(AlignBy === "--"){ 
+                               return t;
+                     } else{ var Dir = (t<0 ? -1 : 1); 
+                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2)
+                    }
+               }     
+  
+      for(var i=0; i < Events.length; i++){
+         event = Events[i];
+         if(event.PtNum >= y1/PatientHeight & event.PtNum <= y2/PatientHeight){
+			// Patient within range
+            
+            if(event.date.length>1 ){
+                 if( (LogTime(event.date[0]-event.offset) >=x1 & LogTime(event.date[0]-event.offset) <= x2) ||
+	                 (LogTime(event.date[1]-event.offset) >=x1 & LogTime(event.date[1]-event.offset) <= x2) ){
+	                  // date endpoints within range
+	                
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            } else{
+                 if (LogTime(event.date-event.offset) >=x1 & LogTime(event.date-event.offset) <= x2) {
+	                  // date within range
+                      if(ids.indexOf(event.PatientID) === -1)
+                        	ids.push(event.PatientID);
+                }
+            }
+         }
+      } // for i
+    
+    if(ids.length > 0)
+ //        sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+         if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
+         settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
+         sendTimelineCurrentIDsToSelection(ids,selectionname, settings);
+    };
+   //--------------------------------------------------------------------------------------------
+   function timelineSelectionToClinicalTable(){
+//      console.log("broadcastSelection: " + TimeLineSelectedRegion);
+      x1=TimeLineSelectedRegion[0][0];
+      y1=TimeLineSelectedRegion[0][1];
+      x2=TimeLineSelectedRegion[1][0];
+      y2=TimeLineSelectedRegion[1][1];
+      ids = [];
+      
       function LogTime(t){
                      if(AlignBy === "--"){ 
                                return t;
@@ -409,20 +618,26 @@ var TimeLineModule = (function () {
     
     if(ids.length > 0)
          sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+//         if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
+  //       settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
+    //     sendTimelineCurrentIDsToSelection(ids,selectionname, settings);
     };
 
 //--------------------------------------------------------------------------------------------
-  function d3PlotBrushReader(){
+  function timelineD3PlotBrushReader(){
      console.log("plotBrushReader");
      TimeLineSelectedRegion = TimeLined3PlotBrush.extent();
      //console.log("region: " + pcaSelectedRegion);
      y0 = TimeLineSelectedRegion[0][1];
      y1 = TimeLineSelectedRegion[1][1];
      selectHeight = Math.abs(y0-y1);
-     if(selectHeight > 1)
+     if(selectHeight > 1){
+        TimeLineSelectionButton.prop("disabled", false);
         TimeLinebroadcastButton.prop("disabled", false);
-     else
+     } else {
+        TimeLineSelectionButton.prop("disabled", true);
         TimeLinebroadcastButton.prop("disabled", true);
+     }
      }; // d3PlotBrushReader
 
    //--------------------------------------------------------------------------------------------
@@ -437,6 +652,22 @@ var TimeLineModule = (function () {
      socket.send(JSON.stringify(msg));
       } // sendTissueIDsToModule
 
+  //--------------------------------------------------------------------------------------------
+   function sendTimelineCurrentIDsToSelection (ids,selectionname, settings) {
+      console.log("entering sendTimelineCurrentIDsToSelection");
+       console.log(ids.length + " patientIDs going to SavedSelection")
+      
+      var NewSelection = {   
+                    "selectionname": selectionname,
+         			"PatientIDs" : ids,
+         			"Tab": "Timeline",
+         			"Settings": settings
+         		}
+ 
+          addSelection(NewSelection, callback="");
+ 
+      } // sendTissueIDsToModule
+
    //--------------------------------------------------------------------------------------------------     
    function handlePatientIDs(msg){
       console.log("Module.TimeLine: handlePatientIDs");
@@ -445,7 +676,7 @@ var TimeLineModule = (function () {
  //       TimeLineInitialLoad=true;
      if(msg.status == "success"){
          patientIDs = msg.payload
-         console.log("TimeLine handlePatientIds: " + patientIDs);
+//         console.log("TimeLine handlePatientIds: " + patientIDs);
          payload = patientIDs
          msg = {cmd: "getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", 
                 payload: payload};
@@ -470,6 +701,7 @@ var TimeLineModule = (function () {
           msg = {cmd: cmd, callback: callback, status: "request", payload: filename};
         // console.log(JSON.stringify(msg))
        socket.send(JSON.stringify(msg));
+              
        } // loadPatientDemoData
 
      //--------------------------------------------------------------------------------------------------
@@ -496,8 +728,7 @@ var TimeLineModule = (function () {
                     } else{d.date = parseDate(d.date); }
                }
                if(d.Name === "Death") d.Name="Status"
-               console.log(ShowEvents);
-              d.disabled = false;
+               d.disabled = false;
               if(ShowEvents){
                if(ShowEvents.indexOf(d.Name) === -1){  d.disabled = true;} }
 
@@ -532,9 +763,9 @@ var TimeLineModule = (function () {
                }
           })
 
-          console.log("CaculatedEvents stored:", CalculatedEvents)
-          console.log("Events stored:", Events)
-          console.log("EventsByID stored:", EventsByID)
+//          console.log("CaculatedEvents stored:", CalculatedEvents)
+//          console.log("Events stored:", Events)
+//          console.log("EventsByID stored:", EventsByID)
 
           if(TimeLineInitialLoad){
                ShowEvents = EventTypes.keys();
@@ -557,14 +788,15 @@ var TimeLineModule = (function () {
                 legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
           var svg = d3.select("#TimeLineDisplay").append("svg")
+                   .attr("id", "timelineSVG")
                    .attr("width", TimeLineSize.width + SideBarSize.width + 2*TimeLineMargin.left + 2*TimeLineMargin.right )
                    .attr("height", SideBarSize.height + TimeLineMargin.top + TimeLineMargin.bottom + legendSize.height)
                        ;
 
-          var SidePlot = svg.append("g").attr("class", "SidePlotSVG")
+          var SidePlot = svg.append("g").attr("id", "SidePlotSVG")
                   .attr("transform", "translate(" + TimeLineMargin.left + "," + TimeLineMargin.top + ")");     
              
-          var TimeLine = svg.append("g").attr("class", "TimeLineSVG")
+          var TimeLine = svg.append("g").attr("id", "TimeLineSVG")
                   .attr("transform", "translate(" + (SideBarSize.width+2*TimeLineMargin.left + TimeLineMargin.right) + "," + TimeLineMargin.top + ")");
           
           
@@ -622,7 +854,8 @@ var TimeLineModule = (function () {
                var y = d3.scale.linear().range([SideBarSize.height, 0]), 
                     yAxis = d3.svg.axis().scale(y).orient("left").ticks(0),          
                     x = d3.scale.linear().range([0, SideBarSize.width]),
-                    xAxis = d3.svg.axis().scale(x).orient("bottom")
+                    xAxis = d3.svg.axis().scale(x).orient("bottom");
+                    
                     y.domain([d3.min(Events,function(d) { return PatientHeight*d.PtNum; })-PatientHeight,d3.max(Events,function(d) { return PatientHeight*d.PtNum; })+PatientHeight]);
 //                  y.domain(d3.extent(Events, function(d) { return PatientHeight*d.PtNum; }));
 //                   y.domain([d3.min(Events,function(d) { return d.PtNum; }),d3.max(Events,function(d) { return PatientHeight*d.PtNum; })]);
@@ -648,8 +881,8 @@ var TimeLineModule = (function () {
                          }
                     })
                     Categories.sort();
-                    console.log(Categories)
-                    console.log(Categories.length)
+//                    console.log(Categories)
+//                    console.log(Categories.length)
                     var xWidth = 1/Categories.length;
                     EventsByID.forEach(function(ID, Patient){
                          if(!Patient.has(SidePlotEvent)){
@@ -661,7 +894,7 @@ var TimeLineModule = (function () {
                     })
                     xAxis.ticks(Categories.length)
                          .tickValues(makeArray(Categories.length,  function(i) { return i/Categories.length; }))
-                         .tickFormat(function (d) {console.log(Categories[d*Categories.length]); return Categories[d*Categories.length]     })
+                         .tickFormat(function (d) {return Categories[d*Categories.length]     })
                } 
 
                console.log("PatientOrderBy")
@@ -670,8 +903,8 @@ var TimeLineModule = (function () {
                 x.domain([d3.min([d3.min(PatientOrderBy, function(d){return d.width}),d3.min(PatientOrderBy, function(d){return d.xBar})]),
                                d3.max(PatientOrderBy, function(d){ return d.xBar + d.width})]).nice();
 
-               console.log("SidePlotDomain: ", d3.min([d3.min(PatientOrderBy, function(d){return d.width}),d3.min(PatientOrderBy, function(d){return d.xBar})]),
-               d3.max(PatientOrderBy, function(d){ return d.xBar + d.width}) )
+//               console.log("SidePlotDomain: ", d3.min([d3.min(PatientOrderBy, function(d){return d.width}),d3.min(PatientOrderBy, function(d){return d.xBar})]),
+//               d3.max(PatientOrderBy, function(d){ return d.xBar + d.width}) )
 
  //            d3PlotBrush = d3.svg.brush()
    //            .x(x)
@@ -765,8 +998,7 @@ var TimeLineModule = (function () {
                 .text("a simple tooltip");
 
  
-               var EventOffset = d3.map({"Radiation": 1.5, "Chemo": -1.5})
-               var x,TimeScale, xTitle, xAxis, 
+                var x,TimeScale, xTitle, xAxis, 
                     y = d3.scale.linear().range([TimeLineSize.height, 0]), 
                     yAxis = d3.svg.axis().scale(y).orient("left").ticks(0)
                     ;
@@ -800,15 +1032,17 @@ var TimeLineModule = (function () {
                var EventMax      = d3.max(Events.filter(function(d){ return d.showPatient && !d.disabled}), function(d){ 
                                         var date = (d.date instanceof Array ? d.date.sort(DescendingDate)[d.date.length-1] : d.date);  return LogTime((date - d.offset)/TimeScale);})
 
-               console.log("Min: " + EventMin + ", Max: "+ EventMax)
                x.domain([EventMin, EventMax]);
                y.domain([d3.min(Events,function(d) { return PatientHeight*d.PtNum; })-PatientHeight,d3.max(Events,function(d) { return PatientHeight*d.PtNum; })+PatientHeight]);
-
+               console.log(y.domain())
+      
+               var EventOffset = d3.map({"Radiation": 1/3*(1/y.domain()[1]), "Chemo": -1/3*(1/y.domain()[1])})
+ 
 
              TimeLined3PlotBrush = d3.svg.brush()
                .x(x)
                .y(y)
-               .on("brushend", d3PlotBrushReader);
+               .on("brushend", timelineD3PlotBrushReader);
 
                TimeLine.call(TimeLined3PlotBrush);
 
@@ -840,16 +1074,15 @@ var TimeLineModule = (function () {
                     .data(Events.filter(function(d){ return (d.date instanceof Array) && !d.disabled && d.showPatient}))
                ;
 
-               console.log("TimeSeries")
-               console.log(TimeSeries)
+      //         console.log("TimeSeries", TimeSeries)
 
                TimeSeries.enter()
                     .append("line")
                     .attr("class", "path")
                     .attr("x1", function(d) { return x(LogTime((d.date[0] - d.offset)/TimeScale));  })
-                    .attr("y1", function(d) { return y(PatientHeight*d.PtNum + EventOffset.get(d.Name)); })
+                    .attr("y1", function(d) { return y(PatientHeight*(d.PtNum + EventOffset.get(d.Name))); })
                     .attr("x2", function(d) { return x(LogTime((d.date[1] - d.offset)/TimeScale));  })
-                    .attr("y2", function(d) { return y(PatientHeight*d.PtNum+ EventOffset.get(d.Name)); })
+                    .attr("y2", function(d) { return y(PatientHeight*(d.PtNum+ EventOffset.get(d.Name))); })
                     .attr("stroke", function(d){ 
                          var ColorShade = d3.rgb(TimeLineColor(d.Name)); 
                          if(d3.keys(d).indexOf("Type") !== -1){ 
@@ -878,13 +1111,11 @@ var TimeLineModule = (function () {
                     ;
 
                TimeSeries.exit().remove();
-//               Hoverbar.exit().remove();
 
                var TimePoint = TimeLine.append("g").selectAll("circle")
                     .data(Events.filter(function(d){ return !(d.date instanceof Array) && !d.disabled && d.showPatient}));
 
-               console.log("TimePoint")
-               console.log(TimePoint)
+      //         console.log("TimePoint", TimePoint)
                     
                TimePoint.enter()
                     .append("circle")
@@ -927,6 +1158,39 @@ var TimeLineModule = (function () {
                      legendSize = {height: 0.05*height, width: TimeLineSize.width};
 
                console.log("======== load.Menu")
+               var PatientMenu = d3.select("#PatientSetDiv")
+                    .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
+                    .append("g")
+                     .append("select")
+   //                  .attr("multiple", "multiple")
+                     .on("focus",function(d){
+                          UpdateSelectionMenu()})
+                     .on("change", function() {
+                        getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
+                         })
+                 ;
+                
+                 
+                 //--------------------------------------------------------------------------------------------
+               function UpdateSelectionMenu(){           
+                  
+                      PatientMenu.selectAll("option")
+                           .data(getSelectionNames(), function(d){return d;})
+                           .enter()
+                             .append("option")
+                             .attr("value", function(d){return d})
+                             .text(function(d) { return d})
+                        ;
+//                        PatientMenu.selectAll("option").exit().remove()
+                }
+ 
+ //d3.select("input").property("checked", true).each(change);
+//<label><input type="checkbox"> Sort values</label>
+
+//  <label><input type="radio" name="dataset" value="apples" checked> Apples</label>
+//  <label><input type="radio" name="dataset" value="oranges"> Oranges</label>
+
+
                  var  AlignByMenu = d3.select("#AlignByDiv")
                    .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
                     .append("g")
@@ -1023,9 +1287,9 @@ var TimeLineModule = (function () {
          dispatch.on("UpdateMenuOptions.Menu", function(){
      
             console.log("======== UpdateMenuOptions")
-            console.log("CalculatedEvents keys: ", CalculatedEvents.keys())
-            console.log("EventTypes keys: ",EventTypes.keys())
-            console.log("OrderByMenu: ", OrderByMenu)
+//            console.log("CalculatedEvents keys: ", CalculatedEvents.keys())
+  //          console.log("EventTypes keys: ",EventTypes.keys())
+    //        console.log("OrderByMenu: ", OrderByMenu)
      
           OrderByMenu.selectAll("option").remove()     
           AlignByMenu.selectAll("option").remove()
@@ -1048,13 +1312,16 @@ var TimeLineModule = (function () {
            ;
            
            AddSideBarMenu.selectAll("option")
-                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys(), ["Radiation", "Chemo", "Diagnosis", "OR", "MRI", "Status"].filter(function(d){console.log(d, EventTypes.has(d)); return EventTypes.has(d) })]))
+                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys(), ["Radiation", "Chemo", "Diagnosis", "OR", "MRI", "Status"].filter(function(d){ return EventTypes.has(d) })]))
                     .enter()
                          .append("option")
                          .attr("value", function(d){return d})
                          .text(function(d) { return d})
            ;
-                     
+           
+           UpdateSelectionMenu();
+     
+     
         })
         //--------------------------------------------------------------------------------------------------
           dispatch.on("LoadOptions.Menu",  function(){
@@ -1068,14 +1335,33 @@ var TimeLineModule = (function () {
                console.log("======== Update.Menu")
                 
                OrderByMenu.selectAll("option")
-                         .each(function(d){console.log(d); if(d === OrderBy) return d3.select(this).attr("selected", "selected")})
+                         .each(function(d){if(d === OrderBy) return d3.select(this).attr("selected", "selected")})
                AddSideBarMenu.selectAll("option")
-                         .each(function(d){console.log(d); if(d === SidePlotEvent) return d3.select(this).attr("selected", "selected")})				
+                         .each(function(d){if(d === SidePlotEvent) return d3.select(this).attr("selected", "selected")})				
                AlignByMenu.selectAll("option")
-                         .each(function(d){console.log(d); if(d === AlignBy) return d3.select(this).attr("selected", "selected")})
+                         .each(function(d){if(d === AlignBy) return d3.select(this).attr("selected", "selected")})
           })
      })
-     //--------------------------------------------------------------------------------------------
+                          
+    //--------------------------------------------------------------------------------------------
+     function FilterTimelinePatients(msg){
+    
+        console.log("=======Updating Patient Selection")
+//        console.log(msg.payload)
+        
+ //       selections = msg.payload
+//         patientIDs = selections.patientIDs
+        // console.log("TimeLine Filter PatientIds: " + patientIDs);
+      patientIDs = []
+      selections = msg.payload;
+      console.log(d3.values(selections))
+      d3.values(selections).forEach(function(d){ console.log(d); patientIDs.push(d.patientIDs)})
+      
+         msg = {cmd:"getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", payload: patientIDs};
+console.log(msg)
+         socket.send(JSON.stringify(msg));
+     }
+    //--------------------------------------------------------------------------------------------
      function UpdateCalculatedEvent(value){
                
           }
@@ -1085,8 +1371,8 @@ var TimeLineModule = (function () {
                           var Event1 = $( "#Event1" ).val();
                           var Event2 = $( "#Event2" ).val();
                           var TimeScale = $( "#TimeScale").val();
-                         console.log("Calculated Event: ")
-                         console.log(Name); console.log(Event1); console.log(Event2); console.log(TimeScale);
+  //                       console.log("Calculated Event: ")
+//                         console.log(Name, Event1 , Event2, TimeScale);
 
                           var valid = true;
       
@@ -1138,8 +1424,7 @@ var TimeLineModule = (function () {
                 
          });
            dialog.dialog( "open" );
-          console.log("open dialog")
-
+ 
      }
 
      //--------------------------------------------------------------------------------------------------
@@ -1176,7 +1461,7 @@ var TimeLineModule = (function () {
 
           if(CalculatedEvents.has(OrderBy) ){
                 var event = CalculatedEvents.get(OrderBy)[0]
-                console.log(event)
+//                console.log(event)
                 PatientOrderBy = getDateDiff(OrderBy, event.Event1,event.Event2,""); 
           } else if(EventTypes.keys().indexOf(OrderBy) !== -1){
                EventsByID.forEach(function(ID, Patient){
@@ -1195,9 +1480,6 @@ var TimeLineModule = (function () {
                          if(EventsByID.has(Ordered.ID)){EventsByID.get(Ordered.ID)
                                    .forEach(function(d){ d.PtNum = i})}
                })
-          
-          
-          
           console.log("Reordered")
           console.log(PatientOrderBy)
      }     
@@ -1210,7 +1492,7 @@ var TimeLineModule = (function () {
           OrderBy = "--";
           if(CalculatedEvents.has(SidePlotEvent) ){
                 var event = CalculatedEvents.get(SidePlotEvent)[0]
-                console.log(event)
+//                console.log(event)
                 PatientOrderBy = getDateDiff(SidePlotEvent, event.Event1,event.Event2,""); OrderBy=SidePlotEvent;
           
           } else if(EventTypes.keys().indexOf(SidePlotEvent) !== -1){
@@ -1225,8 +1507,8 @@ var TimeLineModule = (function () {
                })
                
                Categories.sort();
-               console.log(Categories)
-               console.log(Categories.length)
+  //             console.log(Categories)
+  //             console.log(Categories.length)
           
                PatientOrderBy.forEach(function(d,i){
                     d.value = Categories.indexOf(d.value)
@@ -1366,13 +1648,16 @@ var TimeLineModule = (function () {
 
   return{
    init: function(){
-             console.log("========== initializing PatientModule")
           onReadyFunctions.push(initializeUI);
           
           addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
          addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
-      
+//         addJavascriptMessageHandler("UpdateSelectionList", UpdateSelectionMenu);
+         addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
          socketConnectedFunctions.push(loadPatientDemoData);
+   },
+   RefreshSelectionMenu: function(){
+       dispatch.UpdateMenuOptions();
    }
   };
 
@@ -1391,10 +1676,6 @@ PatientTimeLine.init();
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
-}
-
-.x.axis path {
-  display: none;
 }
 
 .line {
@@ -1431,10 +1712,12 @@ PatientTimeLine.init();
 <div id="patientTimeLinesDiv">
 	<div id="ArrangeDataDiv">
 	     <span id="AddSideBar">Features: </span>
+	     <span id="PatientSetDiv">Patient Set:</span> 
 	     <span id="AlignByDiv">Align By: </span>
 	     <span id="OrderByDiv">Order By: </span>
-<!--	     <button id="SaveImageDiv">Save Image </button>  -->
-       	 <button id="SendSelectionToClinicalTable">To Clinical Data... </button>
+<!--	     <button id="SaveImageDiv">Save Image </button> 
+  -->        	 <button id="SendSelectionToClinicalTable">To Clinical Data... </button>
+     	 <button id="timelineSaveSelection">Save Selection</button>
      </div>
      <div id="TimeLineDisplay">
       </div>

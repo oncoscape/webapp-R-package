@@ -1,5 +1,6 @@
 include(../index.common)
 include(../common.js)
+include(../UserSettings.js)
 include(../m4-workarounds.txt)
 include(code.js)
 <body>

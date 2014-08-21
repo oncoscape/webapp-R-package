@@ -1,5 +1,6 @@
 include(../index.common)
 include(../common.js)
+include(../UserSettings.js)
 include(Module.js)
 <body>
 include(widget.html)

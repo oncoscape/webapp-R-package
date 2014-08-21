@@ -575,18 +575,19 @@ getUserSelectPatientHistory <- function(WS, msg)
   # only allows for 1 username at a time
   # 
   
-   callback <- msg$callback
-   userID <- msg$payload$userID
+#   printf("--- DataProviderBridge looking for payload %s",  msg$payload)
+   payload <- msg$payload
+   userID <- payload["userID"]
    if(nchar(userID)==0)
        userID = NA
-   selectionnames <- msg$payload$selectionnames
+   selectionnames <- payload["selectionname"]
    if(all(nchar(selectionnames))==0)
        selectionnames = NA
 
    category.name <- "PatientSelectionHistory"
 
    printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(USER.SETTINGS))
-   printf("--- username: %s", username);
+   printf("--- userID: %s", userID);
     
    if(!category.name %in% ls(USER.SETTINGS)){
        error.message <- "Oncoscape DataProviderBridge error:  no patientSelectionHistory Provider defined"
@@ -604,8 +605,7 @@ getUserSelectPatientHistory <- function(WS, msg)
    
    printf("found %d (== %d) saved selections for user: %s", length(selections), selection.count, userID)
    
-   return.cmd = msg$callback
-   return.msg <- list(cmd=msg$callback, callback="", status="success", payload=selections)
+   return.msg <- list(cmd=msg$callback, status="success", payload=selections)
 
    printf("DataProviderBridge.R, getUserSelectPatientHistory responding to '%s' with '%s'", msg$cmd, msg$callback);
    

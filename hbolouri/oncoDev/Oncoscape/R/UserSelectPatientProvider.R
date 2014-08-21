@@ -170,13 +170,13 @@ setMethod ("getSelection", "UserSelectPatientProvider",
          nas <- which(is.na(matches))
          if(length(nas) > 0)
             matches <- matches[-nas]
-         recognized.columns  <- names(self@userList[[user]])[matches]
+         recognized.selections  <- names(self@userList[[user]])[matches]
          }
       
       if(length(recognized.selections) == 0)
           return(list())
       
-      self@userList[[user]][recognized.columns]
+      self@userList[[user]][recognized.selections]
       })
 #---------------------------------------------------------------------------------------------------
 setMethod ("ValidUserID", "UserSelectPatientProvider",

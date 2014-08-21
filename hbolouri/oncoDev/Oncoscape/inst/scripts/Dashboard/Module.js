@@ -2,83 +2,42 @@
 //----------------------------------------------------------------------------------------------------
 var DashboardModule = (function () {
 
-     var username = "Guest"
-     var userID = null
-
-//----------------------------------------------------------------------------------------------------
-      function CreateNewUser(){
-      
-         console.log("======= creating new guest user")
-  
-            userID = Math.random().toString(36).substring(7)
-           console.log(userID);
-
- //         msg = {cmd:"createNewUserID",
- //                callback: "addNewUserSettings",
- //                status:"request",
- //                payload:""
- //               };
- //         socket.send(JSON.stringify(msg));
-       
-      }
-//----------------------------------------------------------------------------------------------------
+ //----------------------------------------------------------------------------------------------------
      function DashboardInitializeUI(){
-
-           CreateNewUser();
-       };
-//----------------------------------------------------------------------------------------------------
-      getUserID = function(){
-           console.log("Sending User ID: ", userID)
-           return userID;
-      }      
-
-//----------------------------------------------------------------------------------------------------
-     function addNewUser(){
-              
-            msg = {cmd:"addNewUserToList",
-                 callback: "DisplayUserInfo",
-                 status:"request",
-                 payload: { userID: userID, username: username}
-                };
-                console.log(JSON.stringify(msg))
-          socket.send(JSON.stringify(msg));
- 
-       
-    }
- 
-//----------------------------------------------------------------------------------------------------
-     function addNewUserSettings(msg){
-     
-         console.log("===== adding User Settings to ID")
-         console.log(msg)
-
-         if(msg.status === "success"){
-           userID = msg.payload.userID
-         console.log("created userID: ", userID)
-         
-            msg = {cmd:"addNewUserToList",
-                 callback: "DisplayUserInfo",
-                 status:"request",
-                 payload: { userID: userID, username: username}
-                };
-                console.log(JSON.stringify(msg))
-          socket.send(JSON.stringify(msg));
- 
-         }
-    }
-         
-//----------------------------------------------------------------------------------------------------
-    function DisplayUserInfo(msg){
-    
-        console.log("===== Display User Information")
-        console.log(msg)
-         
-         if(msg.status === "success"){
-           userID = msg.payload.userID
-           username = msg.payload.username
         
-           document.getElementById("UserName").innerHTML = username;
-        }
+        console.log("===== Display User Information")        
+        document.getElementById("UserName").innerHTML = getUsername();
+
+        
+        document.getElementById("DashboardAcknowledgement").style.fontSize = "x-small"
+        
+    };
+    
+//----------------------------------------------------------------------------------------------------
+    function UpdateUserInfo(){
+        console.log("===== Display User Information")        
+        document.getElementById("UserName").innerHTML = getUsername();
+
+      }
+
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayDashboardModifiedDate",
+             status:"request",
+             payload:"Dashboard"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayDashboardModifiedDate(msg){
+
+        console.log("==== Dashboard Date: ", msg.payload)
+        DateModified = document.getElementById("DashboardDateModified");
+        DateModified.innerHTML = msg.payload;
+        DateModified.style.fontSize = "x-small"
     }
      
 //----------------------------------------------------------------------------------------------------
@@ -86,9 +45,8 @@ return{
 
    init: function(){
       onReadyFunctions.push(DashboardInitializeUI);
-      socketConnectedFunctions.push(addNewUser);
-      addJavascriptMessageHandler("addNewUserSettings", addNewUserSettings);
-      addJavascriptMessageHandler("DisplayUserInfo", DisplayUserInfo);
+      socketConnectedFunctions.push(SetModifiedDate);
+      addJavascriptMessageHandler("DisplayDashboardModifiedDate", DisplayDashboardModifiedDate);
       }
    };
 
