@@ -62,36 +62,44 @@ var PCAModule = (function () {
 
   console.log("==== draw legend: ", patientClassification) 
 
-    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG");
-    
-    var TextOffset =  [0, 70, 82, 87, 75, 80, 78, 75, 80];
+    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
+                      .attr("width", $("#pcaDisplay").width())
+                      
+    var TextOffset =  [0, 70, 82, 87, 85, 80, 78, 75, 80];
 
-result = patientClassification[i].color[0]
+   for(var i=0; i<patientClassification.length; i++){
+      if(patientClassification[i].gbmDzSubType[0] == null | patientClassification[i].gbmDzSubType[0] == ""){ 
+          patientClassification[i].gbmDzSubType[0]= "undefined" } }
 
-   var ClassificationCategories = [];
-   patientClassification.forEach(function(ID, Patient){
-        if(ClassificationCategories.indexOf(Patient.color[0]) == -1){ ClassificationCategories.push(Patient.color[0])} })
-                        
-
+        Classifications = d3.nest()
+              .key(function(d) { return d.gbmDzSubType[0]; })
+              .map(patientClassification, d3.map);
+ 
+    var TextOffSet = d3.scale.ordinal()
+               .range(TextOffset)
+               .domain(Classifications.keys());
+               
     var legend = Legendsvg
                    .append("g")
                    .attr("class", "legend")
+                   .attr("transform", "translate(" + 10 + "," + 10 + ")")  
                    .selectAll(".legend")
-                     .data(ClassificationCategories)
+                     .data(Classifications.keys())
                      .enter().append("g")
                      .attr("transform", function(d, i) { 
-                        return "translate(" + i*TextOffset(d) + ",0)" })
+                        return "translate(" + i*TextOffSet(d) + ",0)" })
                 ;
     legend.append("circle")
-           .attr("width", 10)
-           .attr("height", 10)
-           .style("fill", function(d) { return chooseColor(d)})
+            .attr("cx", 12)
+            .attr("cy", 5)
+            .attr("r", function(d) { return 6;})
+            .style("fill", function(d) { return Classifications.get(d)[0].color[0]})
 
     legend.append("text")
-            .attr("y", 9)
-            .attr("x", 12)
+            .attr("y", 10)
+            .attr("x", 20)
             .style("font-size", 12)
-            .text(function(d) { return d; });
+            .text(function(d) { return d});
     
 
   }
@@ -238,12 +246,12 @@ result = patientClassification[i].color[0]
      var xTranslationForYAxis = xScale(0);
      var yTranslationForXAxis = yScale(0);
 
-     var pcaXAxis = d3.svg.axis()
+     var xAxis = d3.svg.axis()
                    .scale(xScale)
                    .orient("top")
                    .ticks(5);
 
-     var pcaYAxis = d3.svg.axis()
+     var yAxis = d3.svg.axis()
                    .scale(yScale)
                    .orient("left")
                    .ticks(5);
@@ -307,6 +315,24 @@ result = patientClassification[i].color[0]
  
      } // d3PcaScatterPlot
 
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayPCAModifiedDate",
+             status:"request",
+             payload:"pca"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayPCAModifiedDate(msg){
+
+        document.getElementById("pcaDateModified").innerHTML = msg.payload;
+    }
+      
+     //--------------------------------------------------------------------------------------------------
 
   //--------------------------------------------------------------------------------------------
   return{
@@ -315,6 +341,8 @@ result = patientClassification[i].color[0]
       addJavascriptMessageHandler("pcaPlot", pcaPlot);
       addJavascriptMessageHandler("PCAHandlePatientIDs", handlePatientIDs);
       addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)
+      addJavascriptMessageHandler("DisplayPCAModifiedDate", DisplayPCAModifiedDate);
+      socketConnectedFunctions.push(SetModifiedDate);
       socketConnectedFunctions.push(getPatientClassification);
       socketConnectedFunctions.push(runDemo);
       }

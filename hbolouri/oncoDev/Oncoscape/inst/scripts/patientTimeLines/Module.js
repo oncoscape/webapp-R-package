@@ -51,7 +51,7 @@ var TimeLineModule = (function () {
            $(window).resize(TimeLineHandleWindowResize);
            TimeLinebroadcastButton.prop("disabled",true);
            TimeLineSelectionButton.prop("disabled",true);
-          
+
            dispatch.load();
       };
 
@@ -924,18 +924,13 @@ var TimeLineModule = (function () {
      function FilterTimelinePatients(msg){
     
         console.log("=======Updating Patient Selection")
-//        console.log(msg.payload)
         
- //       selections = msg.payload
-//         patientIDs = selections.patientIDs
-        // console.log("TimeLine Filter PatientIds: " + patientIDs);
-      patientIDs = []
-      selections = msg.payload;
-      console.log(d3.values(selections))
-      d3.values(selections).forEach(function(d){ console.log(d); d.patientIDs.forEach(function(id){patientIDs.push(id)})})
+        patientIDs = []
+        selections = msg.payload;
+//      console.log(d3.values(selections))
+        d3.values(selections).forEach(function(d){ d.patientIDs.forEach(function(id){patientIDs.push(id)})})
       
          msg = {cmd:"getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", payload: patientIDs};
-console.log(msg)
          socket.send(JSON.stringify(msg));
      }
     //--------------------------------------------------------------------------------------------
@@ -1219,8 +1214,24 @@ console.log(msg)
           ShowEvents = newFilters;
           dispatch.DisplayPatients();
      }
-     //--------------------------------------------------------------------------------------------------
-     
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayTimelineModifiedDate",
+             status:"request",
+             payload:"patientTimeLines"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayTimelineModifiedDate(msg){
+
+        console.log("==== Timeline Date: ", msg.payload)
+        document.getElementById("TimelineDateModified").innerHTML = msg.payload;
+    }
+      
      //--------------------------------------------------------------------------------------------------
 
   return{
@@ -1228,10 +1239,11 @@ console.log(msg)
           onReadyFunctions.push(initializeUI);
           
           addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
-         addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
-//         addJavascriptMessageHandler("UpdateSelectionList", UpdateSelectionMenu);
-         addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
-         socketConnectedFunctions.push(loadPatientDemoData);
+          addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
+          addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
+          addJavascriptMessageHandler("DisplayTimelineModifiedDate", DisplayTimelineModifiedDate);
+          socketConnectedFunctions.push(SetModifiedDate);
+          socketConnectedFunctions.push(loadPatientDemoData);
    },
    RefreshSelectionMenu: function(){
        dispatch.UpdateMenuOptions();

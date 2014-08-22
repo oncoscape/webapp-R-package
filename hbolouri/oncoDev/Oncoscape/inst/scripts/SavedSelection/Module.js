@@ -177,8 +177,23 @@ var SavedSelectionModule = (function (){
 //       return currentNames;
 //      }
   
+ //----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplaySavedSelectionModifiedDate",
+             status:"request",
+             payload:"SavedSelection"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
 //----------------------------------------------------------------------------------------------------
-     
+    function DisplaySavedSelectionModifiedDate(msg){
+        document.getElementById("SavedSelectionDateModified").innerHTML = msg.payload;
+    }
+//----------------------------------------------------------------------------------------------------
+    
        return{
      
         //----------------------------------------------------------------------------------------------------
@@ -206,8 +221,10 @@ var SavedSelectionModule = (function (){
            addJavascriptMessageHandler("SetupSavedSelection", SetupSavedSelection);
    		   addJavascriptMessageHandler("addSelectionToTable", SavedSelection.addSelectionToTable);
   		   addJavascriptMessageHandler("testingAddSavedSelection", testingAddSavedSelection);
+           addJavascriptMessageHandler("DisplaySavedSelectionModifiedDate", DisplaySavedSelectionModifiedDate);
 
-        socketConnectedFunctions.push(loadPatientData);
+           socketConnectedFunctions.push(SetModifiedDate);
+           socketConnectedFunctions.push(loadPatientData);
         }
         
        

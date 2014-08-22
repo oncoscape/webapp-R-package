@@ -708,9 +708,17 @@ var ClinicalTableTabNum=1;
          return;
          }
 
-      var payload = {
-           ids: mes.payload.patientIDs,
-           count: msg.payload.patientIDs.length
+       patientIDs = []
+       selections = msg.payload;
+       d3.values(selections).forEach(function(d){ 
+            d.patientIDs.forEach(function(id){
+               if(patientIDs.indexOf(id) == -1) patientIDs.push(id)
+            })
+        })
+  
+       var payload = {
+           ids: patientIDs,
+           count: patientIDs.length
          }
 
 	var	msg = {
@@ -808,6 +816,22 @@ var ClinicalTableTabNum=1;
      tableRef.fnAddData(msg.payload.mtx);
      }; // displayTable
 
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayClTblModifiedDate",
+             status:"request",
+             payload:"clinicalDataTable"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayClTblModifiedDate(msg){
+        document.getElementById("ClinicalTableDateModified").innerHTML = msg.payload;
+    }
+      
 
   return{
     requestData: requestData,
@@ -817,6 +841,8 @@ var ClinicalTableTabNum=1;
       addJavascriptMessageHandler("handleFilterPatientHistory", handleFilterPatientHistory);
       addJavascriptMessageHandler("PatientHistoryHandlePatientIDs", handleFilterPatientHistory);
       addJavascriptMessageHandler("ChangeTablePatientSelection", SendSelectionToFilterTable)
+      addJavascriptMessageHandler("DisplayClTblModifiedDate", DisplayClTblModifiedDate);
+      socketConnectedFunctions.push(SetModifiedDate);
       socketConnectedFunctions.push(requestData);
       },
     
@@ -906,36 +932,44 @@ var PCAModule = (function () {
 
   console.log("==== draw legend: ", patientClassification) 
 
-    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG");
-    
-    var TextOffset =  [0, 70, 82, 87, 75, 80, 78, 75, 80];
+    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
+                      .attr("width", $("#pcaDisplay").width())
+                      
+    var TextOffset =  [0, 70, 82, 87, 85, 80, 78, 75, 80];
 
-result = patientClassification[i].color[0]
+   for(var i=0; i<patientClassification.length; i++){
+      if(patientClassification[i].gbmDzSubType[0] == null | patientClassification[i].gbmDzSubType[0] == ""){ 
+          patientClassification[i].gbmDzSubType[0]= "undefined" } }
 
-   var ClassificationCategories = [];
-   patientClassification.forEach(function(ID, Patient){
-        if(ClassificationCategories.indexOf(Patient.color[0]) == -1){ ClassificationCategories.push(Patient.color[0])} })
-                        
-
+        Classifications = d3.nest()
+              .key(function(d) { return d.gbmDzSubType[0]; })
+              .map(patientClassification, d3.map);
+ 
+    var TextOffSet = d3.scale.ordinal()
+               .range(TextOffset)
+               .domain(Classifications.keys());
+               
     var legend = Legendsvg
                    .append("g")
                    .attr("class", "legend")
+                   .attr("transform", "translate(" + 10 + "," + 10 + ")")  
                    .selectAll(".legend")
-                     .data(ClassificationCategories)
+                     .data(Classifications.keys())
                      .enter().append("g")
                      .attr("transform", function(d, i) { 
-                        return "translate(" + i*TextOffset(d) + ",0)" })
+                        return "translate(" + i*TextOffSet(d) + ",0)" })
                 ;
     legend.append("circle")
-           .attr("width", 10)
-           .attr("height", 10)
-           .style("fill", function(d) { return chooseColor(d)})
+            .attr("cx", 12)
+            .attr("cy", 5)
+            .attr("r", function(d) { return 6;})
+            .style("fill", function(d) { return Classifications.get(d)[0].color[0]})
 
     legend.append("text")
-            .attr("y", 9)
-            .attr("x", 12)
+            .attr("y", 10)
+            .attr("x", 20)
             .style("font-size", 12)
-            .text(function(d) { return d; });
+            .text(function(d) { return d});
     
 
   }
@@ -1082,12 +1116,12 @@ result = patientClassification[i].color[0]
      var xTranslationForYAxis = xScale(0);
      var yTranslationForXAxis = yScale(0);
 
-     var pcaXAxis = d3.svg.axis()
+     var xAxis = d3.svg.axis()
                    .scale(xScale)
                    .orient("top")
                    .ticks(5);
 
-     var pcaYAxis = d3.svg.axis()
+     var yAxis = d3.svg.axis()
                    .scale(yScale)
                    .orient("left")
                    .ticks(5);
@@ -1151,6 +1185,24 @@ result = patientClassification[i].color[0]
  
      } // d3PcaScatterPlot
 
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayPCAModifiedDate",
+             status:"request",
+             payload:"pca"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayPCAModifiedDate(msg){
+
+        document.getElementById("pcaDateModified").innerHTML = msg.payload;
+    }
+      
+     //--------------------------------------------------------------------------------------------------
 
   //--------------------------------------------------------------------------------------------
   return{
@@ -1159,6 +1211,8 @@ result = patientClassification[i].color[0]
       addJavascriptMessageHandler("pcaPlot", pcaPlot);
       addJavascriptMessageHandler("PCAHandlePatientIDs", handlePatientIDs);
       addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)
+      addJavascriptMessageHandler("DisplayPCAModifiedDate", DisplayPCAModifiedDate);
+      socketConnectedFunctions.push(SetModifiedDate);
       socketConnectedFunctions.push(getPatientClassification);
       socketConnectedFunctions.push(runDemo);
       }
@@ -1223,7 +1277,7 @@ var TimeLineModule = (function () {
            $(window).resize(TimeLineHandleWindowResize);
            TimeLinebroadcastButton.prop("disabled",true);
            TimeLineSelectionButton.prop("disabled",true);
-          
+
            dispatch.load();
       };
 
@@ -2096,18 +2150,13 @@ var TimeLineModule = (function () {
      function FilterTimelinePatients(msg){
     
         console.log("=======Updating Patient Selection")
-//        console.log(msg.payload)
         
- //       selections = msg.payload
-//         patientIDs = selections.patientIDs
-        // console.log("TimeLine Filter PatientIds: " + patientIDs);
-      patientIDs = []
-      selections = msg.payload;
-      console.log(d3.values(selections))
-      d3.values(selections).forEach(function(d){ console.log(d); d.patientIDs.forEach(function(id){patientIDs.push(id)})})
+        patientIDs = []
+        selections = msg.payload;
+//      console.log(d3.values(selections))
+        d3.values(selections).forEach(function(d){ d.patientIDs.forEach(function(id){patientIDs.push(id)})})
       
          msg = {cmd:"getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", payload: patientIDs};
-console.log(msg)
          socket.send(JSON.stringify(msg));
      }
     //--------------------------------------------------------------------------------------------
@@ -2391,8 +2440,24 @@ console.log(msg)
           ShowEvents = newFilters;
           dispatch.DisplayPatients();
      }
-     //--------------------------------------------------------------------------------------------------
-     
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayTimelineModifiedDate",
+             status:"request",
+             payload:"patientTimeLines"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayTimelineModifiedDate(msg){
+
+        console.log("==== Timeline Date: ", msg.payload)
+        document.getElementById("TimelineDateModified").innerHTML = msg.payload;
+    }
+      
      //--------------------------------------------------------------------------------------------------
 
   return{
@@ -2400,10 +2465,11 @@ console.log(msg)
           onReadyFunctions.push(initializeUI);
           
           addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
-         addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
-//         addJavascriptMessageHandler("UpdateSelectionList", UpdateSelectionMenu);
-         addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
-         socketConnectedFunctions.push(loadPatientDemoData);
+          addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
+          addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
+          addJavascriptMessageHandler("DisplayTimelineModifiedDate", DisplayTimelineModifiedDate);
+          socketConnectedFunctions.push(SetModifiedDate);
+          socketConnectedFunctions.push(loadPatientDemoData);
    },
    RefreshSelectionMenu: function(){
        dispatch.UpdateMenuOptions();
@@ -2552,11 +2618,28 @@ var gbmPathwaysModule = (function () {
             } // for i
          } // if 13 (return key)
       } // doSearch
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplaygbmPathwaysModifiedDate",
+             status:"request",
+             payload:"gbmPathways"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplaygbmPathwaysModifiedDate(msg){
+        document.getElementById("gbmPathwaysDateModified").innerHTML = msg.payload;
+    }
 
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
        onReadyFunctions.push(initializeUI);
+       addJavascriptMessageHandler("DisplaygbmPathwaysModifiedDate", DisplaygbmPathwaysModifiedDate);
+       socketConnectedFunctions.push(SetModifiedDate);
        //addJavascriptMessageHandler("pairedDistributionsPlot", pairedDistributionsPlot);
        //socketConnectedFunctions.push(runDemo);
        }
@@ -2873,10 +2956,29 @@ var markersAndTissuesModule = (function () {
          } // if 13 (return key)
       } // doSearch
 
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplaymarkersAndTissuesModifiedDate",
+             status:"request",
+             payload:"markersAndTissues"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplaymarkersAndTissuesModifiedDate(msg){
+        document.getElementById("markersAndTissuesDateModified").innerHTML = msg.payload;
+    }
+
+
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
        onReadyFunctions.push(initializeUI);
+       addJavascriptMessageHandler("DisplaymarkersAndTissuesModifiedDate", DisplaymarkersAndTissuesModifiedDate);
+       socketConnectedFunctions.push(SetModifiedDate);
        //addJavascriptMessageHandler("pairedDistributionsPlot", pairedDistributionsPlot);
        //socketConnectedFunctions.push(runDemo);
        }
@@ -3068,8 +3170,23 @@ var SavedSelectionModule = (function (){
 //       return currentNames;
 //      }
   
+ //----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplaySavedSelectionModifiedDate",
+             status:"request",
+             payload:"SavedSelection"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
 //----------------------------------------------------------------------------------------------------
-     
+    function DisplaySavedSelectionModifiedDate(msg){
+        document.getElementById("SavedSelectionDateModified").innerHTML = msg.payload;
+    }
+//----------------------------------------------------------------------------------------------------
+    
        return{
      
         //----------------------------------------------------------------------------------------------------
@@ -3097,8 +3214,10 @@ var SavedSelectionModule = (function (){
            addJavascriptMessageHandler("SetupSavedSelection", SetupSavedSelection);
    		   addJavascriptMessageHandler("addSelectionToTable", SavedSelection.addSelectionToTable);
   		   addJavascriptMessageHandler("testingAddSavedSelection", testingAddSavedSelection);
+           addJavascriptMessageHandler("DisplaySavedSelectionModifiedDate", DisplaySavedSelectionModifiedDate);
 
-        socketConnectedFunctions.push(loadPatientData);
+           socketConnectedFunctions.push(SetModifiedDate);
+           socketConnectedFunctions.push(loadPatientData);
         }
         
        
@@ -3435,6 +3554,23 @@ var PairedDistributionsModule = (function () {
 
      }; // d3PairedDistributionsScatterPlot
 
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplaypairedDistributionsModifiedDate",
+             status:"request",
+             payload:"pairedDistributions"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplaypairedDistributionsModifiedDate(msg){
+        document.getElementById("pairedDistributionsDateModified").innerHTML = msg.payload;
+    }
+
+
 
   //--------------------------------------------------------------------------------------------
   return{
@@ -3444,6 +3580,9 @@ var PairedDistributionsModule = (function () {
       //addJavascriptMessageHandler("PairedDistributionsHandlePatientIDs", handlePatientIDs);
       //addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)
       //socketConnectedFunctions.push(getPatientClassification);
+      addJavascriptMessageHandler("DisplaypairedDistributionsModifiedDate", DisplaypairedDistributionsModifiedDate);
+      socketConnectedFunctions.push(SetModifiedDate);
+
       socketConnectedFunctions.push(runDemo);
       }
    };
@@ -3503,11 +3642,30 @@ initializeUI = function(){
     ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
     };
 
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplaytodoModifiedDate",
+             status:"request",
+             payload:"todo"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplaytodoModifiedDate(msg){
+        document.getElementById("todoDateModified").innerHTML = msg.payload;
+    }
+
 
 return{
 
    init: function(){
       onReadyFunctions.push(initializeUI);
+      addJavascriptMessageHandler("DisplaytodoModifiedDate", DisplaytodoModifiedDate);
+      socketConnectedFunctions.push(SetModifiedDate);
+
       }
    };
 
@@ -3541,8 +3699,7 @@ ul.UserDocs {
 
 <div id="DashboardDiv">
 <h3> Oncoscape </h3>
-   <i>August 19th, 2014: version 1.1.20 </i>
-   <p> Welcome to Oncoscape!</p>
+   <p> Welcome to Oncoscape!  &nbsp; (version 1.1.18, <i>17 aug 2014</i>)</p>
    <p> You are logged in as: 
        <span id="UserName"> </span>
    </p>
@@ -3555,8 +3712,8 @@ ul.UserDocs {
      <li> link to download/install software </li>
    </ul>
    
-   <div id=DashboardAcknowledgement>Created by Lisa McFerrin</div>
-   <div id=DashboardDateModified>Last Modified: </div>
+   <span id=DashboardAcknowledgement style="font-size:x-small">Created by Lisa McFerrin;</span>
+   <span style="font-size:x-small">Last Modified: <span id=DashboardDateModified style="font-size:x-small"></span></span>
 </div>
 
 <style>
@@ -3732,6 +3889,10 @@ th, td { white-space: nowrap; }
     </div>
    </div>
    <div id="clinicalDataTableDiv"></div>
+          
+        <span id=ClinicalTableAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>
+        <span style="font-size:x-small">Last Modified: <span id=ClinicalTableDateModified style="font-size:x-small"></span></span>
+
 </div>
 <style>
 
@@ -3780,6 +3941,10 @@ th, td { white-space: nowrap; }
    <div id="pcaDisplay"></div>
    <div id="pcaLegend"></div>
    <div id="pcaTextDisplay"></div>
+   
+   <span id=pcaAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>
+   <span style="font-size:x-small">Last Modified: <span id=pcaDateModified style="font-size:x-small"></span></span>
+
 </div>
 
 <style>
@@ -3847,6 +4012,10 @@ th, td { white-space: nowrap; }
           <input type="text" id="TimeScale" value="Days, Months, Years"><br>
 	</form>
      </div>
+     
+        <span id=TimelineAcknowledgement style="font-size:x-small">Created by Lisa McFerrin;</span>
+        <span style="font-size:x-small">Last Modified: <span id=TimelineDateModified style="font-size:x-small"></span></span>
+
 </div>
 
 <script>
@@ -12465,6 +12634,10 @@ div {
       <input type="text" id="gbmPathwaysSearchBox"></input>
    </div>
    <div id="cyGbmPathways"></div>
+   
+  <span id=gbmPathwaysAcknowledgement style="font-size:x-small">Created by Hamid Bolouri & Paul Shannon;</span>
+  <span style="font-size:x-small">Last Modified: <span id=gbmPathwaysDateModified style="font-size:x-small"></span></span>
+
 </div>
 
 
@@ -91879,6 +92052,10 @@ div {
 
    </div>
    <div id="cyMarkersDiv"></div>
+   
+        <span id=markersAndTissuesAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>
+        <span style="font-size:x-small">Last Modified: <span id=markersAndTissuesDateModified style="font-size:x-small"></span></span>
+
 </div>
 
 
@@ -91953,6 +92130,9 @@ table.dataTable.order-column.hover tbody tr.even:hover.selected > .sorting_3 {
    <h3>Saved Selections: Patients</h3>
    <div id="SavedSelectionTableDiv"> </div>
   
+        <span id=SavedSelectionAcknowledgement style="font-size:x-small">Created by Lisa McFerrin;</span>
+        <span style="font-size:x-small">Last Modified: <span id=SavedSelectionDateModified style="font-size:x-small"></span></span>
+
 </div>
   
  
@@ -92005,6 +92185,10 @@ table.dataTable.order-column.hover tbody tr.even:hover.selected > .sorting_3 {
   		<option>5</option>
   	</select>
    <div id="pairedDistributionsDisplay"></div>
+   
+  <span id=pairedDistributionsAcknowledgement style="font-size:x-small">Created by Cliff Rostomily;</span>
+  <span style="font-size:x-small">Last Modified: <span id=pairedDistributionsDateModified style="font-size:x-small"></span></span>
+
 </div>
 
 <div id="todoDiv">
@@ -92015,6 +92199,10 @@ table.dataTable.order-column.hover tbody tr.even:hover.selected > .sorting_3 {
       width="95%",
       src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false">  
    </iframe>
+   
+   <span id=todoAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>
+   <span style="font-size:x-small">Last Modified: <span id=todoDateModified style="font-size:x-small"></span></span>
+
 </div>
 
 

@@ -133,11 +133,28 @@ var gbmPathwaysModule = (function () {
             } // for i
          } // if 13 (return key)
       } // doSearch
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplaygbmPathwaysModifiedDate",
+             status:"request",
+             payload:"gbmPathways"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplaygbmPathwaysModifiedDate(msg){
+        document.getElementById("gbmPathwaysDateModified").innerHTML = msg.payload;
+    }
 
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
        onReadyFunctions.push(initializeUI);
+       addJavascriptMessageHandler("DisplaygbmPathwaysModifiedDate", DisplaygbmPathwaysModifiedDate);
+       socketConnectedFunctions.push(SetModifiedDate);
        //addJavascriptMessageHandler("pairedDistributionsPlot", pairedDistributionsPlot);
        //socketConnectedFunctions.push(runDemo);
        }

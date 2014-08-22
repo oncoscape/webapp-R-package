@@ -321,6 +321,23 @@ var PairedDistributionsModule = (function () {
 
      }; // d3PairedDistributionsScatterPlot
 
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplaypairedDistributionsModifiedDate",
+             status:"request",
+             payload:"pairedDistributions"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplaypairedDistributionsModifiedDate(msg){
+        document.getElementById("pairedDistributionsDateModified").innerHTML = msg.payload;
+    }
+
+
 
   //--------------------------------------------------------------------------------------------
   return{
@@ -330,6 +347,9 @@ var PairedDistributionsModule = (function () {
       //addJavascriptMessageHandler("PairedDistributionsHandlePatientIDs", handlePatientIDs);
       //addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)
       //socketConnectedFunctions.push(getPatientClassification);
+      addJavascriptMessageHandler("DisplaypairedDistributionsModifiedDate", DisplaypairedDistributionsModifiedDate);
+      socketConnectedFunctions.push(SetModifiedDate);
+
       socketConnectedFunctions.push(runDemo);
       }
    };

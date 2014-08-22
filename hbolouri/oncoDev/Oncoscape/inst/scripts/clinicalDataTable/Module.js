@@ -159,9 +159,17 @@ var ClinicalTableTabNum=1;
          return;
          }
 
-      var payload = {
-           ids: mes.payload.patientIDs,
-           count: msg.payload.patientIDs.length
+       patientIDs = []
+       selections = msg.payload;
+       d3.values(selections).forEach(function(d){ 
+            d.patientIDs.forEach(function(id){
+               if(patientIDs.indexOf(id) == -1) patientIDs.push(id)
+            })
+        })
+  
+       var payload = {
+           ids: patientIDs,
+           count: patientIDs.length
          }
 
 	var	msg = {
@@ -259,6 +267,22 @@ var ClinicalTableTabNum=1;
      tableRef.fnAddData(msg.payload.mtx);
      }; // displayTable
 
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayClTblModifiedDate",
+             status:"request",
+             payload:"clinicalDataTable"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayClTblModifiedDate(msg){
+        document.getElementById("ClinicalTableDateModified").innerHTML = msg.payload;
+    }
+      
 
   return{
     requestData: requestData,
@@ -268,6 +292,8 @@ var ClinicalTableTabNum=1;
       addJavascriptMessageHandler("handleFilterPatientHistory", handleFilterPatientHistory);
       addJavascriptMessageHandler("PatientHistoryHandlePatientIDs", handleFilterPatientHistory);
       addJavascriptMessageHandler("ChangeTablePatientSelection", SendSelectionToFilterTable)
+      addJavascriptMessageHandler("DisplayClTblModifiedDate", DisplayClTblModifiedDate);
+      socketConnectedFunctions.push(SetModifiedDate);
       socketConnectedFunctions.push(requestData);
       },
     
