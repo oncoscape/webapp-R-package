@@ -35,6 +35,10 @@
    <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
    <script src="http://s3.amazonaws.com/oncoscape/js/chosen.jquery.min.js" type="text/javascript"></script>
    <link href="http://s3.amazonaws.com/oncoscape/css/chosen.min.css" media="screen" rel="stylesheet" type="text/css">
+   <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.js"></script>
+   <script src="http://s3.amazonaws.com/oncoscape/js/cytoscape.js-qtip.js"></script>
+   <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.css">
+
 	 
 
 <script>
@@ -245,6 +249,17 @@ function setupFilteredPatients()
     }
 }
 //--------------------------------------------------------------------------------------------------
+// the nginx proxy server, used by fhcrc IT for the publicly-visible version of Oncoscape
+// times out web sockets at 90 seconds.
+// this function, when called more often that that, will keep the websocket open.
+keepAlive = function()
+{   
+    console.log("keep alive"); 
+    msg = {cmd: "keepAlive", callback: "", status:"request", payload:""}
+    socket.send(JSON.stringify(msg));
+
+} // keepAlive
+//--------------------------------------------------------------------------------------------------
 $(document).ready(function()
 {
     console.log("==== index.common document.ready #1");
@@ -261,11 +276,11 @@ $(document).ready(function()
     // labkeyWS - labkey launched Oncoscape; local R must be run with WS
     // labkeyRS - labkey launched oncoscape; Rserve is used
     //
-    if (typeof labkey == "undefined")
-    {
+    if (typeof labkey == "undefined") {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-     }
+        setInterval(keepAlive, 30000);
+        }
     else
     if (labkey.mode == "WS")
     {
@@ -287,17 +302,24 @@ $(document).ready(function()
     setupFilteredPatients();
 })
 //--------------------------------------------------------------------------------------------------
+
+
 </script>
 
 <body>
 <div id="todoDiv">
 <h3> Tasks and Schedules </h3>
    <button id=ToDoLink>Edit The Table</button>
-   <iframe
+   <iframe id=ToDoFrame,
       height="600px",
       width="95%",
-      src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false">  
+<!--      src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false">  
+-->
    </iframe>
+   
+   <span id=todoAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>
+   <span style="font-size:x-small">Last Modified: <span id=todoDateModified style="font-size:x-small"></span></span>
+
 </div>
 
 

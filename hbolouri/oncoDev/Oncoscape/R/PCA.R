@@ -60,10 +60,20 @@ new.pcaAnalysis <- function(mtx)
    
    if(all(is.na(PCs)))
        return(NA)
-      
-   result <- as.data.frame(PCs$x[, 1:2])
-   result$id <- rownames(result)
-   rownames(result) <- NULL
+    
+   result <- list()
+     result$scores <- as.data.frame(PCs$x)
+     result$scores$id <- rownames(result$scores)
+     rownames(result$scores) <- NULL
+   
+     result$loadings <- as.data.frame(PCs$rotation)
+     result$loadings$id <- rownames(result$loadings)
+     rownames(result$loadings) <- NULL
+   
+     result$importance <- summary(PCs)$importance
+     
+     result$method <- list(method = "prcomp", center="True", scale="True")
+   
    invisible (result)
 
 } # new.pcaAnalysis
@@ -111,7 +121,7 @@ pcaAnalysis <- function(mtx, sampleIDs=NA)
 #----------------------------------------------------------------------------------------------------
 new.pcaResultsToJSONstring <- function(tbl)
 {
-    stopifnot(colnames(tbl) == c("PC1", "PC2", "id"))
+    stopifnot(colnames(tbl) == c("PC1", "PC2","PC3", "PC4", "PC5", "id"))
     s <- "["
     max <- nrow(tbl)
     for(r in 1:max){

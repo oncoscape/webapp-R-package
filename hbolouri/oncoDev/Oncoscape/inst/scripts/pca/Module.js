@@ -60,7 +60,7 @@ var PCAModule = (function () {
  //--------------------------------------------------------------------------------------------
   function drawLegend () {
 
-  console.log("==== draw legend: ", patientClassification) 
+  console.log("==== draw legend: ") 
 
     var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
                       .attr("width", $("#pcaDisplay").width())
@@ -224,10 +224,10 @@ var PCAModule = (function () {
      
      xMax = xMax * 1.1
      xMin = xMin * 1.1
-     xMax = 40
-     xMin = -40
-     yMax = 30
-     yMin = -30
+//     xMax = 40
+//     xMin = -40
+//     yMax = 30
+//     yMin = -30
 
      //console.log("xMax: " + xMax);   console.log("xMin: " + xMin);
      //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);

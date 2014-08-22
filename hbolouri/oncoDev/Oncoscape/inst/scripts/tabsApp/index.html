@@ -499,8 +499,14 @@ var DashboardModule = (function () {
         console.log("===== Display User Information")        
         document.getElementById("UserName").innerHTML = getUsername();
 
-        
-        document.getElementById("DashboardAcknowledgement").style.fontSize = "x-small"
+        $("#DashboardAccordion" ).accordion({
+              heightStyle: "content",
+              collapsible: true,
+              activate: function(event, ui){
+                 console.log(" activating accordion");
+                 window.cwCuration.resize().fit(50);
+               }
+            });
         
     };
     
@@ -930,7 +936,7 @@ var PCAModule = (function () {
  //--------------------------------------------------------------------------------------------
   function drawLegend () {
 
-  console.log("==== draw legend: ", patientClassification) 
+  console.log("==== draw legend: ") 
 
     var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
                       .attr("width", $("#pcaDisplay").width())
@@ -1094,10 +1100,10 @@ var PCAModule = (function () {
      
      xMax = xMax * 1.1
      xMin = xMin * 1.1
-     xMax = 40
-     xMin = -40
-     yMax = 30
-     yMin = -30
+//     xMax = 40
+//     xMin = -40
+//     yMax = 30
+//     yMin = -30
 
      //console.log("xMax: " + xMax);   console.log("xMin: " + xMin);
      //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);
@@ -3642,6 +3648,12 @@ initializeUI = function(){
     ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
     };
 
+
+ function LoadToDoTable(){
+    $("#ToDoFrame").get(0).contentWindow.location.href = 
+       "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false"
+ }
+
 //----------------------------------------------------------------------------------------------------
     function SetModifiedDate(){
 
@@ -3665,6 +3677,7 @@ return{
       onReadyFunctions.push(initializeUI);
       addJavascriptMessageHandler("DisplaytodoModifiedDate", DisplaytodoModifiedDate);
       socketConnectedFunctions.push(SetModifiedDate);
+      socketConnectedFunctions.push(LoadToDoTable);
 
       }
    };
@@ -3700,18 +3713,25 @@ ul.UserDocs {
 <div id="DashboardDiv">
 <h3> Oncoscape </h3>
    <p> Welcome to Oncoscape!  &nbsp; (version 1.1.18, <i>17 aug 2014</i>)</p>
-   <p> You are logged in as: 
-       <span id="UserName"> </span>
-   </p>
-   <p> This page will include:</p>
+   <p> You are logged in as:  <span id="UserName"> </span>   </p>
+
+   <p> Welcome Message </p>
+
+ <div id="DashboardAccordion">
+     <h3> Available Data </h3><div></div>
+     <h3> Vignettes </h3><div></div>
+     <h3> Tutorials/Use Cases </h3><div></div>
+     <h3> Download Software </h3><div></div>
+     <h3> Features To Come... </h3><div></div> 
+ </div>
+<!--   <p> This page will include:</p>
    <ul class="UserDocs">
-     <li> a welcome message</li>
      <li> links to download vignettes </li>
      <li> Explanation of available data </li>
      <li> Tooltips/Tutorial </li>
      <li> link to download/install software </li>
    </ul>
-   
+-->   
    <span id=DashboardAcknowledgement style="font-size:x-small">Created by Lisa McFerrin;</span>
    <span style="font-size:x-small">Last Modified: <span id=DashboardDateModified style="font-size:x-small"></span></span>
 </div>
@@ -92194,10 +92214,9 @@ table.dataTable.order-column.hover tbody tr.even:hover.selected > .sorting_3 {
 <div id="todoDiv">
 <h3> Tasks and Schedules </h3>
    <button id=ToDoLink>Edit The Table</button>
-   <iframe
-      height="600px",
-      width="95%",
-      src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false">  
+   <iframe id=ToDoFrame height="600px" width="95%"
+<!--      src="https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false">  
+-->
    </iframe>
    
    <span id=todoAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>

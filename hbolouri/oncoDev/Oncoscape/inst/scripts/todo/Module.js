@@ -10,6 +10,12 @@ initializeUI = function(){
     ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
     };
 
+
+ function LoadToDoTable(){
+    $("#ToDoFrame").get(0).contentWindow.location.href = 
+       "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/pubhtml;headers=false"
+ }
+
 //----------------------------------------------------------------------------------------------------
     function SetModifiedDate(){
 
@@ -33,6 +39,7 @@ return{
       onReadyFunctions.push(initializeUI);
       addJavascriptMessageHandler("DisplaytodoModifiedDate", DisplaytodoModifiedDate);
       socketConnectedFunctions.push(SetModifiedDate);
+      socketConnectedFunctions.push(LoadToDoTable);
 
       }
    };

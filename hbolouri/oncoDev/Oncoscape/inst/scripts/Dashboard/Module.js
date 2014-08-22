@@ -8,8 +8,14 @@ var DashboardModule = (function () {
         console.log("===== Display User Information")        
         document.getElementById("UserName").innerHTML = getUsername();
 
-        
-        document.getElementById("DashboardAcknowledgement").style.fontSize = "x-small"
+        $("#DashboardAccordion" ).accordion({
+              heightStyle: "content",
+              collapsible: true,
+              activate: function(event, ui){
+                 console.log(" activating accordion");
+                 window.cwCuration.resize().fit(50);
+               }
+            });
         
     };
     
