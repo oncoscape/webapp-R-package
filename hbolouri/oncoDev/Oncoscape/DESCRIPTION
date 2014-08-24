@@ -1,7 +1,7 @@
 Package: Oncoscape
 Type: Package
 Title: Oncoscape:  Coordinated Exploration of Clinical and Molecular Cancer Data
-Version: 1.1.19
+Version: 1.1.20
 Date: 2014-08-19
 Author: Paul Shannon
 Maintainer:  <pshannon@fhcrc.org>
