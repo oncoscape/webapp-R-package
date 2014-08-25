@@ -316,6 +316,7 @@ var angioPathwaysModule = (function () {
 
   var cyDiv;
   var viewAbstractsButton, zoomSelectedButton, demoVizChangesButton;
+  var sampleMenu, movieButton;
   var searchBox;
   var mouseOverReadout;
   var edgeSelectionOn = false;
@@ -325,6 +326,8 @@ var angioPathwaysModule = (function () {
       cyDiv = $("#cwAngiogenesisDiv");
       //viewAbstractsButton = $("#cwAngioViewAbstractsButton");
       //zoomSelectedButton  = $("#cwAngioZoomSelectedButton");
+      sampleMenu = $("#hypoxiaSampleSelector");
+      movieButton = $("#hypixaMovieButton");
       demoVizChangesButton = $("#angiogenesisDemoVizUpdateButton")
       demoVizChangesButton.click(angiogenesisDemoVizChanges);
       searchBox = $("#angiogenesisSearchBox");
@@ -416,12 +419,42 @@ var angioPathwaysModule = (function () {
       } // toggleEdgeSelection
 
    //----------------------------------------------------------------------------------------------------
+   function transformMatrixToPatientOrientedNamedList(mtx) {
+
+        // geneNames are repeated in each element; grab them from the first one
+      //debugger;
+      var geneNames = Object.keys(mtx[0]);
+        // the last element was originally (in R) the row name -- the tissue
+        // gene1: expression, gene2: expession, ... rowname: 0445.T.1
+      geneCount = geneNames.length - 1;
+      geneNames = geneNames.slice(0,geneCount);
+      var tissueNames = [];
+      max = mtx.length;
+      namedList={};
+
+      for(var r=0; r < max; r++){
+         row = mtx[r]
+         tissueName = row["rowname"][0];
+         tissueNames.push(tissueName);
+         namedList[tissueName] = row;
+         } // for r
+
+      result = {genes: geneNames, tissues: tissueNames, list: namedList};
+      return(result);
+
+      } // transformMatrixToPatientOrientedNamedList
+
+   //----------------------------------------------------------------------------------------------------
+
+   
    // initially, a random set of patient, tissue of sample ids.  soon set by humans
    // these five are those from   fivenum(matrix[, "KDR"])
    //   TCGA.02.0058  TCGA.06.0132  TCGA.02.0034  TCGA.12.0657  TCGA.06.0155 
    //    -3.10414205   -0.62431669    0.05214659    0.60673149    4.43374413 
    function entities() {
-      return(["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155"]);
+      which = getRandomInt(1,4);
+      patients = ["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155"];
+      return(patients.slice(0,which));
       }
    //----------------------------------------------------------------------------------------------------
    function angiogenesisDemoVizChanges() {
@@ -510,19 +543,53 @@ var angioPathwaysModule = (function () {
        }
 
     //----------------------------------------------------------------------------------------------------
+    function addTissueIDsToSelector (tissueIDs) {
+      sampleMenu.empty();
+      if(tissueIDs.length == 0) {
+         alert("angiogenesis received empty tissueIDs list")
+         return;
+         }
+      
+      // every set of tissueIDs needs an aggregate, or average tissue
+
+      //optionMarkup = "<option> average (of " + tissueIDs.length + ") </option>";
+      optionMarkup = "<option>average</option>";
+      sampleMenu.append(optionMarkup);
+        // msg = {cmd: "requestAverageExpression", status: "request", payload: tissueIDs};
+        // console.log(msg)
+        //   msg.json = JSON.stringify(msg);
+        //   console.log(msg.json)
+        //   socket.send(msg.json);
+
+      for(var i=0; i < tissueIDs.length; i++){
+         tissueName = tissueIDs[i]
+         optionMarkup = "<option>" + tissueName + "</option>";
+         sampleMenu.append(optionMarkup);
+         } // for i
+
+     } // addTissueIDsToSelector
+    //----------------------------------------------------------------------------------------------------
     function handle_mRNA_data(msg) {
 
        console.log("handling mRNA data");
-       mrnaVals = msg.payload.mtx[0];
-       genes = Object.keys(mrnaVals);
-
+       var mtx = JSON.parse(msg.payload.mtx)
+       result = transformMatrixToPatientOrientedNamedList(mtx)
+       mRNA = result.list;
+       genes = result.genes;
+       tissues = result.tissues;
+       addTissueIDsToSelector(tissues);
+       console.log("expr for " + genes.length + " genes, and " + tissues.length + " tissues");
        var noa = {};  // new node attributes to assign in the network
 
+
+       toi = tissues[tissues.length-1] // will come from menu
        for(var g=0; g < genes.length; g++){
           gene = genes[g];
-          newScore = mrnaVals[gene];
+          newScore = mRNA[toi][gene][0];
           console.log("  set score of " + gene + " to " + newScore);
-          nodeID = cwAngio.nodes('[geneSymbol="KDR"]')[0].data("id")
+          filterString = '[geneSymbol="' + gene + '"]'
+          console.log("  finding id for geneSymbol: " + gene);
+          nodeID = cwAngio.nodes(filterString)[0].data("id");
           noa[nodeID] = {score: newScore};
           } // for g
       // cwAngio.nodes('[geneSymbol="KDR"]')[0].data()
@@ -1535,34 +1602,14 @@ angiogenesisVizmap = [ {
       "border-width" : 5.0
     }
   }, {
-    "selector" : "node[score > 4.6]",
+    "selector" : "node[score > 0.0][score < 12]",
     "css" : {
-      "background-color" : "rgb(0,255,0)"
+      "background-color" : "mapData(score,0.0,12,rgb(255,255,255),rgb(255,0,0))"
     }
   }, {
-    "selector" : "node[score = 4.6]",
+    "selector" : "node[score > -8.0][score < 0.0]",
     "css" : {
-      "background-color" : "rgb(0,255,0)"
-    }
-  }, {
-    "selector" : "node[score > 0.0][score < 4.6]",
-    "css" : {
-      "background-color" : "mapData(score,0.0,4.6,rgb(255,255,255),rgb(0,255,0))"
-    }
-  }, {
-    "selector" : "node[score > -2.6][score < 0.0]",
-    "css" : {
-      "background-color" : "mapData(score,-2.6,0.0,rgb(255,77,77),rgb(255,255,255))"
-    }
-  }, {
-    "selector" : "node[score = -2.6]",
-    "css" : {
-      "background-color" : "rgb(255,77,77)"
-    }
-  }, {
-    "selector" : "node[score < -2.6]",
-    "css" : {
-      "background-color" : "rgb(255,77,77)"
+      "background-color" : "mapData(score,-8.0,0.0,rgb(0,255,0),rgb(255,255,255))"
     }
   }, {
     "selector" : "node[copyNumber = '2']",
@@ -3438,369 +3485,7 @@ angiogenesisVizmap = [ {
       "line-color" : "rgb(255,0,0)"
     }
   } ]
-}, {
-  "title" : "Nested Network Style",
-  "style" : [ {
-    "selector" : "node",
-    "css" : {
-      "text-opacity" : 1.0,
-      "width" : 70.0,
-      "border-opacity" : 0.7450980392156863,
-      "background-color" : "rgb(153,255,153)",
-      "background-opacity" : 0.5882352941176471,
-      "font-size" : 13,
-      "shape" : "ellipse",
-      "border-width" : 2.0,
-      "border-color" : "rgb(0,153,0)",
-      "color" : "rgb(0,0,0)",
-      "height" : 30.0,
-      "text-valign" : "center",
-      "text-halign" : "center",
-      "font-family" : "SansSerif",
-      "font-weight" : "normal",
-      "content" : "data(name)"
-    }
-  }, {
-    "selector" : "node[has_nested_network = 'true']",
-    "css" : {
-      "shape" : "rectangle"
-    }
-  }, {
-    "selector" : "node[has_nested_network = 'true']",
-    "css" : {
-      "border-width" : 5.0
-    }
-  }, {
-    "selector" : "node[has_nested_network = 'true']",
-    "css" : {
-      "text-valign" : "bottom"
-    }
-  }, {
-    "selector" : "node[has_nested_network = 'true']",
-    "css" : {
-      "background-color" : "rgb(255,255,255)"
-    }
-  }, {
-    "selector" : "node[has_nested_network = 'true']",
-    "css" : {
-      "border-color" : "rgb(0,102,204)"
-    }
-  }, {
-    "selector" : "node[has_nested_network = 'true']",
-    "css" : {
-      "color" : "rgb(0,102,204)"
-    }
-  }, {
-    "selector" : "node[has_nested_network = 'true']",
-    "css" : {
-      "width" : 60.0,
-      "height" : 60.0
-    }
-  }, {
-    "selector" : "node:selected",
-    "css" : {
-      "background-color" : "rgb(255,255,0)"
-    }
-  }, {
-    "selector" : "edge",
-    "css" : {
-      "target-arrow-shape" : "none",
-      "color" : "rgb(0,0,0)",
-      "target-arrow-color" : "rgb(0,0,0)",
-      "font-size" : 10,
-      "width" : 2.0,
-      "line-color" : "rgb(51,51,51)",
-      "font-family" : "Dialog",
-      "font-weight" : "normal",
-      "content" : "",
-      "text-opacity" : 1.0,
-      "line-style" : "solid",
-      "opacity" : 1.0,
-      "source-arrow-color" : "rgb(0,0,0)",
-      "source-arrow-shape" : "none"
-    }
-  }, {
-    "selector" : "edge:selected",
-    "css" : {
-      "line-color" : "rgb(255,0,0)"
-    }
-  } ]
-}, {
-  "title" : "default",
-  "style" : [ {
-    "selector" : "node",
-    "css" : {
-      "text-opacity" : 1.0,
-      "width" : 70.0,
-      "border-opacity" : 1.0,
-      "content" : "",
-      "background-color" : "rgb(255,255,255)",
-      "background-opacity" : 1.0,
-      "font-size" : 20,
-      "shape" : "ellipse",
-      "border-width" : 1.0,
-      "border-color" : "rgb(0,0,0)",
-      "color" : "rgb(0,0,0)",
-      "height" : 30.0,
-      "text-valign" : "center",
-      "text-halign" : "center",
-      "font-family" : "SansSerif",
-      "font-weight" : "bold"
-    }
-  }, {
-    "selector" : "node:selected",
-    "css" : {
-      "background-color" : "rgb(255,255,0)"
-    }
-  }, {
-    "selector" : "edge",
-    "css" : {
-      "target-arrow-shape" : "triangle",
-      "color" : "rgb(0,0,0)",
-      "target-arrow-color" : "rgb(0,0,0)",
-      "font-size" : 10,
-      "width" : 1.0,
-      "line-color" : "rgb(255,255,255)",
-      "font-family" : "Dialog",
-      "font-weight" : "normal",
-      "content" : "",
-      "text-opacity" : 1.0,
-      "line-style" : "solid",
-      "opacity" : 1.0,
-      "source-arrow-color" : "rgb(0,0,0)",
-      "source-arrow-shape" : "triangle"
-    }
-  }, {
-    "selector" : "edge:selected",
-    "css" : {
-      "line-color" : "rgb(255,0,0)"
-    }
-  } ]
-}, {
-  "title" : "Minimal",
-  "style" : [ {
-    "selector" : "node",
-    "css" : {
-      "text-opacity" : 1.0,
-      "width" : 70.0,
-      "border-opacity" : 1.0,
-      "content" : "",
-      "background-color" : "rgb(255,255,255)",
-      "background-opacity" : 1.0,
-      "font-size" : 12,
-      "shape" : "rectangle",
-      "border-width" : 0.0,
-      "border-color" : "rgb(0,0,0)",
-      "color" : "rgb(0,0,0)",
-      "height" : 30.0,
-      "text-valign" : "center",
-      "text-halign" : "center",
-      "font-family" : "Dialog",
-      "font-weight" : "normal"
-    }
-  }, {
-    "selector" : "node:selected",
-    "css" : {
-      "background-color" : "rgb(255,255,0)"
-    }
-  }, {
-    "selector" : "edge",
-    "css" : {
-      "target-arrow-shape" : "none",
-      "color" : "rgb(0,0,0)",
-      "target-arrow-color" : "rgb(0,0,0)",
-      "font-size" : 10,
-      "width" : 4.0,
-      "line-color" : "rgb(51,51,51)",
-      "font-family" : "Dialog",
-      "font-weight" : "normal",
-      "content" : "",
-      "text-opacity" : 1.0,
-      "line-style" : "solid",
-      "opacity" : 1.0,
-      "source-arrow-color" : "rgb(0,0,0)",
-      "source-arrow-shape" : "none"
-    }
-  }, {
-    "selector" : "edge:selected",
-    "css" : {
-      "line-color" : "rgb(255,0,0)"
-    }
-  } ]
-}, {
-  "title" : "Solid",
-  "style" : [ {
-    "selector" : "node",
-    "css" : {
-      "text-opacity" : 0.6274509803921569,
-      "width" : 70.0,
-      "border-opacity" : 1.0,
-      "background-color" : "rgb(102,102,102)",
-      "background-opacity" : 1.0,
-      "font-size" : 18,
-      "shape" : "ellipse",
-      "border-width" : 0.0,
-      "border-color" : "rgb(0,0,0)",
-      "color" : "rgb(0,0,0)",
-      "height" : 30.0,
-      "text-valign" : "bottom",
-      "text-halign" : "center",
-      "font-family" : "Dialog",
-      "font-weight" : "normal",
-      "content" : "data(name)"
-    }
-  }, {
-    "selector" : "node:selected",
-    "css" : {
-      "background-color" : "rgb(255,255,0)"
-    }
-  }, {
-    "selector" : "edge",
-    "css" : {
-      "target-arrow-shape" : "none",
-      "color" : "rgb(102,102,102)",
-      "target-arrow-color" : "rgb(0,0,0)",
-      "font-size" : 10,
-      "width" : 12.0,
-      "line-color" : "rgb(204,204,204)",
-      "font-family" : "Dialog",
-      "font-weight" : "normal",
-      "text-opacity" : 0.7450980392156863,
-      "line-style" : "solid",
-      "opacity" : 1.0,
-      "source-arrow-color" : "rgb(0,0,0)",
-      "source-arrow-shape" : "none",
-      "content" : "data(interaction)"
-    }
-  }, {
-    "selector" : "edge:selected",
-    "css" : {
-      "line-color" : "rgb(255,0,0)"
-    }
-  } ]
-}, {
-  "title" : "Universe",
-  "style" : [ {
-    "selector" : "node",
-    "css" : {
-      "text-opacity" : 0.7058823529411765,
-      "width" : 100.0,
-      "border-opacity" : 1.0,
-      "background-color" : "rgb(0,0,0)",
-      "background-opacity" : 0.0,
-      "font-size" : 20,
-      "shape" : "ellipse",
-      "border-width" : 0.0,
-      "border-color" : "rgb(0,0,0)",
-      "color" : "rgb(255,255,204)",
-      "height" : 30.0,
-      "text-valign" : "center",
-      "text-halign" : "center",
-      "font-family" : "Monospaced",
-      "font-weight" : "bold",
-      "content" : "data(name)"
-    }
-  }, {
-    "selector" : "node:selected",
-    "css" : {
-      "background-color" : "rgb(255,255,0)"
-    }
-  }, {
-    "selector" : "edge",
-    "css" : {
-      "target-arrow-shape" : "none",
-      "color" : "rgb(0,0,0)",
-      "target-arrow-color" : "rgb(0,0,0)",
-      "font-size" : 10,
-      "width" : 3.0,
-      "line-color" : "rgb(255,255,255)",
-      "font-family" : "Dialog",
-      "font-weight" : "normal",
-      "content" : "",
-      "text-opacity" : 1.0,
-      "line-style" : "dashed",
-      "opacity" : 0.39215686274509803,
-      "source-arrow-color" : "rgb(0,0,0)",
-      "source-arrow-shape" : "none"
-    }
-  }, {
-    "selector" : "edge:selected",
-    "css" : {
-      "line-color" : "rgb(255,0,0)"
-    }
-  } ]
-}, {
-  "title" : "Sample1",
-  "style" : [ {
-    "selector" : "node",
-    "css" : {
-      "text-opacity" : 1.0,
-      "width" : 70.0,
-      "border-opacity" : 1.0,
-      "background-color" : "rgb(204,204,255)",
-      "background-opacity" : 1.0,
-      "font-size" : 12,
-      "shape" : "ellipse",
-      "border-width" : 0.0,
-      "border-color" : "rgb(0,0,0)",
-      "color" : "rgb(0,0,0)",
-      "height" : 30.0,
-      "text-valign" : "center",
-      "text-halign" : "center",
-      "font-family" : "Dialog",
-      "font-weight" : "bold",
-      "content" : "data(name)"
-    }
-  }, {
-    "selector" : "node:selected",
-    "css" : {
-      "background-color" : "rgb(255,255,0)"
-    }
-  }, {
-    "selector" : "edge",
-    "css" : {
-      "target-arrow-shape" : "none",
-      "color" : "rgb(0,0,0)",
-      "target-arrow-color" : "rgb(0,0,0)",
-      "font-size" : 10,
-      "width" : 1.0,
-      "line-color" : "rgb(0,0,0)",
-      "font-family" : "Dialog",
-      "font-weight" : "normal",
-      "text-opacity" : 1.0,
-      "line-style" : "solid",
-      "opacity" : 1.0,
-      "source-arrow-color" : "rgb(0,0,0)",
-      "source-arrow-shape" : "none",
-      "content" : "data(interaction)"
-    }
-  }, {
-    "selector" : "edge[interaction = 'pd']",
-    "css" : {
-      "line-style" : "dashed"
-    }
-  }, {
-    "selector" : "edge[interaction = 'pp']",
-    "css" : {
-      "line-style" : "solid"
-    }
-  }, {
-    "selector" : "edge[interaction = 'pd']",
-    "css" : {
-      "line-color" : "rgb(255,0,51)"
-    }
-  }, {
-    "selector" : "edge[interaction = 'pp']",
-    "css" : {
-      "line-color" : "rgb(0,204,0)"
-    }
-  }, {
-    "selector" : "edge:selected",
-    "css" : {
-      "line-color" : "rgb(255,0,0)"
-    }
-  } ]
-} ]
+}]
 
 </script>
 <style>
@@ -3847,6 +3532,9 @@ div {
    <div id="angioGenesisButtonDiv">
       <button id="angiogenesisDemoVizUpdateButton">Demo viz changes</button>
       <input type="text" id="angiogenesisSearchBox"></input>
+      <label for="select">Select a sample:</label>
+      <select id="hypoxiaSampleSelector"></select>
+      <button id="hypoxiaMovieButton">Movie</button>
    </div>
    <div id="cwAngiogenesisDiv"></div>
    <span style="font-size:x-small">Last Modified: <span id=angioPathwaysDateModified style="font-size:x-small"></span></span>
