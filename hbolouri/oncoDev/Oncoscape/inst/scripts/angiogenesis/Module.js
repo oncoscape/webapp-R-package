@@ -71,7 +71,6 @@ var angioPathwaysModule = (function () {
         console.log("cwAngio.reset");
         cwAngio.reset();
         handleWindowResize();
-        //requestNanoStringExpressionData();
         } // cy.ready
        })
     .cytoscapePanzoom({ });   // need to learn about options
@@ -81,7 +80,7 @@ var angioPathwaysModule = (function () {
    function handleWindowResize () {
       console.log("angioPathways window resize: " + $(window).width() + ", " + $(window).height());
       cyDiv.width(0.95 * $(window).width());
-      cyDiv.height(0.8 * $(window).height());
+      cyDiv.height(0.9 * $(window).height());
       cwAngio.resize();
       cwAngio.fit(50);
       } // handleWindowResize
@@ -107,20 +106,30 @@ var angioPathwaysModule = (function () {
       } // toggleEdgeSelection
 
    //----------------------------------------------------------------------------------------------------
-   angiogenesisDemoVizChanges = function() {
+   // initially, a random set of patient, tissue of sample ids.  soon set by humans
+   // these five are those from   fivenum(matrix[, "KDR"])
+   //   TCGA.02.0058  TCGA.06.0132  TCGA.02.0034  TCGA.12.0657  TCGA.06.0155 
+   //    -3.10414205   -0.62431669    0.05214659    0.60673149    4.43374413 
+   function entities() {
+      return(["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155"]);
+      }
+   //----------------------------------------------------------------------------------------------------
+   function angiogenesisDemoVizChanges() {
       console.log("===== entering angiogenesisDemoVizChanges");
+      request_mRNA_data(entities(), geneSymbols());   // entities: patient, tissue or sample ids
+      //nodeIds = nodeIDs();
+      //var noa = {};
 
-     nodeIds = nodeIDs()
-     var noa = {};
+      //for(var i=0; i < nodeIds.length; i++){
+      //   newScore = getRandomFloat(-8, 8);
+      //   newCopyNumberIndex = getRandomInt(0,3);
+      //   newCopyNumber = ["-2", "-1", "0", "1", "2"][newCopyNumberIndex]
+      //   noa[nodeIds[i]] = {score: newScore, copyNumber: newCopyNumber};
+      //   } // for i
 
-     for(var i=0; i < nodeIds.length; i++){
-        newScore = getRandomFloat(-8, 8);
-        newCopyNumberIndex = getRandomInt(0,3);
-        newCopyNumber = ["-2", "-1", "0", "1", "2"][newCopyNumberIndex]
-        noa[nodeIds[i]] = {score: newScore, copyNumber: newCopyNumber};
-       } // for i
-     cwAngio.batchData(noa);
-     } // angiogenesisDemoVizChanges
+      //cwAngio.batchData(noa);
+
+      } // angiogenesisDemoVizChanges
 
    //----------------------------------------------------------------------------------------------------
    function nodeIDs(){
@@ -134,7 +143,8 @@ var angioPathwaysModule = (function () {
      } // nodeIDs
 
    //----------------------------------------------------------------------------------------------------
-   function nodeNames(){
+   function nodeNames() {
+
      nodes = cwAngio.filter("node:visible");
      result = [];
      for(var i=0; i < nodes.length; i++){
@@ -144,8 +154,23 @@ var angioPathwaysModule = (function () {
      } // nodeNames
 
    //----------------------------------------------------------------------------------------------------
+   function geneSymbols() {
+
+     nodes = cwAngio.filter("node");
+     result = [];
+     for(var i=0; i < nodes.length; i++){
+       sym = nodes[i].data().geneSymbol
+       if(typeof(sym) != "undefined")
+          result.push(sym)
+       } // for i
+     return(result)
+     } // geneSymbols
+
+   //----------------------------------------------------------------------------------------------------
    function doSearch(e) {
+
       var keyCode = e.keyCode || e.which;
+
       if (keyCode == 13) {
          searchString = searchBox.val();
          console.log("searchString: " + searchString);
@@ -160,8 +185,53 @@ var angioPathwaysModule = (function () {
                } // if searchString matched beginning of node
             } // for i
          } // if 13 (return key)
+
       } // doSearch
-//----------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------
+    function request_mRNA_data(entities, features) {
+
+      msg = {cmd:"get_mRNA_data",
+              callback: "handle_mRNA_data",
+              status:"request",
+              payload:{entities: entities, features: features}
+              };
+       msg.json = JSON.stringify(msg);
+       socket.send(msg.json);
+       }
+
+    //----------------------------------------------------------------------------------------------------
+    function handle_mRNA_data(msg) {
+
+       console.log("handling mRNA data");
+       mrnaVals = msg.payload.mtx[0];
+       genes = Object.keys(mrnaVals);
+
+       var noa = {};  // new node attributes to assign in the network
+
+       for(var g=0; g < genes.length; g++){
+          gene = genes[g];
+          newScore = mrnaVals[gene];
+          console.log("  set score of " + gene + " to " + newScore);
+          //filterString = 
+          nodeID = cwAngio.nodes('[geneSymbol="KDR"]')[0].data("id")
+          noa[nodeID] = {score: newScore};
+          } // for g
+      // cwAngio.nodes('[geneSymbol="KDR"]')[0].data()
+      // nodeIds = nodeIDs();
+      // var noa = {};
+      // for(var i=0; i < nodeIds.length; i++){
+      //   debugger;
+      //   newScore = getRandomFloat(-8, 8);
+      //   newCopyNumberIndex = getRandomInt(0,3);
+      //   newCopyNumber = ["-2", "-1", "0", "1", "2"][newCopyNumberIndex]
+      //   noa[nodeIds[i]] = {score: newScore, copyNumber: newCopyNumber};
+      //   } // for i
+
+       cwAngio.batchData(noa);
+
+       } 
+
+    //----------------------------------------------------------------------------------------------------
     function SetModifiedDate(){
 
         msg = {cmd:"getModuleModificationDate",
@@ -171,8 +241,8 @@ var angioPathwaysModule = (function () {
                };
         msg.json = JSON.stringify(msg);
         socket.send(msg.json);
-    }
-//----------------------------------------------------------------------------------------------------
+        }
+    //----------------------------------------------------------------------------------------------------
     function DisplayAngioPathwaysModifiedDate(msg){
        document.getElementById("angioPathwaysDateModified").innerHTML = msg.payload;
        }
@@ -182,7 +252,10 @@ var angioPathwaysModule = (function () {
      init: function(){
        onReadyFunctions.push(initializeUI);
        addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
+       addJavascriptMessageHandler("handle_mRNA_data", handle_mRNA_data);
        socketConnectedFunctions.push(SetModifiedDate);
+          // enable this only if you want data overlay at start up, without explicit request
+       //socketConnectedFunctions.push(request_mRNA_data);
        }
      };
 
