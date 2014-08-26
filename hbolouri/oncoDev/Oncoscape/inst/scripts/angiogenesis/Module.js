@@ -6,17 +6,22 @@ var angioPathwaysModule = (function () {
 
   var cyDiv;
   var viewAbstractsButton, zoomSelectedButton, demoVizChangesButton;
-  var sampleMenu, movieButton;
+  var tissueMenu, movieButton;
   var searchBox;
   var mouseOverReadout;
   var edgeSelectionOn = false;
+  var expressionData;   // consists of a gene list, a tissue list, and the data (a list of 
+                        // gene/value pairs, each list named by a tissue (patient) id
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
       cyDiv = $("#cwAngiogenesisDiv");
       //viewAbstractsButton = $("#cwAngioViewAbstractsButton");
       //zoomSelectedButton  = $("#cwAngioZoomSelectedButton");
-      sampleMenu = $("#hypoxiaSampleSelector");
+
+      tissueMenu = $("#hypoxiaSampleSelector");
+      tissueMenu.change(tissueSelectorChanged);
+
       movieButton = $("#hypixaMovieButton");
       demoVizChangesButton = $("#angiogenesisDemoVizUpdateButton")
       demoVizChangesButton.click(angiogenesisDemoVizChanges);
@@ -129,7 +134,7 @@ var angioPathwaysModule = (function () {
          namedList[tissueName] = row;
          } // for r
 
-      result = {genes: geneNames, tissues: tissueNames, list: namedList};
+      result = {genes: geneNames, tissues: tissueNames, values: namedList};
       return(result);
 
       } // transformMatrixToPatientOrientedNamedList
@@ -141,27 +146,17 @@ var angioPathwaysModule = (function () {
    // these five are those from   fivenum(matrix[, "KDR"])
    //   TCGA.02.0058  TCGA.06.0132  TCGA.02.0034  TCGA.12.0657  TCGA.06.0155 
    //    -3.10414205   -0.62431669    0.05214659    0.60673149    4.43374413 
-   function entities() {
+   function demoTissues() {
       which = getRandomInt(1,4);
-      patients = ["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155"];
-      return(patients.slice(0,which));
+      patients = ["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155",
+                  "TCGA.06.0155", "TCGA.06.0162", "TCGA.06.1087", "TCGA.12.0778", 
+                  "TCGA.14.0871", "TCGA.06.0192"];
+      return(patients);
       }
    //----------------------------------------------------------------------------------------------------
    function angiogenesisDemoVizChanges() {
       console.log("===== entering angiogenesisDemoVizChanges");
-      request_mRNA_data(entities(), geneSymbols());   // entities: patient, tissue or sample ids
-      //nodeIds = nodeIDs();
-      //var noa = {};
-
-      //for(var i=0; i < nodeIds.length; i++){
-      //   newScore = getRandomFloat(-8, 8);
-      //   newCopyNumberIndex = getRandomInt(0,3);
-      //   newCopyNumber = ["-2", "-1", "0", "1", "2"][newCopyNumberIndex]
-      //   noa[nodeIds[i]] = {score: newScore, copyNumber: newCopyNumber};
-      //   } // for i
-
-      //cwAngio.batchData(noa);
-
+      request_mRNA_data(demoTissues(), geneSymbols());   // entities: patient, tissue or sample ids
       } // angiogenesisDemoVizChanges
 
    //----------------------------------------------------------------------------------------------------
@@ -234,7 +229,7 @@ var angioPathwaysModule = (function () {
 
     //----------------------------------------------------------------------------------------------------
     function addTissueIDsToSelector (tissueIDs) {
-      sampleMenu.empty();
+      tissueMenu.empty();
       if(tissueIDs.length == 0) {
          alert("angiogenesis received empty tissueIDs list")
          return;
@@ -244,7 +239,7 @@ var angioPathwaysModule = (function () {
 
       //optionMarkup = "<option> average (of " + tissueIDs.length + ") </option>";
       optionMarkup = "<option>average</option>";
-      sampleMenu.append(optionMarkup);
+      tissueMenu.append(optionMarkup);
         // msg = {cmd: "requestAverageExpression", status: "request", payload: tissueIDs};
         // console.log(msg)
         //   msg.json = JSON.stringify(msg);
@@ -254,7 +249,7 @@ var angioPathwaysModule = (function () {
       for(var i=0; i < tissueIDs.length; i++){
          tissueName = tissueIDs[i]
          optionMarkup = "<option>" + tissueName + "</option>";
-         sampleMenu.append(optionMarkup);
+         tissueMenu.append(optionMarkup);
          } // for i
 
      } // addTissueIDsToSelector
@@ -262,26 +257,43 @@ var angioPathwaysModule = (function () {
     function handle_mRNA_data(msg) {
 
        console.log("handling mRNA data");
-       var mtx = JSON.parse(msg.payload.mtx)
-       result = transformMatrixToPatientOrientedNamedList(mtx)
-       mRNA = result.list;
-       genes = result.genes;
-       tissues = result.tissues;
-       addTissueIDsToSelector(tissues);
+       var mtx = JSON.parse(msg.payload.mtx);
+       expressionData = transformMatrixToPatientOrientedNamedList(mtx);
+       addTissueIDsToSelector(expressionData.tissues);
+
+       } // handle_mRNA_data
+
+    //----------------------------------------------------------------------------------------------------
+    function tissueSelectorChanged() {
+
+       tissueID = tissueMenu.val()
+       displayTissue(tissueID);
+
+       } // tissueSelectorChanged
+
+    //----------------------------------------------------------------------------------------------------
+    function displayTissue(tissueID) {
+
+       if(expressionData.tissues.indexOf(tissueID) < 0){
+          alert(tissueId + " not found in current expressionData");
+          return;
+          }
+       mRNA = expressionData.values
+       genes = expressionData.genes;
+       tissues = expressionData.tissues;
        console.log("expr for " + genes.length + " genes, and " + tissues.length + " tissues");
        var noa = {};  // new node attributes to assign in the network
 
-
-       toi = tissues[tissues.length-1] // will come from menu
        for(var g=0; g < genes.length; g++){
           gene = genes[g];
-          newScore = mRNA[toi][gene][0];
+          newScore = mRNA[tissueID][gene][0];
           console.log("  set score of " + gene + " to " + newScore);
           filterString = '[geneSymbol="' + gene + '"]'
           console.log("  finding id for geneSymbol: " + gene);
           nodeID = cwAngio.nodes(filterString)[0].data("id");
           noa[nodeID] = {score: newScore};
           } // for g
+
       // cwAngio.nodes('[geneSymbol="KDR"]')[0].data()
       // nodeIds = nodeIDs();
       // var noa = {};
@@ -320,10 +332,11 @@ var angioPathwaysModule = (function () {
        addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
        addJavascriptMessageHandler("handle_mRNA_data", handle_mRNA_data);
        socketConnectedFunctions.push(SetModifiedDate);
-          // enable this only if you want data overlay at start up, without explicit request
-       //socketConnectedFunctions.push(request_mRNA_data);
-       }
-     };
+       if(typeof(window.tabsAppRunning) == "undefined") {
+          socketConnectedFunctions.push(angiogenesisDemoVizChanges)
+          }
+       } // init
+     }; 
 
    }); // angioPathwaysModule
 //----------------------------------------------------------------------------------------------------
