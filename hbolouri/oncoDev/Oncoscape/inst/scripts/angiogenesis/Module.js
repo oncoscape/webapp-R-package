@@ -12,6 +12,7 @@ var angioPathwaysModule = (function () {
   var edgeSelectionOn = false;
   var expressionData;   // consists of a gene list, a tissue list, and the data (a list of 
                         // gene/value pairs, each list named by a tissue (patient) id
+  var moviePlaying = false;
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -22,7 +23,9 @@ var angioPathwaysModule = (function () {
       tissueMenu = $("#hypoxiaSampleSelector");
       tissueMenu.change(tissueSelectorChanged);
 
-      movieButton = $("#hypixaMovieButton");
+      movieButton = $("#hypoxiaMovieButton");
+      movieButton.button();
+      movieButton.click(togglePlayMovie);
       demoVizChangesButton = $("#angiogenesisDemoVizUpdateButton")
       demoVizChangesButton.click(angiogenesisDemoVizChanges);
       searchBox = $("#angiogenesisSearchBox");
@@ -66,14 +69,7 @@ var angioPathwaysModule = (function () {
            console.log("pmid: " + pmid);
            openCenteredBrowserWindow("http://www.ncbi.nlm.nih.gov/pubmed/?term=" + pmid, "pubmed abstract", 800, 600)
            });
-        //$("#cwAngioMovieButton").button()
-        //zoomSelectedButton.button();
-        //zoomSelectedButton.click(zoomSelection);
-        //viewAbstractsButton.button();
-        //viewAbstractsButton.click(toggleEdgeSelection);
         searchBox.keydown(doSearch);
-        //$("#cwAngioMovieButton").click(cwAngiotogglePlayMovie);
-        //$("#angioPathwaysSearchBox").keydown(readAngioPathwaysSearchBox);
 
         cwAngio.edges().unselectify();
         console.log("cwAngio.reset");
@@ -140,19 +136,17 @@ var angioPathwaysModule = (function () {
       } // transformMatrixToPatientOrientedNamedList
 
    //----------------------------------------------------------------------------------------------------
-
-   
-   // initially, a random set of patient, tissue of sample ids.  soon set by humans
-   // these five are those from   fivenum(matrix[, "KDR"])
-   //   TCGA.02.0058  TCGA.06.0132  TCGA.02.0034  TCGA.12.0657  TCGA.06.0155 
-   //    -3.10414205   -0.62431669    0.05214659    0.60673149    4.43374413 
+     // initially, a random set of patient, tissue of sample ids.  soon set by humans
+     // these five are those from   fivenum(matrix[, "KDR"])
+     //   TCGA.02.0058  TCGA.06.0132  TCGA.02.0034  TCGA.12.0657  TCGA.06.0155 
+     //    -3.10414205   -0.62431669    0.05214659    0.60673149    4.43374413 
    function demoTissues() {
-      which = getRandomInt(1,4);
       patients = ["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155",
                   "TCGA.06.0155", "TCGA.06.0162", "TCGA.06.1087", "TCGA.12.0778", 
                   "TCGA.14.0871", "TCGA.06.0192"];
       return(patients);
       }
+
    //----------------------------------------------------------------------------------------------------
    function angiogenesisDemoVizChanges() {
       console.log("===== entering angiogenesisDemoVizChanges");
@@ -195,6 +189,35 @@ var angioPathwaysModule = (function () {
      } // geneSymbols
 
    //----------------------------------------------------------------------------------------------------
+   function togglePlayMovie() {
+
+      allCurrentTissues = tissueMenu.children().map(function() {return $(this).val();}).get();
+      currentTissueIndex = 0;
+
+     oneFrame = function(){
+        tissueIndex = currentTissueIndex  % allCurrentTissues.length;
+        tissueName =  allCurrentTissues[tissueIndex]
+        console.log(" movie about to display frame " + tissueIndex + ", " + tissueName);
+        currentTissueIndex = currentTissueIndex + 1;
+        tissueMenu.val(tissueName);
+        tissueSelectorChanged()
+        } // oneFrame
+
+     if(moviePlaying){
+        moviePlaying = false;
+        clearInterval(movieIntervalID);
+        movieButton.button( "option", "label", "Movie");
+        }
+     else{
+        moviePlaying = true;
+        movieButton.button( "option", "label", "Stop ");
+        movieIntervalID = setInterval(oneFrame, 1500);
+        }
+   
+
+    } // cwGBMtogglePlayMovie
+   //----------------------------------------------------------------------------------------------------
+
    function doSearch(e) {
 
       var keyCode = e.keyCode || e.which;
@@ -238,8 +261,8 @@ var angioPathwaysModule = (function () {
       // every set of tissueIDs needs an aggregate, or average tissue
 
       //optionMarkup = "<option> average (of " + tissueIDs.length + ") </option>";
-      optionMarkup = "<option>average</option>";
-      tissueMenu.append(optionMarkup);
+      //optionMarkup = "<option>average</option>";
+      //tissueMenu.append(optionMarkup);
         // msg = {cmd: "requestAverageExpression", status: "request", payload: tissueIDs};
         // console.log(msg)
         //   msg.json = JSON.stringify(msg);
