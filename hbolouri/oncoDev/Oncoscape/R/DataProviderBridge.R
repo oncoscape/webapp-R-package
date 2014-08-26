@@ -8,6 +8,7 @@ addRMessageHandler("DataProviderBridge.ping",         "DataProviderBridgePing") 
 #addRMessageHandler("get_MSK_GBM_mRNA_Data",           "get_MSK_GBM_mRNA_Data")
 #addRMessageHandler("get_MSK_GBM_mRNA_Average",        "get_MSK_GBM_mRNA_Average")
 addRMessageHandler("getTabularPatientHistory",         "getTabularPatientHistory")
+addRMessageHandler("getPatientHistoryDataVector",      "getPatientHistoryDataVector")
 addRMessageHandler("createNewUserID",                  "createNewUserID")
 addRMessageHandler("UserIDexists",                     "UserIDexists")
 addRMessageHandler("addNewUserToList",                 "addNewUserToList")
@@ -302,6 +303,42 @@ getTabularPatientHistory <- function(WS, msg)
    return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(colnames=colnames, mtx=matrix))
 
    printf("DataProviderBridge.R, getTabularPatientHistory responding to '%s' with '%s'", msg$cmd, msg$callback);
+   
+   sendOutput(DATA=toJSON(return.msg), WS=WS)
+
+} # getTabularPatientHistory
+#----------------------------------------------------------------------------------------------------
+getPatientHistoryDataVector <- function(WS, msg)
+{
+   signature <- "patientHistoryTable";
+   
+   if(!signature %in% ls(DATA.PROVIDERS)){
+       error.message <- sprintf("Oncoscape DataProviderBridge error:  no %s provider defined", signature)
+       return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       }
+
+   print("---- current provider keys:")
+   print(ls(DATA.PROVIDERS))
+   
+   patientHistoryProvider <- DATA.PROVIDERS$patientHistoryTable
+   tbl <- getTable(patientHistoryProvider)
+
+      # has a recognizable column been requested?
+   columnOfInterest <- msg$payload
+   if(!columnOfInterest %in% colnames(tbl)){
+      error.message <- sprintf("Oncoscape DataProviderBridge patientHistoryDataVector error:  '%s' is not a column title", columnOfInterest);
+      return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")
+      sendOutput(DATA=toJSON(return.msg), WS=WS)
+      } # 
+       
+   return.cmd = msg$callback
+   result <- as.numeric(tbl[, columnOfInterest])
+   names(result) <- tbl$ID
+   printf("returning %d values from column %s", length(result), columnOfInterest)
+   return.msg <- list(cmd=msg$callback, callback="", status="success", payload=toJSON(result));
+
+   printf("DataProviderBridge.R, getPatientHistoryDataVector responding to '%s' with '%s'", msg$cmd, msg$callback);
    
    sendOutput(DATA=toJSON(return.msg), WS=WS)
 

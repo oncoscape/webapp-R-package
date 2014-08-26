@@ -29,9 +29,9 @@ runTests = function (levels)
     test_localFilePreparedTable()
     test_filterPatientHistory()
     test_getPatientClassification()
-    explore_timeLinesData()
+    test_getPatientHistoryDataVector()
 
-    test_calculatePairedDistributionsOfPatientHistoryData()
+    #test_calculatePairedDistributionsOfPatientHistoryData()
     
 } # runTests
 #----------------------------------------------------------------------------------------------------
@@ -150,6 +150,7 @@ explore_timeLinesData <- function()
    checkEquals(msg.incoming$status, "success")
 
    all.events <- (msg.incoming$payload)
+   browser()
    checkTrue(length(all.events) == 1513)
    x <- all.events[[1]]
    checkEquals(x$PatientID, "TCGA.02.0001")
@@ -177,21 +178,21 @@ test_calculatePairedDistributionsOfPatientHistoryData <- function()
    system("sleep 1")
    service(client)
 
-   pop1 <- msg.incoming$payload$pop1
-   pop2 <- msg.incoming$payload$pop2
-   checkTrue(length(pop1) > 10)
-   checkTrue(length(pop2) > 10)
-   checkEquals(length(intersect(names(pop1), names(pop2))), 0)
+   #pop1 <- msg.incoming$payload$pop1
+   #pop2 <- msg.incoming$payload$pop2
+   #checkTrue(length(pop1) > 10)
+   #checkTrue(length(pop2) > 10)
+   #checkEquals(length(intersect(names(pop1), names(pop2))), 0)
 
      # don't know what mean should be, in the general case, but the data should support
      # the calculation
 
-   pop1.mean <- mean(unlist(pop1, use.names=FALSE))
-   checkTrue(is.numeric(pop1.mean))
-   checkTrue(pop1.mean > 0.0)
-   pop2.mean <- mean(unlist(pop2, use.names=FALSE))
-   checkTrue(is.numeric(pop2.mean))
-   checkTrue(pop2.mean > 0.0)
+   #pop1.mean <- mean(unlist(pop1, use.names=FALSE))
+   #checkTrue(is.numeric(pop1.mean))
+   #checkTrue(pop1.mean > 0.0)
+   #pop2.mean <- mean(unlist(pop2, use.names=FALSE))
+   #checkTrue(is.numeric(pop2.mean))
+   #checkTrue(pop2.mean > 0.0)
 
       #----------------------------------------------------------------------------------
       # now do a 'real' run.  begin by getting some patientIDs from the currently loaded
@@ -199,34 +200,53 @@ test_calculatePairedDistributionsOfPatientHistoryData <- function()
       # patientHistoryTable: tbl://tcgaGBM/tbl.ptHistory.RData
       #----------------------------------------------------------------------------------
    
-   pop1 <- c("TCGA.02.0001", "TCGA.02.0003", "TCGA.02.0006", "TCGA.02.0007", "TCGA.02.0009", "TCGA.02.0010",
-             "TCGA.02.0011", "TCGA.02.0014", "TCGA.02.0021", "TCGA.02.0024")
-   pop2 <- c("TCGA.12.0703", "TCGA.12.0707", "TCGA.12.0769", "TCGA.12.0772", "TCGA.12.0773", "TCGA.12.0775",
-             "TCGA.12.0776", "TCGA.12.0778", "TCGA.12.0780",  "TCGA.15.0742")
-
-   checkEquals(length(intersect(pop1, pop2)), 0)
-
-   cmd <- "calculatePairedDistributionsOfPatientHistoryData"
-   status <- "request"
-   callback <- "pairedDistributionsPlot"
-   payload <- list(attribute="FirstProgression", pop1=pop1, pop2=pop2)
-
-   websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=payload)), client)
-   system("sleep 1")
-   service(client)
-
-       #----------------------------------------
-       # check the results
-       #----------------------------------------
-
-   pop1.vals <- msg.incoming$payload$pop1
-   pop2.vals <- msg.incoming$payload$pop2
-   checkEquals(names(pop1.vals), pop1)
-   checkEquals(names(pop2.vals), pop2)
-
-   checkEqualsNumeric(mean(as.numeric(pop1.vals)), 1.551, tol=1e-5)
-      # utter mystery: why is pop1 a numeric vector, and pop2 a list?
-   checkEquals(mean(unlist(pop2.vals, use.names=FALSE)), 0.8222222, tol=1e-5)
+   #pop1 <- c("TCGA.02.0001", "TCGA.02.0003", "TCGA.02.0006", "TCGA.02.0007", "TCGA.02.0009", "TCGA.02.0010",
+   #          "TCGA.02.0011", "TCGA.02.0014", "TCGA.02.0021", "TCGA.02.0024")
+   #pop2 <- c("TCGA.12.0703", "TCGA.12.0707", "TCGA.12.0769", "TCGA.12.0772", "TCGA.12.0773", "TCGA.12.0775",
+   #          "TCGA.12.0776", "TCGA.12.0778", "TCGA.12.0780",  "TCGA.15.0742")
+#
+#   checkEquals(length(intersect(pop1, pop2)), 0)
+#
+#   cmd <- "calculatePairedDistributionsOfPatientHistoryData"
+#   status <- "request"
+#   callback <- "pairedDistributionsPlot"
+#   payload <- list(attribute="FirstProgression", pop1=pop1, pop2=pop2)
+#
+#   websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=payload)), client)
+#   system("sleep 1")
+#   service(client)
+#
+#       #----------------------------------------
+#       # check the results
+#       #----------------------------------------
+#
+#   pop1.vals <- msg.incoming$payload$pop1
+#   pop2.vals <- msg.incoming$payload$pop2
+#   checkEquals(names(pop1.vals), pop1)
+#   checkEquals(names(pop2.vals), pop2)
+#
+#   checkEqualsNumeric(mean(as.numeric(pop1.vals)), 1.551, tol=1e-5)
+#      # utter mystery: why is pop1 a numeric vector, and pop2 a list?
+#   checkEquals(mean(unlist(pop2.vals, use.names=FALSE)), 0.8222222, tol=1e-5)
 
 } # test_calculatePairedDistributionsOfPatientHistoryData
+#----------------------------------------------------------------------------------------------------
+test_getPatientHistoryDataVector <- function()
+{
+   print("--- test_getPatientHistoryDataVector")
+   cmd <- "getPatientHistoryDataVector"
+   status <- "request"
+   callback <- "handlePatientHistoryDataVector"
+   payload <- "ageAtDx"
+   
+   websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=payload)), client)
+
+   system("sleep 1")
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   ages <- fromJSON(msg.incoming$payload)
+   checkTrue(length(ages) > 500)
+   checkTrue(mean(ages) > 40)   # almost 58 years on 25 aug 2014
+   
+} # test_getPatientHistoryDataVector
 #----------------------------------------------------------------------------------------------------
