@@ -19,6 +19,7 @@ addRMessageHandler("getPatientClassification",         "getPatientClassification
 addRMessageHandler("getCaisisPatientHistory",          "getCaisisPatientHistory")          # uses eventList (multi-flat, list of lists)
 addRMessageHandler("createRandomPatientPairedDistributionsForTesting", "createRandomPatientPairedDistributionsForTesting")
 addRMessageHandler("calculatePairedDistributionsOfPatientHistoryData", "calculatePairedDistributionsOfPatientHistoryData")
+addRMessageHandler("get_mRNA_data",                    "get_mRNA_data");
 #----------------------------------------------------------------------------------------------------
 DataProviderBridgePing <- function(WS, msg)
 {
@@ -305,6 +306,67 @@ getTabularPatientHistory <- function(WS, msg)
    sendOutput(DATA=toJSON(return.msg), WS=WS)
 
 } # getTabularPatientHistory
+#----------------------------------------------------------------------------------------------------
+get_mRNA_data <- function(WS, msg)
+{
+   signature <- "mRNA";
+   
+   if(!signature %in% ls(DATA.PROVIDERS)){
+       error.message <- sprintf("Oncoscape DataProviderBridge error:  no %s provider defined", signature)
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       }
+
+   printf("--- get_mRNA_data, msg fields: %s", paste(names(msg), collapse=","))
+   printf("    payload fields: %s", names(msg$payload))
+   
+   dataProvider <- DATA.PROVIDERS[[signature]];
+   payload <- msg$payload
+   
+     # entities and features fields can be empty, but must be present
+   if(!is.list(payload)) {
+       status <- "failure"
+       payload <- "no constraint fields in payload"
+       }
+
+   if(is.list(payload)){
+      constraint.fields <- sort(names(payload))
+      legal.constraint.fields <- constraint.fields == c("entities", "features")
+      if (any(!legal.constraint.fields)){
+          status <- "failure"
+          payload <- sprintf("payload fields not precisely 'entities', 'features': %s",
+                             paste(constraint.fields, collapse=", "))
+          }
+      else {
+         entities <- payload$entities
+         features <- payload$features
+         printf("entities: %s", paste(entities, collapse=","))
+         printf("features: %s", paste(features, collapse=","))
+         tbl <- getData(dataProvider, entities=entities, features=features)
+         matrix <- as.matrix(tbl)
+         printf("matrix dim: %d, %d", nrow(matrix), ncol(matrix))
+         return.cmd <- msg$callback
+         #return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(mtx=matrixToJSON(matrix)))
+         payload <- list(mtx=matrixToJSON(matrix))
+         status <- "success"
+         }
+       } # is.list(payload)
+
+
+   if(nrow(tbl) == 0) {
+      status <- "failure"
+      payload <- "empty table"
+      }
+
+   status <- "success"
+
+   return.msg <- list(cmd=msg$callback, callback="", status=status, payload=payload)
+
+   printf("DataProviderBridge.R, get_mRNA_data responding to '%s' with '%s'", msg$cmd, msg$callback);
+   
+   sendOutput(DATA=toJSON(return.msg), WS=WS)
+
+} # get_mRNA_data
 #----------------------------------------------------------------------------------------------------
 # msg$payload has 4 fields:
 #   ageAtDxMin, ageAtDxMax, overallSurvivalMin, overallSurvivalMax
