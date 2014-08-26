@@ -312,29 +312,62 @@ getPatientHistoryDataVector <- function(WS, msg)
 {
    signature <- "patientHistoryTable";
    
+   patientHistoryProvider <- DATA.PROVIDERS$patientHistoryTable
+   tbl <- getTable(patientHistoryProvider)
+
    if(!signature %in% ls(DATA.PROVIDERS)){
        error.message <- sprintf("Oncoscape DataProviderBridge error:  no %s provider defined", signature)
        return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")
        sendOutput(DATA=toJSON(return.msg), WS=WS)
+       return()
        }
 
-   print("---- current provider keys:")
-   print(ls(DATA.PROVIDERS))
-   
-   patientHistoryProvider <- DATA.PROVIDERS$patientHistoryTable
-   tbl <- getTable(patientHistoryProvider)
+      # payload must be a list
+   payload <- msg$payload;
+   printf("--- payload");
+   print(payload)
+   if(!is.list(payload)) {
+       status <- "failure"
+       error.message <- "need two fields in payload: 'colname' and 'patients'"
+       return.msg <- list(cmd=msg$callback, callback="", status="error", payload=error.message)
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       return()
+       }
 
-      # has a recognizable column been requested?
-   columnOfInterest <- msg$payload
+   printf("checked for two fields");
+      # list must have two fields
+   constraint.fields <- sort(names(payload))
+   legal.constraint.fields <- constraint.fields == c("colname", "patients")
+   if (any(!legal.constraint.fields)){
+      status <- "failure"
+      error.message <- sprintf("payload fields not precisely 'colname', 'patients': %s",
+                               paste(constraint.fields, collapse=", "))
+      return.msg <- list(cmd=msg$callback, callback="", status="error", payload=error.message)
+      sendOutput(DATA=toJSON(return.msg), WS=WS)
+      return()
+      }
+   
+   printf("extracting payload field values");
+   patients <- payload$patients
+   print(patients)
+   if(all(nchar(patients) == 0))
+      patients <- NA
+       
+   columnOfInterest <- payload$colname
+   printf("getting colname: %s", columnOfInterest)
    if(!columnOfInterest %in% colnames(tbl)){
       error.message <- sprintf("Oncoscape DataProviderBridge patientHistoryDataVector error:  '%s' is not a column title", columnOfInterest);
       return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")
       sendOutput(DATA=toJSON(return.msg), WS=WS)
+      return()
       } # 
        
    return.cmd = msg$callback
    result <- as.numeric(tbl[, columnOfInterest])
    names(result) <- tbl$ID
+   if(!is.na(patients))
+      result <- result[patients];
+       
    printf("returning %d values from column %s", length(result), columnOfInterest)
    return.msg <- list(cmd=msg$callback, callback="", status="success", payload=toJSON(result));
 
