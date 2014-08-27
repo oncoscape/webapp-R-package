@@ -1,0 +1,8 @@
+include(../../scripts/index.common)
+include(../../scripts/common.js)
+include(../../scripts/UserSettings.js)
+include(Module.js)
+<body>
+include(widget.html)
+</body>
+</html>

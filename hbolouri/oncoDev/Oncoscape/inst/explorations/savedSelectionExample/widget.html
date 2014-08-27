@@ -1,0 +1,15 @@
+
+<div id="SelectionExampleDiv">
+  <button id="toSavedSelectionButton">Save Random Selection</button>
+  <span id="useSavedSelectionButton" type="button">Use Selection</span>
+  <br></br><br></br>
+  <div id="showNewSelection"></div>
+  <br></br><br></br>
+  <p>Note that the first saved selection will not appear as the default until the 
+     menu is in "focus" (e.g. clicked). To make the menu update after the selection 
+     has been stored, the tab must be alerted.  If we use multiple function calls
+     for the message handler, a tab may register to receive this status update.  
+     Until then, I have set up an Event listener within the UserSettings.js file
+     "UpdateSelectionListeners" where each tab can call their public function
+     for updating the menu, e.g. "UpdateSelectionMenu"
+</div>
