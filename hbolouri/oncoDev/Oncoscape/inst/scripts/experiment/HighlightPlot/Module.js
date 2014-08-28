@@ -2,17 +2,24 @@
 // task:  establish how existing points in a d3 plot can be selected and highlighted programmatically.
 //   a) create minimal d3 xy plot, from data hard-coded into your Module.js
 //   b) that hard-coded data should be defined within a function call, "getRandomPoints(count)"
-//   b) write a function "selectPoints(listOfPoints, clearExistingSelectionFirst)"
-//   c) add a button which calls a function creating a random subset from getRandomPoints:
-//          getRandomSubset(count)
-//   d) add a button which clears any existing selection
+//   c) write a function "selectPoints(listOfPoints, clearExistingSelectionFirst)"
+//      the listOfPoints needs to be a proper subset of the current points you have displayed, but
+//      since someone could send you bad data, always check these points, and use only the 
+//      intersection of listOfPoints with the points currently displayed
+//   d) add a button which calls this selectPoints function.  this simulates the json message coming in from Oncoscape
+//   3) add a button which clears any existing selection
 //
 // Note that the button in d, and the "clearExistingSelectionFirst" (if true) will call the same function,
 // "clearSelection()"
 //
 // Make it clean, make it simple, make it a little bit handsome.  Once it checks out, your next step will be to add
 // this capability to the PCA module, and to register a new function to handle a message like "selectPatientsInPCAModule".
-
+//
+//  one technique for highlighting d3 points is seen here:
+//     http://bl.ocks.org/bycoffe/5871227
+//  the points to be highlighted are painted a different color -- orange in this example.  this example
+//  only highlights interactively selected points, where in your code, instead, you need to highligh
+//  programmatically selected points.  but the d3 technique can be the same.
 //----------------------------------------------------------------------------------------------------
 var highlightPlotModule = (function () {
                            
