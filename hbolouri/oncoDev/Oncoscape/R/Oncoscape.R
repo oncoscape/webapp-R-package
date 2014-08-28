@@ -127,6 +127,44 @@ addRMessageHandler <- function(key, function.name)
        DATA.PROVIDERS$mRNA <- Data2DProvider(path);
        } # found mRNA line
 
+   #-------------------------- cnv
+   signature <- "^ *cnv: *"
+   signatureLine <- grep(signature, lines, ignore.case=TRUE)
+   if(length(signatureLine) > 1)
+       warning(sprintf("Oncoscape::.setupDataProviders, multiple %s entries, using only the first", signature))
+
+   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
+
+   if(length(signatureLine > 0)){
+       text <- lines[signatureLine[1]]
+       path <- sub(signature, "", text)
+       tokens <<- strsplit(path, "://")[[1]]
+       if(!length(tokens) == 2){
+           printf("Oncoscape error.  Manifest line for cnv ill-formed: '%s'", text);
+           stop()
+           }
+       DATA.PROVIDERS$cnv <- Data2DProvider(path);
+       } # found cnv line
+
+   #-------------------------- mut
+   signature <- "^ *mut: *"
+   signatureLine <- grep(signature, lines, ignore.case=TRUE)
+   if(length(signatureLine) > 1)
+       warning(sprintf("Oncoscape::.setupDataProviders, multiple %s entries, using only the first", signature))
+
+   printf("Oncoscape .setupDataProviders looking for %s:  %d", signature, length(signatureLine))
+
+   if(length(signatureLine > 0)){
+       text <- lines[signatureLine[1]]
+       path <- sub(signature, "", text)
+       tokens <<- strsplit(path, "://")[[1]]
+       if(!length(tokens) == 2){
+           printf("Oncoscape error.  Manifest line for mut ill-formed: '%s'", text);
+           stop()
+           }
+       DATA.PROVIDERS$mut <- Data2DProvider(path);
+       } # found mut line
+
    #-------------------------- patientClassification
    signature <- "^ *patientClassification: *"
    signatureLine <- grep(signature, lines, ignore.case=TRUE)

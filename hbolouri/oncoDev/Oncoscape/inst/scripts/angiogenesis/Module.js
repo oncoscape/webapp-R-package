@@ -12,6 +12,7 @@ var angioPathwaysModule = (function () {
   var edgeSelectionOn = false;
   var expressionData;   // consists of a gene list, a tissue list, and the data (a list of 
                         // gene/value pairs, each list named by a tissue (patient) id
+  var cnvData;
   var moviePlaying = false;
 
   //--------------------------------------------------------------------------------------------
@@ -151,6 +152,7 @@ var angioPathwaysModule = (function () {
    function angiogenesisDemoVizChanges() {
       console.log("===== entering angiogenesisDemoVizChanges");
       request_mRNA_data(demoTissues(), geneSymbols());   // entities: patient, tissue or sample ids
+      request_cnv_data(demoTissues(), geneSymbols());
       } // angiogenesisDemoVizChanges
 
    //----------------------------------------------------------------------------------------------------
@@ -185,6 +187,7 @@ var angioPathwaysModule = (function () {
        if(typeof(sym) != "undefined")
           result.push(sym)
        } // for i
+     console.log("geneSymbols: " + result);
      return(result)
      } // geneSymbols
 
@@ -251,6 +254,18 @@ var angioPathwaysModule = (function () {
        }
 
     //----------------------------------------------------------------------------------------------------
+    function request_cnv_data(entities, features) {
+
+      msg = {cmd:"get_cnv_data",
+              callback: "handle_cnv_data",
+              status:"request",
+              payload:{entities: entities, features: features}
+              };
+       msg.json = JSON.stringify(msg);
+       socket.send(msg.json);
+       }
+
+    //----------------------------------------------------------------------------------------------------
     function addTissueIDsToSelector (tissueIDs) {
       tissueMenu.empty();
       if(tissueIDs.length == 0) {
@@ -287,6 +302,17 @@ var angioPathwaysModule = (function () {
        } // handle_mRNA_data
 
     //----------------------------------------------------------------------------------------------------
+    function handle_cnv_data(msg) {
+
+       console.log("handling cnv data");
+       var mtx = JSON.parse(msg.payload.mtx);
+       debugger;
+       cnvData = transformMatrixToPatientOrientedNamedList(mtx);
+       //addTissueIDsToSelector(expressionData.tissues);
+
+       } // handle_mRNA_data
+
+    //----------------------------------------------------------------------------------------------------
     function tissueSelectorChanged() {
 
        tissueID = tissueMenu.val()
@@ -317,6 +343,26 @@ var angioPathwaysModule = (function () {
           noa[nodeID] = {score: newScore};
           } // for g
 
+       cwAngio.batchData(noa);
+
+       cnv = cnvData.values
+       genes = cnvData.genes;
+       tissues = cnvData.tissues;
+       console.log("cnv for " + genes.length + " genes, and " + tissues.length + " tissues");
+       var noa = {};  // new node attributes to assign in the network
+
+       for(var g=0; g < genes.length; g++){
+         gene = genes[g];
+         newCopyNumber = cnv[tissueID][gene][0];
+         console.log("  set score of " + gene + " to " + newCopyNumber);
+         filterString = '[geneSymbol="' + gene + '"]'
+         console.log("  finding id for geneSymbol: " + gene);
+         nodeID = cwAngio.nodes(filterString)[0].data("id");
+         noa[nodeID] = {copyNumber: newCopyNumber};
+         } // for g
+
+       cwAngio.batchData(noa);
+
       // cwAngio.nodes('[geneSymbol="KDR"]')[0].data()
       // nodeIds = nodeIDs();
       // var noa = {};
@@ -328,7 +374,6 @@ var angioPathwaysModule = (function () {
       //   noa[nodeIds[i]] = {score: newScore, copyNumber: newCopyNumber};
       //   } // for i
 
-       cwAngio.batchData(noa);
 
        } 
 
@@ -354,6 +399,7 @@ var angioPathwaysModule = (function () {
        onReadyFunctions.push(initializeUI);
        addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
        addJavascriptMessageHandler("handle_mRNA_data", handle_mRNA_data);
+       addJavascriptMessageHandler("handle_cnv_data",  handle_cnv_data);
        socketConnectedFunctions.push(SetModifiedDate);
        if(typeof(window.tabsAppRunning) == "undefined") {
           socketConnectedFunctions.push(angiogenesisDemoVizChanges)

@@ -21,6 +21,8 @@ addRMessageHandler("getCaisisPatientHistory",          "getCaisisPatientHistory"
 addRMessageHandler("createRandomPatientPairedDistributionsForTesting", "createRandomPatientPairedDistributionsForTesting")
 addRMessageHandler("calculatePairedDistributionsOfPatientHistoryData", "calculatePairedDistributionsOfPatientHistoryData")
 addRMessageHandler("get_mRNA_data",                    "get_mRNA_data");
+addRMessageHandler("get_cnv_data",                     "get_cnv_data");
+addRMessageHandler("get_mutation_data",                "get_mutation_data");
 #----------------------------------------------------------------------------------------------------
 DataProviderBridgePing <- function(WS, msg)
 {
@@ -437,6 +439,135 @@ get_mRNA_data <- function(WS, msg)
    sendOutput(DATA=toJSON(return.msg), WS=WS)
 
 } # get_mRNA_data
+#----------------------------------------------------------------------------------------------------
+get_cnv_data <- function(WS, msg)
+{
+   signature <- "cnv";
+   
+   if(!signature %in% ls(DATA.PROVIDERS)){
+       error.message <- sprintf("Oncoscape DataProviderBridge error:  no %s provider defined", signature)
+       return.msg <- list(cmd=msg$callback, payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       }
+
+   printf("--- get_cnv_data, msg fields: %s", paste(names(msg), collapse=","))
+   printf("    payload fields: %s", names(msg$payload))
+   
+   dataProvider <- DATA.PROVIDERS[[signature]];
+   payload <- msg$payload
+   
+     # entities and features fields can be empty, but must be present
+   if(!is.list(payload)) {
+       status <- "failure"
+       payload <- "no constraint fields in payload"
+       }
+
+   if(is.list(payload)){
+      constraint.fields <- sort(names(payload))
+      legal.constraint.fields <- constraint.fields == c("entities", "features")
+      if (any(!legal.constraint.fields)){
+          status <- "failure"
+          payload <- sprintf("payload fields not precisely 'entities', 'features': %s",
+                             paste(constraint.fields, collapse=", "))
+          }
+      else {
+         entities <- payload$entities
+         features <- payload$features
+         printf("entities: %s", paste(entities, collapse=","))
+         printf("features: %s", paste(features, collapse=","))
+         tbl <- getData(dataProvider, entities=entities, features=features)
+         matrix <- as.matrix(tbl)
+         printf("matrix dim: %d, %d", nrow(matrix), ncol(matrix))
+         return.cmd <- msg$callback
+         #return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(mtx=matrixToJSON(matrix)))
+         payload <- list(mtx=matrixToJSON(matrix))
+         status <- "success"
+         }
+       } # is.list(payload)
+
+
+   if(nrow(tbl) == 0) {
+      status <- "failure"
+      payload <- "empty table"
+      }
+
+   status <- "success"
+
+   return.msg <- list(cmd=msg$callback, callback="", status=status, payload=payload)
+
+   printf("DataProviderBridge.R, get_cnv_data responding to '%s' with '%s'", msg$cmd, msg$callback);
+   
+   sendOutput(DATA=toJSON(return.msg), WS=WS)
+
+} # get_cnv_data
+#----------------------------------------------------------------------------------------------------
+get_mutation_data <- function(WS, msg)
+{
+   signature <- "mut";
+   
+   if(!signature %in% ls(DATA.PROVIDERS)){
+       error.message <- sprintf("Oncoscape DataProviderBridge error:  no %s provider defined", signature)
+       return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")
+       printf("DataProviderBridge error: %s", error.message)
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       }
+
+   printf("--- get_mut_data, msg fields: %s", paste(names(msg), collapse=","))
+   printf("    payload fields: %s", names(msg$payload))
+   
+   dataProvider <- DATA.PROVIDERS[[signature]];
+   payload <- msg$payload
+   status <- "failure"
+   print("--- payload");
+   print(payload)
+   print(class(payload))
+     # entities and features fields can be empty, but must be present
+   if(!is.list(payload)) {
+       payload <- "no constraint fields in payload"
+       printf("DataProviderBridge error: %s", payload)
+       }
+
+   if(is.list(payload)){
+      constraint.fields <- sort(names(payload))
+      legal.constraint.fields <- constraint.fields == c("entities", "features")
+      if (any(!legal.constraint.fields)){
+          payload <- sprintf("payload fields not precisely 'entities', 'features': %s",
+                             paste(constraint.fields, collapse=", "))
+           printf("DataProviderBridge error: %s", payload)
+          }
+      else {
+         entities <- payload$entities
+         features <- payload$features
+         printf("entities: %s (%d)", paste(entities, collapse=","), length(entities))
+         printf("features: %s (%d)", paste(features, collapse=","), length(features))
+         tbl <- getData(dataProvider, entities=entities, features=features)
+         if(nrow(tbl) == 0) {
+            payload <- "empty table"
+            printf("DataProviderBridge error: %s", payload)
+           }
+         else{
+            status <- "success"
+            matrix <- as.matrix(tbl)
+            matrix[matrix=="NaN"] <- NA
+            printf("matrix dim: %d, %d", nrow(matrix), ncol(matrix))
+            return.cmd <- msg$callback
+            #return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(mtx=matrixToJSON(matrix)))
+            payload <- list(mtx=matrixToJSON(matrix))
+            } # some rows in tbl
+         } # legal constraint fields found
+       } # is.list(payload)
+
+
+   if(nrow(tbl) == 0) {
+      }
+
+   return.msg <- list(cmd=msg$callback, callback="", status=status, payload=payload)
+
+   printf("DataProviderBridge.R, get_cnv_data responding to '%s' with '%s'", msg$cmd, msg$callback);
+   
+   sendOutput(DATA=toJSON(return.msg), WS=WS)
+
+} # get_mutation_data
 #----------------------------------------------------------------------------------------------------
 # msg$payload has 4 fields:
 #   ageAtDxMin, ageAtDxMax, overallSurvivalMin, overallSurvivalMax

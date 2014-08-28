@@ -101,27 +101,27 @@ angiogenesisVizmap = [ {
       "height" : 100.0
     }
   }, {
-    "selector" : "node[copyNumber = '2']",
+    "selector" : "node[copyNumber = 2]",
     "css" : {
       "border-width" : 10.0
     }
   }, {
-    "selector" : "node[copyNumber = '1']",
+    "selector" : "node[copyNumber = 1]",
     "css" : {
       "border-width" : 5.0
     }
   }, {
-    "selector" : "node[copyNumber = '0']",
+    "selector" : "node[copyNumber = 0]",
     "css" : {
       "border-width" : 1.0
     }
   }, {
-    "selector" : "node[copyNumber = '-2']",
+    "selector" : "node[copyNumber = -2]",
     "css" : {
       "border-width" : 10.0
     }
   }, {
-    "selector" : "node[copyNumber = '-1']",
+    "selector" : "node[copyNumber = -1]",
     "css" : {
       "border-width" : 5.0
     }
@@ -136,27 +136,27 @@ angiogenesisVizmap = [ {
       "background-color" : "mapData(score,-8.0,0.0,rgb(0,255,0),rgb(255,255,255))"
     }
   }, {
-    "selector" : "node[copyNumber = '2']",
+    "selector" : "node[copyNumber = 2]",
     "css" : {
       "border-color" : "rgb(0,0,255)"
     }
   }, {
-    "selector" : "node[copyNumber = '1']",
+    "selector" : "node[copyNumber = 1]",
     "css" : {
       "border-color" : "rgb(0,0,255)"
     }
   }, {
-    "selector" : "node[copyNumber = '0']",
+    "selector" : "node[copyNumber = 0]",
     "css" : {
       "border-color" : "rgb(0,0,0)"
     }
   }, {
-    "selector" : "node[copyNumber = '-2']",
+    "selector" : "node[copyNumber = -2]",
     "css" : {
       "border-color" : "rgb(0,0,0)"
     }
   }, {
-    "selector" : "node[copyNumber = '-1']",
+    "selector" : "node[copyNumber = -1]",
     "css" : {
       "border-color" : "rgb(0,0,0)"
     }

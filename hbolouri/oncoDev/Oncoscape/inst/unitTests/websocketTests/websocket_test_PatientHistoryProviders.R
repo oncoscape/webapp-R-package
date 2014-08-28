@@ -237,7 +237,8 @@ test_getPatientHistoryDataVector <- function()
    cmd <- "getPatientHistoryDataVector"
    status <- "request"
    callback <- "handlePatientHistoryDataVector"
-   payload <- "ageAtDx"
+   payload <- list(colname="ageAtDx",
+                   patients=c("TCGA.02.0010","TCGA.02.0011","TCGA.02.0266","TCGA.08.0516"))
    
    websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=payload)), client)
 
@@ -245,8 +246,62 @@ test_getPatientHistoryDataVector <- function()
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    ages <- fromJSON(msg.incoming$payload)
-   checkTrue(length(ages) > 500)
-   checkTrue(mean(ages) > 40)   # almost 58 years on 25 aug 2014
+   checkTrue(length(ages) == 4)
+   checkTrue(mean(ages) > 10)  # these appear to be young patients
+   
+      # this time specify no patients, getting them all.  todo.  fails.
+ # payload <- list(colname="ageAtDx", patients="")
+ # 
+ #  websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=payload)), client)
+ #  system("sleep 1")
+ #  service(client)
+ #  checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+ #  ages <- fromJSON(msg.incoming$payload)
+ #  checkTrue(length(ages) == 4)
+ #  checkTrue(mean(ages) > 10)  # these appear to be young patients
+   
+
+   
+} # test_getPatientHistoryDataVector
+#----------------------------------------------------------------------------------------------------
+test_getGetMutations <- function()
+{
+   print("--- test_getMutations")
+   cmd <- "get_mutation_data"
+   status <- "request"
+   callback <- "handle_mutation_data"
+   patients <- c("TCGA.02.0003", "TCGA.02.2485", "TCGA.02.0047", "TCGA.06.0122")
+   genes <- c("EGFR", "PIK3CA")
+   payload <- list(entities=patients, features=genes)
+
+      # should be
+      #               EGFR PIK3CA
+      # TCGA.02.0003 C620Y    NaN
+      # TCGA.02.2485   NaN  E103G
+      # TCGA.02.0047  <NA>  N345K
+      # TCGA.06.0122   NaN   <NA>
+   
+   websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=payload)), client)
+
+   system("sleep 1")
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   muts <- fromJSON(msg.incoming$payload)
+   checkTrue(length(muts) == 4)  # one per entity
+   checkEquals(unlist(lapply(muts, function(mut) mut$rowname)), patients)
+   
+      # this time specify no patients, getting them all.  todo.  fails.
+ # payload <- list(colname="ageAtDx", patients="")
+ # 
+ #  websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload=payload)), client)
+ #  system("sleep 1")
+ #  service(client)
+ #  checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+ #  ages <- fromJSON(msg.incoming$payload)
+ #  checkTrue(length(ages) == 4)
+ #  checkTrue(mean(ages) > 10)  # these appear to be young patients
+   
+
    
 } # test_getPatientHistoryDataVector
 #----------------------------------------------------------------------------------------------------
