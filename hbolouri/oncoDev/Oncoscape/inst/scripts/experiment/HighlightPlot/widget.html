@@ -1,18 +1,27 @@
 <style>
 
 .domain { 
-  fill: none; 
-  } 
+   fill: none;
+   }
 
 .extent {
-  fill-opacity: .1;
-  stroke: #f00;
-}
+   fill-opacity: .1;
+   stroke: #f00;
+   }
 
 .axis path, .axis line {
-    stroke: black;
-    stroke-width: 1px;
-    }
+   stroke: black;
+   stroke-width: 1px;
+   }
+
+circle {
+   fill: steelblue;
+   opacity: 0.5;
+   }
+circle.highlighted {
+   fill: orange;
+   opacity: 1;
+   }
 
 #HighlightPlotDiv {
    margin: 0px;
@@ -36,7 +45,7 @@
 </style>
 
 <div id="HighlightPlotDiv">
-   <button id="HighlightPlotRandomPoints"> Random Points </button>
+   <button id="HighlightPlotRandomPoints"> Select Random Points </button>
    <button id="HighlightPlotClearSelection"> Clear Selection </button>
    <div id="HighlightPlotDisplay"></div>
    <div id="HighlightPlotLegend"></div>

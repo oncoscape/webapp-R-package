@@ -26,30 +26,27 @@ var highlightPlotModule = (function () {
   var randomPointsButton;
   var clearSelectionButton;
   var highlightPlotDisplay;
-  //var HighlightPlotResults;
-  //var patientClassification;
   var firstTime = true;
   var highlightPlotSelectedRegion;    // from brushing
   var d3PlotBrush;
-  //var HighlightPlotTabNumber = 2;
   var d3HighlightPlotDisplay;
   var highlightPlotTextDisplay;
   var numberOfPoints = 100;
   var listOfPoints;
-  var clearExistingSelectionFirst;
+  var clearExistingSelectionFirst = true;
   var data = [];
                            
   //--------------------------------------------------------------------------------------------
 
   function initializeUI () {
-      getRandomPoints(numberOfPoints);
       highlightPlotDisplay = $("#HighlightPlotDisplay");
       d3HighlightPlotDisplay = d3.select("#HighlightPlotDisplay");
       highlightPlotHandleWindowResize();
+      getRandomPoints(numberOfPoints);
       randomPointsButton = $("#HighlightPlotRandomPoints");
       randomPointsButton.click(updateSubset);
       clearSelectionButton = $("#HighlightPlotClearSelection");
-      clearSelectionButton.click(clearSelection());
+      clearSelectionButton.click(clearSelection);
       $(window).resize(highlightPlotHandleWindowResize);
       highlightPlotTextDisplay = $("#HighlightPlotTextDisplay");
       };
@@ -61,7 +58,6 @@ var highlightPlotModule = (function () {
                            
   //--------------------------------------------------------------------------------------------
   function getRandomSubset(count){
-      //var subset = _.sample(data, count);
       console.log("called");
       var subset = [];
       var dataCopy = $.extend(true, [], data);
@@ -69,19 +65,29 @@ var highlightPlotModule = (function () {
           index = Math.floor(Math.random()*(dataCopy.length));
           subset.push(dataCopy.splice(index, 1)[0]);
           }
-      console.log(data);
-      console.log(dataCopy);
-      d3HighlightPlotScatterPlot(subset);
+      selectPoints(subset, clearExistingSelectionFirst);
       };
                            
   //--------------------------------------------------------------------------------------------
   function selectPoints(listOfPoints, clearExistingSelectionFirst){
-                           
+      if(clearExistingSelectionFirst){
+          clearSelection();
+      }
+      var ids = [];
+      for(i=0;i<listOfPoints.length;i++){
+          ids.push(listOfPoints[i].ID);
+      }
+      d3.selectAll("circle")
+          .filter(function(d, i) {return ids.indexOf(d.ID) > -1;})
+          .classed("highlighted", true)
+          .attr("r", 5);
       };
                            
   //--------------------------------------------------------------------------------------------
   function clearSelection(){
-                           
+      d3.selectAll("circle")
+          .classed("highlighted", false)
+          .attr("r", 3);
       };
       
   //--------------------------------------------------------------------------------------------
@@ -94,63 +100,20 @@ var highlightPlotModule = (function () {
           }
       console.log(points);
       data = points;
+      d3HighlightPlotScatterPlot(data);
       };
-                           
-  //--------------------------------------------------------------------------------------------
-//  function drawLegend () {
-//
-//  console.log("==== draw legend: ")
-//    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
-//                      .attr("width", $("#pcaDisplay").width())
-//    var TextOffset =  [0, 70, 82, 87, 85, 80, 78, 75, 80];
-//
-//   for(var i=0; i<patientClassification.length; i++){
-//      if(patientClassification[i].gbmDzSubType[0] == null | patientClassification[i].gbmDzSubType[0] == ""){ 
-//          patientClassification[i].gbmDzSubType[0]= "undefined" } }
-//
-//        Classifications = d3.nest()
-//              .key(function(d) { return d.gbmDzSubType[0]; })
-//              .map(patientClassification, d3.map);
-// 
-//    var TextOffSet = d3.scale.ordinal()
-//               .range(TextOffset)
-//               .domain(Classifications.keys());
-//               
-//    var legend = Legendsvg
-//                   .append("g")
-//                   .attr("class", "legend")
-//                   .attr("transform", "translate(" + 10 + "," + 10 + ")")  
-//                   .selectAll(".legend")
-//                     .data(Classifications.keys())
-//                     .enter().append("g")
-//                     .attr("transform", function(d, i) { 
-//                        return "translate(" + i*TextOffSet(d) + ",0)" })
-//                ;
-//    legend.append("circle")
-//            .attr("cx", 12)
-//            .attr("cy", 5)
-//            .attr("r", function(d) { return 6;})
-//            .style("fill", function(d) { return Classifications.get(d)[0].color[0]})
-//
-//    legend.append("text")
-//            .attr("y", 10)
-//            .attr("x", 20)
-//            .style("font-size", 12)
-//            .text(function(d) { return d});
-//    }
+
 
   //--------------------------------------------------------------------------------------------
   function highlightPlotHandleWindowResize () {
       highlightPlotDisplay.width($(window).width() * 0.95);
       highlightPlotDisplay.height($(window).height() * 0.80);
-      //if(!firstTime) {d3HighlightPlotScatterPlot(dataset);}
       };
 
   //--------------------------------------------------------------------------------------------
   function d3PlotBrushReader () {
       console.log("plotBrushReader 1037a 22jul2014");
       highlightPlotSelectedRegion = d3PlotBrush.extent();
-      //console.log("region: " + pcaSelectedRegion);
       x0 = highlightPlotSelectedRegion[0][0];
       x1 = highlightPlotSelectedRegion[1][0];
       width = Math.abs(x0-x1);
@@ -234,7 +197,6 @@ var highlightPlotModule = (function () {
           .attr("transform", "translate(" + xTranslationForYAxis + ", 0)")
           .call(yAxis)
           .append("text")
-//        .attr("transform", "rotate(-90)")
           .attr("y", 10)
           .attr("dy", ".71em")
           .style("font-size", 14)
@@ -247,9 +209,7 @@ var highlightPlotModule = (function () {
           .append("circle")
           .attr("cx", function(d) {return xScale(d.x);})
           .attr("cy", function(d) {return yScale(d.y);})
-          .attr("r", function(d) { return 3;})
-          .style("fill", function(d) {return(chooseColor(d))})
-        //.style("fill", function(d) { return "blue"})
+          .attr("r", 3)
           .on("mouseover", function(d){tooltip.text(d.ID);return tooltip.style("visibility", "visible");})
           .on("mousemove", function(){return tooltip.style("top",(d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
           .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
