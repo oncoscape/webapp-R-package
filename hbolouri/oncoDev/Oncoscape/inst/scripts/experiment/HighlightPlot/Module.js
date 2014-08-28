@@ -40,11 +40,16 @@ var highlightPlotModule = (function () {
       d3HighlightPlotDisplay = d3.select("#HighlightPlotDisplay");
       highlightPlotHandleWindowResize();
       randomPointsButton = $("#HighlightPlotRandomPoints");
-      randomPointsButton.click(getRandomSubset(20));
+      randomPointsButton.click(updateSubset);
       clearSelectionButton = $("#HighlightPlotClearSelection");
       clearSelectionButton.click(clearSelection());
       $(window).resize(highlightPlotHandleWindowResize);
       highlightPlotTextDisplay = $("#HighlightPlotTextDisplay");
+      };
+      
+  //--------------------------------------------------------------------------------------------
+  function updateSubset(){
+      getRandomSubset(20);
       };
                            
   //--------------------------------------------------------------------------------------------
@@ -52,11 +57,13 @@ var highlightPlotModule = (function () {
       //var subset = _.sample(data, count);
       console.log("called");
       var subset = [];
-      var dataCopy = data;
+      var dataCopy = $.extend(true, [], data);
       for(i=0;i<count;i++){
           index = Math.floor(Math.random()*(dataCopy.length));
           subset.push(dataCopy.splice(index, 1)[0]);
           }
+      console.log(data);
+      console.log(dataCopy);
       d3HighlightPlotScatterPlot(subset);
       };
                            
@@ -69,6 +76,7 @@ var highlightPlotModule = (function () {
   function clearSelection(){
                            
       };
+      
   //--------------------------------------------------------------------------------------------
   function getRandomPoints(count){
       points = [];
