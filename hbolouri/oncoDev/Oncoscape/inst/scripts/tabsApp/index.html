@@ -1021,8 +1021,12 @@ var PCAModule = (function () {
       console.log("==== pcaPlot");
       //console.log(msg);
       if(msg.status == "success"){
-         pcaResults = JSON.parse(msg.payload);
-         d3PcaScatterPlot(pcaResults);
+         pcaScores = JSON.parse(msg.payload.tbl);
+         d3PcaScatterPlot(pcaScores);
+         console.log(msg.payload.importance)
+//         pcaData = JSON.parse(msg.payload.importance);
+//         pcaDataTable(pcaData);
+         
          if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
              $("#tabs").tabs( "option", "active", pcaTabNumber);
          } // success
@@ -1083,6 +1087,37 @@ var PCAModule = (function () {
      return("black");
      }
   //-------------------------------------------------------------------------------------------
+   function pcaDataTable(pcaData){
+        var pcaText = d3.select("#pcaTextDisplay")
+        
+        console.log(pcaData)
+        var tblColumnNames = ["A", "B", "C"];
+        columnTitles = [];
+        for(var i=0; i < tblColumnNames.length; i++){
+          columnTitles.push({sTitle: tblColumnNames[i]});
+        }
+
+     displayDiv.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="pcaTable"></table>');
+     $("#pcaTable").dataTable({
+        "sDom": "Rlfrtip",
+         sDom: 'C<"clear">lfrtip',
+        "aoColumns": columnTitles,
+	    "sScrollX": "100px",
+        "iDisplayLength": 25,
+         bPaginate: true,
+        "scrollX": true,
+        "fnInitComplete": function(){
+            $(".display_results").show();
+            }
+         }); // dataTable
+
+     console.log("displayTable adding data to table");
+     tableRef = $("#pcaTable").dataTable();
+//     tableRef.fnAddData(pcaData);
+
+        
+   }
+ //-------------------------------------------------------------------------------------------
   function d3PcaScatterPlot(dataset) {
 
      broadcastButton.prop("disabled",true);

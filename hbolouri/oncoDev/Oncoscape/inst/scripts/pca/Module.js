@@ -4,7 +4,7 @@ var PCAModule = (function () {
 
   var broadcastButton;
   var pcaDisplay;
-  var pcaResults;
+  var pcaScores;
   var patientClassification;
   var firstTime = true;
   var pcaSelectedRegion;    // from brushing
@@ -24,7 +24,7 @@ var PCAModule = (function () {
       $(window).resize(pcaHandleWindowResize);
       broadcastButton.prop("disabled",true);
       
-      pcaTextDisplay = $("#pcaTextDisplay");
+      pcaTextDisplay = $("#pcaTextDisplayDiv");
       };
 
   //--------------------------------------------------------------------------------------------
@@ -57,15 +57,10 @@ var PCAModule = (function () {
        alert("error!" + msg.payload)
        }
       }; // handlePatientIDs
- //--------------------------------------------------------------------------------------------
+ //-------------------------------------------------------------------------------------------- 
   function drawLegend () {
 
-  console.log("==== draw legend: ") 
-
-    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
-                      .attr("width", $("#pcaDisplay").width())
-                      
-    var TextOffset =  [0, 70, 82, 87, 85, 80, 78, 75, 80];
+   console.log("==== draw legend: ") 
 
    for(var i=0; i<patientClassification.length; i++){
       if(patientClassification[i].gbmDzSubType[0] == null | patientClassification[i].gbmDzSubType[0] == ""){ 
@@ -74,40 +69,61 @@ var PCAModule = (function () {
         Classifications = d3.nest()
               .key(function(d) { return d.gbmDzSubType[0]; })
               .map(patientClassification, d3.map);
+
+
+   var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
+                      .attr("width", $("#pcaDisplay").width())
+
+    var LegendLabels = d3.values(Classifications.keys())
  
-    var TextOffSet = d3.scale.ordinal()
-               .range(TextOffset)
-               .domain(Classifications.keys());
-               
-    var legend = Legendsvg
+//     var TextOffSet =  [0, 70, 82, 87, 85, 80, 78, 75, 80];
+//     var TextOffset = d3.scale.ordinal()
+//               .range(TextOffset)
+//               .domain(Classifications.keys());
+        
+    var legend =    Legendsvg
                    .append("g")
                    .attr("class", "legend")
                    .attr("transform", "translate(" + 10 + "," + 10 + ")")  
                    .selectAll(".legend")
-                     .data(Classifications.keys())
+                     .data(LegendLabels)
                      .enter().append("g")
-                     .attr("transform", function(d, i) { 
-                        return "translate(" + i*TextOffSet(d) + ",0)" })
                 ;
-    legend.append("circle")
-            .attr("cx", 12)
+
+    var text = legend.append("text")
+            .attr("y", 10)
+            .attr("x", 0)
+            .style("font-size", 12)
+            .text(function(d) { return d})
+           ;
+
+    var TextOffset = []
+    var xPosition = 0
+
+   text.attr("transform", function(d, i){
+        TextOffset.push(xPosition)
+        console.log(i, xPosition)
+        xPosition = xPosition + this.getBBox().width +20
+     return "translate(" + (TextOffset[i]+10) +",0)"
+   })
+   
+   console.log(TextOffset)
+     legend.append("circle")
+            .attr("cx", 0)
             .attr("cy", 5)
             .attr("r", function(d) { return 6;})
             .style("fill", function(d) { return Classifications.get(d)[0].color[0]})
+            .attr("transform", function(d, i){
+               return "translate(" + (TextOffset[i]) +",0)"
+             })
 
-    legend.append("text")
-            .attr("y", 10)
-            .attr("x", 20)
-            .style("font-size", 12)
-            .text(function(d) { return d});
-    
 
   }
   //--------------------------------------------------------------------------------------------
   function pcaHandleWindowResize () {
      pcaDisplay.width($(window).width() * 0.95);
      pcaDisplay.height($(window).height() * 0.80);
-     if(!firstTime) {d3PcaScatterPlot(pcaResults);}
+     if(!firstTime) {d3PcaScatterPlot(pcaScores);}
      };
 
    //--------------------------------------------------------------------------------------------
@@ -118,8 +134,8 @@ var PCAModule = (function () {
       x2=pcaSelectedRegion[1][0];
       y2=pcaSelectedRegion[1][1];
       ids = [];
-      for(var i=0; i < pcaResults.length; i++){
-         p = pcaResults[i];
+      for(var i=0; i < pcaScores.length; i++){
+         p = pcaScores[i];
          if(p.PC1 >= x1 & p.PC1 <= x2 & p.PC2 >= y1 & p.PC2 <= y2)
             ids.push(p.id[0]);
          } // for i
@@ -145,8 +161,12 @@ var PCAModule = (function () {
       console.log("==== pcaPlot");
       //console.log(msg);
       if(msg.status == "success"){
-         pcaResults = JSON.parse(msg.payload);
-         d3PcaScatterPlot(pcaResults);
+         pcaScores = JSON.parse(msg.payload.tbl);
+         d3PcaScatterPlot(pcaScores);
+         console.log(msg.payload.importance)
+//         pcaData = JSON.parse(msg.payload.importance);
+//         pcaDataTable(pcaData);
+         
          if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
              $("#tabs").tabs( "option", "active", pcaTabNumber);
          } // success
@@ -207,6 +227,37 @@ var PCAModule = (function () {
      return("black");
      }
   //-------------------------------------------------------------------------------------------
+   function pcaDataTable(pcaData){
+        var pcaText = d3.select("#pcaTextDisplay")
+        
+        console.log(pcaData)
+        var tblColumnNames = ["A", "B", "C"];
+        columnTitles = [];
+        for(var i=0; i < tblColumnNames.length; i++){
+          columnTitles.push({sTitle: tblColumnNames[i]});
+        }
+
+     displayDiv.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="pcaTable"></table>');
+     $("#pcaTable").dataTable({
+        "sDom": "Rlfrtip",
+         sDom: 'C<"clear">lfrtip',
+        "aoColumns": columnTitles,
+	    "sScrollX": "100px",
+        "iDisplayLength": 25,
+         bPaginate: true,
+        "scrollX": true,
+        "fnInitComplete": function(){
+            $(".display_results").show();
+            }
+         }); // dataTable
+
+     console.log("displayTable adding data to table");
+     tableRef = $("#pcaTable").dataTable();
+//     tableRef.fnAddData(pcaData);
+
+        
+   }
+ //-------------------------------------------------------------------------------------------
   function d3PcaScatterPlot(dataset) {
 
      broadcastButton.prop("disabled",true);
@@ -224,6 +275,8 @@ var PCAModule = (function () {
      
      xMax = xMax * 1.1
      xMin = xMin * 1.1
+     yMax = yMax * 1.1
+     yMin = yMin * 1.1
 //     xMax = 40
 //     xMin = -40
 //     yMax = 30

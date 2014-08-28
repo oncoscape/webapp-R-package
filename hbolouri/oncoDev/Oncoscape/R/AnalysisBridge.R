@@ -34,7 +34,6 @@ calculate_mRNA_PCA <- function(WS, msg)
    tbl.pca <- pca$scores[,c("PC1", "PC2", "PC3", "PC4", "PC5", "id")]
        printf("pca score columns: %s", colnames(tbl.pca))
 
-
    if(all(is.na(tbl.pca))){
        printf("Oncoscape::calculatePCA encountered pcaAnalysis error")
        return.msg <- toJSON(list(cmd=msg$callback, callback="", status="error",
@@ -42,13 +41,15 @@ calculate_mRNA_PCA <- function(WS, msg)
        sendOutput(DATA=return.msg, WS=WS)
        return()
        }
-  
+
+  tbl.importance <- pca$importance
   
        
    printf("pca on %d samples returned nrows %d", length(entities), nrow(tbl.pca))
    json.string <- new.pcaResultsToJSONstring(tbl.pca)
 
-   return.msg <- toJSON(list(cmd=msg$callback, callback="",  status="success", payload=json.string))
+   return.msg <- toJSON(list(cmd=msg$callback, callback="",  status="success", 
+                        payload=list(tbl=json.string, importance=tbl.importance)))
    sendOutput(DATA=return.msg, WS=WS)
 
 
