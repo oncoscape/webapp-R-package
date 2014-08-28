@@ -80,7 +80,9 @@ var highlightPlotModule = (function () {
       d3.selectAll("circle")
           .filter(function(d, i) {return ids.indexOf(d.ID) > -1;})
           .classed("highlighted", true)
-          .attr("r", 5);
+          .transition()
+          .attr("r", 5)
+          .duration(500);
       };
                            
   //--------------------------------------------------------------------------------------------
