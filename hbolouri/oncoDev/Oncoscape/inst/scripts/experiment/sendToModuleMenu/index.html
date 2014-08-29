@@ -442,37 +442,9 @@ UserSettings = UserSettingsModule();
 UserSettings.init();
 
 </script>
+
 <script>
 
-
-var ActiveModules = [];
-
-//----------------------------------------------------------------------------------------------------
-addSelectionDestination = function(module)
-{
-   if(module in ActiveModules){
-        alert("Selection Destination message handler for '" +  module + " already set");
-   } else{  ActiveModules.push(module)  }
-}
-
-//----------------------------------------------------------------------------------------------------
-getSelectionDestinations = function(){
-     return ActiveModules;
-//   return tissueMenu.children().map(function() {return $(this).val();}).get();
-}
-
-//--------------------------------------------------------------------------------------------
-function SendSelectionToModule(ModuleName, currentIDs){
-    
-      callback = ModuleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
-      msg = {cmd:"sendPatientIDsToModule",                  // generalize to "sendIDsToModule"?
-             callback: callback,
-             status:"request",
-             payload:{targetModule: ModuleName,
-                      ids: currentIDs}
-             };
-      socket.send(JSON.stringify(msg));
-    }
 //----------------------------------------------------------------------------------------------------
 var sendToModuleExample = (function () {
 
@@ -491,9 +463,9 @@ var sendToModuleExample = (function () {
     //----------------------------------------------------------------------------------------------------
     initializeUI = function(){
   
-       addSelectionDestination("PCA")          // called out of PCA/Module.js  as it starts up
-       addSelectionDestination("gbmPathways")  // called out of gbmPathways/Module.js at startup
-       addSelectionDestination("Timelines")    // called out of PCA/Module.js  as it starts up
+//       addSelectionDestination("PCA")          // called out of PCA/Module.js  as it starts up
+//       addSelectionDestination("gbmPathways")  // called out of gbmPathways/Module.js at startup
+//       addSelectionDestination("Timelines")    // called out of patientTimelines/Module.js  as it starts up
        addSelectionDestination(ThisModuleName)   // called out of gbmPathways/Module.js at startup
 
        $("#GenerateSelectionButton").click(addRandomSelectionData);
