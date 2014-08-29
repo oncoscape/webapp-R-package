@@ -45,7 +45,6 @@ var PCAModule = (function () {
   //--------------------------------------------------------------------------------------------
   function handlePatientClassification (msg){
      console.log("=== handlePatientClassification");
-     console.log(msg);
      if(msg.status == "success"){
         patientClassification = JSON.parse(msg.payload)
         console.log("got classification, length " + patientClassification.length);
@@ -121,20 +120,25 @@ var PCAModule = (function () {
   
   //--------------------------------------------------------------------------------------------
   function highlightPoints(data){
+     console.log("DATA === ");
+     console.log(data);
      selectPoints(data, true);
   };
   
   //--------------------------------------------------------------------------------------------
-  function selectPoints(listOfPoints, clearExistingSelectionFirst){
+  function selectPoints(selectIds, clearExistingSelectionFirst){
       if(clearExistingSelectionFirst){
           clearSelection();
       }
-      var ids = [];
-      for(i=0;i<listOfPoints.length;i++){
-          ids.push(listOfPoints[i].ID);
-      }
+      var ids = selectIds.ids;
+//      for(i=0;i<selectIds.ids.length;i++){
+//          ids.push(listOfPoints[i].ID);
+//      }
+
+    console.log("selectIds: ");
+    console.log(selectIds.ids);
       d3.selectAll("circle")
-          .filter(function(d, i) {return ids.indexOf(d.ID) > -1;})
+          .filter(function(d, i) { return ids.indexOf(d.id) > -1;})
           .classed("highlighted", true)
           .transition()
           .attr("r", 5)
@@ -265,7 +269,6 @@ var PCAModule = (function () {
   //-------------------------------------------------------------------------------------------
    function pcaDataTable(pcaData){
         var pcaText = d3.select("#pcaTextDisplay")
-        console.log("!!!!!!!!!!!!!pcaData=========")
         console.log(pcaData)
         var tblColumnNames = ["A", "B", "C"];
         columnTitles = [];
@@ -295,7 +298,8 @@ var PCAModule = (function () {
    }
  //-------------------------------------------------------------------------------------------
   function d3PcaScatterPlot(dataset) {
-                 console.log(dataset);
+     console.log("DATASET = ");
+     console.log(dataset);
      broadcastButton.prop("disabled",true);
      var padding = 50;
      var width = $("#pcaDisplay").width();
@@ -383,7 +387,8 @@ var PCAModule = (function () {
              .style("font-size", 14)
             .style("text-anchor", "end") //start, middle
             .text("PC2");
-
+            
+    
      var circle = svg.append("g").selectAll("circle")
                      .data(dataset)
                      .enter()
