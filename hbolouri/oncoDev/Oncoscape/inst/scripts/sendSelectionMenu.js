@@ -1,3 +1,4 @@
+<script>
 var ActiveModules = [];
 
 //----------------------------------------------------------------------------------------------------
@@ -26,3 +27,5 @@ function SendSelectionToModule(ModuleName, currentIDs){
              };
       socket.send(JSON.stringify(msg));
     }
+
+</script>

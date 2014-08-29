@@ -18,9 +18,9 @@ var sendToModuleExample = (function () {
     //----------------------------------------------------------------------------------------------------
     initializeUI = function(){
   
-       addSelectionDestination("PCA")          // called out of PCA/Module.js  as it starts up
-       addSelectionDestination("gbmPathways")  // called out of gbmPathways/Module.js at startup
-       addSelectionDestination("Timelines")    // called out of patientTimelines/Module.js  as it starts up
+//       addSelectionDestination("PCA")          // called out of PCA/Module.js  as it starts up
+//       addSelectionDestination("gbmPathways")  // called out of gbmPathways/Module.js at startup
+//       addSelectionDestination("Timelines")    // called out of patientTimelines/Module.js  as it starts up
        addSelectionDestination(ThisModuleName)   // called out of gbmPathways/Module.js at startup
 
        $("#GenerateSelectionButton").click(addRandomSelectionData);
