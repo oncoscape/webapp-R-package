@@ -128,7 +128,7 @@ var ClinicalTableTabNum=1;
 
       } // currentSelectedIDS
    //----------------------------------------------------------------------------------------------------
-   function sendCurrentIDsToModule (moduleName) {
+   function sendCurrentIDsToModule (moduleName, extraPayloadInfo) {
       console.log("entering sendCurrentIDsToModule");
 
       currentIDs = currentSelectedIDs();
