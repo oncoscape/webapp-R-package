@@ -23,7 +23,6 @@ var PCAModule = (function () {
       broadcastButton.click(pcaBroadcastSelection);
       $(window).resize(pcaHandleWindowResize);
       broadcastButton.prop("disabled",true);
-      
       pcaTextDisplay = $("#pcaTextDisplayDiv");
       };
 
@@ -46,11 +45,11 @@ var PCAModule = (function () {
   //--------------------------------------------------------------------------------------------
   function handlePatientClassification (msg){
      console.log("=== handlePatientClassification");
-     //console.log(msg)
+     console.log(msg);
      if(msg.status == "success"){
         patientClassification = JSON.parse(msg.payload)
         console.log("got classification, length " + patientClassification.length);
-        
+        console.log(patientClassification.payload);
         drawLegend();
         }
      else{
@@ -119,6 +118,36 @@ var PCAModule = (function () {
 
 
   }
+  
+  //--------------------------------------------------------------------------------------------
+  function highlightPoints(data){
+     selectPoints(data, true);
+  };
+  
+  //--------------------------------------------------------------------------------------------
+  function selectPoints(listOfPoints, clearExistingSelectionFirst){
+      if(clearExistingSelectionFirst){
+          clearSelection();
+      }
+      var ids = [];
+      for(i=0;i<listOfPoints.length;i++){
+          ids.push(listOfPoints[i].ID);
+      }
+      d3.selectAll("circle")
+          .filter(function(d, i) {return ids.indexOf(d.ID) > -1;})
+          .classed("highlighted", true)
+          .transition()
+          .attr("r", 5)
+          .duration(500);
+      };
+  
+  //--------------------------------------------------------------------------------------------
+  function clearSelection(){
+      d3.selectAll("circle")
+          .classed("highlighted", false)
+          .attr("r", 3);
+      };
+  
   //--------------------------------------------------------------------------------------------
   function pcaHandleWindowResize () {
      pcaDisplay.width($(window).width() * 0.95);
@@ -180,15 +209,22 @@ var PCAModule = (function () {
   //--------------------------------------------------------------------------------------------
   function handlePatientIDs(msg){
       console.log("Module.pca: handlePatientIDs");
-      //console.log(msg)
+      console.log(msg)
       if(msg.status == "success"){
-         patientIDs = msg.payload
+         patientIDs = msg.payload;
          //console.log("pca handlePatientIds: " + patientIDs);
-         payload = patientIDs
-         msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request", 
+         payload = patientIDs;
+         console.log(payload);
+         if(payload.Higlight == "Highlight"){
+            console.log("HIGHLIGHTED!!!!!!");
+            highlightPoints(payload);
+        }else{
+            console.log("NOT HIGHLIGHTED!!!!!!");
+            msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request",
                 payload: payload};
-         socket.send(JSON.stringify(msg));
-         }
+            socket.send(JSON.stringify(msg));
+            }
+        }
     else{
       console.log("handlePatientIDs about to call alert: " + msg)
       alert(msg.payload)
@@ -229,7 +265,7 @@ var PCAModule = (function () {
   //-------------------------------------------------------------------------------------------
    function pcaDataTable(pcaData){
         var pcaText = d3.select("#pcaTextDisplay")
-        
+        console.log("!!!!!!!!!!!!!pcaData=========")
         console.log(pcaData)
         var tblColumnNames = ["A", "B", "C"];
         columnTitles = [];
@@ -259,7 +295,7 @@ var PCAModule = (function () {
    }
  //-------------------------------------------------------------------------------------------
   function d3PcaScatterPlot(dataset) {
-
+                 console.log(dataset);
      broadcastButton.prop("disabled",true);
      var padding = 50;
      var width = $("#pcaDisplay").width();
@@ -381,13 +417,10 @@ var PCAModule = (function () {
     }
 //----------------------------------------------------------------------------------------------------
     function DisplayPCAModifiedDate(msg){
-
         document.getElementById("pcaDateModified").innerHTML = msg.payload;
     }
       
-     //--------------------------------------------------------------------------------------------------
-
-  //--------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
   return{
    init: function(){
       onReadyFunctions.push(initializeUI);
