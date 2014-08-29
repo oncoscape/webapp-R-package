@@ -442,7 +442,6 @@ UserSettings = UserSettingsModule();
 UserSettings.init();
 
 </script>
-
 <script>
 var ActiveModules = [];
 
@@ -659,14 +658,14 @@ sel.init();
 
 </script>
 <body>
-
 <div id="ModuleMenuDiv">
   <button id="GenerateSelectionButton">Make Random Selection</button>
-  <span id="SendSelectiontoModuleButton" type="button">Send Selection to...</span>
+  <button id="ActiveSelectionDiv">De/Activate Selection</button>
+  <select id="SendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
   <br></br><br></br>
-  <div id="ActiveSelectionDiv">Activate Selection</div>
   <div id="showNewSelection"></div>
   <br></br><br></br>
+  <div id="showReceivedSelection"></div>
  </div>
 
 </body>
