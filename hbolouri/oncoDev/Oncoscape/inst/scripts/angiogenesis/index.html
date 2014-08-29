@@ -323,6 +323,8 @@ var angioPathwaysModule = (function () {
   var expressionData;   // consists of a gene list, a tissue list, and the data (a list of 
                         // gene/value pairs, each list named by a tissue (patient) id
   var cnvData;
+  var mutationData;
+
   var moviePlaying = false;
 
   //--------------------------------------------------------------------------------------------
@@ -385,6 +387,7 @@ var angioPathwaysModule = (function () {
         cwAngio.edges().unselectify();
         console.log("cwAngio.reset");
         cwAngio.reset();
+        setInfoNodeLabel("neutral");
         handleWindowResize();
         } // cy.ready
        })
@@ -424,7 +427,6 @@ var angioPathwaysModule = (function () {
    function transformMatrixToPatientOrientedNamedList(mtx) {
 
         // geneNames are repeated in each element; grab them from the first one
-      //debugger;
       var geneNames = Object.keys(mtx[0]);
         // the last element was originally (in R) the row name -- the tissue
         // gene1: expression, gene2: expession, ... rowname: 0445.T.1
@@ -452,9 +454,17 @@ var angioPathwaysModule = (function () {
      //   TCGA.02.0058  TCGA.06.0132  TCGA.02.0034  TCGA.12.0657  TCGA.06.0155 
      //    -3.10414205   -0.62431669    0.05214659    0.60673149    4.43374413 
    function demoTissues() {
+
+        // good for copy number and expression changes, but no mutations
       patients = ["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155",
                   "TCGA.06.0155", "TCGA.06.0162", "TCGA.06.1087", "TCGA.12.0778", 
                   "TCGA.14.0871", "TCGA.06.0192"];
+
+        // has about a dozen mutations
+      patients = ["neutral", "TCGA.06.0125", "TCGA.06.0126", "TCGA.06.0128", "TCGA.06.0130", "TCGA.06.0184",
+                  "TCGA.06.0188", "TCGA.06.0221", "TCGA.06.0882", "TCGA.12.0692", "TCGA.76.6282",
+                  "TCGA.81.5910"]
+
       return(patients);
       }
 
@@ -463,6 +473,7 @@ var angioPathwaysModule = (function () {
       console.log("===== entering angiogenesisDemoVizChanges");
       request_mRNA_data(demoTissues(), geneSymbols());   // entities: patient, tissue or sample ids
       request_cnv_data(demoTissues(), geneSymbols());
+      request_mutation_data(demoTissues(), geneSymbols());
       } // angiogenesisDemoVizChanges
 
    //----------------------------------------------------------------------------------------------------
@@ -576,6 +587,18 @@ var angioPathwaysModule = (function () {
        }
 
     //----------------------------------------------------------------------------------------------------
+    function request_mutation_data(entities, features) {
+
+      msg = {cmd:"get_mutation_data",
+              callback: "handle_mutation_data",
+              status:"request",
+              payload:{entities: entities, features: features}
+              };
+       msg.json = JSON.stringify(msg);
+       socket.send(msg.json);
+       }
+
+    //----------------------------------------------------------------------------------------------------
     function addTissueIDsToSelector (tissueIDs) {
       tissueMenu.empty();
       if(tissueIDs.length == 0) {
@@ -583,16 +606,9 @@ var angioPathwaysModule = (function () {
          return;
          }
       
-      // every set of tissueIDs needs an aggregate, or average tissue
+      // every set of tissueIDs needs a neutral (no data) pseudo-tissue
 
-      //optionMarkup = "<option> average (of " + tissueIDs.length + ") </option>";
-      //optionMarkup = "<option>average</option>";
-      //tissueMenu.append(optionMarkup);
-        // msg = {cmd: "requestAverageExpression", status: "request", payload: tissueIDs};
-        // console.log(msg)
-        //   msg.json = JSON.stringify(msg);
-        //   console.log(msg.json)
-        //   socket.send(msg.json);
+      tissueIDs.unshift("neutral");
 
       for(var i=0; i < tissueIDs.length; i++){
          tissueName = tissueIDs[i]
@@ -616,10 +632,15 @@ var angioPathwaysModule = (function () {
 
        console.log("handling cnv data");
        var mtx = JSON.parse(msg.payload.mtx);
-       debugger;
        cnvData = transformMatrixToPatientOrientedNamedList(mtx);
-       //addTissueIDsToSelector(expressionData.tissues);
+       } // handle_mRNA_data
 
+    //----------------------------------------------------------------------------------------------------
+    function handle_mutation_data(msg) {
+
+       console.log("handling mutation data");
+       var mtx = JSON.parse(msg.payload.mtx);
+       mutationData = transformMatrixToPatientOrientedNamedList(mtx);
        } // handle_mRNA_data
 
     //----------------------------------------------------------------------------------------------------
@@ -631,20 +652,55 @@ var angioPathwaysModule = (function () {
        } // tissueSelectorChanged
 
     //----------------------------------------------------------------------------------------------------
+    setInfoNodeLabel = function(newLabel){
+       infoNodeID = cwAngio.filter('node[canonicalName="info.node"]').data("id")
+       console.log("setting info.node label to '" + newLabel + "'");
+       noa = {};
+       noa[infoNodeID] = {label: newLabel};
+       cwAngio.batchData(noa);
+       }
+
+    //----------------------------------------------------------------------------------------------------
     function displayTissue(tissueID) {
+
+       setInfoNodeLabel(tissueID);
+
+       var noa = {};
+
+       if(tissueID == "neutral") {
+          console.log(" will display neutral values of expression, copynumber, mutation");
+          ids = [];
+          allNodes = cwAngio.nodes();
+          for(i=0; i < allNodes.length; i++){
+             node = allNodes[i];
+             id = node.data("id");
+             console.log("neutral tissue, node id: " + id);
+             if(Object.keys(node.data()).indexOf("geneSymbol") >= 0){
+                geneSymbol = node.data("geneSymbol");
+                ids.push(id);
+                noa[id] = {score:0, label: geneSymbol, copyNumber:0}
+                } // if node has geneSymbol attribute
+             } // for i
+          console.log("all ids: " + ids + "  noa: " + noa);
+          cwAngio.batchData(noa);
+          return;
+          } // neutral pseudo-tissue
 
        if(expressionData.tissues.indexOf(tissueID) < 0){
           alert(tissueId + " not found in current expressionData");
           return;
           }
+
        mRNA = expressionData.values
        genes = expressionData.genes;
        tissues = expressionData.tissues;
        console.log("expr for " + genes.length + " genes, and " + tissues.length + " tissues");
-       var noa = {};  // new node attributes to assign in the network
+
+       noa = {};  // new node attributes to assign in the network
 
        for(var g=0; g < genes.length; g++){
           gene = genes[g];
+
           newScore = mRNA[tissueID][gene][0];
           console.log("  set score of " + gene + " to " + newScore);
           filterString = '[geneSymbol="' + gene + '"]'
@@ -659,7 +715,8 @@ var angioPathwaysModule = (function () {
        genes = cnvData.genes;
        tissues = cnvData.tissues;
        console.log("cnv for " + genes.length + " genes, and " + tissues.length + " tissues");
-       var noa = {};  // new node attributes to assign in the network
+
+       noa = {};  // new node attributes to assign in the network
 
        for(var g=0; g < genes.length; g++){
          gene = genes[g];
@@ -673,19 +730,34 @@ var angioPathwaysModule = (function () {
 
        cwAngio.batchData(noa);
 
-      // cwAngio.nodes('[geneSymbol="KDR"]')[0].data()
-      // nodeIds = nodeIDs();
-      // var noa = {};
-      // for(var i=0; i < nodeIds.length; i++){
-      //   debugger;
-      //   newScore = getRandomFloat(-8, 8);
-      //   newCopyNumberIndex = getRandomInt(0,3);
-      //   newCopyNumber = ["-2", "-1", "0", "1", "2"][newCopyNumberIndex]
-      //   noa[nodeIds[i]] = {score: newScore, copyNumber: newCopyNumber};
-      //   } // for i
+       mut = mutationData.values
 
+       noa = {};  // new node attributes to assign in the network
+ 
 
-       } 
+       for(var g=0; g < genes.length; g++){
+         gene = genes[g];
+         newMutation = mut [tissueID][gene][0];
+            // identify the node (by id) whose geneSymbol attribute is gene
+            // the label attribute changes, but geneSymbol remains
+         filterString = 'node[geneSymbol="' + gene  + '"]';
+         nodeID = cwAngio.filter(filterString).id();
+            // set label and nodeType for every gene
+         if(newMutation == null){
+            newGeneLabel = gene;
+            newNodeType = "gene";
+            console.log("setting wt label: " + newGeneLabel);
+            }
+         else{
+            newGeneLabel = gene + " (" + newMutation + ")";
+            newNodeType = "mutation";
+            console.log("setting  mut label: " + newGeneLabel);
+            }
+         console.log(" setting noa for " + nodeID + " " + newGeneLabel + "  " + newNodeType);
+         noa[nodeID] = {label: newGeneLabel, nodeType: newNodeType};
+         } // for g, mutations
+       cwAngio.batchData(noa);
+       } // displayTissue
 
     //----------------------------------------------------------------------------------------------------
     function SetModifiedDate(){
@@ -710,6 +782,7 @@ var angioPathwaysModule = (function () {
        addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
        addJavascriptMessageHandler("handle_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_cnv_data",  handle_cnv_data);
+       addJavascriptMessageHandler("handle_mutation_data",  handle_mutation_data);
        socketConnectedFunctions.push(SetModifiedDate);
        if(typeof(window.tabsAppRunning) == "undefined") {
           socketConnectedFunctions.push(angiogenesisDemoVizChanges)
@@ -1571,14 +1644,20 @@ angiogenesisVizmap = [ {
       "border-width" : 1.0,
       "border-color" : "rgb(0,0,0)",
       "color" : "rgb(0,0,0)",
-      "height" : 30.0,
+      "height" : 50.0,
       "text-valign" : "center",
       "text-halign" : "center",
       "font-family" : "SansSerif",
       "font-weight" : "bold",
       "content" : "data(label)"
     }
-  }, {
+  }, 
+   {"selector": "node[name='info.node']",
+     "css" : {width: 0,  height: 0}
+    },
+ 
+
+   {
     "selector" : "node[type = 'gene']",
     "css" : {
       "shape" : "ellipse"

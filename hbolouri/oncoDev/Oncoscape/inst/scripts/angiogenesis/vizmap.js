@@ -13,14 +13,20 @@ angiogenesisVizmap = [ {
       "border-width" : 1.0,
       "border-color" : "rgb(0,0,0)",
       "color" : "rgb(0,0,0)",
-      "height" : 30.0,
+      "height" : 50.0,
       "text-valign" : "center",
       "text-halign" : "center",
       "font-family" : "SansSerif",
       "font-weight" : "bold",
       "content" : "data(label)"
     }
-  }, {
+  }, 
+   {"selector": "node[name='info.node']",
+     "css" : {width: 0,  height: 0}
+    },
+ 
+
+   {
     "selector" : "node[type = 'gene']",
     "css" : {
       "shape" : "ellipse"
