@@ -249,6 +249,17 @@ function setupFilteredPatients()
     }
 }
 //--------------------------------------------------------------------------------------------------
+// the nginx proxy server, used by fhcrc IT for the publicly-visible version of Oncoscape
+// times out web sockets at 90 seconds.
+// this function, when called more often that that, will keep the websocket open.
+keepAlive = function()
+{   
+    console.log("keep alive"); 
+    msg = {cmd: "keepAlive", callback: "", status:"request", payload:""}
+    socket.send(JSON.stringify(msg));
+
+} // keepAlive
+//--------------------------------------------------------------------------------------------------
 $(document).ready(function()
 {
     console.log("==== index.common document.ready #1");
@@ -265,11 +276,11 @@ $(document).ready(function()
     // labkeyWS - labkey launched Oncoscape; local R must be run with WS
     // labkeyRS - labkey launched oncoscape; Rserve is used
     //
-    if (typeof labkey == "undefined")
-    {
+    if (typeof labkey == "undefined") {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-     }
+        setInterval(keepAlive, 30000);
+        }
     else
     if (labkey.mode == "WS")
     {
@@ -291,6 +302,8 @@ $(document).ready(function()
     setupFilteredPatients();
 })
 //--------------------------------------------------------------------------------------------------
+
+
 </script>
 
 <script>
@@ -299,8 +312,9 @@ var ClinicalTableModule = (function () {
 
 var currentIDs;   // assign this to the full content in the tbl on startup
 var tableRef;
-var pcaButton;
-var timeLinesButton;
+//var pcaButton;
+//var timeLinesButton;
+var PatientMenu;
 var displayDiv;
 var ClinicalTableTabNum=1;
 
@@ -309,9 +323,18 @@ var ClinicalTableTabNum=1;
       SaveSelectedButton = $("#toSavedSelectionButton");
       SaveSelectedButton.click(function(){sendCurrentIDsToSelection()});
 
-      pcaButton = $("#toPCAButton");
-      pcaButton.click(function(){sendCurrentIDsToModule("PCA")});
-      timeLinesButton = $("#toTimeLinesButton")
+      PatientMenu = d3.select("#useSavedSelectionButton")
+            .append("g")
+            .append("select")
+            .on("focus",function(d){ ctbl.UpdateSelectionMenu()})
+            .on("change", function() {
+                   getSelectionbyName(this.value, callback="ChangeTablePatientSelection"); 
+            })
+            ;
+                 
+      var pcaButton = $("#toPCAButton");
+      pcaButton.click(checkAndSendSelectionsToPCA);
+      var timeLinesButton = $("#toTimeLinesButton")
       timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines")});
       displayDiv = $("#clinicalDataTableDiv");
       $(window).resize(handleWindowResize);
@@ -357,6 +380,7 @@ var ClinicalTableTabNum=1;
     $("#toTimeLinesButton").prop("disabled",false);
     };
 
+
   //--------------------------------------------------------------------------------------------
    function sendCurrentIDsToSelection () {
       console.log("entering sendCurrentIDsToSelection");
@@ -367,7 +391,6 @@ var ClinicalTableTabNum=1;
       console.log(currentIDs.length + " patientIDs going to SavedSelection")
       
       var NewSelection = {   
-                    "userID": getUserID(),
                     "selectionname": "ClinicalTable",
          			"PatientIDs" : currentIDs,
          			"Tab": "ClinicalTable",
@@ -377,24 +400,44 @@ var ClinicalTableTabNum=1;
                       overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
          		}
  
- 
-      msg = {cmd:"addNewUserSelection",
-             callback: "addSelectionToTable",
-               status:"request",
-              payload: NewSelection 
-             };
-      msg.json = JSON.stringify(msg);
-           console.log(msg.json);
-      socket.send(msg.json);
+       addSelection(NewSelection);
+       
+//      msg = {cmd:"addNewUserSelection",
+//             callback: "addSelectionToTable",
+//               status:"request",
+//              payload: NewSelection 
+//             };
+//      msg.json = JSON.stringify(msg);
+//           console.log(msg.json);
+//      socket.send(msg.json);
       } // sendTissueIDsToModule
 
    //--------------------------------------------------------------------------------------------
-   function sendCurrentIDsToModule (moduleName) {
-      console.log("entering sendCurrentIDsToModule");
+   function checkAndSendSelectionsToPCA(){
+      var minimumPatientsForPCA = 5
+      if(currentSelectedIDs().length < minimumPatientsForPCA){
+         alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
+         return;
+         }
+
+      sendCurrentIDsToModule("PCA");
+      } // checkAndSendSelectionsToPCA
+
+   //----------------------------------------------------------------------------------------------------
+   function currentSelectedIDs(){
       var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
       var currentIDs = []
       for(var i=0; i < rows.length; i++) 
           currentIDs.push(rows[i][0]);
+
+      return(currentIDs)
+
+      } // currentSelectedIDS
+   //----------------------------------------------------------------------------------------------------
+   function sendCurrentIDsToModule (moduleName) {
+      console.log("entering sendCurrentIDsToModule");
+
+      currentIDs = currentSelectedIDs();
       console.log(currentIDs.length + " patientIDs going to " + moduleName)
       callback = moduleName + "HandlePatientIDs";
       msg = {cmd:"sendPatientIDsToModule",
@@ -434,7 +477,36 @@ var ClinicalTableTabNum=1;
       socket.send(msg.json);
       } // readAndApplyClinicalTableFilters 
 
+    //--------------------------------------------------------------------------------------------
+    function SendSelectionToFilterTable(msg){
+       console.log("==== Send Selection IDs to Filter Table")
+       
+      if(msg.status != "success"){
+         alert("SendSelectioToFilterTable error: " + msg.payload);
+         return;
+         }
 
+       patientIDs = []
+       selections = msg.payload;
+       d3.values(selections).forEach(function(d){ 
+            d.patientIDs.forEach(function(id){
+               if(patientIDs.indexOf(id) == -1) patientIDs.push(id)
+            })
+        })
+  
+       var payload = {
+           ids: patientIDs,
+           count: patientIDs.length
+         }
+
+	var	msg = {
+		   cmd: "handleFilterPatientHistory",
+		   callback: "",
+		   status: "success",
+		   payload : payload
+		}
+       handleFilterPatientHistory(msg);
+    }
    //--------------------------------------------------------------------------------------------
    function handleFilterPatientHistory(msg) {
       console.log("=== handleFilterPatientHistory");
@@ -469,7 +541,7 @@ var ClinicalTableTabNum=1;
         } // if more than one id
 
       console.log("---- clinicalDataTable2.handleFilterClinicalDataTable");
-      console.log(filterString)
+      //console.log(filterString)
       console.log("about to call fnFilter");
       tableRef.fnFilter(filterString, 0, true);
       $("#tabs").tabs( "option", "active", ClinicalTableTabNum);
@@ -522,6 +594,22 @@ var ClinicalTableTabNum=1;
      tableRef.fnAddData(msg.payload.mtx);
      }; // displayTable
 
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayClTblModifiedDate",
+             status:"request",
+             payload:"clinicalDataTable"
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayClTblModifiedDate(msg){
+        document.getElementById("ClinicalTableDateModified").innerHTML = msg.payload;
+    }
+      
 
   return{
     requestData: requestData,
@@ -530,8 +618,25 @@ var ClinicalTableTabNum=1;
       addJavascriptMessageHandler("handlePatientHistory", displayTable);
       addJavascriptMessageHandler("handleFilterPatientHistory", handleFilterPatientHistory);
       addJavascriptMessageHandler("PatientHistoryHandlePatientIDs", handleFilterPatientHistory);
+      addJavascriptMessageHandler("ChangeTablePatientSelection", SendSelectionToFilterTable)
+      addJavascriptMessageHandler("DisplayClTblModifiedDate", DisplayClTblModifiedDate);
+      socketConnectedFunctions.push(SetModifiedDate);
       socketConnectedFunctions.push(requestData);
-      }
+      },
+    
+    //--------------------------------------------------------------------------------------------
+    UpdateSelectionMenu: function(){           
+                  
+      PatientMenu.selectAll("option")
+                 .data(getSelectionNames(), function(d){return d;})
+                 .enter()
+                        .append("option")
+                        .attr("value", function(d){return d})
+                        .text(function(d) { return d})
+                ;
+     }
+
+
     }; // returned object
 
   }); // DateAndTimeModule
@@ -700,9 +805,10 @@ th, td { white-space: nowrap; }
               <button id="showAllClinicalTablesRowsButton" class="tblClinicalControlButton" type="button">Remove Filters</button>
               <!-- button id="toggleMoreFewerColumnsButton" class="tblClinicalControlButton" type="button">More Columns</button -->
            </div>
+             <button id="toSavedSelectionButton" class="tblClinicalControlButton" type="button">Save Selection</button>
+             <span id="useSavedSelectionButton" class="tblClinicalControlButton" type="button">Use Selection</span>
 
           <div id="clinicalDataTableOutboundButtonDiv" style="display: inline-block">
-             <button id="toSavedSelectionButton" class="tblClinicalControlButton" type="button">Save Selection</button>
              <button id="toMarkersAndTissuesButton" class="tblClinicalControlButton" type="button">Markers &amp; Tissues</button>
              <button id="toGBMPathwaysButton" class="tblClinicalControlButton" type="button">GBM Pathways</button>
              <button id="toPCAButton" class="tblClinicalControlButton" type="button">PCA</button>
@@ -714,6 +820,10 @@ th, td { white-space: nowrap; }
     </div>
    </div>
    <div id="clinicalDataTableDiv"></div>
+          
+        <span id=ClinicalTableAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>
+        <span style="font-size:x-small">Last Modified: <span id=ClinicalTableDateModified style="font-size:x-small"></span></span>
+
 </div>
 </body>
 </html>

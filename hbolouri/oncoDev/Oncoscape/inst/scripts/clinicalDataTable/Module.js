@@ -25,7 +25,7 @@ var ClinicalTableTabNum=1;
             ;
                  
       var pcaButton = $("#toPCAButton");
-      pcaButton.click(function(){sendCurrentIDsToModule("PCA")});
+      pcaButton.click(checkAndSendSelectionsToPCA);
       var timeLinesButton = $("#toTimeLinesButton")
       timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines")});
       displayDiv = $("#clinicalDataTableDiv");
@@ -105,12 +105,31 @@ var ClinicalTableTabNum=1;
       } // sendTissueIDsToModule
 
    //--------------------------------------------------------------------------------------------
-   function sendCurrentIDsToModule (moduleName) {
-      console.log("entering sendCurrentIDsToModule");
+   function checkAndSendSelectionsToPCA(){
+      var minimumPatientsForPCA = 8;
+      if(currentSelectedIDs().length < minimumPatientsForPCA){
+         alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
+         return;
+         }
+
+      sendCurrentIDsToModule("PCA");
+      } // checkAndSendSelectionsToPCA
+
+   //----------------------------------------------------------------------------------------------------
+   function currentSelectedIDs(){
       var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
       var currentIDs = []
       for(var i=0; i < rows.length; i++) 
           currentIDs.push(rows[i][0]);
+
+      return(currentIDs)
+
+      } // currentSelectedIDS
+   //----------------------------------------------------------------------------------------------------
+   function sendCurrentIDsToModule (moduleName) {
+      console.log("entering sendCurrentIDsToModule");
+
+      currentIDs = currentSelectedIDs();
       console.log(currentIDs.length + " patientIDs going to " + moduleName)
       callback = moduleName + "HandlePatientIDs";
       msg = {cmd:"sendPatientIDsToModule",
