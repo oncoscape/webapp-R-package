@@ -26,8 +26,10 @@ var ClinicalTableTabNum=1;
                  
       var pcaButton = $("#toPCAButton");
       pcaButton.click(checkAndSendSelectionsToPCA);
-      var timeLinesButton = $("#toTimeLinesButton")
-      timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines")});
+      var pcaHighlightButton = $("#pcaHighlight");
+      pcaHighlightButton.click(function(){sendCurrentIDsToModule("PCA", "Highlight")});
+      var timeLinesButton = $("#toTimeLinesButton");
+      timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines", null)});
       displayDiv = $("#clinicalDataTableDiv");
       $(window).resize(handleWindowResize);
       handleWindowResize();
@@ -132,12 +134,29 @@ var ClinicalTableTabNum=1;
       currentIDs = currentSelectedIDs();
       console.log(currentIDs.length + " patientIDs going to " + moduleName)
       callback = moduleName + "HandlePatientIDs";
-      msg = {cmd:"sendPatientIDsToModule",
-             callback: callback,
-             status:"request",
-             payload:{targetModule: moduleName,
-                      ids: currentIDs}
-             };
+      console.log("EXTRA PAYLOAD INFO = " + extraPayloadInfo);
+      if(extraPayloadInfo == "Highlight"){
+          msg = {cmd:"sendPatientIDsToModule",
+                 callback: callback,
+                 status:"request",
+                 payload:{targetModule: moduleName,
+                          ids: currentIDs, Higlight: "Highlight"}
+                 };
+       }else if(extraPayloadInfo == "newCalculation"){
+          msg = {cmd:"sendPatientIDsToModule",
+                 callback: callback,
+                 status:"request",
+                 payload:{targetModule: moduleName,
+                          ids: currentIDs, Highlight: extraPayloadInfo}
+                 };
+       }else{
+          msg = {cmd:"sendPatientIDsToModule",
+                 callback: callback,
+                 status:"request",
+                 payload:{targetModule: moduleName,
+                          ids: currentIDs}
+                 };
+          }
       msg.json = JSON.stringify(msg);
       //console.log(msg.json);
       socket.send(msg.json);
