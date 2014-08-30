@@ -67,7 +67,7 @@ var sendToModuleExample = (function () {
      function sendToModuleChanged() {
 
        ModuleName = sendSelectionMenu.val()
-       SendSelectionToModule(ModuleName, SelectedPatientIDs);
+       sendSelectionToModule(ModuleName, SelectedPatientIDs);
        sendSelectionMenu.val("Send Selection to:")
        } // sendToModuleChanged
 
@@ -97,10 +97,8 @@ var sendToModuleExample = (function () {
              + "Settings: " + NewSelection.Settings + "<br>" 
              + "IDs: "  + JSON.stringify(NewSelection.PatientIDs) + "<br>";
         
-
         document.getElementById("showNewSelection").innerHTML = SelectionString
-
-
+        
      } // addRandomSelectionData
 
 //--------------------------------------------------------------------------------------------
@@ -148,13 +146,14 @@ var sendToModuleExample = (function () {
          return;
          }
 
-       patientIDs = msg.payload;
+       patientIDs = msg.payload.ids;
         
         var SelectionString = "Received Selection: <br><br>" + JSON.stringify(patientIDs)
         document.getElementById("showReceivedSelection").innerHTML = SelectionString
        
      } // handlePatientIDs
 
+ //--------------------------------------------------------------------------------------------
  return{
 
    init: function(){

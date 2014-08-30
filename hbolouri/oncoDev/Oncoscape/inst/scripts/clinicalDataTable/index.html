@@ -308,6 +308,203 @@ $(document).ready(function()
 
 <script>
 //----------------------------------------------------------------------------------------------------
+var UserSettingsModule = (function () {
+
+     var username = "Guest"
+     var userID = null
+     var SelectionNames = [];
+     
+//----------------------------------------------------------------------------------------------------
+//======= PUBLIC FUNCTIONS ==========
+//----------------------------------------------------------------------------------------------------
+      getUserID = function(){
+           console.log("Sending User ID: ", userID)
+           return userID;
+      }      
+//----------------------------------------------------------------------------------------------------
+      getUsername = function(){
+           console.log("Sending Username: ", username)
+           return username;
+      }      
+
+//----------------------------------------------------------------------------------------------------
+      setUsername = function(msg){
+           console.log("Set username: ", msg.payload.username)
+           username = msg.payload.username
+      }      
+
+    //--------------------------------------------------------------------------------------------
+     addSelection = function(NewSelection){
+  
+           //Check NewSelection values for completeness/accuracy
+           // should have selectionnames, patientIDs, Tab, and Settings
+           
+           NewSelection.userID = getUserID() 
+     
+           msg = {cmd: "addNewUserSelection",
+                  callback: "UpdateSelectionListeners",
+                  status:"request",
+                  payload: NewSelection 
+                 };
+ 
+           msg.json = JSON.stringify(msg);
+//           console.log(msg.json);
+           socket.send(msg.json);
+     }
+    //--------------------------------------------------------------------------------------------
+     getSelectionbyName = function(selectionname, callback){
+               
+			if(SelectionNames.indexOf(selectionname) == -1){
+   			     alert("Error: ",selectionname, " not in list")
+                  return;
+			} else{
+  
+                msg = {cmd:"getUserSelection",
+                  callback: callback,
+                  status:"request",
+                  payload:{userID: getUserID(),
+                           selectionname: selectionname}
+                  };
+     
+                 console.log(JSON.stringify(msg));
+                  socket.send(JSON.stringify(msg));
+          }     
+    }
+
+   //--------------------------------------------------------------------------------------------
+     getSelectionNames = function(){
+
+            return SelectionNames;
+     }
+
+//----------------------------------------------------------------------------------------------------
+//======= PRIVATE FUNCTIONS ==========
+//----------------------------------------------------------------------------------------------------
+      function CreateNewUser(){
+      
+         console.log("======= creating new guest user")
+  
+            userID = Math.random().toString(36).substring(7)
+            console.log(userID);
+      }
+//----------------------------------------------------------------------------------------------------
+     function UserSettingsInitializeUI(){
+
+           CreateNewUser();
+       };
+
+//----------------------------------------------------------------------------------------------------
+     function addNewUser(){
+              
+            msg = {cmd:"addNewUserToList",
+                 callback: "UpdateUserInfo",
+                 status:"request",
+                 payload: { userID: userID, username: username}
+                };
+                console.log(JSON.stringify(msg))
+          socket.send(JSON.stringify(msg));
+     }
+ 
+         
+
+//----------------------------------------------------------------------------------------------------
+    function UpdateSelectionListeners(msg){
+    
+        console.log("===== Updating JS Selection Lists")
+        console.log(msg)
+         
+         if(msg.status === "success"){
+           SelectionNames.push(msg.payload.selectionname)  
+           
+           if(typeof(SavedSelection) != "undefined")  SavedSelection.addSelectionToTable(msg);
+           if(typeof(PatientTimeLine) != "undefined") PatientTimeLine.RefreshSelectionMenu()
+           if(typeof(ctbl) != "undefined") ctbl.UpdateSelectionMenu()
+         }
+     }
+  
+ 
+     
+//----------------------------------------------------------------------------------------------------
+return{
+
+   init: function(){
+      onReadyFunctions.push(UserSettingsInitializeUI);
+      socketConnectedFunctions.push(addNewUser);
+     addJavascriptMessageHandler("UpdateSelectionListeners", UpdateSelectionListeners);
+     addJavascriptMessageHandler("UpdateUserInfo", setUsername);
+
+      }
+   };
+
+}); // DateAndTimeModule
+//----------------------------------------------------------------------------------------------------
+UserSettings = UserSettingsModule();
+UserSettings.init();
+
+</script>
+<script>
+//----------------------------------------------------------------------------------------------------
+var AboutModule = (function () {
+
+ 
+    initializeUI = function(){
+     
+        ClearAboutInfo()      
+    };
+
+
+//----------------------------------------------------------------------------------------------------
+    function ClearAboutInfo(){
+       document.getElementById("ModuleNameSlot").innerHTML = "";
+       document.getElementById("CreatorSlot").innerHTML = "";
+       document.getElementById("MaintainerSlot").innerHTML = "";
+       document.getElementById("LastModifiedSlot").innerHTML = "";
+    }
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(ModuleFolderName){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayModifiedDate",
+             status:"request",
+             payload:ModuleFolderName
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayModifiedDate(msg){
+        document.getElementById("LastModifiedSlot").innerHTML = msg.payload.date;
+    }
+
+
+ return{
+
+   init: function(){
+      onReadyFunctions.push(initializeUI);
+//      socketConnectedFunctions.push(SetModifiedDate)
+      addJavascriptMessageHandler("DisplayModifiedDate", DisplayModifiedDate);
+      },
+      
+      //----------------------------------------------------------------------------------------------------
+    SetAboutInfo: function(info){
+
+       document.getElementById("ModuleNameSlot").innerHTML = info.Modulename;
+       document.getElementById("CreatorSlot").innerHTML = info.CreatedBy;
+       document.getElementById("MaintainerSlot").innerHTML = info.MaintainedBy;
+       SetModifiedDate(info.Folder)
+       
+       alert($("#AboutDiv"))
+    }
+ }; // return
+
+}); // SelectionExample
+//----------------------------------------------------------------------------------------------------
+about = AboutModule();
+about.init();
+
+</script>
+<script>
+//----------------------------------------------------------------------------------------------------
 var ClinicalTableModule = (function () {
 
 var currentIDs;   // assign this to the full content in the tbl on startup
@@ -320,7 +517,13 @@ var ClinicalTableTabNum=1;
 
    //--------------------------------------------------------------------------------------------
    function initializeUI(){
+     
+      ClTblAbout = $("#AboutLink")
+      ClTblTooltip = $("#TooltipsLink")
       SaveSelectedButton = $("#toSavedSelectionButton");
+      
+      ClTblAbout.click(function(){DisplayAboutModule()})
+      ClTblTooltip.click(function(){DisplayModuleTooltip()})
       SaveSelectedButton.click(function(){sendCurrentIDsToSelection()});
 
       PatientMenu = d3.select("#useSavedSelectionButton")
@@ -339,6 +542,7 @@ var ClinicalTableTabNum=1;
       displayDiv = $("#clinicalDataTableDiv");
       $(window).resize(handleWindowResize);
       handleWindowResize();
+
       $("#ageAtDxMinSlider").slider({
          change: function(event, ui) {$("#ageAtDxMinSliderReadout").text (ui.value)},
          min: 10,
@@ -552,6 +756,7 @@ var ClinicalTableTabNum=1;
   function handleWindowResize(){
       displayDiv.width($(window).width() * 0.95);
       displayDiv.height($(window).height() * 0.95);
+      $("#clinicalDataTableControlsDiv").width($(window).width() * 0.95);
      }; // handleWindowResize
 
    //--------------------------------------------------------------------------------------------
@@ -584,6 +789,7 @@ var ClinicalTableTabNum=1;
         "iDisplayLength": 25,
          bPaginate: true,
         "scrollX": true,
+        "scrollY": true,
         "fnInitComplete": function(){
             $(".display_results").show();
             }
@@ -647,6 +853,20 @@ ctbl.init();
 
 </script>
 <body>
+
+
+<div id="AboutDiv" style="display:none">
+  <ul id="CreditsList">
+   <li id="ModuleNameSlot"></li>
+   <li id="CreatorSlot">Created by: </li>
+   <li id="MaintainerSlot">Maintained by: </li>
+   <li id="LastModifiedSlot">Last Modified: </li>
+   <li id="ContactSlot">Contact: <li>
+   </ul>
+   <br></br>
+   <div>Oncoscape is supported by Fred Hutch and STTR</div>
+ </div>
+
 <style>
 
 
@@ -686,8 +906,8 @@ th, td { white-space: nowrap; }
    font-family: sans-serif;
    font-size: 12px;
    margin-top: 2px;
-   margin-left: 10px;
-   margin-right: 10px;
+   min-width: 900px;
+   margin: 0 auto;
    margin-bottom: 5px;
    background-color: #E8E8E8;
    }
@@ -747,13 +967,23 @@ th, td { white-space: nowrap; }
    margin-bottom: 2px;
    }
 
-
+.HeaderLinks {
+  color: blue;
+  right: 5px;
+  margin-left: auto;
+  margin-right: 0px;
+  cursor: pointer;
+}
 
 
 </style>
 
 
 <div id="clinicalDataModuleDiv">
+   <div id="InfoLinks" class="HeaderLinks">
+      <a id="AboutLink">About</a>
+      <a id="TooltipsLink">Tooltips</a>
+   </div>
    <div id="clinicalDataTableControlsDiv">
       <div id=clinicalDataTableFilterControlsDiv" style="border: 1px;">
 

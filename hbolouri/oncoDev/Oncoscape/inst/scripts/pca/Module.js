@@ -12,16 +12,34 @@ var PCAModule = (function () {
   var pcaTabNumber = 2;
   var d3pcaDisplay;
   var pcaTextDisplay;
+  var PCAPCAsendSelectionMenu;
+  var ThisModuleName = "PCA"
   
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
       pcaDisplay = $("#pcaDisplay");
       d3pcaDisplay = d3.select("#pcaDisplay");
       pcaHandleWindowResize();
-      broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
-      //broadcastButton.button();
-      broadcastButton.click(pcaBroadcastSelection);
       $(window).resize(pcaHandleWindowResize);
+ 
+        PCAsendSelectionMenu = $("#PCAsendSelectiontoModuleButton")
+        PCAsendSelectionMenu.change(sendToModuleChanged);
+        PCAsendSelectionMenu.empty();
+        
+        PCAsendSelectionMenu.append("<option>Send Selection to:</option>")
+        var ModuleNames = getSelectionDestinations()
+        for(var i=0;i< ModuleNames.length; i++){
+           var SendToModule = ModuleNames[i]
+           if(SendToModule !== ThisModuleName){
+              optionMarkup = "<option>" + SendToModule + "</option>";
+              PCAsendSelectionMenu.append(optionMarkup);
+           }
+        }  
+        PCAsendSelectionMenu.prop("disabled",true);
+
+
+      broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
+      broadcastButton.click(pcaBroadcastSelection);
       broadcastButton.prop("disabled",true);
       pcaTextDisplay = $("#pcaTextDisplayDiv");
       };
@@ -68,17 +86,11 @@ var PCAModule = (function () {
               .key(function(d) { return d.gbmDzSubType[0]; })
               .map(patientClassification, d3.map);
 
-
    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
                       .attr("width", $("#pcaDisplay").width())
 
     var LegendLabels = d3.values(Classifications.keys())
- 
-//     var TextOffSet =  [0, 70, 82, 87, 85, 80, 78, 75, 80];
-//     var TextOffset = d3.scale.ordinal()
-//               .range(TextOffset)
-//               .domain(Classifications.keys());
-        
+         
     var legend =    Legendsvg
                    .append("g")
                    .attr("class", "legend")
@@ -101,11 +113,17 @@ var PCAModule = (function () {
    text.attr("transform", function(d, i){
         TextOffset.push(xPosition)
         console.log(i, xPosition)
+        console.log(this)
+        console.log(this.getBBox())
+        console.log(d)
         xPosition = xPosition + this.getBBox().width +20
      return "translate(" + (TextOffset[i]+10) +",0)"
    })
-   
-   console.log(TextOffset)
+  
+  
+ console.log("BBox node: ", text.node().getBBox())  
+// console.log("BBox node: ", text.node().getBBox())  
+ 
      legend.append("circle")
             .attr("cx", 0)
             .attr("cy", 5)
@@ -114,8 +132,6 @@ var PCAModule = (function () {
             .attr("transform", function(d, i){
                return "translate(" + (TextOffset[i]) +",0)"
              })
-
-
   }
   
   //--------------------------------------------------------------------------------------------
@@ -159,6 +175,15 @@ var PCAModule = (function () {
      if(!firstTime) {d3PcaScatterPlot(pcaScores);}
      };
 
+    //----------------------------------------------------------------------------------------------------
+     function sendToModuleChanged() {
+
+       ModuleName = PCAsendSelectionMenu.val()
+       pcaBroadcastSelection ()
+       PCAsendSelectionMenu.val("Send Selection to:")
+    } // sendToModuleChanged
+
+
    //--------------------------------------------------------------------------------------------
   function pcaBroadcastSelection (){
       console.log("pcaBroadcastSelection: " + pcaSelectedRegion);
@@ -173,20 +198,21 @@ var PCAModule = (function () {
             ids.push(p.id[0]);
          } // for i
       if(ids.length > 0)
-         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+//         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+          sendSelectionToModule(ModuleName, ids);
       };
 
   //--------------------------------------------------------------------------------------------
-  function sendIDsToModule (ids, moduleName, title){
-       callback = moduleName + title;
-       msg = {cmd:"sendIDsToModule",
-              callback: callback,
-              status:"request",
-              payload:{targetModule: moduleName,
-                       ids: ids}
-             };
-      socket.send(JSON.stringify(msg));
-      } // sendTissueIDsToModule
+//  function sendIDsToModule (ids, moduleName, title){
+//       callback = moduleName + title;
+//       msg = {cmd:"sendIDsToModule",
+//              callback: callback,
+//              status:"request",
+//              payload:{targetModule: moduleName,
+//                       ids: ids}
+//             };
+//      socket.send(JSON.stringify(msg));
+//      } // sendTissueIDsToModule
 
 
   //--------------------------------------------------------------------------------------------
@@ -215,7 +241,7 @@ var PCAModule = (function () {
       console.log("Module.pca: handlePatientIDs");
       console.log(msg)
       if(msg.status == "success"){
-         patientIDs = msg.payload;
+         patientIDs = msg.payload.ids
          //console.log("pca handlePatientIds: " + patientIDs);
          payload = patientIDs;
          console.log(payload);
@@ -245,10 +271,14 @@ var PCAModule = (function () {
      width = Math.abs(x0-x1);
      //console.log("width: " + width);
      if(width > 1){
+       PCAsendSelectionMenu.prop("disabled",false);
+
         broadcastButton.prop("disabled", false);
         console.log("width > 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
         }
      else{
+       PCAsendSelectionMenu.prop("disabled",true);
+
         broadcastButton.prop("disabled", true);
         console.log("width !> 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
         }
@@ -317,14 +347,9 @@ var PCAModule = (function () {
      xMin = xMin * 1.1
      yMax = yMax * 1.1
      yMin = yMin * 1.1
-//     xMax = 40
-//     xMin = -40
-//     yMax = 30
-//     yMin = -30
 
      //console.log("xMax: " + xMax);   console.log("xMin: " + xMin);
      //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);
-
 
      d3pcaDisplay.select("#pcaSVG").remove();  // so that append("svg") is not cumulative
  
@@ -429,6 +454,7 @@ var PCAModule = (function () {
   return{
    init: function(){
       onReadyFunctions.push(initializeUI);
+      addSelectionDestination("PCA")   
       addJavascriptMessageHandler("pcaPlot", pcaPlot);
       addJavascriptMessageHandler("PCAHandlePatientIDs", handlePatientIDs);
       addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)

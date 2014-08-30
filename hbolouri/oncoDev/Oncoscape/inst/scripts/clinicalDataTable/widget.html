@@ -37,8 +37,8 @@ th, td { white-space: nowrap; }
    font-family: sans-serif;
    font-size: 12px;
    margin-top: 2px;
-   margin-left: 10px;
-   margin-right: 10px;
+   min-width: 900px;
+   margin: 0 auto;
    margin-bottom: 5px;
    background-color: #E8E8E8;
    }
@@ -98,14 +98,23 @@ th, td { white-space: nowrap; }
    margin-bottom: 2px;
    }
 
-
+.HeaderLinks {
+  color: blue;
+  margin-left: auto;
+  margin-right: 0px;
+  cursor: pointer;
+}
 
 
 </style>
 
 
 <div id="clinicalDataModuleDiv">
-   <div id="clinicalDataTableControlsDiv">
+<!--   <div id="InfoLinks" class="HeaderLinks">
+      <a id="AboutLink">About</a>
+      <a id="TooltipsLink">Tooltips</a>
+   </div>
+-->   <div id="clinicalDataTableControlsDiv">
       <div id=clinicalDataTableFilterControlsDiv" style="border: 1px;">
 
        <div id="slider1Div" style="display: inline-block">
@@ -160,20 +169,19 @@ th, td { white-space: nowrap; }
              <span id="useSavedSelectionButton" class="tblClinicalControlButton" type="button">Use Selection</span>
 
           <div id="clinicalDataTableOutboundButtonDiv" style="display: inline-block">
-             <button id="toMarkersAndTissuesButton" class="tblClinicalControlButton" type="button">Markers &amp; Tissues</button>
+            <select id="ClTblsendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
+
+<!--             <button id="toMarkersAndTissuesButton" class="tblClinicalControlButton" type="button">Markers &amp; Tissues</button>
              <button id="toGBMPathwaysButton" class="tblClinicalControlButton" type="button">GBM Pathways</button>
              <button id="toPCAButton" class="tblClinicalControlButton" type="button">PCA</button>
              <button id="pcaHighlight" class="tblClinicalControlButton" type="button"> PCA Highlight </button>
              <button id="toSurvivalStatsButton" class="tblClinicalControlButton" type="button">Survival</button>
              <button id="toTimeLinesButton" class="tblClinicalControlButton" type="button">Timelines</button>
-          </div>
+-->          </div>
        </div>
 
     </div>
    </div>
    <div id="clinicalDataTableDiv"></div>
           
-        <span id=ClinicalTableAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>
-        <span style="font-size:x-small">Last Modified: <span id=ClinicalTableDateModified style="font-size:x-small"></span></span>
-
 </div>

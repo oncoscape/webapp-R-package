@@ -460,14 +460,15 @@ getSelectionDestinations = function(){
 }
 
 //--------------------------------------------------------------------------------------------
-function SendSelectionToModule(ModuleName, currentIDs){
+function sendSelectionToModule(ModuleName, currentIDs, metadata){
     
       callback = ModuleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
-      msg = {cmd:"sendPatientIDsToModule",                  // generalize to "sendIDsToModule"?
+      msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
              callback: callback,
              status:"request",
              payload:{targetModule: ModuleName,
-                      ids: currentIDs}
+                      ids: currentIDs,
+                      metadata: metadata}
              };
       socket.send(JSON.stringify(msg));
     }
@@ -542,7 +543,7 @@ var sendToModuleExample = (function () {
      function sendToModuleChanged() {
 
        ModuleName = sendSelectionMenu.val()
-       SendSelectionToModule(ModuleName, SelectedPatientIDs);
+       sendSelectionToModule(ModuleName, SelectedPatientIDs);
        sendSelectionMenu.val("Send Selection to:")
        } // sendToModuleChanged
 
@@ -623,13 +624,14 @@ var sendToModuleExample = (function () {
          return;
          }
 
-       patientIDs = msg.payload;
+       patientIDs = msg.payload.ids;
         
         var SelectionString = "Received Selection: <br><br>" + JSON.stringify(patientIDs)
         document.getElementById("showReceivedSelection").innerHTML = SelectionString
        
      } // handlePatientIDs
 
+ //--------------------------------------------------------------------------------------------
  return{
 
    init: function(){

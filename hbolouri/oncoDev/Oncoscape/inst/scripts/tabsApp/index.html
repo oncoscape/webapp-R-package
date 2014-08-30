@@ -442,6 +442,40 @@ UserSettings = UserSettingsModule();
 UserSettings.init();
 
 </script>
+<script>
+var ActiveModules = [];
+
+//----------------------------------------------------------------------------------------------------
+addSelectionDestination = function(module)
+{
+   if(module in ActiveModules){
+        alert("Selection Destination message handler for '" +  module + " already set");
+   } else{  ActiveModules.push(module)  }
+}
+
+//----------------------------------------------------------------------------------------------------
+getSelectionDestinations = function(){
+     return ActiveModules;
+//   return tissueMenu.children().map(function() {return $(this).val();}).get();
+}
+
+//--------------------------------------------------------------------------------------------
+function sendSelectionToModule(moduleName, currentIDs, metadata){
+    
+      callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
+      msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
+             callback: callback,
+             status:"request",
+             payload:{targetModule: ModuleName,
+                      ids: currentIDs,
+                      metadata: metadata}
+             };
+      socket.send(JSON.stringify(msg));
+    }
+
+</script>
+
+ 
 
 
 <script>
@@ -561,12 +595,19 @@ var currentIDs;   // assign this to the full content in the tbl on startup
 var tableRef;
 //var pcaButton;
 //var timeLinesButton;
+var ClTblsendSelectionMenu;
 var PatientMenu;
 var displayDiv;
 var ClinicalTableTabNum=1;
-
+var ThisModuleName = "ClinicalTable"
+      
    //--------------------------------------------------------------------------------------------
    function initializeUI(){
+
+      displayDiv = $("#clinicalDataTableDiv");
+      $(window).resize(handleWindowResize);
+      handleWindowResize();
+
       SaveSelectedButton = $("#toSavedSelectionButton");
       SaveSelectedButton.click(function(){sendCurrentIDsToSelection()});
 
@@ -578,14 +619,29 @@ var ClinicalTableTabNum=1;
                    getSelectionbyName(this.value, callback="ChangeTablePatientSelection"); 
             })
             ;
+ 
+        ClTblsendSelectionMenu = $("#ClTblsendSelectiontoModuleButton")
+        ClTblsendSelectionMenu.change(sendToModuleChanged);
+        ClTblsendSelectionMenu.empty();
+        
+        ClTblsendSelectionMenu.append("<option>Send Selection to:</option>")
+        ModuleNames = getSelectionDestinations()
+        for(var i=0;i< ModuleNames.length; i++){
+           var SendToModule = ModuleNames[i]
+           if(SendToModule !== ThisModuleName){
+              optionMarkup = "<option>" + SendToModule + "</option>";
+              ClTblsendSelectionMenu.append(optionMarkup);
+           }
+        }  
+//        ClTblsendSelectionMenu.prop("disabled",true);
+
                  
-      var pcaButton = $("#toPCAButton");
-      pcaButton.click(function(){sendCurrentIDsToModule("PCA")});
-      var timeLinesButton = $("#toTimeLinesButton")
-      timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines")});
-      displayDiv = $("#clinicalDataTableDiv");
-      $(window).resize(handleWindowResize);
-      handleWindowResize();
+//      var pcaButton = $("#toPCAButton");
+//      pcaButton.click(checkAndSendSelectionsToPCA);
+//      var timeLinesButton = $("#toTimeLinesButton")
+//      timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines")});
+
+
       $("#ageAtDxMinSlider").slider({
          change: function(event, ui) {$("#ageAtDxMinSliderReadout").text (ui.value)},
          min: 10,
@@ -627,15 +683,24 @@ var ClinicalTableTabNum=1;
     $("#toTimeLinesButton").prop("disabled",false);
     };
 
+    //----------------------------------------------------------------------------------------------------
+     function sendToModuleChanged() {
+
+       ModuleName = ClTblsendSelectionMenu.val()
+       SelectedPatientIDs = currentSelectedIDs()
+       if(validSelectionToSend(ModuleName, SelectedPatientIDs)){
+         console.log(SelectedPatientIDs.length + " patientIDs going to " + ModuleName)    
+         sendSelectionToModule(ModuleName, SelectedPatientIDs);
+       }
+       ClTblsendSelectionMenu.val("Send Selection to:")
+    } // sendToModuleChanged
+
 
   //--------------------------------------------------------------------------------------------
    function sendCurrentIDsToSelection () {
       console.log("entering sendCurrentIDsToSelection");
-      var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
-      var currentIDs = []
-      for(var i=0; i < rows.length; i++) 
-          currentIDs.push(rows[i][0]);
-      console.log(currentIDs.length + " patientIDs going to SavedSelection")
+      var currentIDs = currentSelectedIDs()
+       console.log(currentIDs.length + " patientIDs going to SavedSelection")
       
       var NewSelection = {   
                     "selectionname": "ClinicalTable",
@@ -649,36 +714,33 @@ var ClinicalTableTabNum=1;
  
        addSelection(NewSelection);
        
-//      msg = {cmd:"addNewUserSelection",
-//             callback: "addSelectionToTable",
-//               status:"request",
-//              payload: NewSelection 
-//             };
-//      msg.json = JSON.stringify(msg);
-//           console.log(msg.json);
-//      socket.send(msg.json);
       } // sendTissueIDsToModule
-
+  //--------------------------------------------------------------------------------------------
+   function validSelectionToSend(modulename, ids){
+       if(modulename == "PCA") 
+          return checkBeforeSendSelectionsToPCA(ids)
+       return true;
+    }
    //--------------------------------------------------------------------------------------------
-   function sendCurrentIDsToModule (moduleName) {
-      console.log("entering sendCurrentIDsToModule");
+   function checkBeforeSendSelectionsToPCA(ids){
+      var minimumPatientsForPCA = 8;
+      if(ids.length < minimumPatientsForPCA){
+         alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
+         return false;
+         }
+      return true;
+      } // checkBeforeSendSelectionsToPCA
+
+   //----------------------------------------------------------------------------------------------------
+   function currentSelectedIDs(){
       var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
       var currentIDs = []
       for(var i=0; i < rows.length; i++) 
           currentIDs.push(rows[i][0]);
-      console.log(currentIDs.length + " patientIDs going to " + moduleName)
-      callback = moduleName + "HandlePatientIDs";
-      msg = {cmd:"sendPatientIDsToModule",
-             callback: callback,
-             status:"request",
-             payload:{targetModule: moduleName,
-                      ids: currentIDs}
-             };
-      msg.json = JSON.stringify(msg);
-      //console.log(msg.json);
-      socket.send(msg.json);
-      
-      } // sendTissueIDsToModule
+
+      return(currentIDs)
+
+      } // currentSelectedIDS
 
 //----------------------------------------------------------------------------------------------------
    function showAllRows() {
@@ -780,6 +842,7 @@ var ClinicalTableTabNum=1;
   function handleWindowResize(){
       displayDiv.width($(window).width() * 0.95);
       displayDiv.height($(window).height() * 0.95);
+      $("#clinicalDataTableControlsDiv").width($(window).width() * 0.95);
      }; // handleWindowResize
 
    //--------------------------------------------------------------------------------------------
@@ -812,6 +875,7 @@ var ClinicalTableTabNum=1;
         "iDisplayLength": 25,
          bPaginate: true,
         "scrollX": true,
+        "scrollY": true,
         "fnInitComplete": function(){
             $(".display_results").show();
             }
@@ -823,32 +887,35 @@ var ClinicalTableTabNum=1;
      }; // displayTable
 
 //----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
+//    function DisplayAboutModule(){
+        
+//        var ThisModuleName = "Clinical DataTable"
+//        var Folder = "clinicalDataTable"
+//        var CreatedBy= ["Paul Shannon"]
+//        var MaintainedBy = "Paul Shannon"
+//        var Contact = 
 
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplayClTblModifiedDate",
-             status:"request",
-             payload:"clinicalDataTable"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
+//        var info = {Modulename: ThisModuleName, Folder: Folder, CreatedBy: CreatedBy, MaintainedBy: MaintainedBy}
+//        about.SetAboutInfo(info)
+
+//    }
 //----------------------------------------------------------------------------------------------------
-    function DisplayClTblModifiedDate(msg){
-        document.getElementById("ClinicalTableDateModified").innerHTML = msg.payload;
-    }
-      
+ //   function DisplayModuleTooltip(){
+       
+//    }
 
+//----------------------------------------------------------------------------------------------------
   return{
     requestData: requestData,
     init: function(){
+      addSelectionDestination(ThisModuleName)   
       onReadyFunctions.push(initializeUI);
       addJavascriptMessageHandler("handlePatientHistory", displayTable);
       addJavascriptMessageHandler("handleFilterPatientHistory", handleFilterPatientHistory);
       addJavascriptMessageHandler("PatientHistoryHandlePatientIDs", handleFilterPatientHistory);
       addJavascriptMessageHandler("ChangeTablePatientSelection", SendSelectionToFilterTable)
-      addJavascriptMessageHandler("DisplayClTblModifiedDate", DisplayClTblModifiedDate);
-      socketConnectedFunctions.push(SetModifiedDate);
+      addJavascriptMessageHandler("ClinicalTableHandlePatientIDs", handleFilterPatientHistory)
+
       socketConnectedFunctions.push(requestData);
       },
     
@@ -880,7 +947,7 @@ var PCAModule = (function () {
 
   var broadcastButton;
   var pcaDisplay;
-  var pcaResults;
+  var pcaScores;
   var patientClassification;
   var firstTime = true;
   var pcaSelectedRegion;    // from brushing
@@ -888,19 +955,37 @@ var PCAModule = (function () {
   var pcaTabNumber = 2;
   var d3pcaDisplay;
   var pcaTextDisplay;
+  var PCAPCAsendSelectionMenu;
+  var ThisModuleName = "PCA"
   
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
       pcaDisplay = $("#pcaDisplay");
       d3pcaDisplay = d3.select("#pcaDisplay");
       pcaHandleWindowResize();
-      broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
-      //broadcastButton.button();
-      broadcastButton.click(pcaBroadcastSelection);
       $(window).resize(pcaHandleWindowResize);
+ 
+        PCAsendSelectionMenu = $("#PCAsendSelectiontoModuleButton")
+        PCAsendSelectionMenu.change(sendToModuleChanged);
+        PCAsendSelectionMenu.empty();
+        
+        PCAsendSelectionMenu.append("<option>Send Selection to:</option>")
+        var ModuleNames = getSelectionDestinations()
+        for(var i=0;i< ModuleNames.length; i++){
+           var SendToModule = ModuleNames[i]
+           if(SendToModule !== ThisModuleName){
+              optionMarkup = "<option>" + SendToModule + "</option>";
+              PCAsendSelectionMenu.append(optionMarkup);
+           }
+        }  
+        PCAsendSelectionMenu.prop("disabled",true);
+
+
+      broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
+      broadcastButton.click(pcaBroadcastSelection);
       broadcastButton.prop("disabled",true);
       
-      pcaTextDisplay = $("#pcaTextDisplay");
+      pcaTextDisplay = $("#pcaTextDisplayDiv");
       };
 
   //--------------------------------------------------------------------------------------------
@@ -933,15 +1018,10 @@ var PCAModule = (function () {
        alert("error!" + msg.payload)
        }
       }; // handlePatientIDs
- //--------------------------------------------------------------------------------------------
+ //-------------------------------------------------------------------------------------------- 
   function drawLegend () {
 
-  console.log("==== draw legend: ") 
-
-    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
-                      .attr("width", $("#pcaDisplay").width())
-                      
-    var TextOffset =  [0, 70, 82, 87, 85, 80, 78, 75, 80];
+   console.log("==== draw legend: ") 
 
    for(var i=0; i<patientClassification.length; i++){
       if(patientClassification[i].gbmDzSubType[0] == null | patientClassification[i].gbmDzSubType[0] == ""){ 
@@ -950,41 +1030,69 @@ var PCAModule = (function () {
         Classifications = d3.nest()
               .key(function(d) { return d.gbmDzSubType[0]; })
               .map(patientClassification, d3.map);
- 
-    var TextOffSet = d3.scale.ordinal()
-               .range(TextOffset)
-               .domain(Classifications.keys());
-               
-    var legend = Legendsvg
+
+   var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
+                      .attr("width", $("#pcaDisplay").width())
+
+    var LegendLabels = d3.values(Classifications.keys())
+         
+    var legend =    Legendsvg
                    .append("g")
                    .attr("class", "legend")
                    .attr("transform", "translate(" + 10 + "," + 10 + ")")  
                    .selectAll(".legend")
-                     .data(Classifications.keys())
+                     .data(LegendLabels)
                      .enter().append("g")
-                     .attr("transform", function(d, i) { 
-                        return "translate(" + i*TextOffSet(d) + ",0)" })
                 ;
-    legend.append("circle")
-            .attr("cx", 12)
+
+    var text = legend.append("text")
+            .attr("y", 10)
+            .attr("x", 0)
+            .style("font-size", 12)
+            .text(function(d) { return d})
+           ;
+
+    var TextOffset = []
+    var xPosition = 0
+
+   text.attr("transform", function(d, i){
+        TextOffset.push(xPosition)
+        console.log(i, xPosition)
+        console.log(this)
+        console.log(this.getBBox())
+        console.log(d)
+        xPosition = xPosition + this.getBBox().width +20
+     return "translate(" + (TextOffset[i]+10) +",0)"
+   })
+  
+  
+ console.log("BBox node: ", text.node().getBBox())  
+// console.log("BBox node: ", text.node().getBBox())  
+ 
+     legend.append("circle")
+            .attr("cx", 0)
             .attr("cy", 5)
             .attr("r", function(d) { return 6;})
             .style("fill", function(d) { return Classifications.get(d)[0].color[0]})
-
-    legend.append("text")
-            .attr("y", 10)
-            .attr("x", 20)
-            .style("font-size", 12)
-            .text(function(d) { return d});
-    
-
+            .attr("transform", function(d, i){
+               return "translate(" + (TextOffset[i]) +",0)"
+             })
   }
   //--------------------------------------------------------------------------------------------
   function pcaHandleWindowResize () {
      pcaDisplay.width($(window).width() * 0.95);
      pcaDisplay.height($(window).height() * 0.80);
-     if(!firstTime) {d3PcaScatterPlot(pcaResults);}
+     if(!firstTime) {d3PcaScatterPlot(pcaScores);}
      };
+
+    //----------------------------------------------------------------------------------------------------
+     function sendToModuleChanged() {
+
+       ModuleName = PCAsendSelectionMenu.val()
+       pcaBroadcastSelection ()
+       PCAsendSelectionMenu.val("Send Selection to:")
+    } // sendToModuleChanged
+
 
    //--------------------------------------------------------------------------------------------
   function pcaBroadcastSelection (){
@@ -994,26 +1102,27 @@ var PCAModule = (function () {
       x2=pcaSelectedRegion[1][0];
       y2=pcaSelectedRegion[1][1];
       ids = [];
-      for(var i=0; i < pcaResults.length; i++){
-         p = pcaResults[i];
+      for(var i=0; i < pcaScores.length; i++){
+         p = pcaScores[i];
          if(p.PC1 >= x1 & p.PC1 <= x2 & p.PC2 >= y1 & p.PC2 <= y2)
             ids.push(p.id[0]);
          } // for i
       if(ids.length > 0)
-         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+//         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+          sendSelectionToModule(ModuleName, ids);
       };
 
   //--------------------------------------------------------------------------------------------
-  function sendIDsToModule (ids, moduleName, title){
-       callback = moduleName + title;
-       msg = {cmd:"sendIDsToModule",
-              callback: callback,
-              status:"request",
-              payload:{targetModule: moduleName,
-                       ids: ids}
-             };
-      socket.send(JSON.stringify(msg));
-      } // sendTissueIDsToModule
+//  function sendIDsToModule (ids, moduleName, title){
+//       callback = moduleName + title;
+//       msg = {cmd:"sendIDsToModule",
+//              callback: callback,
+//              status:"request",
+//              payload:{targetModule: moduleName,
+//                       ids: ids}
+//             };
+//      socket.send(JSON.stringify(msg));
+//      } // sendTissueIDsToModule
 
 
   //--------------------------------------------------------------------------------------------
@@ -1042,7 +1151,7 @@ var PCAModule = (function () {
       console.log("Module.pca: handlePatientIDs");
       //console.log(msg)
       if(msg.status == "success"){
-         patientIDs = msg.payload
+         patientIDs = msg.payload.ids
          //console.log("pca handlePatientIds: " + patientIDs);
          payload = patientIDs
          msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request", 
@@ -1065,10 +1174,14 @@ var PCAModule = (function () {
      width = Math.abs(x0-x1);
      //console.log("width: " + width);
      if(width > 1){
+       PCAsendSelectionMenu.prop("disabled",false);
+
         broadcastButton.prop("disabled", false);
         console.log("width > 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
         }
      else{
+       PCAsendSelectionMenu.prop("disabled",true);
+
         broadcastButton.prop("disabled", true);
         console.log("width !> 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
         }
@@ -1135,14 +1248,11 @@ var PCAModule = (function () {
      
      xMax = xMax * 1.1
      xMin = xMin * 1.1
-//     xMax = 40
-//     xMin = -40
-//     yMax = 30
-//     yMin = -30
+     yMax = yMax * 1.1
+     yMin = yMin * 1.1
 
      //console.log("xMax: " + xMax);   console.log("xMin: " + xMin);
      //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);
-
 
      d3pcaDisplay.select("#pcaSVG").remove();  // so that append("svg") is not cumulative
  
@@ -1249,6 +1359,7 @@ var PCAModule = (function () {
   return{
    init: function(){
       onReadyFunctions.push(initializeUI);
+      addSelectionDestination("PCA")   
       addJavascriptMessageHandler("pcaPlot", pcaPlot);
       addJavascriptMessageHandler("PCAHandlePatientIDs", handlePatientIDs);
       addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)
@@ -3723,7 +3834,6 @@ todo = todoModule();
 todo.init();
 
 </script>
-
 <div id="tabs">
    <ul>
      <li><a href="#DashboardDiv">Dashboard</a></li>
@@ -3810,8 +3920,8 @@ th, td { white-space: nowrap; }
    font-family: sans-serif;
    font-size: 12px;
    margin-top: 2px;
-   margin-left: 10px;
-   margin-right: 10px;
+   min-width: 900px;
+   margin: 0 auto;
    margin-bottom: 5px;
    background-color: #E8E8E8;
    }
@@ -3871,14 +3981,23 @@ th, td { white-space: nowrap; }
    margin-bottom: 2px;
    }
 
-
+.HeaderLinks {
+  color: blue;
+  margin-left: auto;
+  margin-right: 0px;
+  cursor: pointer;
+}
 
 
 </style>
 
 
 <div id="clinicalDataModuleDiv">
-   <div id="clinicalDataTableControlsDiv">
+<!--   <div id="InfoLinks" class="HeaderLinks">
+      <a id="AboutLink">About</a>
+      <a id="TooltipsLink">Tooltips</a>
+   </div>
+-->   <div id="clinicalDataTableControlsDiv">
       <div id=clinicalDataTableFilterControlsDiv" style="border: 1px;">
 
        <div id="slider1Div" style="display: inline-block">
@@ -3933,21 +4052,20 @@ th, td { white-space: nowrap; }
              <span id="useSavedSelectionButton" class="tblClinicalControlButton" type="button">Use Selection</span>
 
           <div id="clinicalDataTableOutboundButtonDiv" style="display: inline-block">
-             <button id="toMarkersAndTissuesButton" class="tblClinicalControlButton" type="button">Markers &amp; Tissues</button>
+            <select id="ClTblsendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
+
+<!--             <button id="toMarkersAndTissuesButton" class="tblClinicalControlButton" type="button">Markers &amp; Tissues</button>
              <button id="toGBMPathwaysButton" class="tblClinicalControlButton" type="button">GBM Pathways</button>
              <button id="toPCAButton" class="tblClinicalControlButton" type="button">PCA</button>
              <button id="toSurvivalStatsButton" class="tblClinicalControlButton" type="button">Survival</button>
              <button id="toTimeLinesButton" class="tblClinicalControlButton" type="button">Timelines</button>
-          </div>
+-->          </div>
        </div>
 
     </div>
    </div>
    <div id="clinicalDataTableDiv"></div>
           
-        <span id=ClinicalTableAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>
-        <span style="font-size:x-small">Last Modified: <span id=ClinicalTableDateModified style="font-size:x-small"></span></span>
-
 </div>
 <style>
 
@@ -3992,14 +4110,12 @@ th, td { white-space: nowrap; }
 </style>
 
 <div id="pcaDiv">
-   <button id="pcaBroadcastSelectionToClinicalTable">To Clinical Data... </button>
+<!--   <button id="pcaBroadcastSelectionToClinicalTable">To Clinical Data... </button>
+-->   <select id="PCAsendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
    <div id="pcaDisplay"></div>
    <div id="pcaLegend"></div>
-   <div id="pcaTextDisplay"></div>
+   <div id="pcaTextDisplayDiv"></div>
    
-   <span id=pcaAcknowledgement style="font-size:x-small">Created by Paul Shannon;</span>
-   <span style="font-size:x-small">Last Modified: <span id=pcaDateModified style="font-size:x-small"></span></span>
-
 </div>
 
 <style>

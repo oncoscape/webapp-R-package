@@ -6,12 +6,19 @@ var currentIDs;   // assign this to the full content in the tbl on startup
 var tableRef;
 //var pcaButton;
 //var timeLinesButton;
+var ClTblsendSelectionMenu;
 var PatientMenu;
 var displayDiv;
 var ClinicalTableTabNum=1;
-
+var ThisModuleName = "ClinicalTable"
+      
    //--------------------------------------------------------------------------------------------
    function initializeUI(){
+
+      displayDiv = $("#clinicalDataTableDiv");
+      $(window).resize(handleWindowResize);
+      handleWindowResize();
+
       SaveSelectedButton = $("#toSavedSelectionButton");
       SaveSelectedButton.click(function(){sendCurrentIDsToSelection()});
 
@@ -23,16 +30,29 @@ var ClinicalTableTabNum=1;
                    getSelectionbyName(this.value, callback="ChangeTablePatientSelection"); 
             })
             ;
+ 
+        ClTblsendSelectionMenu = $("#ClTblsendSelectiontoModuleButton")
+        ClTblsendSelectionMenu.change(sendToModuleChanged);
+        ClTblsendSelectionMenu.empty();
+        
+        ClTblsendSelectionMenu.append("<option>Send Selection to:</option>")
+        ModuleNames = getSelectionDestinations()
+        for(var i=0;i< ModuleNames.length; i++){
+           var SendToModule = ModuleNames[i]
+           if(SendToModule !== ThisModuleName){
+              optionMarkup = "<option>" + SendToModule + "</option>";
+              ClTblsendSelectionMenu.append(optionMarkup);
+           }
+        }  
+//        ClTblsendSelectionMenu.prop("disabled",true);
+
                  
-      var pcaButton = $("#toPCAButton");
-      pcaButton.click(checkAndSendSelectionsToPCA);
-      var pcaHighlightButton = $("#pcaHighlight");
-      pcaHighlightButton.click(function(){sendCurrentIDsToModule("PCA", "Highlight")});
-      var timeLinesButton = $("#toTimeLinesButton");
-      timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines", null)});
-      displayDiv = $("#clinicalDataTableDiv");
-      $(window).resize(handleWindowResize);
-      handleWindowResize();
+//      var pcaButton = $("#toPCAButton");
+//      pcaButton.click(checkAndSendSelectionsToPCA);
+//      var timeLinesButton = $("#toTimeLinesButton")
+//      timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines")});
+
+
       $("#ageAtDxMinSlider").slider({
          change: function(event, ui) {$("#ageAtDxMinSliderReadout").text (ui.value)},
          min: 10,
@@ -74,15 +94,24 @@ var ClinicalTableTabNum=1;
     $("#toTimeLinesButton").prop("disabled",false);
     };
 
+    //----------------------------------------------------------------------------------------------------
+     function sendToModuleChanged() {
+
+       ModuleName = ClTblsendSelectionMenu.val()
+       SelectedPatientIDs = currentSelectedIDs()
+       if(validSelectionToSend(ModuleName, SelectedPatientIDs)){
+         console.log(SelectedPatientIDs.length + " patientIDs going to " + ModuleName)    
+         sendSelectionToModule(ModuleName, SelectedPatientIDs);
+       }
+       ClTblsendSelectionMenu.val("Send Selection to:")
+    } // sendToModuleChanged
+
 
   //--------------------------------------------------------------------------------------------
    function sendCurrentIDsToSelection () {
       console.log("entering sendCurrentIDsToSelection");
-      var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
-      var currentIDs = []
-      for(var i=0; i < rows.length; i++) 
-          currentIDs.push(rows[i][0]);
-      console.log(currentIDs.length + " patientIDs going to SavedSelection")
+      var currentIDs = currentSelectedIDs()
+       console.log(currentIDs.length + " patientIDs going to SavedSelection")
       
       var NewSelection = {   
                     "selectionname": "ClinicalTable",
@@ -96,26 +125,22 @@ var ClinicalTableTabNum=1;
  
        addSelection(NewSelection);
        
-//      msg = {cmd:"addNewUserSelection",
-//             callback: "addSelectionToTable",
-//               status:"request",
-//              payload: NewSelection 
-//             };
-//      msg.json = JSON.stringify(msg);
-//           console.log(msg.json);
-//      socket.send(msg.json);
       } // sendTissueIDsToModule
-
+  //--------------------------------------------------------------------------------------------
+   function validSelectionToSend(modulename, ids){
+       if(modulename == "PCA") 
+          return checkBeforeSendSelectionsToPCA(ids)
+       return true;
+    }
    //--------------------------------------------------------------------------------------------
-   function checkAndSendSelectionsToPCA(){
+   function checkBeforeSendSelectionsToPCA(ids){
       var minimumPatientsForPCA = 8;
-      if(currentSelectedIDs().length < minimumPatientsForPCA){
+      if(ids.length < minimumPatientsForPCA){
          alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
-         return;
+         return false;
          }
-
-      sendCurrentIDsToModule("PCA");
-      } // checkAndSendSelectionsToPCA
+      return true;
+      } // checkBeforeSendSelectionsToPCA
 
    //----------------------------------------------------------------------------------------------------
    function currentSelectedIDs(){
@@ -127,41 +152,6 @@ var ClinicalTableTabNum=1;
       return(currentIDs)
 
       } // currentSelectedIDS
-   //----------------------------------------------------------------------------------------------------
-   function sendCurrentIDsToModule (moduleName, extraPayloadInfo) {
-      console.log("entering sendCurrentIDsToModule");
-
-      currentIDs = currentSelectedIDs();
-      console.log(currentIDs.length + " patientIDs going to " + moduleName)
-      callback = moduleName + "HandlePatientIDs";
-      console.log("EXTRA PAYLOAD INFO = " + extraPayloadInfo);
-      if(extraPayloadInfo == "Highlight"){
-          msg = {cmd:"sendPatientIDsToModule",
-                 callback: callback,
-                 status:"request",
-                 payload:{targetModule: moduleName,
-                          ids: currentIDs, Higlight: "Highlight"}
-                 };
-       }else if(extraPayloadInfo == "newCalculation"){
-          msg = {cmd:"sendPatientIDsToModule",
-                 callback: callback,
-                 status:"request",
-                 payload:{targetModule: moduleName,
-                          ids: currentIDs, Highlight: extraPayloadInfo}
-                 };
-       }else{
-          msg = {cmd:"sendPatientIDsToModule",
-                 callback: callback,
-                 status:"request",
-                 payload:{targetModule: moduleName,
-                          ids: currentIDs}
-                 };
-          }
-      msg.json = JSON.stringify(msg);
-      //console.log(msg.json);
-      socket.send(msg.json);
-      
-      } // sendTissueIDsToModule
 
 //----------------------------------------------------------------------------------------------------
    function showAllRows() {
@@ -263,6 +253,7 @@ var ClinicalTableTabNum=1;
   function handleWindowResize(){
       displayDiv.width($(window).width() * 0.95);
       displayDiv.height($(window).height() * 0.95);
+      $("#clinicalDataTableControlsDiv").width($(window).width() * 0.95);
      }; // handleWindowResize
 
    //--------------------------------------------------------------------------------------------
@@ -295,6 +286,7 @@ var ClinicalTableTabNum=1;
         "iDisplayLength": 25,
          bPaginate: true,
         "scrollX": true,
+        "scrollY": true,
         "fnInitComplete": function(){
             $(".display_results").show();
             }
@@ -306,32 +298,35 @@ var ClinicalTableTabNum=1;
      }; // displayTable
 
 //----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
+//    function DisplayAboutModule(){
+        
+//        var ThisModuleName = "Clinical DataTable"
+//        var Folder = "clinicalDataTable"
+//        var CreatedBy= ["Paul Shannon"]
+//        var MaintainedBy = "Paul Shannon"
+//        var Contact = 
 
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplayClTblModifiedDate",
-             status:"request",
-             payload:"clinicalDataTable"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
+//        var info = {Modulename: ThisModuleName, Folder: Folder, CreatedBy: CreatedBy, MaintainedBy: MaintainedBy}
+//        about.SetAboutInfo(info)
+
+//    }
 //----------------------------------------------------------------------------------------------------
-    function DisplayClTblModifiedDate(msg){
-        document.getElementById("ClinicalTableDateModified").innerHTML = msg.payload;
-    }
-      
+ //   function DisplayModuleTooltip(){
+       
+//    }
 
+//----------------------------------------------------------------------------------------------------
   return{
     requestData: requestData,
     init: function(){
+      addSelectionDestination(ThisModuleName)   
       onReadyFunctions.push(initializeUI);
       addJavascriptMessageHandler("handlePatientHistory", displayTable);
       addJavascriptMessageHandler("handleFilterPatientHistory", handleFilterPatientHistory);
       addJavascriptMessageHandler("PatientHistoryHandlePatientIDs", handleFilterPatientHistory);
       addJavascriptMessageHandler("ChangeTablePatientSelection", SendSelectionToFilterTable)
-      addJavascriptMessageHandler("DisplayClTblModifiedDate", DisplayClTblModifiedDate);
-      socketConnectedFunctions.push(SetModifiedDate);
+      addJavascriptMessageHandler("ClinicalTableHandlePatientIDs", handleFilterPatientHistory)
+
       socketConnectedFunctions.push(requestData);
       },
     

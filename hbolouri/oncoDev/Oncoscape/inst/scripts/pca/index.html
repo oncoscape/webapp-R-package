@@ -443,6 +443,40 @@ UserSettings.init();
 
 </script>
 <script>
+var ActiveModules = [];
+
+//----------------------------------------------------------------------------------------------------
+addSelectionDestination = function(module)
+{
+   if(module in ActiveModules){
+        alert("Selection Destination message handler for '" +  module + " already set");
+   } else{  ActiveModules.push(module)  }
+}
+
+//----------------------------------------------------------------------------------------------------
+getSelectionDestinations = function(){
+     return ActiveModules;
+//   return tissueMenu.children().map(function() {return $(this).val();}).get();
+}
+
+//--------------------------------------------------------------------------------------------
+function sendSelectionToModule(moduleName, currentIDs, metadata){
+    
+      callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
+      msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
+             callback: callback,
+             status:"request",
+             payload:{targetModule: ModuleName,
+                      ids: currentIDs,
+                      metadata: metadata}
+             };
+      socket.send(JSON.stringify(msg));
+    }
+
+</script>
+
+ 
+<script>
 //----------------------------------------------------------------------------------------------------
 var PCAModule = (function () {
 
@@ -512,17 +546,11 @@ var PCAModule = (function () {
               .key(function(d) { return d.gbmDzSubType[0]; })
               .map(patientClassification, d3.map);
 
-
    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
                       .attr("width", $("#pcaDisplay").width())
 
     var LegendLabels = d3.values(Classifications.keys())
- 
-//     var TextOffSet =  [0, 70, 82, 87, 85, 80, 78, 75, 80];
-//     var TextOffset = d3.scale.ordinal()
-//               .range(TextOffset)
-//               .domain(Classifications.keys());
-        
+         
     var legend =    Legendsvg
                    .append("g")
                    .attr("class", "legend")
@@ -545,11 +573,17 @@ var PCAModule = (function () {
    text.attr("transform", function(d, i){
         TextOffset.push(xPosition)
         console.log(i, xPosition)
+        console.log(this)
+        console.log(this.getBBox())
+        console.log(d)
         xPosition = xPosition + this.getBBox().width +20
      return "translate(" + (TextOffset[i]+10) +",0)"
    })
-   
-   console.log(TextOffset)
+  
+  
+ console.log("BBox node: ", text.node().getBBox())  
+// console.log("BBox node: ", text.node().getBBox())  
+ 
      legend.append("circle")
             .attr("cx", 0)
             .attr("cy", 5)
@@ -558,8 +592,6 @@ var PCAModule = (function () {
             .attr("transform", function(d, i){
                return "translate(" + (TextOffset[i]) +",0)"
              })
-
-
   }
   
   //--------------------------------------------------------------------------------------------
@@ -654,7 +686,7 @@ var PCAModule = (function () {
       console.log("Module.pca: handlePatientIDs");
       //console.log(msg)
       if(msg.status == "success"){
-         patientIDs = msg.payload
+         patientIDs = msg.payload.ids
          //console.log("pca handlePatientIds: " + patientIDs);
          payload = patientIDs
          if(payload.Higlight == "Highlight"){
@@ -755,14 +787,9 @@ var PCAModule = (function () {
      xMin = xMin * 1.1
      yMax = yMax * 1.1
      yMin = yMin * 1.1
-//     xMax = 40
-//     xMin = -40
-//     yMax = 30
-//     yMin = -30
 
      //console.log("xMax: " + xMax);   console.log("xMin: " + xMin);
      //console.log("yMax: " + yMax);   console.log("yMin: " + yMin);
-
 
      d3pcaDisplay.select("#pcaSVG").remove();  // so that append("svg") is not cumulative
  
@@ -869,6 +896,7 @@ var PCAModule = (function () {
   return{
    init: function(){
       onReadyFunctions.push(initializeUI);
+      addSelectionDestination("PCA")   
       addJavascriptMessageHandler("pcaPlot", pcaPlot);
       addJavascriptMessageHandler("PCAHandlePatientIDs", handlePatientIDs);
       addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)

@@ -16,16 +16,19 @@ getSelectionDestinations = function(){
 }
 
 //--------------------------------------------------------------------------------------------
-function SendSelectionToModule(ModuleName, currentIDs){
+function sendSelectionToModule(moduleName, currentIDs, metadata){
     
-      callback = ModuleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
-      msg = {cmd:"sendPatientIDsToModule",                  // generalize to "sendIDsToModule"?
+      callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
+      msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
              callback: callback,
              status:"request",
              payload:{targetModule: ModuleName,
-                      ids: currentIDs}
+                      ids: currentIDs,
+                      metadata: metadata}
              };
       socket.send(JSON.stringify(msg));
     }
 
 </script>
+
+ 
