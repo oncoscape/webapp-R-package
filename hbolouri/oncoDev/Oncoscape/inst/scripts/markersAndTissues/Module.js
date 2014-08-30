@@ -302,30 +302,10 @@ var markersAndTissuesModule = (function () {
          } // if 13 (return key)
       } // doSearch
 
-//----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplaymarkersAndTissuesModifiedDate",
-             status:"request",
-             payload:"markersAndTissues"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
-//----------------------------------------------------------------------------------------------------
-    function DisplaymarkersAndTissuesModifiedDate(msg){
-        document.getElementById("markersAndTissuesDateModified").innerHTML = msg.payload;
-    }
-
-
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
        onReadyFunctions.push(initializeUI);
-       addJavascriptMessageHandler("DisplaymarkersAndTissuesModifiedDate", DisplaymarkersAndTissuesModifiedDate);
-       socketConnectedFunctions.push(SetModifiedDate);
-       //addJavascriptMessageHandler("pairedDistributionsPlot", pairedDistributionsPlot);
        //socketConnectedFunctions.push(runDemo);
        }
      };

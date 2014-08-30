@@ -26,33 +26,12 @@ var DashboardModule = (function () {
 
       }
 
-//----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplayDashboardModifiedDate",
-             status:"request",
-             payload:"Dashboard"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
-//----------------------------------------------------------------------------------------------------
-    function DisplayDashboardModifiedDate(msg){
-
-        console.log("==== Dashboard Date: ", msg.payload)
-        DateModified = document.getElementById("DashboardDateModified");
-        DateModified.innerHTML = msg.payload;
-        DateModified.style.fontSize = "x-small"
-    }
      
 //----------------------------------------------------------------------------------------------------
 return{
 
    init: function(){
       onReadyFunctions.push(DashboardInitializeUI);
-      socketConnectedFunctions.push(SetModifiedDate);
-      addJavascriptMessageHandler("DisplayDashboardModifiedDate", DisplayDashboardModifiedDate);
       }
    };
 

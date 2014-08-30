@@ -44,14 +44,6 @@ var ThisModuleName = "ClinicalTable"
               ClTblsendSelectionMenu.append(optionMarkup);
            }
         }  
-//        ClTblsendSelectionMenu.prop("disabled",true);
-
-                 
-//      var pcaButton = $("#toPCAButton");
-//      pcaButton.click(checkAndSendSelectionsToPCA);
-//      var timeLinesButton = $("#toTimeLinesButton")
-//      timeLinesButton.click(function(){sendCurrentIDsToModule("timeLines")});
-
 
       $("#ageAtDxMinSlider").slider({
          change: function(event, ui) {$("#ageAtDxMinSliderReadout").text (ui.value)},
@@ -99,6 +91,9 @@ var ThisModuleName = "ClinicalTable"
 
        ModuleName = ClTblsendSelectionMenu.val()
        SelectedPatientIDs = currentSelectedIDs()
+       if(ModuleName == "Save Selection"){
+          
+       }
        if(validSelectionToSend(ModuleName, SelectedPatientIDs)){
          console.log(SelectedPatientIDs.length + " patientIDs going to " + ModuleName)    
          sendSelectionToModule(ModuleName, SelectedPatientIDs);
@@ -110,11 +105,16 @@ var ThisModuleName = "ClinicalTable"
   //--------------------------------------------------------------------------------------------
    function sendCurrentIDsToSelection () {
       console.log("entering sendCurrentIDsToSelection");
+
+      var selectionname = PromptForSelectionName()
+           if(typeof(selectionname) !== "string")  
+           return;
+
       var currentIDs = currentSelectedIDs()
        console.log(currentIDs.length + " patientIDs going to SavedSelection")
-      
+
       var NewSelection = {   
-                    "selectionname": "ClinicalTable",
+                    "selectionname": selectionname,
          			"PatientIDs" : currentIDs,
          			"Tab": "ClinicalTable",
          			"Settings": {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),

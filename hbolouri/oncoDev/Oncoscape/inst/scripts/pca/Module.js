@@ -12,7 +12,7 @@ var PCAModule = (function () {
   var pcaTabNumber = 2;
   var d3pcaDisplay;
   var pcaTextDisplay;
-  var PCAPCAsendSelectionMenu;
+  var PCAsendSelectionMenu;
   var ThisModuleName = "PCA"
   
   //--------------------------------------------------------------------------------------------
@@ -101,6 +101,7 @@ var PCAModule = (function () {
                 ;
 
     var text = legend.append("text")
+            .attr("id", "legendtext")
             .attr("y", 10)
             .attr("x", 0)
             .style("font-size", 12)
@@ -112,11 +113,8 @@ var PCAModule = (function () {
 
    text.attr("transform", function(d, i){
         TextOffset.push(xPosition)
-        console.log(i, xPosition)
-        console.log(this)
-        console.log(this.getBBox())
-        console.log(d)
-        xPosition = xPosition + this.getBBox().width +20
+        console.log(this.getComputedTextLength())
+        xPosition = xPosition + this.getComputedTextLength() +20
      return "translate(" + (TextOffset[i]+10) +",0)"
    })
   
@@ -203,19 +201,6 @@ var PCAModule = (function () {
       };
 
   //--------------------------------------------------------------------------------------------
-//  function sendIDsToModule (ids, moduleName, title){
-//       callback = moduleName + title;
-//       msg = {cmd:"sendIDsToModule",
-//              callback: callback,
-//              status:"request",
-//              payload:{targetModule: moduleName,
-//                       ids: ids}
-//             };
-//      socket.send(JSON.stringify(msg));
-//      } // sendTissueIDsToModule
-
-
-  //--------------------------------------------------------------------------------------------
   function pcaPlot (msg){
       console.log("==== pcaPlot");
       //console.log(msg);
@@ -235,6 +220,12 @@ var PCAModule = (function () {
       }
      firstTime = false;
      };
+
+  //--------------------------------------------------------------------------------------------
+  function highlightPatientIDs(msg){
+      console.log("Module.pca: highlight Patient IDs")
+      console.log(msg)
+   }
 
   //--------------------------------------------------------------------------------------------
   function handlePatientIDs(msg){
@@ -328,8 +319,8 @@ var PCAModule = (function () {
    }
  //-------------------------------------------------------------------------------------------
   function d3PcaScatterPlot(dataset) {
-     console.log("DATASET = ");
-     console.log(dataset);
+//     console.log("DATASET = ");
+//     console.log(dataset);
      broadcastButton.prop("disabled",true);
      var padding = 50;
      var width = $("#pcaDisplay").width();
@@ -433,33 +424,18 @@ var PCAModule = (function () {
       
  
      } // d3PcaScatterPlot
-
-//----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplayPCAModifiedDate",
-             status:"request",
-             payload:"pca"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
-//----------------------------------------------------------------------------------------------------
-    function DisplayPCAModifiedDate(msg){
-        document.getElementById("pcaDateModified").innerHTML = msg.payload;
-    }
       
 //--------------------------------------------------------------------------------------------
   return{
    init: function(){
-      onReadyFunctions.push(initializeUI);
       addSelectionDestination("PCA")   
+      addSelectionDestination("PCA (highlight)")   
+      onReadyFunctions.push(initializeUI);
       addJavascriptMessageHandler("pcaPlot", pcaPlot);
       addJavascriptMessageHandler("PCAHandlePatientIDs", handlePatientIDs);
+      addJavascriptMessageHandler("PCA (highlight)HandlePatientIDs", highlightPatientIDs);
+
       addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)
-      addJavascriptMessageHandler("DisplayPCAModifiedDate", DisplayPCAModifiedDate);
-      socketConnectedFunctions.push(SetModifiedDate);
       socketConnectedFunctions.push(getPatientClassification);
       socketConnectedFunctions.push(runDemo);
       }

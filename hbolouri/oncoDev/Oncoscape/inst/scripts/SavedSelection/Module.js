@@ -6,6 +6,7 @@ var SavedSelectionModule = (function (){
     var SelectionTableRef;
     var SaveSelectedDisplay;
     var CurrentSelection;
+    var ThisModuleName = "Save Selection"
   
 //--------------------------------------------------------------------------------------------
   function handleWindowResize(){
@@ -30,14 +31,6 @@ var SavedSelectionModule = (function (){
          displaySelectionTable();
 
      $("#addRandomSelection").click(addRandomSelectionData);
-
-//        if(typeof(window.tabsAppRunning) == "undefined") {
-//      		$("#ModuleDate").text(fetchHeader("Module.js") );
-//        } else {
-//            $("#ModuleDate").text(fetchHeader("../../tabsApp/Module.js") );
-//        }
-		// if date modified needs updated
-		//http://www.dynamicdrive.com/forums/archive/index.php/t-63637.html
 
        };
 
@@ -111,8 +104,6 @@ var SavedSelectionModule = (function (){
      function SetupSavedSelection(msg){			     
 
 		console.log("===== Setup SavedSelection")
-//         console.log(msg)
-         InitialLoad = false;
 
          var AllData = msg.payload
          var PtIDs = []; 
@@ -129,10 +120,26 @@ var SavedSelectionModule = (function (){
          			Settings: "None"
          		}
            
-         addSelection(NewSelection)
- 
-       
+         addSelection(NewSelection)      
      }     
+
+//----------------------------------------------------------------------------------------------------
+     function HandlePatientIDs(msg){			     
+
+		console.log("===== sendTo Save Selection: ", msg)
+
+         var PtIDs = msg.payload.ids 
+         var NewSelection = {   
+                    selectionname: msg.payload.metadata.selectionname,
+         			PatientIDs : PtIDs,
+         			Tab: msg.payload.metadata.Tab,
+         			Settings: msg.payload.metadata.Settings
+         		}
+           
+         addSelection(NewSelection)      
+     }     
+
+
  //----------------------------------------------------------------------------------------------------
      function testingAddSavedSelection(msg) {
 
@@ -149,8 +156,6 @@ var SavedSelectionModule = (function (){
       randomsubset = [];
       for(i=0;i<6;i++){ randomsubset.push(PtIDs[getRandomInt (0, PtIDs.length) ])}
 
- //   console.log("Subset Patients: ",randomsubset)      
-
          var NewSelection = {   
                     selectionname: "test",
          			PatientIDs : randomsubset,
@@ -161,37 +166,6 @@ var SavedSelectionModule = (function (){
           addSelection(NewSelection)
 }
 
-        //--------------------------------------------------------------------------------------------
-//     getSelectionNames = function(){
-           
-//        if(typeof(SelectionTableRef) == "undefined") return ""
-             
-//        var rows = SelectionTableRef._('tr', {"filter":"applied"});   // cryptic, no?
-//       var rows = SelectionTableRef.rows().data()
-//        var currentNames = []
-//        for(var i=0; i < rows.length; i++) 
-//          currentNames.push(rows[i][0]);
-      
-//        console.log(currentNames.length + " selection names being reported")
-
-//       return currentNames;
-//      }
-  
- //----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplaySavedSelectionModifiedDate",
-             status:"request",
-             payload:"SavedSelection"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
-//----------------------------------------------------------------------------------------------------
-    function DisplaySavedSelectionModifiedDate(msg){
-        document.getElementById("SavedSelectionDateModified").innerHTML = msg.payload;
-    }
 //----------------------------------------------------------------------------------------------------
     
        return{
@@ -217,13 +191,13 @@ var SavedSelectionModule = (function (){
         },
         //----------------------------------------------------------------------------------------------------
         init: function(){
+           addSelectionDestination(ThisModuleName)   
            onReadyFunctions.push(initializeSelectionUI);
            addJavascriptMessageHandler("SetupSavedSelection", SetupSavedSelection);
    		   addJavascriptMessageHandler("addSelectionToTable", SavedSelection.addSelectionToTable);
+   		   addJavascriptMessageHandler("Save SelectionHandlePatientIDs", HandlePatientIDs);
   		   addJavascriptMessageHandler("testingAddSavedSelection", testingAddSavedSelection);
-           addJavascriptMessageHandler("DisplaySavedSelectionModifiedDate", DisplaySavedSelectionModifiedDate);
 
-           socketConnectedFunctions.push(SetModifiedDate);
            socketConnectedFunctions.push(loadPatientData);
         }
         

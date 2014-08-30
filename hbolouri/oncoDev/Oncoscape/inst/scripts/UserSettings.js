@@ -69,6 +69,17 @@ var UserSettingsModule = (function () {
             return SelectionNames;
      }
 
+//--------------------------------------------------------------------------------------------
+     PromptForSelectionName = function(){
+        var selectionname = prompt("Please enter a selection name", "e.g. high survival")
+        if (selectionname != null & selectionname !== "e.g. high survival") 
+               return selectionname;
+ 
+        alert("Invalid Selection name: ", selectionname,". Please try again.")
+        return null;
+
+     }
+
 //----------------------------------------------------------------------------------------------------
 //======= PRIVATE FUNCTIONS ==========
 //----------------------------------------------------------------------------------------------------

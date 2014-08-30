@@ -9,6 +9,7 @@ var gbmPathwaysModule = (function () {
   var searchBox;
   var mouseOverReadout;
   var edgeSelectionOn = false;
+  var ThisModuleName = "gbmPathways"
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -133,29 +134,65 @@ var gbmPathwaysModule = (function () {
             } // for i
          } // if 13 (return key)
       } // doSearch
-//----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
 
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplaygbmPathwaysModifiedDate",
-             status:"request",
-             payload:"gbmPathways"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
-//----------------------------------------------------------------------------------------------------
-    function DisplaygbmPathwaysModifiedDate(msg){
-        document.getElementById("gbmPathwaysDateModified").innerHTML = msg.payload;
-    }
+    //----------------------------------------------------------------------------------------------------
+    function handlePatientIDs(msg){
+        console.log("=== entering handleTissueIDsForGBMPathways");
+        console.log("status: " + msg.status);
+   
+        tissueIDCount = msg.payload.count;
+        tissueIDs = msg.payload.ids;
+ 
+        // solve the R/javascript difference about vectors of length 1 vs a single scalar
+        if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
+
+//        console.log("count: " + tissueIDCount + "  ids: " + tissueIDs);
+        addTissueIDsToSelector(tissueIDs);
+
+        // expression data for the currently-selected tissueID will be used 
+
+    } // handleTissueIDsForGBMPathways
+
+    //----------------------------------------------------------------------------------------------------
+    addTissueIDsToSelector = function(tissueIDs)
+    {
+       $("#sampleSelector").empty();
+
+       if(tissueIDs.length == 0) {
+          alert("GBMPathways received empty tissueIDs list")
+          return;
+          }
+      
+      // every set of tissueIDs needs an aggregate, or average tissue
+      //optionMarkup = "<option> average (of " + tissueIDs.length + ") </option>";
+      optionMarkup = "<option>average</option>";
+      $("#sampleSelector").append(optionMarkup);
+
+//       window.gbmPathways.flags.averageExpressionDataReady = false;
+
+       msg = {cmd: "requestAverageExpression", status: "request", payload: tissueIDs};
+//       socket.send(JSON.stringify(msg));
+
+       for(var i=0; i < tissueIDs.length; i++){
+          tissueName = tissueIDs[i]
+          optionMarkup = "<option>" + tissueName + "</option>";
+          $("#sampleSelector").append(optionMarkup);
+          } // for i
+
+        tabIndex = $('#tabs a[href="#gbmPathwaysDiv"]').parent().index();
+        $("#tabs").tabs( "option", "active", tabIndex);
+
+
+} // addTissueIDsToSelector
 
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
+      addSelectionDestination(ThisModuleName)   
        onReadyFunctions.push(initializeUI);
-       addJavascriptMessageHandler("DisplaygbmPathwaysModifiedDate", DisplaygbmPathwaysModifiedDate);
-       socketConnectedFunctions.push(SetModifiedDate);
-       //addJavascriptMessageHandler("pairedDistributionsPlot", pairedDistributionsPlot);
+       addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
+ 
+
        //socketConnectedFunctions.push(runDemo);
        }
      };

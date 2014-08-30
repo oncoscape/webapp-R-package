@@ -511,7 +511,7 @@ sendIDsToModule <- function(WS, msg)
    printf("Oncoscape::sendIDsToModule received %d IDs for %s", length(ids), target);
    print(msg)
 
-   payload <- list(count=length(ids), ids=ids)
+   payload <- list(count=length(ids), ids=ids, metadata=msg$payload$metadata)
    return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success", payload=payload))
    sendOutput(DATA=return.msg, WS=WS)
 

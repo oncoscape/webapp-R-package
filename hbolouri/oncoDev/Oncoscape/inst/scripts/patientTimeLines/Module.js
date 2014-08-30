@@ -5,7 +5,7 @@ var TimeLineModule = (function () {
      define(JAVASCRIPT_FORMAT, format)
 
      //--------------------------------------------------------------------------------------------------
-     var TimelineTabNumber = 3;
+     var ThisModuleName = "timelines"
      var TimeLineMargin = {top: 10, right: 15, bottom: 30, left: 20};
      var AlignBy = "--";
      var OrderBy = "--";
@@ -17,7 +17,8 @@ var TimeLineModule = (function () {
      var TimeLineSelectedRegion;    // from brushing
      var TimeLined3PlotBrush;
      var dialog;
-     var TimeLinebroadcastButton;
+
+     var TimeLinesendSelectionMenu;
      var TimeLineSelectionButton;
      var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
                             {Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
@@ -40,16 +41,30 @@ var TimeLineModule = (function () {
              console.log("========== initializing Timeline UI")
            TimeLineDisplay = $("#TimeLineDisplay");
            TimeLineHandleWindowResize();
-           TimeLinebroadcastButton = $("#SendSelectionToClinicalTable");
-              TimeLinebroadcastButton.click(timelineSelectionToClinicalTable);
+ 
+        TimeLinesendSelectionMenu = $("#TimeLinesendSelectiontoModuleButton")
+        TimeLinesendSelectionMenu.change(sendToModuleChanged);
+        TimeLinesendSelectionMenu.empty();
+        
+        TimeLinesendSelectionMenu.append("<option>Send Selection to:</option>")
+        var ModuleNames = getSelectionDestinations()
+        for(var i=0;i< ModuleNames.length; i++){
+           var SendToModule = ModuleNames[i]
+           if(SendToModule !== ThisModuleName){
+              optionMarkup = "<option>" + SendToModule + "</option>";
+              TimeLinesendSelectionMenu.append(optionMarkup);
+           }
+        }  
+        TimeLinesendSelectionMenu.prop("disabled",true);
+
+ 
           TimeLineSelectionButton = $("#timelineSaveSelection");
               TimeLineSelectionButton.click(function(){
-                  var selectionname = prompt("Please enter a selection name", "e.g. high survival")
-                  if (selectionname != null & selectionname !== "e.g. high survival") 
+                  var selectionname = PromptForSelectionName()
+                  if(typeof(selectionname) == "string")  
                       timelineBroadcastSelection(selectionname);
               });
            $(window).resize(TimeLineHandleWindowResize);
-           TimeLinebroadcastButton.prop("disabled",true);
            TimeLineSelectionButton.prop("disabled",true);
 
            dispatch.load();
@@ -107,6 +122,14 @@ var TimeLineModule = (function () {
           if(!TimeLineInitialLoad) {dispatch.DisplayPatients();}
      };
 
+    //----------------------------------------------------------------------------------------------------
+     function sendToModuleChanged() {
+
+       ModuleName = TimeLinesendSelectionMenu.val()
+       timelineSelectionToModule(ModuleName)
+       TimeLinesendSelectionMenu.val("Send Selection to:")
+    } // sendToModuleChanged
+
    //--------------------------------------------------------------------------------------------
    function timelineBroadcastSelection(selectionname){
  //     console.log("broadcastSelection: " + TimeLineSelectedRegion);
@@ -148,13 +171,12 @@ var TimeLineModule = (function () {
       } // for i
     
     if(ids.length > 0)
- //        sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
          if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
          settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
          sendTimelineCurrentIDsToSelection(ids,selectionname, settings);
     };
    //--------------------------------------------------------------------------------------------
-   function timelineSelectionToClinicalTable(){
+   function timelineSelectionToModule(ModuleName){
 //      console.log("broadcastSelection: " + TimeLineSelectedRegion);
       x1=TimeLineSelectedRegion[0][0];
       y1=TimeLineSelectedRegion[0][1];
@@ -193,11 +215,22 @@ var TimeLineModule = (function () {
          }
       } // for i
     
+    var metadata = null;
+    if(ModuleName == "Save Selection"){
+        var selectionname = PromptForSelectionName()
+        if(typeof(selectionname) !== "string")  
+          return;
+        if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
+        settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
+        var metadata = {   
+                    "selectionname": selectionname,
+         			"Tab": "Timeline",
+         			"Settings": settings
+         		}
+    }
+    
     if(ids.length > 0)
-         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
-//         if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
-  //       settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
-    //     sendTimelineCurrentIDsToSelection(ids,selectionname, settings);
+         sendSelectionToModule(ModuleName, ids, metadata);
     };
 
 //--------------------------------------------------------------------------------------------
@@ -210,24 +243,12 @@ var TimeLineModule = (function () {
      selectHeight = Math.abs(y0-y1);
      if(selectHeight > 1){
         TimeLineSelectionButton.prop("disabled", false);
-        TimeLinebroadcastButton.prop("disabled", false);
+        TimeLinesendSelectionMenu.prop("disabled",false);
      } else {
         TimeLineSelectionButton.prop("disabled", true);
-        TimeLinebroadcastButton.prop("disabled", true);
+        TimeLinesendSelectionMenu.prop("disabled",true);
      }
      }; // d3PlotBrushReader
-
-   //--------------------------------------------------------------------------------------------
-  function sendIDsToModule(ids, moduleName, title){
-       callback = moduleName + title;
-       msg = {cmd:"sendIDsToModule",
-              callback: callback,
-              status:"request",
-              payload:{targetModule: moduleName,
-                       ids: ids}
-             };
-     socket.send(JSON.stringify(msg));
-      } // sendTissueIDsToModule
 
   //--------------------------------------------------------------------------------------------
    function sendTimelineCurrentIDsToSelection (ids,selectionname, settings) {
@@ -249,11 +270,11 @@ var TimeLineModule = (function () {
    function handlePatientIDs(msg){
       console.log("Module.TimeLine: handlePatientIDs");
       console.log(msg)
-    $("#tabs").tabs( "option", "active", TimelineTabNumber);
- //       TimeLineInitialLoad=true;
+      var tabIndex = $('#tabs a[href="#patientTimeLinesDiv"]').parent().index();
+      $("#tabs").tabs( "option", "active", tabIndex);
+ 
      if(msg.status == "success"){
-         patientIDs = msg.payload
-//         console.log("TimeLine handlePatientIds: " + patientIDs);
+         patientIDs = msg.payload.ids
          payload = patientIDs
          msg = {cmd: "getCaisisPatientHistory", callback: "DisplayPatientTimeLine", status: "request", 
                 payload: payload};
@@ -758,15 +779,7 @@ var TimeLineModule = (function () {
                              .attr("value", function(d){return d})
                              .text(function(d) { return d})
                         ;
-//                        PatientMenu.selectAll("option").exit().remove()
                 }
- 
- //d3.select("input").property("checked", true).each(change);
-//<label><input type="checkbox"> Sort values</label>
-
-//  <label><input type="radio" name="dataset" value="apples" checked> Apples</label>
-//  <label><input type="radio" name="dataset" value="oranges"> Oranges</label>
-
 
                  var  AlignByMenu = d3.select("#AlignByDiv")
                    .attr("transform", "translate(" + (3*TimeLineMargin.left+SideBarSize.width+TimeLineMargin.right) + ",0)")
@@ -864,9 +877,6 @@ var TimeLineModule = (function () {
          dispatch.on("UpdateMenuOptions.Menu", function(){
      
             console.log("======== UpdateMenuOptions")
-//            console.log("CalculatedEvents keys: ", CalculatedEvents.keys())
-  //          console.log("EventTypes keys: ",EventTypes.keys())
-    //        console.log("OrderByMenu: ", OrderByMenu)
      
           OrderByMenu.selectAll("option").remove()     
           AlignByMenu.selectAll("option").remove()
@@ -1214,35 +1224,16 @@ var TimeLineModule = (function () {
           ShowEvents = newFilters;
           dispatch.DisplayPatients();
      }
-//----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplayTimelineModifiedDate",
-             status:"request",
-             payload:"patientTimeLines"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
-//----------------------------------------------------------------------------------------------------
-    function DisplayTimelineModifiedDate(msg){
-
-        console.log("==== Timeline Date: ", msg.payload)
-        document.getElementById("TimelineDateModified").innerHTML = msg.payload;
-    }
       
      //--------------------------------------------------------------------------------------------------
 
   return{
    init: function(){
+          addSelectionDestination("timelines")   
           onReadyFunctions.push(initializeUI);
-          
           addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
-          addJavascriptMessageHandler("timeLinesHandlePatientIDs", handlePatientIDs);
+          addJavascriptMessageHandler("timelinesHandlePatientIDs", handlePatientIDs);
           addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
-          addJavascriptMessageHandler("DisplayTimelineModifiedDate", DisplayTimelineModifiedDate);
-          socketConnectedFunctions.push(SetModifiedDate);
           socketConnectedFunctions.push(loadPatientDemoData);
    },
    RefreshSelectionMenu: function(){
