@@ -335,8 +335,14 @@ var angioPathwaysModule = (function () {
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
       cyDiv = $("#cwAngiogenesisDiv");
-      //viewAbstractsButton = $("#cwAngioViewAbstractsButton");
-      //zoomSelectedButton  = $("#cwAngioZoomSelectedButton");
+
+      viewAbstractsButton = $("#angioViewAbstractsButton");
+      viewAbstractsButton.button();
+      viewAbstractsButton.click(toggleEdgeSelection);
+
+      zoomSelectedButton  = $("#angioZoomSelectedButton");
+      zoomSelectedButton.button()
+      zoomSelectedButton.click(zoomSelection);
 
       tissueMenu = $("#hypoxiaSampleSelector");
       tissueMenu.change(tissueSelectorChanged);
@@ -381,14 +387,30 @@ var angioPathwaysModule = (function () {
      ready: function() {
         console.log("cwAngio ready");
         cwAngio = this;
-        cwAngio.on('mouseover', 'node', function(evt){
-           var node = evt.cyTarget;
-           mouseOverReadout.text(node.data().label);
-           })
-        cwAngio.on('mouseover', 'edge', function(evt){
-           var edge = evt.cyTarget;
-           mouseOverReadout.text(edge.data().canonicalName);
-           })
+        cwAngio.elements().qtip({
+            content: function() {
+              return (this.data().canonicalName);
+              },
+            position: {
+              my: 'top center',
+              at: 'bottom center'
+              },
+            show: {
+              delay: 1000,
+              event: 'mouseover'
+              },
+            hide: {
+              event: 'mouseout'
+              },
+            style: {
+              classes: 'qtip-bootstrap',
+              tip: {
+                 width: 16,
+                 height: 8
+                }
+              }
+            }); // qtip
+
         cwAngio.on('select', 'edge', function(evt){
            var edge = evt.cyTarget;
            console.log("selected edge");
@@ -1300,6 +1322,7 @@ angiogenesisNetwork = {
         "source" : "79",
         "target" : "65",
         "detectionMethod" : "curation",
+        "pmid" : "9204896",
         "selected" : false,
         "canonicalName" : "285 (inhibits) 7010",
         "edgeType" : "inhibits",
@@ -1318,6 +1341,7 @@ angiogenesisNetwork = {
         "source" : "79",
         "target" : "78",
         "detectionMethod" : "curation",
+        "pmid" : "9204896",
         "selected" : false,
         "canonicalName" : "285 (inhibits) 284",
         "edgeType" : "inhibits",
@@ -1336,6 +1360,7 @@ angiogenesisNetwork = {
         "source" : "78",
         "target" : "65",
         "detectionMethod" : "curation",
+        "pmid" : "20054809",
         "selected" : false,
         "canonicalName" : "284 (activates) 7010",
         "edgeType" : "activates",
@@ -1552,6 +1577,7 @@ angiogenesisNetwork = {
         "source" : "70",
         "target" : "79",
         "detectionMethod" : "curation",
+        "pmid" : "14702352",
         "selected" : false,
         "canonicalName" : "low oxygen (activates) 285",
         "edgeType" : "activates",
@@ -1642,6 +1668,7 @@ angiogenesisNetwork = {
         "source" : "65",
         "target" : "62",
         "detectionMethod" : "curation",
+        "pmid" : "25165221",
         "selected" : false,
         "canonicalName" : "7010 (preserves) quiescence",
         "edgeType" : "preserves",
@@ -3702,7 +3729,7 @@ div {
   padding: 0px;
   }
 
-#hypoxiaMovieButton, #slowerMovieButton, #fasterMovieButton{
+.angioButton {
    font-size: 8pt;
    }
 
@@ -3723,13 +3750,16 @@ div {
 <div id="angiogenesisDiv">
    <div id="angiogenesisMouseOverReadoutDiv"></div>
    <div id="angioGenesisButtonDiv">
-      <button id="angiogenesisDemoVizUpdateButton">Demo viz changes</button>
+      <button id="angiogenesisDemoVizUpdateButton"  class="angioButton">Demo viz changes</button>
       <input type="text" id="angiogenesisSearchBox"></input>
       <label for="select">Select a sample:</label>
-      <select id="hypoxiaSampleSelector"></select>
-      <button id="hypoxiaMovieButton">Movie</button>
-      <button id="slowerMovieButton"> - </button>
-      <button id="fasterMovieButton"> + </button>
+      <select id="hypoxiaSampleSelector" class="angioButton"></select>
+      <button id="hypoxiaMovieButton"  class="angioButton">Movie</button>
+      <button id="slowerMovieButton" class="angioButton"> - </button>
+      <button id="fasterMovieButton" class="angioButton"> + </button>
+      &nbsp;
+      <button id="angioViewAbstractsButton" class="angioButton">Enable Abstracts</button>
+      <button id="angioZoomSelectedButton" class="angioButton">Zoom Selected</button>
    </div>
    <div id="cwAngiogenesisDiv"></div>
    <span style="font-size:x-small">Last Modified: <span id=angioPathwaysDateModified style="font-size:x-small"></span></span>

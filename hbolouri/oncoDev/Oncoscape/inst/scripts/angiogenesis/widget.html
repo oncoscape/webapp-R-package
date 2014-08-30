@@ -28,7 +28,7 @@ div {
   padding: 0px;
   }
 
-#hypoxiaMovieButton, #slowerMovieButton, #fasterMovieButton{
+.angioButton {
    font-size: 8pt;
    }
 
@@ -49,13 +49,16 @@ div {
 <div id="angiogenesisDiv">
    <div id="angiogenesisMouseOverReadoutDiv"></div>
    <div id="angioGenesisButtonDiv">
-      <button id="angiogenesisDemoVizUpdateButton">Demo viz changes</button>
+      <button id="angiogenesisDemoVizUpdateButton"  class="angioButton">Demo viz changes</button>
       <input type="text" id="angiogenesisSearchBox"></input>
       <label for="select">Select a sample:</label>
-      <select id="hypoxiaSampleSelector"></select>
-      <button id="hypoxiaMovieButton">Movie</button>
-      <button id="slowerMovieButton"> - </button>
-      <button id="fasterMovieButton"> + </button>
+      <select id="hypoxiaSampleSelector" class="angioButton"></select>
+      <button id="hypoxiaMovieButton"  class="angioButton">Movie</button>
+      <button id="slowerMovieButton" class="angioButton"> - </button>
+      <button id="fasterMovieButton" class="angioButton"> + </button>
+      &nbsp;
+      <button id="angioViewAbstractsButton" class="angioButton">Enable Abstracts</button>
+      <button id="angioZoomSelectedButton" class="angioButton">Zoom Selected</button>
    </div>
    <div id="cwAngiogenesisDiv"></div>
    <span style="font-size:x-small">Last Modified: <span id=angioPathwaysDateModified style="font-size:x-small"></span></span>

@@ -25,8 +25,14 @@ var angioPathwaysModule = (function () {
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
       cyDiv = $("#cwAngiogenesisDiv");
-      //viewAbstractsButton = $("#cwAngioViewAbstractsButton");
-      //zoomSelectedButton  = $("#cwAngioZoomSelectedButton");
+
+      viewAbstractsButton = $("#angioViewAbstractsButton");
+      viewAbstractsButton.button();
+      viewAbstractsButton.click(toggleEdgeSelection);
+
+      zoomSelectedButton  = $("#angioZoomSelectedButton");
+      zoomSelectedButton.button()
+      zoomSelectedButton.click(zoomSelection);
 
       tissueMenu = $("#hypoxiaSampleSelector");
       tissueMenu.change(tissueSelectorChanged);
@@ -71,14 +77,30 @@ var angioPathwaysModule = (function () {
      ready: function() {
         console.log("cwAngio ready");
         cwAngio = this;
-        cwAngio.on('mouseover', 'node', function(evt){
-           var node = evt.cyTarget;
-           mouseOverReadout.text(node.data().label);
-           })
-        cwAngio.on('mouseover', 'edge', function(evt){
-           var edge = evt.cyTarget;
-           mouseOverReadout.text(edge.data().canonicalName);
-           })
+        cwAngio.elements().qtip({
+            content: function() {
+              return (this.data().canonicalName);
+              },
+            position: {
+              my: 'top center',
+              at: 'bottom center'
+              },
+            show: {
+              delay: 1000,
+              event: 'mouseover'
+              },
+            hide: {
+              event: 'mouseout'
+              },
+            style: {
+              classes: 'qtip-bootstrap',
+              tip: {
+                 width: 16,
+                 height: 8
+                }
+              }
+            }); // qtip
+
         cwAngio.on('select', 'edge', function(evt){
            var edge = evt.cyTarget;
            console.log("selected edge");
