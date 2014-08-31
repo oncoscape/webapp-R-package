@@ -1,8 +1,8 @@
+include(../m4-workarounds.txt)
 include(../index.common)
 include(../common.js)
 include(../UserSettings.js)
 include(../sendSelectionMenu.js)
-include(../m4-workarounds.txt)
 include(code.js)
 <body>
 include(widget.html)

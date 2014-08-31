@@ -1,3 +1,7 @@
+
+
+
+
 <!DOCTYPE html> 
 <html>
 
@@ -85,6 +89,22 @@ String.prototype.beginsWith = function (string)
 {
     return(this.toLowerCase().indexOf(string.toLowerCase()) === 0);
 };
+//----------------------------------------------------------------------------------------------------
+// if jQuery-style tabs are in use with Oncoscape, this function raised the named tab to the
+// the front (visible) position in the tabset
+// the argument, "tabIDString" is the tab id used in the module's widget.html, reproduced exactly
+// in tabsApp/widget.html, with some current examples being
+//  pcaDiv, patientTimeLinesDiv, gbmPathwaysDiv
+function raiseTab(tabIDString)
+{
+  tabsWidget = $("#oncoscapeTabs");
+  if(tabsWidget.length > 0){
+     selectionString = '#oncoscapeTabs a[href="#' + tabIDString + '"]';
+     tabIndex = $(selectionString).parent().index ();
+     tabsWidget.tabs( "option", "active", tabIndex);
+     } // if tabs exist
+
+} // raiseTab
 //----------------------------------------------------------------------------------------------------
 // from http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 function openCenteredBrowserWindow(url, title, w, h) {
@@ -518,13 +538,11 @@ function sendSelectionToModule(moduleName, currentIDs, metadata){
 </script>
 
  
-
-
 <script>
 onReadyFunctions.push(function() {
     console.log("====== tabapps document ready");
     window.tabsAppRunning = true
-    $("#tabs").tabs({
+    $("#oncoscapeTabs").tabs({
          // todo: distinguish between tabs, only do needed resets
        activate: function(event, ui) {
             console.log("tabs.activate");
@@ -2697,7 +2715,6 @@ var gbmPathwaysModule = (function () {
         // solve the R/javascript difference about vectors of length 1 vs a single scalar
         if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
 
-//        console.log("count: " + tissueIDCount + "  ids: " + tissueIDs);
         addTissueIDsToSelector(tissueIDs);
 
         // expression data for the currently-selected tissueID will be used 
@@ -2739,7 +2756,7 @@ var gbmPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
-      addSelectionDestination(ThisModuleName)   
+       addSelectionDestination(ThisModuleName);
        onReadyFunctions.push(initializeUI);
        addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
  
@@ -3070,6 +3087,576 @@ var markersAndTissuesModule = (function () {
 //----------------------------------------------------------------------------------------------------
 markersModule = markersAndTissuesModule()
 markersModule.init();
+
+</script>
+
+<script>
+//----------------------------------------------------------------------------------------------------
+var cwAngio;   // move this into module when debugging settles down
+
+var angioPathwaysModule = (function () {
+
+  var cyDiv;
+  var viewAbstractsButton, zoomSelectedButton; //, demoVizChangesButton;
+  var tissueMenu, movieButton;
+  var selectLabel;
+
+  var slowerMovieButton, fasterMovieButton;
+  var currentMovieSpeed = 750;
+  var movieSpeedReadout;
+  var movieIntervalID;
+
+  var searchBox;
+  //var mouseOverReadout;
+  var edgeSelectionOn = false;
+  var expressionData;   // consists of a gene list, a tissue list, and the data (a list of 
+                        // gene/value pairs, each list named by a tissue (patient) id
+  var cnvData;
+  var mutationData;
+
+  var moviePlaying = false;
+  var thisModuleName = "angiogenesis"
+
+
+  //--------------------------------------------------------------------------------------------
+  function initializeUI () {
+      cyDiv = $("#cwAngiogenesisDiv");
+
+      selectLabel = $("#angiogenesisSelectLabel");
+      selectLabel.css("color", "lightgray");   // not functional until some tissueIDs have been been added
+      viewAbstractsButton = $("#angioViewAbstractsButton");
+      viewAbstractsButton.button();
+      viewAbstractsButton.click(toggleEdgeSelection);
+
+      zoomSelectedButton  = $("#angioZoomSelectedButton");
+      zoomSelectedButton.button()
+      zoomSelectedButton.click(zoomSelection);
+
+      tissueMenu = $("#angiogenesisSampleSelector");
+      tissueMenu.change(tissueSelectorChanged);
+
+      movieButton = $("#angiogenesisMovieButton");
+      movieButton.button();
+      movieButton.prop("disabled", true);
+
+      slowerMovieButton = $("#slowerMovieButton");
+      slowerMovieButton.button();
+      fasterMovieButton = $("#fasterMovieButton");
+      fasterMovieButton.button();
+
+      movieSpeedReadout = $("#angiogenesisMovieSpeedReadout");
+      movieSpeedReadout.text(Number(currentMovieSpeed/1000).toFixed(2));
+
+      fasterMovieButton.click(function() {changeMovieSpeed(-250);})
+      slowerMovieButton.click(function() {changeMovieSpeed(250);})
+
+      movieButton.click(togglePlayMovie);
+      //demoVizChangesButton = $("#angiogenesisDemoVizUpdateButton")
+      //demoVizChangesButton.click(angiogenesisDemoVizChanges);
+      searchBox = $("#angiogenesisSearchBox");
+      //mouseOverReadout = $("#angioPathwaysMouseOverReadoutDiv")
+      loadNetwork();
+      $(window).resize(handleWindowResize);
+      };
+
+  //--------------------------------------------------------------------------------------------
+  function loadNetwork () {
+
+       // the pathways graph is included explicitly by widget.html, so the
+       // angiogenesisNetwork is already defined
+    console.log("loadANGIOPathwaysNetwork, node count: " + angiogenesisNetwork.elements.nodes.length);
+    cwAngio = $("#cwAngiogenesisDiv");
+    cwAngio.cytoscape({
+       elements: angiogenesisNetwork.elements,
+       style: angiogenesisVizmap[0].style,
+       showOverlay: false,
+       minZoom: 0.01,
+       maxZoom: 8.0,
+       layout: {
+         name: "preset",
+         fit: true
+         },
+     ready: function() {
+        console.log("cwAngio ready");
+        cwAngio = this;
+        cwAngio.elements().qtip({
+            content: function() {
+              return (this.data().canonicalName);
+              },
+            position: {
+              my: 'top center',
+              at: 'bottom center'
+              },
+            show: {
+              delay: 1000,
+              event: 'mouseover'
+              },
+            hide: {
+              event: 'mouseout'
+              },
+            style: {
+              classes: 'qtip-bootstrap',
+              tip: {
+                 width: 16,
+                 height: 8
+                }
+              }
+            }); // qtip
+
+        cwAngio.on('select', 'edge', function(evt){
+           var edge = evt.cyTarget;
+           console.log("selected edge");
+           var pmid = edge.data().pmid;
+           console.log("pmid: " + pmid);
+           openCenteredBrowserWindow("http://www.ncbi.nlm.nih.gov/pubmed/?term=" + pmid, "pubmed abstract", 800, 600)
+           });
+        searchBox.keydown(doSearch);
+
+        cwAngio.edges().unselectify();
+        console.log("cwAngio.reset");
+        cwAngio.reset();
+        setInfoNodeLabel("neutral");
+        handleWindowResize();
+        } // cy.ready
+       })
+    .cytoscapePanzoom({ });   // need to learn about options
+    } // loadNetwork
+
+   //----------------------------------------------------------------------------------------------------
+   function handleWindowResize () {
+      console.log("angioPathways window resize: " + $(window).width() + ", " + $(window).height());
+      cyDiv.width(0.95 * $(window).width());
+      cyDiv.height(0.9 * $(window).height());
+      cwAngio.resize();
+      cwAngio.fit(50);
+      } // handleWindowResize
+
+
+   //----------------------------------------------------------------------------------------------------
+   function zoomSelection() {
+      cwAngio.fit(cwAngio.$(':selected'), 50)
+      }
+
+   //----------------------------------------------------------------------------------------------------
+   function toggleEdgeSelection () {
+     if(edgeSelectionOn){
+        cwAngio.edges().unselectify();
+        edgeSelectionOn = false;
+        viewAbstractsButton.button("option", "label", "Enable Abstracts");
+        }
+      else{
+        cwAngio.edges().selectify();
+        edgeSelectionOn = true;
+        viewAbstractsButton.button("option", "label", "Disable Abstracts");
+        }
+      } // toggleEdgeSelection
+
+   //----------------------------------------------------------------------------------------------------
+   function transformMatrixToPatientOrientedNamedList(mtx) {
+
+        // geneNames are repeated in each element; grab them from the first one
+      var geneNames = Object.keys(mtx[0]);
+        // the last element was originally (in R) the row name -- the tissue
+        // gene1: expression, gene2: expession, ... rowname: 0445.T.1
+      geneCount = geneNames.length - 1;
+      geneNames = geneNames.slice(0,geneCount);
+      var tissueNames = [];
+      max = mtx.length;
+      namedList={};
+
+      for(var r=0; r < max; r++){
+         row = mtx[r]
+         tissueName = row["rowname"][0];
+         tissueNames.push(tissueName);
+         namedList[tissueName] = row;
+         } // for r
+
+      result = {genes: geneNames, tissues: tissueNames, values: namedList};
+      return(result);
+
+      } // transformMatrixToPatientOrientedNamedList
+
+   //----------------------------------------------------------------------------------------------------
+     // initially, a random set of patient, tissue of sample ids.  soon set by humans
+     // these five are those from   fivenum(matrix[, "KDR"])
+     //   TCGA.02.0058  TCGA.06.0132  TCGA.02.0034  TCGA.12.0657  TCGA.06.0155 
+     //    -3.10414205   -0.62431669    0.05214659    0.60673149    4.43374413 
+   function demoTissues() {
+
+        // good for copy number and expression changes, but no mutations
+      patients = ["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155",
+                  "TCGA.06.0155", "TCGA.06.0162", "TCGA.06.1087", "TCGA.12.0778", 
+                  "TCGA.14.0871", "TCGA.06.0192"];
+
+        // has about a dozen mutations
+      patients = ["neutral", "TCGA.06.0125", "TCGA.06.0126", "TCGA.06.0128", "TCGA.06.0130", "TCGA.06.0184",
+                  "TCGA.06.0188", "TCGA.06.0221", "TCGA.06.0882", "TCGA.12.0692", "TCGA.76.6282",
+                  "TCGA.81.5910"]
+
+      return(patients);
+      }
+
+   //----------------------------------------------------------------------------------------------------
+     // run all that should happen when this module receives an incoming selection of patientIDs
+   demoIncomingSelectionOfPatientIDs = function() {
+      request_mRNA_data(demoTissues(), geneSymbols());   // entities: patient, tissue or sample ids
+      request_cnv_data(demoTissues(), geneSymbols());
+      request_mutation_data(demoTissues(), geneSymbols());
+      } // demoIncomingSelectionOfPatientIDs
+
+   //----------------------------------------------------------------------------------------------------
+   function handlePatientIDs(msg){
+
+      console.log("=== entering handlePatientIDs for angio");
+      console.log("status: " + msg.status);
+   
+      tissueIDCount = msg.payload.count;
+      tissueIDs = msg.payload.ids;
+ 
+        // solve the R/javascript difference about vectors of length 1 vs a single scalar
+      if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
+      
+      request_mRNA_data(tissueIDs, geneSymbols());   // entities: patient, tissue or sample ids
+      request_cnv_data(tissueIDs, geneSymbols());
+      request_mutation_data(tissueIDs, geneSymbols());
+      } // handlePatientIDs
+
+   //----------------------------------------------------------------------------------------------------
+   function nodeIDs(){
+     nodes = cwAngio.filter("node:visible");
+     result = [];
+     for(var i=0; i < nodes.length; i++){
+       id = nodes[i].data()['id'];
+       result.push(id);
+       } // for i
+     return(result)
+     } // nodeIDs
+
+   //----------------------------------------------------------------------------------------------------
+   function nodeNames() {
+
+     nodes = cwAngio.filter("node:visible");
+     result = [];
+     for(var i=0; i < nodes.length; i++){
+       result.push(nodes[i].data().label)
+       } // for i
+     return(result)
+     } // nodeNames
+
+   //----------------------------------------------------------------------------------------------------
+   function geneSymbols() {
+
+     nodes = cwAngio.filter("node");
+     result = [];
+     for(var i=0; i < nodes.length; i++){
+       sym = nodes[i].data().geneSymbol
+       if(typeof(sym) != "undefined")
+          result.push(sym)
+       } // for i
+     console.log("geneSymbols: " + result);
+     return(result)
+     } // geneSymbols
+
+   //----------------------------------------------------------------------------------------------------
+   function changeMovieSpeed(delta) {
+
+      if((currentMovieSpeed + delta) < 0)
+         return;
+
+      console.log("currentMovieSpeed: " + currentMovieSpeed);
+      currentMovieSpeed += delta;
+      console.log("currentMovieSpeed: " + currentMovieSpeed);
+      movieSpeedReadout.text(Number(currentMovieSpeed/1000).toFixed(2));
+      if(moviePlaying){
+         clearInterval(movieIntervalID);
+         movieIntervalID = setInterval(oneFrame, currentMovieSpeed);
+         }
+      } // changeMovieSpeed
+
+   //----------------------------------------------------------------------------------------------------
+   function togglePlayMovie() {
+
+      allCurrentTissues = tissueMenu.children().map(function() {return $(this).val();}).get();
+      currentTissueIndex = 0;
+
+     oneFrame = function(){
+        tissueIndex = currentTissueIndex  % allCurrentTissues.length;
+        tissueName =  allCurrentTissues[tissueIndex]
+        //console.log(" movie about to display frame " + tissueIndex + ", " + tissueName);
+        currentTissueIndex = currentTissueIndex + 1;
+        tissueMenu.val(tissueName);
+        tissueSelectorChanged()
+        } // oneFrame
+
+     if(moviePlaying){
+        moviePlaying = false;
+        clearInterval(movieIntervalID);
+        movieButton.button( "option", "label", "Movie");
+        }
+     else{
+        moviePlaying = true;
+        movieButton.button( "option", "label", "Stop ");
+        movieIntervalID = setInterval(oneFrame, currentMovieSpeed);
+        }
+   
+
+    } // cwGBMtogglePlayMovie
+   //----------------------------------------------------------------------------------------------------
+   function doSearch(e) {
+
+      var keyCode = e.keyCode || e.which;
+
+      if (keyCode == 13) {
+         searchString = searchBox.val();
+         console.log("searchString: " + searchString);
+         names = nodeNames()
+         matches = []
+         for(var i=0; i < names.length; i++){
+            if(names[i].beginsWith(searchString)) {
+               console.log(searchString + " matched " + names[i]);
+               s = "cwAngio.filter('node[label=\"" + names[i] + "\"]').select()";
+               console.log("select cmd: " + s);
+               eval (s);
+               } // if searchString matched beginning of node
+            } // for i
+         } // if 13 (return key)
+
+      } // doSearch
+    //----------------------------------------------------------------------------------------------------
+    function request_mRNA_data(entities, features) {
+
+      msg = {cmd:"get_mRNA_data",
+              callback: "handle_mRNA_data",
+              status:"request",
+              payload:{entities: entities, features: features}
+              };
+       msg.json = JSON.stringify(msg);
+       socket.send(msg.json);
+       }
+
+    //----------------------------------------------------------------------------------------------------
+    function request_cnv_data(entities, features) {
+
+      msg = {cmd:"get_cnv_data",
+              callback: "handle_cnv_data",
+              status:"request",
+              payload:{entities: entities, features: features}
+              };
+       msg.json = JSON.stringify(msg);
+       socket.send(msg.json);
+       }
+
+    //----------------------------------------------------------------------------------------------------
+    function request_mutation_data(entities, features) {
+
+      msg = {cmd:"get_mutation_data",
+              callback: "handle_mutation_data",
+              status:"request",
+              payload:{entities: entities, features: features}
+              };
+       msg.json = JSON.stringify(msg);
+       socket.send(msg.json);
+       }
+
+    //----------------------------------------------------------------------------------------------------
+    function addTissueIDsToSelector (tissueIDs) {
+      tissueMenu.empty();
+      if(tissueIDs.length == 0) {
+         alert("angiogenesis received empty tissueIDs list")
+         return;
+         }
+      
+      // every set of tissueIDs needs a neutral (no data) pseudo-tissue
+
+      tissueIDs.unshift("neutral");
+
+      for(var i=0; i < tissueIDs.length; i++){
+         tissueName = tissueIDs[i]
+         optionMarkup = "<option>" + tissueName + "</option>";
+         tissueMenu.append(optionMarkup);
+         } // for i
+
+     } // addTissueIDsToSelector
+    //----------------------------------------------------------------------------------------------------
+    function handle_mRNA_data(msg) {
+
+       console.log("handling mRNA data");
+       var mtx = JSON.parse(msg.payload.mtx);
+       expressionData = transformMatrixToPatientOrientedNamedList(mtx);
+       addTissueIDsToSelector(expressionData.tissues);
+       movieButton.prop("disabled", false);
+       selectLabel.css("color", "black");
+       } // handle_mRNA_data
+
+    //----------------------------------------------------------------------------------------------------
+    function handle_cnv_data(msg) {
+
+       console.log("handling cnv data");
+       var mtx = JSON.parse(msg.payload.mtx);
+       cnvData = transformMatrixToPatientOrientedNamedList(mtx);
+       } // handle_mRNA_data
+
+    //----------------------------------------------------------------------------------------------------
+    function handle_mutation_data(msg) {
+
+       console.log("handling mutation data");
+       var mtx = JSON.parse(msg.payload.mtx);
+       mutationData = transformMatrixToPatientOrientedNamedList(mtx);
+       } // handle_mRNA_data
+
+    //----------------------------------------------------------------------------------------------------
+    function tissueSelectorChanged() {
+
+       tissueID = tissueMenu.val()
+       displayTissue(tissueID);
+
+       } // tissueSelectorChanged
+
+    //----------------------------------------------------------------------------------------------------
+    setInfoNodeLabel = function(newLabel){
+       infoNodeID = cwAngio.filter('node[canonicalName="info.node"]').data("id")
+       //console.log("setting info.node label to '" + newLabel + "'");
+       noa = {};
+       noa[infoNodeID] = {label: newLabel};
+       cwAngio.batchData(noa);
+       }
+
+    //----------------------------------------------------------------------------------------------------
+    function displayTissue(tissueID) {
+
+       setInfoNodeLabel(tissueID);
+
+       var noa = {};
+
+       if(tissueID == "neutral") {
+          console.log(" will display neutral values of expression, copynumber, mutation");
+          ids = [];
+          allNodes = cwAngio.nodes();
+          for(i=0; i < allNodes.length; i++){
+             node = allNodes[i];
+             id = node.data("id");
+           //console.log("neutral tissue, node id: " + id);
+             if(Object.keys(node.data()).indexOf("geneSymbol") >= 0){
+                geneSymbol = node.data("geneSymbol");
+                ids.push(id);
+                noa[id] = {score:0, label: geneSymbol, copyNumber:0}
+                } // if node has geneSymbol attribute
+             } // for i
+        //console.log("all ids: " + ids + "  noa: " + noa);
+          cwAngio.batchData(noa);
+          return;
+          } // neutral pseudo-tissue
+
+       if(expressionData.tissues.indexOf(tissueID) < 0){
+          alert(tissueId + " not found in current expressionData");
+          return;
+          }
+
+       mRNA = expressionData.values
+       genes = expressionData.genes;
+       tissues = expressionData.tissues;
+     //console.log("expr for " + genes.length + " genes, and " + tissues.length + " tissues");
+
+       noa = {};  // new node attributes to assign in the network
+
+       for(var g=0; g < genes.length; g++){
+          gene = genes[g];
+
+          newScore = mRNA[tissueID][gene][0];
+        //console.log("  set score of " + gene + " to " + newScore);
+          filterString = '[geneSymbol="' + gene + '"]'
+        //console.log("  finding id for geneSymbol: " + gene);
+          nodeID = cwAngio.nodes(filterString)[0].data("id");
+          noa[nodeID] = {score: newScore};
+          } // for g
+
+       cwAngio.batchData(noa);
+
+       cnv = cnvData.values
+       genes = cnvData.genes;
+       tissues = cnvData.tissues;
+     //console.log("cnv for " + genes.length + " genes, and " + tissues.length + " tissues");
+
+       noa = {};  // new node attributes to assign in the network
+
+       for(var g=0; g < genes.length; g++){
+         gene = genes[g];
+         newCopyNumber = cnv[tissueID][gene][0];
+       //console.log("  set score of " + gene + " to " + newCopyNumber);
+         filterString = '[geneSymbol="' + gene + '"]'
+       //console.log("  finding id for geneSymbol: " + gene);
+         nodeID = cwAngio.nodes(filterString)[0].data("id");
+         noa[nodeID] = {copyNumber: newCopyNumber};
+         } // for g
+
+       cwAngio.batchData(noa);
+
+       mut = mutationData.values
+
+       noa = {};  // new node attributes to assign in the network
+ 
+
+       for(var g=0; g < genes.length; g++){
+         gene = genes[g];
+         newMutation = mut [tissueID][gene][0];
+            // identify the node (by id) whose geneSymbol attribute is gene
+            // the label attribute changes, but geneSymbol remains
+         filterString = 'node[geneSymbol="' + gene  + '"]';
+         nodeID = cwAngio.filter(filterString).id();
+            // set label and nodeType for every gene
+         if(newMutation == null){
+            newGeneLabel = gene;
+            newNodeType = "gene";
+          //console.log("setting wt label: " + newGeneLabel);
+            }
+         else{
+            newGeneLabel = gene + " (" + newMutation + ")";
+            newNodeType = "mutation";
+          //console.log("setting  mut label: " + newGeneLabel);
+            }
+       //console.log(" setting noa for " + nodeID + " " + newGeneLabel + "  " + newNodeType);
+         noa[nodeID] = {label: newGeneLabel, nodeType: newNodeType};
+         } // for g, mutations
+       cwAngio.batchData(noa);
+       } // displayTissue
+
+    //----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(){
+
+        msg = {cmd:"getModuleModificationDate",
+               callback: "DisplayAngioPathwaysModifiedDate",
+               status:"request",
+               payload:"angioPathways"
+               };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+        }
+    //----------------------------------------------------------------------------------------------------
+    function DisplayAngioPathwaysModifiedDate(msg){
+       document.getElementById("angioPathwaysDateModified").innerHTML = msg.payload;
+       }
+
+   //----------------------------------------------------------------------------------------------------
+   return{
+     init: function(){
+       addSelectionDestination(thisModuleName);
+       onReadyFunctions.push(initializeUI);
+       addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
+       addJavascriptMessageHandler("handle_mRNA_data", handle_mRNA_data);
+       addJavascriptMessageHandler("handle_cnv_data",  handle_cnv_data);
+       addJavascriptMessageHandler("handle_mutation_data",  handle_mutation_data);
+       addJavascriptMessageHandler("angiogenesisHandlePatientIDs", handlePatientIDs);
+       socketConnectedFunctions.push(SetModifiedDate);
+       //if(typeof(window.tabsAppRunning) == "undefined") {
+       //   socketConnectedFunctions.push(angiogenesisDemoVizChanges)
+       //   }
+       } // init
+     }; 
+
+   }); // angioPathwaysModule
+//----------------------------------------------------------------------------------------------------
+angioPathway = angioPathwaysModule()
+angioPathway.init();
 
 </script>
 
@@ -3488,14 +4075,14 @@ var PairedDistributionsModule = (function () {
   };
   //-------------------------------------------------------------------------------------------   
   getColor = function(population){
-  	console.log("called");
+  	//console.log("called");
   	if(currentPopulationForColor!=(population.name)||currentPopulationForColor==null){
   		var letters = '0123456789ABCDEF'.split('');
     	currentColor = '#';
     	for (var i = 0; i < 6; i++ ) {
         currentColor += letters[Math.floor(Math.random() * 16)];
     	}
-    	console.log("switched color");
+    	//console.log("switched color");
     	currentPopulationForColor = population.name;
     }
     return currentColor;
@@ -3653,7 +4240,7 @@ pairedDistributions.init();
 onReadyFunctions.push(function() {
     console.log("====== tabapps document ready");
     window.tabsAppRunning = true
-    $("#tabs").tabs({
+    $("#oncoscapeTabs").tabs({
          // todo: distinguish between tabs, only do needed resets
        activate: function(event, ui) {
             console.log("tabs.activate");
@@ -3738,13 +4325,15 @@ todo = todoModule();
 todo.init();
 
 </script>
-<div id="tabs">
+
+<div id="oncoscapeTabs">
    <ul>
      <li><a href="#DashboardDiv">Dashboard</a></li>
      <li><a href="#clinicalDataModuleDiv">Clinical Data</a></li>
      <li><a href="#pcaDiv">PCA</a></li>
      <li><a href="#patientTimeLinesDiv">Timelines</a></li>
      <li><a href="#gbmPathwaysDiv">GBM Pathways</a></li>
+     <li><a href="#angiogenesisDiv">Angiogenesis</a></li>
      <li><a href="#markersAndTissuesDiv">Markers &amp; Patients</a></li>
      <li><a href="#SavedSelectionDiv">My Selections</a></li>
      <li><a href="#pairedDistributionsDiv">Paired Distributions</a></li>
@@ -3761,7 +4350,7 @@ ul.UserDocs {
 
 <div id="DashboardDiv">
 <h3> Oncoscape </h3>
-   <p> Welcome to Oncoscape!  &nbsp; (version 1.1.21, <i>25 aug 2014</i>)</p>
+   <p> Welcome to Oncoscape!  &nbsp; (version 1.1.22, 30 aug 2014)</p>
    <p> You are logged in as:  <span id="UserName"> </span>   </p>
 
    <p> Welcome Message </p>
@@ -12716,6 +13305,2932 @@ div {
    </div>
    <div id="cyGbmPathways"></div>
    
+</div>
+
+
+
+
+<script>
+angiogenesisNetwork = {
+  "data" : {
+    "selected" : true,
+    "__Annotations" : [ ],
+    "shared_name" : "Hif1a",
+    "SUID" : 52,
+    "name" : "Hif1a"
+  },
+  "elements" : {
+    "nodes" : [ {
+      "data" : {
+        "id" : "81",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 81,
+        "node_size" : "40.0",
+        "score" : 0.0,
+        "label" : "info.node",
+        "type" : "gene",
+        "node_opacity" : "0.0",
+        "node_fontSize" : "30.0",
+        "node_shape" : "RECT",
+        "selected" : false,
+        "canonicalName" : "info.node",
+        "copyNumber" : "0",
+        "node_borderOpacity" : "0.0",
+        "name" : "info.node",
+        "node_label" : "",
+        "nodeDetail" : "",
+        "shared_name" : "info.node"
+      },
+      "position" : {
+        "x" : -414.0,
+        "y" : -114.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "80",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 80,
+        "score" : 0.0,
+        "geneSymbol" : "VEGFA",
+        "label" : "VEGFA",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "7422",
+        "copyNumber" : "0",
+        "name" : "7422",
+        "nodeDetail" : "",
+        "shared_name" : "7422"
+      },
+      "position" : {
+        "x" : -33.0,
+        "y" : 305.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "79",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 79,
+        "score" : 0.0,
+        "geneSymbol" : "ANGPT2",
+        "label" : "ANGPT2",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "285",
+        "copyNumber" : "0",
+        "name" : "285",
+        "nodeDetail" : "",
+        "shared_name" : "285"
+      },
+      "position" : {
+        "x" : -545.0,
+        "y" : 208.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "78",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 78,
+        "score" : 0.0,
+        "geneSymbol" : "ANGPT1",
+        "label" : "ANGPT1",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "284",
+        "copyNumber" : "0",
+        "name" : "284",
+        "nodeDetail" : "",
+        "shared_name" : "284"
+      },
+      "position" : {
+        "x" : -719.0,
+        "y" : 207.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "77",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 77,
+        "score" : 0.0,
+        "label" : "HIF1A",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "3091",
+        "copyNumber" : "0",
+        "name" : "3091",
+        "nodeDetail" : "",
+        "shared_name" : "3091"
+      },
+      "position" : {
+        "x" : -32.0,
+        "y" : 24.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "76",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 76,
+        "score" : 0.0,
+        "geneSymbol" : "JUN",
+        "label" : "JUN",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "3725",
+        "copyNumber" : "0",
+        "name" : "3725",
+        "nodeDetail" : "",
+        "shared_name" : "3725"
+      },
+      "position" : {
+        "x" : 166.0,
+        "y" : 228.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "75",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 75,
+        "score" : 0.0,
+        "geneSymbol" : "SP1",
+        "label" : "SP1",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "6667",
+        "copyNumber" : "0",
+        "name" : "6667",
+        "nodeDetail" : "",
+        "shared_name" : "6667"
+      },
+      "position" : {
+        "x" : 32.0,
+        "y" : 168.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "74",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 74,
+        "score" : 0.0,
+        "geneSymbol" : "EGLN1",
+        "label" : "EGLN1",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "54583",
+        "copyNumber" : "0",
+        "name" : "54583",
+        "nodeDetail" : "",
+        "shared_name" : "54583"
+      },
+      "position" : {
+        "x" : -177.0,
+        "y" : 189.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "73",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 73,
+        "score" : 0.0,
+        "geneSymbol" : "EGLN3",
+        "label" : "EGLN3",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "112399",
+        "copyNumber" : "0",
+        "name" : "112399",
+        "nodeDetail" : "",
+        "shared_name" : "112399"
+      },
+      "position" : {
+        "x" : -293.0,
+        "y" : 91.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "72",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 72,
+        "score" : 0.0,
+        "geneSymbol" : "VHL",
+        "label" : "VHL",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "7428",
+        "copyNumber" : "0",
+        "name" : "7428",
+        "nodeDetail" : "",
+        "shared_name" : "7428"
+      },
+      "position" : {
+        "x" : 228.0,
+        "y" : -61.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "71",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 71,
+        "score" : 0.0,
+        "geneSymbol" : "HIF1AN",
+        "label" : "HIF1AN",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "846",
+        "copyNumber" : "0",
+        "name" : "846",
+        "nodeDetail" : "",
+        "shared_name" : "846"
+      },
+      "position" : {
+        "x" : -372.0,
+        "y" : 24.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "70",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 70,
+        "score" : 0.0,
+        "label" : "low oxygen",
+        "type" : "state",
+        "selected" : false,
+        "canonicalName" : "low oxygen",
+        "copyNumber" : "0",
+        "name" : "low oxygen",
+        "nodeDetail" : "",
+        "shared_name" : "low oxygen"
+      },
+      "position" : {
+        "x" : -374.0,
+        "y" : 209.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "69",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 69,
+        "score" : 0.0,
+        "label" : "growth factors",
+        "type" : "category",
+        "selected" : false,
+        "canonicalName" : "growth factors",
+        "copyNumber" : "0",
+        "name" : "growth factors",
+        "nodeDetail" : "",
+        "shared_name" : "growth factors"
+      },
+      "position" : {
+        "x" : -376.0,
+        "y" : 367.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "68",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 68,
+        "score" : 0.0,
+        "geneSymbol" : "MAPK14",
+        "label" : "MAPK14",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "1432",
+        "copyNumber" : "0",
+        "name" : "1432",
+        "nodeDetail" : "",
+        "shared_name" : "1432"
+      },
+      "position" : {
+        "x" : 279.0,
+        "y" : 352.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "67",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 67,
+        "score" : 0.0,
+        "geneSymbol" : "EP300",
+        "label" : "EP300",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "2033",
+        "copyNumber" : "0",
+        "name" : "2033",
+        "nodeDetail" : "",
+        "shared_name" : "2033"
+      },
+      "position" : {
+        "x" : -202.0,
+        "y" : 305.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "66",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 66,
+        "score" : 0.0,
+        "geneSymbol" : "KDR",
+        "label" : "KDR",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "3791",
+        "copyNumber" : "0",
+        "name" : "3791",
+        "nodeDetail" : "",
+        "shared_name" : "3791"
+      },
+      "position" : {
+        "x" : -30.0,
+        "y" : 460.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "65",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 65,
+        "score" : 0.0,
+        "geneSymbol" : "TEK",
+        "label" : "TEK",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "7010",
+        "copyNumber" : "0",
+        "name" : "7010",
+        "nodeDetail" : "",
+        "shared_name" : "7010"
+      },
+      "position" : {
+        "x" : -597.0,
+        "y" : 350.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "64",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 64,
+        "score" : 0.0,
+        "label" : "hydroxylated HIF1A",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "x.3091",
+        "copyNumber" : "0",
+        "name" : "x.3091",
+        "nodeDetail" : "",
+        "shared_name" : "x.3091"
+      },
+      "position" : {
+        "x" : 41.0,
+        "y" : -106.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "63",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 63,
+        "score" : 0.0,
+        "label" : "sprouting angiogenesis",
+        "type" : "process",
+        "selected" : false,
+        "canonicalName" : "sprouting angiogenesis",
+        "copyNumber" : "0",
+        "name" : "sprouting angiogenesis",
+        "nodeDetail" : "",
+        "shared_name" : "sprouting angiogenesis"
+      },
+      "position" : {
+        "x" : -30.0,
+        "y" : 597.0
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "62",
+        "pval" : 1.0,
+        "status" : "normal",
+        "SUID" : 62,
+        "score" : 0.0,
+        "label" : "quiescence",
+        "type" : "gene",
+        "selected" : false,
+        "canonicalName" : "quiescence",
+        "copyNumber" : "0",
+        "name" : "quiescence",
+        "nodeDetail" : "",
+        "shared_name" : "quiescence"
+      },
+      "position" : {
+        "x" : -597.0,
+        "y" : 478.0
+      },
+      "selected" : false
+    } ],
+    "edges" : [ {
+      "data" : {
+        "id" : "102",
+        "source" : "80",
+        "target" : "66",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "7422 (activates) 3791",
+        "edgeType" : "activates",
+        "SUID" : 102,
+        "name" : "7422 (activates) 3791",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "activates",
+        "shared_interaction" : "activates",
+        "shared_name" : "7422 (activates) 3791",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "101",
+        "source" : "79",
+        "target" : "65",
+        "detectionMethod" : "curation",
+        "pmid" : "9204896",
+        "selected" : false,
+        "canonicalName" : "285 (inhibits) 7010",
+        "edgeType" : "inhibits",
+        "SUID" : 101,
+        "name" : "285 (inhibits) 7010",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "inhibits",
+        "shared_interaction" : "inhibits",
+        "shared_name" : "285 (inhibits) 7010",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "100",
+        "source" : "79",
+        "target" : "78",
+        "detectionMethod" : "curation",
+        "pmid" : "9204896",
+        "selected" : false,
+        "canonicalName" : "285 (inhibits) 284",
+        "edgeType" : "inhibits",
+        "SUID" : 100,
+        "name" : "285 (inhibits) 284",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "inhibits",
+        "shared_interaction" : "inhibits",
+        "shared_name" : "285 (inhibits) 284",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "99",
+        "source" : "78",
+        "target" : "65",
+        "detectionMethod" : "curation",
+        "pmid" : "20054809",
+        "selected" : false,
+        "canonicalName" : "284 (activates) 7010",
+        "edgeType" : "activates",
+        "SUID" : 99,
+        "name" : "284 (activates) 7010",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "activates",
+        "shared_interaction" : "activates",
+        "shared_name" : "284 (activates) 7010",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "98",
+        "source" : "77",
+        "target" : "80",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "3091 (TF binding) 7422",
+        "edgeType" : "TF binding",
+        "SUID" : 98,
+        "name" : "3091 (TF binding) 7422",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "TF binding",
+        "shared_interaction" : "TF binding",
+        "shared_name" : "3091 (TF binding) 7422",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "97",
+        "source" : "77",
+        "target" : "64",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "3091 (hydroxylated) x.3091",
+        "edgeType" : "hydroxylated",
+        "SUID" : 97,
+        "name" : "3091 (hydroxylated) x.3091",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "hydroxylated",
+        "shared_interaction" : "hydroxylated",
+        "shared_name" : "3091 (hydroxylated) x.3091",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "96",
+        "source" : "76",
+        "target" : "80",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "3725 (TF binding) 7422",
+        "edgeType" : "TF binding",
+        "SUID" : 96,
+        "name" : "3725 (TF binding) 7422",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "TF binding",
+        "shared_interaction" : "TF binding",
+        "shared_name" : "3725 (TF binding) 7422",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "95",
+        "source" : "75",
+        "target" : "80",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "6667 (TF binding) 7422",
+        "edgeType" : "TF binding",
+        "SUID" : 95,
+        "name" : "6667 (TF binding) 7422",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "TF binding",
+        "shared_interaction" : "TF binding",
+        "shared_name" : "6667 (TF binding) 7422",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "94",
+        "source" : "74",
+        "target" : "77",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "54583 (hydroxylates) 3091",
+        "edgeType" : "hydroxylates",
+        "SUID" : 94,
+        "name" : "54583 (hydroxylates) 3091",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "hydroxylates",
+        "shared_interaction" : "hydroxylates",
+        "shared_name" : "54583 (hydroxylates) 3091",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "93",
+        "source" : "73",
+        "target" : "77",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "112399 (hydroxylates) 3091",
+        "edgeType" : "hydroxylates",
+        "SUID" : 93,
+        "name" : "112399 (hydroxylates) 3091",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "hydroxylates",
+        "shared_interaction" : "hydroxylates",
+        "shared_name" : "112399 (hydroxylates) 3091",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "92",
+        "source" : "72",
+        "target" : "64",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "7428 (proteolyzes) x.3091",
+        "edgeType" : "proteolyzes",
+        "SUID" : 92,
+        "name" : "7428 (proteolyzes) x.3091",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "proteolyzes",
+        "shared_interaction" : "proteolyzes",
+        "shared_name" : "7428 (proteolyzes) x.3091",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "91",
+        "source" : "71",
+        "target" : "77",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "846 (inactivates) 3091",
+        "edgeType" : "inactivates",
+        "SUID" : 91,
+        "name" : "846 (inactivates) 3091",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "inactivates",
+        "shared_interaction" : "inactivates",
+        "shared_name" : "846 (inactivates) 3091",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "90",
+        "source" : "70",
+        "target" : "71",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "low oxygen (inhibits) 846",
+        "edgeType" : "inhibits",
+        "SUID" : 90,
+        "name" : "low oxygen (inhibits) 846",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "inhibits",
+        "shared_interaction" : "inhibits",
+        "shared_name" : "low oxygen (inhibits) 846",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "89",
+        "source" : "70",
+        "target" : "74",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "low oxygen (inhibits) 54583",
+        "edgeType" : "inhibits",
+        "SUID" : 89,
+        "name" : "low oxygen (inhibits) 54583",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "inhibits",
+        "shared_interaction" : "inhibits",
+        "shared_name" : "low oxygen (inhibits) 54583",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "88",
+        "source" : "70",
+        "target" : "73",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "low oxygen (inhibits) 112399",
+        "edgeType" : "inhibits",
+        "SUID" : 88,
+        "name" : "low oxygen (inhibits) 112399",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "inhibits",
+        "shared_interaction" : "inhibits",
+        "shared_name" : "low oxygen (inhibits) 112399",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "87",
+        "source" : "70",
+        "target" : "79",
+        "detectionMethod" : "curation",
+        "pmid" : "14702352",
+        "selected" : false,
+        "canonicalName" : "low oxygen (activates) 285",
+        "edgeType" : "activates",
+        "SUID" : 87,
+        "name" : "low oxygen (activates) 285",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "activates",
+        "shared_interaction" : "activates",
+        "shared_name" : "low oxygen (activates) 285",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "86",
+        "source" : "69",
+        "target" : "67",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "growth factors (activates) 2033",
+        "edgeType" : "activates",
+        "SUID" : 86,
+        "name" : "growth factors (activates) 2033",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "activates",
+        "shared_interaction" : "activates",
+        "shared_name" : "growth factors (activates) 2033",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "85",
+        "source" : "68",
+        "target" : "80",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "1432 (stabilizes.mrna) 7422",
+        "edgeType" : "stabilizes.mrna",
+        "SUID" : 85,
+        "name" : "1432 (stabilizes.mrna) 7422",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "stabilizes.mrna",
+        "shared_interaction" : "stabilizes.mrna",
+        "shared_name" : "1432 (stabilizes.mrna) 7422",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "84",
+        "source" : "67",
+        "target" : "80",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "2033 (TF cofactor) 7422",
+        "edgeType" : "TF cofactor",
+        "SUID" : 84,
+        "name" : "2033 (TF cofactor) 7422",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "TF cofactor",
+        "shared_interaction" : "TF cofactor",
+        "shared_name" : "2033 (TF cofactor) 7422",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "83",
+        "source" : "66",
+        "target" : "63",
+        "detectionMethod" : "curation",
+        "selected" : false,
+        "canonicalName" : "3791 (activates) sprouting angiogenesis",
+        "edgeType" : "activates",
+        "SUID" : 83,
+        "name" : "3791 (activates) sprouting angiogenesis",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "activates",
+        "shared_interaction" : "activates",
+        "shared_name" : "3791 (activates) sprouting angiogenesis",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    }, {
+      "data" : {
+        "id" : "82",
+        "source" : "65",
+        "target" : "62",
+        "detectionMethod" : "curation",
+        "pmid" : "25165221",
+        "selected" : false,
+        "canonicalName" : "7010 (preserves) quiescence",
+        "edgeType" : "preserves",
+        "SUID" : 82,
+        "name" : "7010 (preserves) quiescence",
+        "provider" : "pshannon@fhcrc.org",
+        "interaction" : "preserves",
+        "shared_interaction" : "preserves",
+        "shared_name" : "7010 (preserves) quiescence",
+        "edgeDetail" : ""
+      },
+      "selected" : false
+    } ]
+  }
+}
+angiogenesisVizmap = [ {
+  "title" : "hallmarksOfCancer",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "text-opacity" : 1.0,
+      "width" : 50.0,
+      "border-opacity" : 1.0,
+      "background-color" : "rgb(255,255,255)",
+      "background-opacity" : 1.0,
+      "font-size" : 20,
+      "shape" : "ellipse",
+      "border-width" : 1.0,
+      "border-color" : "rgb(0,0,0)",
+      "color" : "rgb(0,0,0)",
+      "height" : 50.0,
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "font-family" : "SansSerif",
+      "font-weight" : "bold",
+      "content" : "data(label)"
+    }
+  }, 
+   {"selector": "node[name='info.node']",
+     "css" : {width: 0,  height: 0}
+    },
+ 
+
+   {
+    "selector" : "node[type = 'gene']",
+    "css" : {
+      "shape" : "ellipse"
+    }
+  }, {
+    "selector" : "node[type = 'state']",
+    "css" : {
+      "shape" : "roundrectangle"
+    }
+  }, {
+    "selector" : "node[type = 'category']",
+    "css" : {
+      "shape" : "rectangle"
+    }
+  }, {
+    "selector" : "node[type = 'process']",
+    "css" : {
+      "shape" : "roundrectangle"
+    }
+  }, {
+    "selector" : "node[score > 4.6]",
+    "css" : {
+      "width" : 100.0
+    }
+  }, {
+    "selector" : "node[score = 4.6]",
+    "css" : {
+      "width" : 100.0
+    }
+  }, {
+    "selector" : "node[score > 0.0][score < 4.6]",
+    "css" : {
+      "width" : "mapData(score,0.0,4.6,50.0,100.0)"
+    }
+  }, {
+    "selector" : "node[score > -2.6][score < 0.0]",
+    "css" : {
+      "width" : "mapData(score,-2.6,0.0,100.0,50.0)"
+    }
+  }, {
+    "selector" : "node[score = -2.6]",
+    "css" : {
+      "width" : 100.0
+    }
+  }, {
+    "selector" : "node[score < -2.6]",
+    "css" : {
+      "width" : 100.0
+    }
+  }, {
+    "selector" : "node[score > 4.6]",
+    "css" : {
+      "height" : 100.0
+    }
+  }, {
+    "selector" : "node[score = 4.6]",
+    "css" : {
+      "height" : 100.0
+    }
+  }, {
+    "selector" : "node[score > 0.0][score < 4.6]",
+    "css" : {
+      "height" : "mapData(score,0.0,4.6,50.0,100.0)"
+    }
+  }, {
+    "selector" : "node[score > -2.6][score < 0.0]",
+    "css" : {
+      "height" : "mapData(score,-2.6,0.0,100.0,50.0)"
+    }
+  }, {
+    "selector" : "node[score = -2.6]",
+    "css" : {
+      "height" : 100.0
+    }
+  }, {
+    "selector" : "node[score < -2.6]",
+    "css" : {
+      "height" : 100.0
+    }
+  }, {
+    "selector" : "node[copyNumber = 2]",
+    "css" : {
+      "border-width" : 10.0
+    }
+  }, {
+    "selector" : "node[copyNumber = 1]",
+    "css" : {
+      "border-width" : 5.0
+    }
+  }, {
+    "selector" : "node[copyNumber = 0]",
+    "css" : {
+      "border-width" : 1.0
+    }
+  }, {
+    "selector" : "node[copyNumber = -2]",
+    "css" : {
+      "border-width" : 10.0
+    }
+  }, {
+    "selector" : "node[copyNumber = -1]",
+    "css" : {
+      "border-width" : 5.0
+    }
+  }, {
+    "selector" : "node[score > 0.0][score < 12]",
+    "css" : {
+      "background-color" : "mapData(score,0.0,12,rgb(255,255,255),rgb(255,0,0))"
+    }
+  }, {
+    "selector" : "node[score > -8.0][score < 0.0]",
+    "css" : {
+      "background-color" : "mapData(score,-8.0,0.0,rgb(0,255,0),rgb(255,255,255))"
+    }
+  }, {
+    "selector" : "node[copyNumber = 2]",
+    "css" : {
+      "border-color" : "rgb(0,0,255)"
+    }
+  }, {
+    "selector" : "node[copyNumber = 1]",
+    "css" : {
+      "border-color" : "rgb(0,0,255)"
+    }
+  }, {
+    "selector" : "node[copyNumber = 0]",
+    "css" : {
+      "border-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "node[copyNumber = -2]",
+    "css" : {
+      "border-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "node[copyNumber = -1]",
+    "css" : {
+      "border-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "target-arrow-shape" : "triangle",
+      "color" : "rgb(0,0,0)",
+      "target-arrow-color" : "rgb(0,0,0)",
+      "font-size" : 10,
+      "width" : 1.0,
+      "line-color" : "rgb(255,255,255)",
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "content" : "",
+      "text-opacity" : 1.0,
+      "line-style" : "solid",
+      "opacity" : 1.0,
+      "source-arrow-color" : "rgb(0,0,0)",
+      "source-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'expression']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0403(colocalization)']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dissociation']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'compound']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition;phosphorylation']",
+    "css" : {
+      "target-arrow-shape" : "tee"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'functional']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0407(direct interaction)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inactivates']",
+    "css" : {
+      "target-arrow-shape" : "tee"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'Mi:0933(negative genetic interaction)']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0799(additive genetic interaction defined by inequality)']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilizes.mrna']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0915(physical association)']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation reaction)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0935(positive genetic interaction)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylates']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0203(dephosphorylation reaction)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'preserves']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0914(association)']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition']",
+    "css" : {
+      "target-arrow-shape" : "tee"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0414(enzymatic reaction)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = '-']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'proteolyzes']",
+    "css" : {
+      "target-arrow-shape" : "tee"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylated']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'unspecified']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilzes.mrna']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'detectedBy']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0794(synthetic genetic interaction defined by inequality)']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0796(suppressive genetic interaction defined by inequality)']",
+    "css" : {
+      "target-arrow-shape" : "tee"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF cofactor']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF binding']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0220(ubiquitination reaction)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'binding/association']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquination']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation;phosphorylation']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'repression']",
+    "css" : {
+      "target-arrow-shape" : "tee"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'indirect effect']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0567(neddylation reaction)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0191(aggregation)']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activates']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dimerize']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'missing interaction']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0192(acetylation reaction)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0190']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0570(protein cleavage)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage reaction)']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquitination']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibits']",
+    "css" : {
+      "target-arrow-shape" : "tee"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dephosphorylation']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'phosphorylation']",
+    "css" : {
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'expression']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0403(colocalization)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'compound']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dissociation']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'functional']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition;phosphorylation']",
+    "css" : {
+      "target-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0407(direct interaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inactivates']",
+    "css" : {
+      "target-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'Mi:0933(negative genetic interaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0799(additive genetic interaction defined by inequality)']",
+    "css" : {
+      "target-arrow-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilizes.mrna']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0915(physical association)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation reaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylates']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0935(positive genetic interaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,221,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0203(dephosphorylation reaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'preserves']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0914(association)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition']",
+    "css" : {
+      "target-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0414(enzymatic reaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'proteolyzes']",
+    "css" : {
+      "target-arrow-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = '-']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylated']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'unspecified']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilzes.mrna']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,136)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'detectedBy']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0794(synthetic genetic interaction defined by inequality)']",
+    "css" : {
+      "target-arrow-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0796(suppressive genetic interaction defined by inequality)']",
+    "css" : {
+      "target-arrow-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF cofactor']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF binding']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0220(ubiquitination reaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquination']",
+    "css" : {
+      "target-arrow-color" : "rgb(221,0,221)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'binding/association']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation;phosphorylation']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'indirect effect']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'repression']",
+    "css" : {
+      "target-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0567(neddylation reaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0191(aggregation)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activates']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,136,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dimerize']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'missing interaction']",
+    "css" : {
+      "target-arrow-color" : "rgb(170,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0192(acetylation reaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation)']",
+    "css" : {
+      "target-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0190']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0570(protein cleavage)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquitination']",
+    "css" : {
+      "target-arrow-color" : "rgb(221,0,221)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage reaction)']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibits']",
+    "css" : {
+      "target-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dephosphorylation']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'phosphorylation']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'expression']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0403(colocalization)']",
+    "css" : {
+      "width" : 4.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dissociation']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'compound']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'functional']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition;phosphorylation']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0407(direct interaction)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inactivates']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'Mi:0933(negative genetic interaction)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0799(additive genetic interaction defined by inequality)']",
+    "css" : {
+      "width" : 5.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilizes.mrna']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0915(physical association)']",
+    "css" : {
+      "width" : 2.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation reaction)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylates']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0935(positive genetic interaction)']",
+    "css" : {
+      "width" : 5.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0203(dephosphorylation reaction)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'preserves']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0914(association)']",
+    "css" : {
+      "width" : 2.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0414(enzymatic reaction)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = '-']",
+    "css" : {
+      "width" : 1.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'proteolyzes']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylated']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'unspecified']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilzes.mrna']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'detectedBy']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0794(synthetic genetic interaction defined by inequality)']",
+    "css" : {
+      "width" : 5.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0796(suppressive genetic interaction defined by inequality)']",
+    "css" : {
+      "width" : 5.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF cofactor']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF binding']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0220(ubiquitination reaction)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquination']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'binding/association']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation;phosphorylation']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'repression']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'indirect effect']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation']",
+    "css" : {
+      "width" : 6.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0567(neddylation reaction)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0191(aggregation)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activates']",
+    "css" : {
+      "width" : 6.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dimerize']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'missing interaction']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0192(acetylation reaction)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0190']",
+    "css" : {
+      "width" : 1.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation)']",
+    "css" : {
+      "width" : 7.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0570(protein cleavage)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage reaction)']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquitination']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibits']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dephosphorylation']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'phosphorylation']",
+    "css" : {
+      "width" : 3.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'expression']",
+    "css" : {
+      "line-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0403(colocalization)']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'compound']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dissociation']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'functional']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition;phosphorylation']",
+    "css" : {
+      "line-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0407(direct interaction)']",
+    "css" : {
+      "line-color" : "rgb(0,170,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inactivates']",
+    "css" : {
+      "line-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'Mi:0933(negative genetic interaction)']",
+    "css" : {
+      "line-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0799(additive genetic interaction defined by inequality)']",
+    "css" : {
+      "line-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilizes.mrna']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0915(physical association)']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation reaction)']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylates']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0935(positive genetic interaction)']",
+    "css" : {
+      "line-color" : "rgb(0,221,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0203(dephosphorylation reaction)']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'preserves']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition']",
+    "css" : {
+      "line-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0914(association)']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0414(enzymatic reaction)']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'proteolyzes']",
+    "css" : {
+      "line-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = '-']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylated']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'unspecified']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilzes.mrna']",
+    "css" : {
+      "line-color" : "rgb(0,0,136)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'detectedBy']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0794(synthetic genetic interaction defined by inequality)']",
+    "css" : {
+      "line-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0796(suppressive genetic interaction defined by inequality)']",
+    "css" : {
+      "line-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF cofactor']",
+    "css" : {
+      "line-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage)']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF binding']",
+    "css" : {
+      "line-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0220(ubiquitination reaction)']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'binding/association']",
+    "css" : {
+      "line-color" : "rgb(0,170,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquination']",
+    "css" : {
+      "line-color" : "rgb(221,0,221)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation;phosphorylation']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'repression']",
+    "css" : {
+      "line-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'indirect effect']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0567(neddylation reaction)']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0191(aggregation)']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activates']",
+    "css" : {
+      "line-color" : "rgb(0,136,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dimerize']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'missing interaction']",
+    "css" : {
+      "line-color" : "rgb(170,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0192(acetylation reaction)']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation)']",
+    "css" : {
+      "line-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0190']",
+    "css" : {
+      "line-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0570(protein cleavage)']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquitination']",
+    "css" : {
+      "line-color" : "rgb(221,0,221)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage reaction)']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibits']",
+    "css" : {
+      "line-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dephosphorylation']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'phosphorylation']",
+    "css" : {
+      "line-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'expression']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0403(colocalization)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'compound']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dissociation']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'functional']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition;phosphorylation']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0407(direct interaction)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inactivates']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'Mi:0933(negative genetic interaction)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0799(additive genetic interaction defined by inequality)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilizes.mrna']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0915(physical association)']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation reaction)']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylates']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0935(positive genetic interaction)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0203(dephosphorylation reaction)']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'preserves']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0914(association)']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0414(enzymatic reaction)']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = '-']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'proteolyzes']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylated']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'unspecified']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilzes.mrna']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'detectedBy']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0794(synthetic genetic interaction defined by inequality)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0796(suppressive genetic interaction defined by inequality)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF cofactor']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF binding']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0220(ubiquitination reaction)']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquination']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'binding/association']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation;phosphorylation']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'repression']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'indirect effect']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0567(neddylation reaction)']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0191(aggregation)']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activates']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dimerize']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'missing interaction']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0192(acetylation reaction)']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0190']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0570(protein cleavage)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquitination']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage reaction)']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibits']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dephosphorylation']",
+    "css" : {
+      "line-style" : "dotted"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'phosphorylation']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'expression']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0403(colocalization)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'compound']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dissociation']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'functional']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition;phosphorylation']",
+    "css" : {
+      "source-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0407(direct interaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inactivates']",
+    "css" : {
+      "source-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'Mi:0933(negative genetic interaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0799(additive genetic interaction defined by inequality)']",
+    "css" : {
+      "source-arrow-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilizes.mrna']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0915(physical association)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation reaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylates']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0935(positive genetic interaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,221,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0203(dephosphorylation reaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'preserves']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0914(association)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition']",
+    "css" : {
+      "source-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0414(enzymatic reaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'proteolyzes']",
+    "css" : {
+      "source-arrow-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = '-']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylated']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'unspecified']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilzes.mrna']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,136)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'detectedBy']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0796(suppressive genetic interaction defined by inequality)']",
+    "css" : {
+      "source-arrow-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0794(synthetic genetic interaction defined by inequality)']",
+    "css" : {
+      "source-arrow-color" : "rgb(170,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF cofactor']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF binding']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0220(ubiquitination reaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'binding/association']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquination']",
+    "css" : {
+      "source-arrow-color" : "rgb(221,0,221)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation;phosphorylation']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'repression']",
+    "css" : {
+      "source-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'indirect effect']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0567(neddylation reaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0191(aggregation)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activates']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,136,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dimerize']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'missing interaction']",
+    "css" : {
+      "source-arrow-color" : "rgb(170,0,170)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0192(acetylation reaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0190']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation)']",
+    "css" : {
+      "source-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0570(protein cleavage)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage reaction)']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquitination']",
+    "css" : {
+      "source-arrow-color" : "rgb(221,0,221)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibits']",
+    "css" : {
+      "source-arrow-color" : "rgb(221,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dephosphorylation']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'phosphorylation']",
+    "css" : {
+      "source-arrow-color" : "rgb(0,170,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'expression']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0403(colocalization)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dissociation']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'compound']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition;phosphorylation']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'functional']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0407(direct interaction)']",
+    "css" : {
+      "source-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inactivates']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'Mi:0933(negative genetic interaction)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0799(additive genetic interaction defined by inequality)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilizes.mrna']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0915(physical association)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation reaction)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylates']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0935(positive genetic interaction)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0203(dephosphorylation reaction)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'preserves']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0914(association)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibition']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0414(enzymatic reaction)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'proteolyzes']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = '-']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'hydroxylated']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'unspecified']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'stabilzes.mrna']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'detectedBy']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0794(synthetic genetic interaction defined by inequality)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0796(suppressive genetic interaction defined by inequality)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF cofactor']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'TF binding']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0220(ubiquitination reaction)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'binding/association']",
+    "css" : {
+      "source-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquination']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation;phosphorylation']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'repression']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'indirect effect']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activation']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0567(neddylation reaction)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0191(aggregation)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'activates']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dimerize']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'missing interaction']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0192(acetylation reaction)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0190']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0217(phosphorylation)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0570(protein cleavage)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'ubiquitination']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'psi-mi:MI:0194(cleavage reaction)']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'inhibits']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'dephosphorylation']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'phosphorylation']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+}]
+
+</script>
+<style>
+
+div {
+   display: block;
+   }
+
+#angiogenesisDiv {
+  }
+
+#cwAngiogenesisDiv {
+  background-color: #DDD;
+
+  position: relative;
+
+  height: 400px;
+  width: 600px;
+
+  border: 1px solid #aaa;
+
+  margin-top: 0px;
+  margin-left: 0px;
+
+  padding: 0px;
+  }
+
+.angioButton {
+   font-size: 8pt;
+   }
+
+#angiogenesisMouseOverReadoutDiv{
+  border: 1px solid #aaa;
+  width: 800px;
+  height: 20px;
+  margin: 0px;
+  }
+
+#angiogenesisButtonDiv{
+  margin-top: 0px;
+  margin-bottom: 0px;
+  }
+
+#angiogenesisMovieSpeedReadout{
+   border: 1px solid #aaa;
+   width: 50px;
+   height: 20px;
+   margin: 0px;
+   }
+
+</style>
+
+<div id="angiogenesisDiv">
+   <div id="angioGenesisButtonDiv">
+      <label id="angiogenesisSelectLabel" for="select">Select a sample:</label>
+      <select id="angiogenesisSampleSelector" class="angioButton"></select>
+      <button id="angiogenesisMovieButton" style="width:100px"  class="angioButton">Movie</button>
+      <button id="slowerMovieButton" class="angioButton"> + </button>
+      <button id="fasterMovieButton" class="angioButton"> - </button>
+      <span id="angiogenesisMovieSpeedReadout" style="width: 50px"></span>
+      &nbsp;
+      <button id="angioViewAbstractsButton" class="angioButton">Enable Abstracts</button>
+      <button id="angioZoomSelectedButton" class="angioButton">Zoom Selected</button>
+      <input type="text" id="angiogenesisSearchBox" value="search"></input>
+   </div>
+   <div id="cwAngiogenesisDiv"></div>
+   <span style="font-size:x-small">Last Modified: <span id=angioPathwaysDateModified style="font-size:x-small"></span></span>
 </div>
 
 

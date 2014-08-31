@@ -23,6 +23,8 @@ var angioPathwaysModule = (function () {
   var mutationData;
 
   var moviePlaying = false;
+  var thisModuleName = "angiogenesis"
+
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -209,6 +211,23 @@ var angioPathwaysModule = (function () {
       request_cnv_data(demoTissues(), geneSymbols());
       request_mutation_data(demoTissues(), geneSymbols());
       } // demoIncomingSelectionOfPatientIDs
+
+   //----------------------------------------------------------------------------------------------------
+   function handlePatientIDs(msg){
+
+      console.log("=== entering handlePatientIDs for angio");
+      console.log("status: " + msg.status);
+   
+      tissueIDCount = msg.payload.count;
+      tissueIDs = msg.payload.ids;
+ 
+        // solve the R/javascript difference about vectors of length 1 vs a single scalar
+      if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
+      
+      request_mRNA_data(tissueIDs, geneSymbols());   // entities: patient, tissue or sample ids
+      request_cnv_data(tissueIDs, geneSymbols());
+      request_mutation_data(tissueIDs, geneSymbols());
+      } // handlePatientIDs
 
    //----------------------------------------------------------------------------------------------------
    function nodeIDs(){
@@ -528,11 +547,13 @@ var angioPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
+       addSelectionDestination(thisModuleName);
        onReadyFunctions.push(initializeUI);
        addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
        addJavascriptMessageHandler("handle_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_mutation_data",  handle_mutation_data);
+       addJavascriptMessageHandler("angiogenesisHandlePatientIDs", handlePatientIDs);
        socketConnectedFunctions.push(SetModifiedDate);
        //if(typeof(window.tabsAppRunning) == "undefined") {
        //   socketConnectedFunctions.push(angiogenesisDemoVizChanges)

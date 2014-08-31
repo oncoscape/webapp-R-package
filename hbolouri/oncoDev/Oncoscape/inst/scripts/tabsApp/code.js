@@ -2,7 +2,7 @@
 onReadyFunctions.push(function() {
     console.log("====== tabapps document ready");
     window.tabsAppRunning = true
-    $("#tabs").tabs({
+    $("#oncoscapeTabs").tabs({
          // todo: distinguish between tabs, only do needed resets
        activate: function(event, ui) {
             console.log("tabs.activate");
