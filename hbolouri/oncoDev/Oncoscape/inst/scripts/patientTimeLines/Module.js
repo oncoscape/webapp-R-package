@@ -19,7 +19,7 @@ var TimeLineModule = (function () {
      var dialog;
 
      var TimeLinesendSelectionMenu;
-     var TimeLineSelectionButton;
+//     var TimeLineSelectionButton;
      var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
                             {Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
                             {Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
@@ -56,16 +56,8 @@ var TimeLineModule = (function () {
            }
         }  
         TimeLinesendSelectionMenu.prop("disabled",true);
-
  
-          TimeLineSelectionButton = $("#timelineSaveSelection");
-              TimeLineSelectionButton.click(function(){
-                  var selectionname = PromptForSelectionName()
-                  if(typeof(selectionname) == "string")  
-                      timelineBroadcastSelection(selectionname);
-              });
            $(window).resize(TimeLineHandleWindowResize);
-           TimeLineSelectionButton.prop("disabled",true);
 
            dispatch.load();
       };
@@ -131,51 +123,6 @@ var TimeLineModule = (function () {
     } // sendToModuleChanged
 
    //--------------------------------------------------------------------------------------------
-   function timelineBroadcastSelection(selectionname){
- //     console.log("broadcastSelection: " + TimeLineSelectedRegion);
-      x1=TimeLineSelectedRegion[0][0];
-      y1=TimeLineSelectedRegion[0][1];
-      x2=TimeLineSelectedRegion[1][0];
-      y2=TimeLineSelectedRegion[1][1];
-      ids = [];
-      
-      function LogTime(t){
-                     if(AlignBy === "--"){ 
-                               return t;
-                     } else{ var Dir = (t<0 ? -1 : 1); 
-                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2)
-                    }
-               }     
-  
-      for(var i=0; i < Events.length; i++){
-         event = Events[i];
-         if(event.PtNum >= y1/PatientHeight & event.PtNum <= y2/PatientHeight){
-			// Patient within range
-            
-            if(event.date.length>1 ){
-                 if( (LogTime(event.date[0]-event.offset) >=x1 & LogTime(event.date[0]-event.offset) <= x2) ||
-	                 (LogTime(event.date[1]-event.offset) >=x1 & LogTime(event.date[1]-event.offset) <= x2) ){
-	                  // date endpoints within range
-	                
-                      if(ids.indexOf(event.PatientID) === -1)
-                        	ids.push(event.PatientID);
-                }
-            } else{
-                 if (LogTime(event.date-event.offset) >=x1 & LogTime(event.date-event.offset) <= x2) {
-	                  // date within range
-                      if(ids.indexOf(event.PatientID) === -1)
-                        	ids.push(event.PatientID);
-                }
-            }
-         }
-      } // for i
-    
-    if(ids.length > 0)
-         if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
-         settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
-         sendTimelineCurrentIDsToSelection(ids,selectionname, settings);
-    };
-   //--------------------------------------------------------------------------------------------
    function timelineSelectionToModule(ModuleName){
 //      console.log("broadcastSelection: " + TimeLineSelectedRegion);
       x1=TimeLineSelectedRegion[0][0];
@@ -184,13 +131,10 @@ var TimeLineModule = (function () {
       y2=TimeLineSelectedRegion[1][1];
       ids = [];
       
-      function LogTime(t){
-                     if(AlignBy === "--"){ 
-                               return t;
-                     } else{ var Dir = (t<0 ? -1 : 1); 
-                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2)
-                    }
-               }     
+      function 
+        LogTime(t){ if(AlignBy === "--"){ return t;}
+                    else{ var Dir = (t<0 ? -1 : 1); 
+                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2) }  }     
   
       for(var i=0; i < Events.length; i++){
          event = Events[i];
@@ -215,24 +159,13 @@ var TimeLineModule = (function () {
          }
       } // for i
     
-    var metadata = null;
-    if(ModuleName == "Save Selection"){
-        var selectionname = PromptForSelectionName()
-        if(typeof(selectionname) !== "string")  
-          return;
-        if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
-        settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
-        var metadata = {   
-                    "selectionname": selectionname,
-         			"Tab": "Timeline",
-         			"Settings": settings
-         		}
-    }
-    
+    if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
+    var settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
+    var metadata = {"Tab": "timeline",
+         			"Settings": settings }
     if(ids.length > 0)
          sendSelectionToModule(ModuleName, ids, metadata);
     };
-
 //--------------------------------------------------------------------------------------------
   function timelineD3PlotBrushReader(){
      console.log("plotBrushReader");
@@ -242,29 +175,11 @@ var TimeLineModule = (function () {
      y1 = TimeLineSelectedRegion[1][1];
      selectHeight = Math.abs(y0-y1);
      if(selectHeight > 1){
-        TimeLineSelectionButton.prop("disabled", false);
         TimeLinesendSelectionMenu.prop("disabled",false);
      } else {
-        TimeLineSelectionButton.prop("disabled", true);
         TimeLinesendSelectionMenu.prop("disabled",true);
      }
      }; // d3PlotBrushReader
-
-  //--------------------------------------------------------------------------------------------
-   function sendTimelineCurrentIDsToSelection (ids,selectionname, settings) {
-      console.log("entering sendTimelineCurrentIDsToSelection");
-       console.log(ids.length + " patientIDs going to SavedSelection")
-      
-      var NewSelection = {   
-                    "selectionname": selectionname,
-         			"PatientIDs" : ids,
-         			"Tab": "Timeline",
-         			"Settings": settings
-         		}
- 
-          addSelection(NewSelection, callback="");
- 
-      } // sendTissueIDsToModule
 
    //--------------------------------------------------------------------------------------------------     
    function handlePatientIDs(msg){
@@ -291,7 +206,6 @@ var TimeLineModule = (function () {
     function loadPatientDemoData(){
 
        console.log("==== patientTimeLines  get Events from File");
-//       TimeLineInitialLoad=true;
        cmd = "getCaisisPatientHistory";
        status = "request"
        callback = "DisplayPatientTimeLine"
@@ -461,7 +375,6 @@ var TimeLineModule = (function () {
                var PatientOrderBy = []
                var Categories = []
 
-               
                console.log("Display Current Side Plot Event: " + SidePlotEvent)
 
                if(SidePlotEvent === "--"){     return;     

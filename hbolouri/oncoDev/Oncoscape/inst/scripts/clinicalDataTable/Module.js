@@ -9,7 +9,6 @@ var tableRef;
 var ClTblsendSelectionMenu;
 var PatientMenu;
 var displayDiv;
-var ClinicalTableTabNum=1;
 var ThisModuleName = "ClinicalTable"
       
    //--------------------------------------------------------------------------------------------
@@ -18,9 +17,6 @@ var ThisModuleName = "ClinicalTable"
       displayDiv = $("#clinicalDataTableDiv");
       $(window).resize(handleWindowResize);
       handleWindowResize();
-
-      SaveSelectedButton = $("#toSavedSelectionButton");
-      SaveSelectedButton.click(function(){sendCurrentIDsToSelection()});
 
       PatientMenu = d3.select("#useSavedSelectionButton")
             .append("g")
@@ -91,57 +87,17 @@ var ThisModuleName = "ClinicalTable"
 
        ModuleName = ClTblsendSelectionMenu.val()
        SelectedPatientIDs = currentSelectedIDs()
-       if(ModuleName == "Save Selection"){
-          
-       }
-       if(validSelectionToSend(ModuleName, SelectedPatientIDs)){
-         console.log(SelectedPatientIDs.length + " patientIDs going to " + ModuleName)    
-         sendSelectionToModule(ModuleName, SelectedPatientIDs);
-       }
+       metadata =  {"Tab": "ClinicalTable",
+         			"Settings": {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
+                                 ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
+                                 overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
+                                 overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
+                   }
+       sendSelectionToModule(ModuleName, SelectedPatientIDs, metadata);
+       
        ClTblsendSelectionMenu.val("Send Selection to:")
     } // sendToModuleChanged
-
-
-  //--------------------------------------------------------------------------------------------
-   function sendCurrentIDsToSelection () {
-      console.log("entering sendCurrentIDsToSelection");
-
-      var selectionname = PromptForSelectionName()
-           if(typeof(selectionname) !== "string")  
-           return;
-
-      var currentIDs = currentSelectedIDs()
-       console.log(currentIDs.length + " patientIDs going to SavedSelection")
-
-      var NewSelection = {   
-                    "selectionname": selectionname,
-         			"PatientIDs" : currentIDs,
-         			"Tab": "ClinicalTable",
-         			"Settings": {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
-                      ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
-                      overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
-                      overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
-         		}
  
-       addSelection(NewSelection);
-       
-      } // sendTissueIDsToModule
-  //--------------------------------------------------------------------------------------------
-   function validSelectionToSend(modulename, ids){
-       if(modulename == "PCA") 
-          return checkBeforeSendSelectionsToPCA(ids)
-       return true;
-    }
-   //--------------------------------------------------------------------------------------------
-   function checkBeforeSendSelectionsToPCA(ids){
-      var minimumPatientsForPCA = 8;
-      if(ids.length < minimumPatientsForPCA){
-         alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
-         return false;
-         }
-      return true;
-      } // checkBeforeSendSelectionsToPCA
-
    //----------------------------------------------------------------------------------------------------
    function currentSelectedIDs(){
       var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
@@ -245,7 +201,8 @@ var ThisModuleName = "ClinicalTable"
       //console.log(filterString)
       console.log("about to call fnFilter");
       tableRef.fnFilter(filterString, 0, true);
-      $("#tabs").tabs( "option", "active", ClinicalTableTabNum);
+      var tabIndex = $('#tabs a[href="#clinicalDataModuleDiv"]').parent().index();
+      $("#tabs").tabs( "option", "active", tabIndex);
       } // handleFilterClinicalDataTable 
 
 
@@ -298,24 +255,6 @@ var ThisModuleName = "ClinicalTable"
      }; // displayTable
 
 //----------------------------------------------------------------------------------------------------
-//    function DisplayAboutModule(){
-        
-//        var ThisModuleName = "Clinical DataTable"
-//        var Folder = "clinicalDataTable"
-//        var CreatedBy= ["Paul Shannon"]
-//        var MaintainedBy = "Paul Shannon"
-//        var Contact = 
-
-//        var info = {Modulename: ThisModuleName, Folder: Folder, CreatedBy: CreatedBy, MaintainedBy: MaintainedBy}
-//        about.SetAboutInfo(info)
-
-//    }
-//----------------------------------------------------------------------------------------------------
- //   function DisplayModuleTooltip(){
-       
-//    }
-
-//----------------------------------------------------------------------------------------------------
   return{
     requestData: requestData,
     init: function(){
@@ -345,7 +284,7 @@ var ThisModuleName = "ClinicalTable"
 
     }; // returned object
 
-  }); // DateAndTimeModule
+  }); // ClinicalTableModule
 
 //----------------------------------------------------------------------------------------------------
 ctbl = ClinicalTableModule();

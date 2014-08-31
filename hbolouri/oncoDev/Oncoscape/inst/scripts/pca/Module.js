@@ -2,7 +2,6 @@
 //----------------------------------------------------------------------------------------------------
 var PCAModule = (function () {
 
-  var broadcastButton;
   var pcaDisplay;
   var pcaScores;
   var patientClassification;
@@ -12,6 +11,7 @@ var PCAModule = (function () {
   var pcaTabNumber = 2;
   var d3pcaDisplay;
   var pcaTextDisplay;
+  var PatientMenu;
   var PCAsendSelectionMenu;
   var ThisModuleName = "PCA"
   var tempTest;
@@ -23,6 +23,15 @@ var PCAModule = (function () {
       pcaHandleWindowResize();
       $(window).resize(pcaHandleWindowResize);
  
+      PatientMenu = d3.select("#useSelectionPCA")
+            .append("g")
+            .append("select")
+            .on("focus",function(d){ pca.UpdateSelectionMenu()})
+            .on("change", function() {
+                   getSelectionbyName(this.value, callback="changePCAids"); 
+            });
+
+
         PCAsendSelectionMenu = $("#PCAsendSelectiontoModuleButton")
         PCAsendSelectionMenu.change(sendToModuleChanged);
         PCAsendSelectionMenu.empty();
@@ -38,10 +47,6 @@ var PCAModule = (function () {
         }  
         PCAsendSelectionMenu.prop("disabled",true);
 
-
-      broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
-      broadcastButton.click(pcaBroadcastSelection);
-      broadcastButton.prop("disabled",true);
       pcaTextDisplay = $("#pcaTextDisplayDiv");
       };
 
@@ -74,6 +79,20 @@ var PCAModule = (function () {
        alert("error!" + msg.payload)
        }
       }; // handlePatientIDs
+ 
+    //--------------------------------------------------------------------------------------------
+     function changePCAids(msg){
+    
+        console.log("=======Updating PCA Patient ID selection")     
+        patientIDs = []
+        selections = msg.payload;
+//      console.log(d3.values(selections))
+        d3.values(selections).forEach(function(d){ d.patientIDs.forEach(function(id){patientIDs.push(id)})})
+      
+        sendSelectionToModule("PCA", patientIDs)
+     }
+
+ 
  //-------------------------------------------------------------------------------------------- 
   function drawLegend () {
 
@@ -92,7 +111,7 @@ var PCAModule = (function () {
 
     var LegendLabels = d3.values(Classifications.keys())
          
-    var legend =    Legendsvg
+    var legend = Legendsvg
                    .append("g")
                    .attr("class", "legend")
                    .attr("transform", "translate(" + 10 + "," + 10 + ")")  
@@ -109,10 +128,12 @@ var PCAModule = (function () {
             .text(function(d) { return d})
            ;
 
+    console.log(d3.select("legendtext").node().getComputedTextLength())
+
     var TextOffset = []
     var xPosition = 0
 
-   text.attr("transform", function(d, i){
+   text.selectAll("legendtext").attr("transform", function(d, i){
         TextOffset.push(xPosition)
         console.log(this.getComputedTextLength())
         xPosition = xPosition + this.getComputedTextLength() +20
@@ -144,7 +165,7 @@ var PCAModule = (function () {
      function sendToModuleChanged() {
 
        ModuleName = PCAsendSelectionMenu.val()
-       pcaBroadcastSelection ()
+       pcaBroadcastSelection()
        PCAsendSelectionMenu.val("Send Selection to:")
     } // sendToModuleChanged
 
@@ -162,10 +183,15 @@ var PCAModule = (function () {
          if(p.PC1 >= x1 & p.PC1 <= x2 & p.PC2 >= y1 & p.PC2 <= y2)
             ids.push(p.id[0]);
          } // for i
-      if(ids.length > 0)
-//         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
-          sendSelectionToModule(ModuleName, ids);
-      };
+         
+         var settings = {x: [x1, x2], y: [y1, y2]}
+         var metadata = {"Tab": "PCA",
+                         "Settings": settings }
+         
+      if(ids.length > 0){
+          sendSelectionToModule(ModuleName, ids, metadata);
+      }
+    };
 
   //--------------------------------------------------------------------------------------------
   function pcaPlot (msg){
@@ -241,16 +267,12 @@ var PCAModule = (function () {
      width = Math.abs(x0-x1);
      //console.log("width: " + width);
      if(width > 1){
-       PCAsendSelectionMenu.prop("disabled",false);
-
-        broadcastButton.prop("disabled", false);
-        console.log("width > 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
+        PCAsendSelectionMenu.prop("disabled",false);
+        console.log("width > 1, new button state, disabled?: " + PCAsendSelectionMenu.prop("disabled"));
         }
      else{
-       PCAsendSelectionMenu.prop("disabled",true);
-
-        broadcastButton.prop("disabled", true);
-        console.log("width !> 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
+        PCAsendSelectionMenu.prop("disabled",true);
+        console.log("width !> 1, new button state, disabled?: " + PCAsendSelectionMenu.prop("disabled"));
         }
      }; // d3PlotBrushReader
 
@@ -300,7 +322,7 @@ var PCAModule = (function () {
   function d3PcaScatterPlot(dataset) {
 //     console.log("DATASET = ");
 //     console.log(dataset);
-     broadcastButton.prop("disabled",true);
+     PCAsendSelectionMenu.prop("disabled",true);
      var padding = 50;
      var width = $("#pcaDisplay").width();
      var height = $("#pcaDisplay").height();
@@ -421,7 +443,19 @@ var PCAModule = (function () {
       addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)
       socketConnectedFunctions.push(getPatientClassification);
       socketConnectedFunctions.push(runDemo);
-      }
+      },
+      
+         //--------------------------------------------------------------------------------------------
+       UpdateSelectionMenu: function(){           
+                  
+          PatientMenu.selectAll("option")
+                 .data(getSelectionNames(), function(d){return d;})
+                 .enter()
+                        .append("option")
+                        .attr("value", function(d){return d})
+                        .text(function(d) { return d});
+     }
+
    };
 
 }); // PCAModule

@@ -122,6 +122,7 @@ var UserSettingsModule = (function () {
            if(typeof(SavedSelection) != "undefined")  SavedSelection.addSelectionToTable(msg);
            if(typeof(PatientTimeLine) != "undefined") PatientTimeLine.RefreshSelectionMenu()
            if(typeof(ctbl) != "undefined") ctbl.UpdateSelectionMenu()
+           if(typeof(pca) != "undefined") pca.UpdateSelectionMenu() 
          }
      }
   

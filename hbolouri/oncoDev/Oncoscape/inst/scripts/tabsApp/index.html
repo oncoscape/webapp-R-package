@@ -430,6 +430,7 @@ var UserSettingsModule = (function () {
            if(typeof(SavedSelection) != "undefined")  SavedSelection.addSelectionToTable(msg);
            if(typeof(PatientTimeLine) != "undefined") PatientTimeLine.RefreshSelectionMenu()
            if(typeof(ctbl) != "undefined") ctbl.UpdateSelectionMenu()
+           if(typeof(pca) != "undefined") pca.UpdateSelectionMenu() 
          }
      }
   
@@ -470,18 +471,46 @@ getSelectionDestinations = function(){
 //   return tissueMenu.children().map(function() {return $(this).val();}).get();
 }
 
+ //--------------------------------------------------------------------------------------------
+   function validSelectionToSend(modulename, ids){
+       if(modulename == "PCA") 
+          return checkBeforeSendSelectionsToPCA(ids)
+       return true;
+    }
+   //--------------------------------------------------------------------------------------------
+   function checkBeforeSendSelectionsToPCA(ids){
+      var minimumPatientsForPCA = 8;
+      if(ids.length < minimumPatientsForPCA){
+         alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
+         return false;
+         }
+      return true;
+      } // checkBeforeSendSelectionsToPCA
+
+
 //--------------------------------------------------------------------------------------------
 function sendSelectionToModule(moduleName, currentIDs, metadata){
     
-      callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
-      msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
-             callback: callback,
-             status:"request",
-             payload:{targetModule: ModuleName,
-                      ids: currentIDs,
-                      metadata: metadata}
-             };
-      socket.send(JSON.stringify(msg));
+       if(moduleName == "Save Selection"){
+          var selectionname = PromptForSelectionName()
+          if(typeof(selectionname) !== "string")  
+             return;
+          metadata.selectionname = selectionname;
+        }
+    
+       if(validSelectionToSend(ModuleName, currentIDs)){    
+          console.log(currentIDs.length + " patientIDs going to " + moduleName)    
+       
+          callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
+          msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
+                 callback: callback,
+                 status:"request",
+                 payload:{targetModule: ModuleName,
+                          ids: currentIDs,
+                          metadata: metadata}
+                 };
+         socket.send(JSON.stringify(msg));
+        }
     }
 
 </script>
@@ -588,7 +617,6 @@ var tableRef;
 var ClTblsendSelectionMenu;
 var PatientMenu;
 var displayDiv;
-var ClinicalTableTabNum=1;
 var ThisModuleName = "ClinicalTable"
       
    //--------------------------------------------------------------------------------------------
@@ -597,9 +625,6 @@ var ThisModuleName = "ClinicalTable"
       displayDiv = $("#clinicalDataTableDiv");
       $(window).resize(handleWindowResize);
       handleWindowResize();
-
-      SaveSelectedButton = $("#toSavedSelectionButton");
-      SaveSelectedButton.click(function(){sendCurrentIDsToSelection()});
 
       PatientMenu = d3.select("#useSavedSelectionButton")
             .append("g")
@@ -670,57 +695,17 @@ var ThisModuleName = "ClinicalTable"
 
        ModuleName = ClTblsendSelectionMenu.val()
        SelectedPatientIDs = currentSelectedIDs()
-       if(ModuleName == "Save Selection"){
-          
-       }
-       if(validSelectionToSend(ModuleName, SelectedPatientIDs)){
-         console.log(SelectedPatientIDs.length + " patientIDs going to " + ModuleName)    
-         sendSelectionToModule(ModuleName, SelectedPatientIDs);
-       }
+       metadata =  {"Tab": "ClinicalTable",
+         			"Settings": {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
+                                 ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
+                                 overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
+                                 overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
+                   }
+       sendSelectionToModule(ModuleName, SelectedPatientIDs, metadata);
+       
        ClTblsendSelectionMenu.val("Send Selection to:")
     } // sendToModuleChanged
-
-
-  //--------------------------------------------------------------------------------------------
-   function sendCurrentIDsToSelection () {
-      console.log("entering sendCurrentIDsToSelection");
-
-      var selectionname = PromptForSelectionName()
-           if(typeof(selectionname) !== "string")  
-           return;
-
-      var currentIDs = currentSelectedIDs()
-       console.log(currentIDs.length + " patientIDs going to SavedSelection")
-
-      var NewSelection = {   
-                    "selectionname": selectionname,
-         			"PatientIDs" : currentIDs,
-         			"Tab": "ClinicalTable",
-         			"Settings": {ageAtDxMin: $("#ageAtDxMinSliderReadout").val(),
-                      ageAtDxMax: $("#ageAtDxMaxSliderReadout").val(),
-                      overallSurvivalMin: $("#overallSurvivalMinSliderReadout").val(),
-                      overallSurvivalMax: $("#overallSurvivalMaxSliderReadout").val()}
-         		}
  
-       addSelection(NewSelection);
-       
-      } // sendTissueIDsToModule
-  //--------------------------------------------------------------------------------------------
-   function validSelectionToSend(modulename, ids){
-       if(modulename == "PCA") 
-          return checkBeforeSendSelectionsToPCA(ids)
-       return true;
-    }
-   //--------------------------------------------------------------------------------------------
-   function checkBeforeSendSelectionsToPCA(ids){
-      var minimumPatientsForPCA = 8;
-      if(ids.length < minimumPatientsForPCA){
-         alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
-         return false;
-         }
-      return true;
-      } // checkBeforeSendSelectionsToPCA
-
    //----------------------------------------------------------------------------------------------------
    function currentSelectedIDs(){
       var rows = tableRef._('tr', {"filter":"applied"});   // cryptic, no?
@@ -824,7 +809,8 @@ var ThisModuleName = "ClinicalTable"
       //console.log(filterString)
       console.log("about to call fnFilter");
       tableRef.fnFilter(filterString, 0, true);
-      $("#tabs").tabs( "option", "active", ClinicalTableTabNum);
+      var tabIndex = $('#tabs a[href="#clinicalDataModuleDiv"]').parent().index();
+      $("#tabs").tabs( "option", "active", tabIndex);
       } // handleFilterClinicalDataTable 
 
 
@@ -877,24 +863,6 @@ var ThisModuleName = "ClinicalTable"
      }; // displayTable
 
 //----------------------------------------------------------------------------------------------------
-//    function DisplayAboutModule(){
-        
-//        var ThisModuleName = "Clinical DataTable"
-//        var Folder = "clinicalDataTable"
-//        var CreatedBy= ["Paul Shannon"]
-//        var MaintainedBy = "Paul Shannon"
-//        var Contact = 
-
-//        var info = {Modulename: ThisModuleName, Folder: Folder, CreatedBy: CreatedBy, MaintainedBy: MaintainedBy}
-//        about.SetAboutInfo(info)
-
-//    }
-//----------------------------------------------------------------------------------------------------
- //   function DisplayModuleTooltip(){
-       
-//    }
-
-//----------------------------------------------------------------------------------------------------
   return{
     requestData: requestData,
     init: function(){
@@ -924,7 +892,7 @@ var ThisModuleName = "ClinicalTable"
 
     }; // returned object
 
-  }); // DateAndTimeModule
+  }); // ClinicalTableModule
 
 //----------------------------------------------------------------------------------------------------
 ctbl = ClinicalTableModule();
@@ -935,7 +903,6 @@ ctbl.init();
 //----------------------------------------------------------------------------------------------------
 var PCAModule = (function () {
 
-  var broadcastButton;
   var pcaDisplay;
   var pcaScores;
   var patientClassification;
@@ -945,6 +912,7 @@ var PCAModule = (function () {
   var pcaTabNumber = 2;
   var d3pcaDisplay;
   var pcaTextDisplay;
+  var PatientMenu;
   var PCAsendSelectionMenu;
   var ThisModuleName = "PCA"
   
@@ -955,6 +923,15 @@ var PCAModule = (function () {
       pcaHandleWindowResize();
       $(window).resize(pcaHandleWindowResize);
  
+      PatientMenu = d3.select("#useSelectionPCA")
+            .append("g")
+            .append("select")
+            .on("focus",function(d){ pca.UpdateSelectionMenu()})
+            .on("change", function() {
+                   getSelectionbyName(this.value, callback="changePCAids"); 
+            });
+
+
         PCAsendSelectionMenu = $("#PCAsendSelectiontoModuleButton")
         PCAsendSelectionMenu.change(sendToModuleChanged);
         PCAsendSelectionMenu.empty();
@@ -970,10 +947,6 @@ var PCAModule = (function () {
         }  
         PCAsendSelectionMenu.prop("disabled",true);
 
-
-      broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
-      broadcastButton.click(pcaBroadcastSelection);
-      broadcastButton.prop("disabled",true);
       pcaTextDisplay = $("#pcaTextDisplayDiv");
       };
 
@@ -1006,6 +979,20 @@ var PCAModule = (function () {
        alert("error!" + msg.payload)
        }
       }; // handlePatientIDs
+ 
+    //--------------------------------------------------------------------------------------------
+     function changePCAids(msg){
+    
+        console.log("=======Updating PCA Patient ID selection")     
+        patientIDs = []
+        selections = msg.payload;
+//      console.log(d3.values(selections))
+        d3.values(selections).forEach(function(d){ d.patientIDs.forEach(function(id){patientIDs.push(id)})})
+      
+        sendSelectionToModule("PCA", patientIDs)
+     }
+
+ 
  //-------------------------------------------------------------------------------------------- 
   function drawLegend () {
 
@@ -1024,7 +1011,7 @@ var PCAModule = (function () {
 
     var LegendLabels = d3.values(Classifications.keys())
          
-    var legend =    Legendsvg
+    var legend = Legendsvg
                    .append("g")
                    .attr("class", "legend")
                    .attr("transform", "translate(" + 10 + "," + 10 + ")")  
@@ -1041,10 +1028,12 @@ var PCAModule = (function () {
             .text(function(d) { return d})
            ;
 
+    console.log(d3.select("legendtext").node().getComputedTextLength())
+
     var TextOffset = []
     var xPosition = 0
 
-   text.attr("transform", function(d, i){
+   text.selectAll("legendtext").attr("transform", function(d, i){
         TextOffset.push(xPosition)
         console.log(this.getComputedTextLength())
         xPosition = xPosition + this.getComputedTextLength() +20
@@ -1110,7 +1099,7 @@ var PCAModule = (function () {
      function sendToModuleChanged() {
 
        ModuleName = PCAsendSelectionMenu.val()
-       pcaBroadcastSelection ()
+       pcaBroadcastSelection()
        PCAsendSelectionMenu.val("Send Selection to:")
     } // sendToModuleChanged
 
@@ -1128,10 +1117,15 @@ var PCAModule = (function () {
          if(p.PC1 >= x1 & p.PC1 <= x2 & p.PC2 >= y1 & p.PC2 <= y2)
             ids.push(p.id[0]);
          } // for i
-      if(ids.length > 0)
-//         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
-          sendSelectionToModule(ModuleName, ids);
-      };
+         
+         var settings = {x: [x1, x2], y: [y1, y2]}
+         var metadata = {"Tab": "PCA",
+                         "Settings": settings }
+         
+      if(ids.length > 0){
+          sendSelectionToModule(ModuleName, ids, metadata);
+      }
+    };
 
   //--------------------------------------------------------------------------------------------
   function pcaPlot (msg){
@@ -1195,16 +1189,12 @@ var PCAModule = (function () {
      width = Math.abs(x0-x1);
      //console.log("width: " + width);
      if(width > 1){
-       PCAsendSelectionMenu.prop("disabled",false);
-
-        broadcastButton.prop("disabled", false);
-        console.log("width > 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
+        PCAsendSelectionMenu.prop("disabled",false);
+        console.log("width > 1, new button state, disabled?: " + PCAsendSelectionMenu.prop("disabled"));
         }
      else{
-       PCAsendSelectionMenu.prop("disabled",true);
-
-        broadcastButton.prop("disabled", true);
-        console.log("width !> 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
+        PCAsendSelectionMenu.prop("disabled",true);
+        console.log("width !> 1, new button state, disabled?: " + PCAsendSelectionMenu.prop("disabled"));
         }
      }; // d3PlotBrushReader
 
@@ -1254,7 +1244,7 @@ var PCAModule = (function () {
   function d3PcaScatterPlot(dataset) {
 //     console.log("DATASET = ");
 //     console.log(dataset);
-     broadcastButton.prop("disabled",true);
+     PCAsendSelectionMenu.prop("disabled",true);
      var padding = 50;
      var width = $("#pcaDisplay").width();
      var height = $("#pcaDisplay").height();
@@ -1371,7 +1361,19 @@ var PCAModule = (function () {
       addJavascriptMessageHandler("handlePatientClassification", handlePatientClassification)
       socketConnectedFunctions.push(getPatientClassification);
       socketConnectedFunctions.push(runDemo);
-      }
+      },
+      
+         //--------------------------------------------------------------------------------------------
+       UpdateSelectionMenu: function(){           
+                  
+          PatientMenu.selectAll("option")
+                 .data(getSelectionNames(), function(d){return d;})
+                 .enter()
+                        .append("option")
+                        .attr("value", function(d){return d})
+                        .text(function(d) { return d});
+     }
+
    };
 
 }); // PCAModule
@@ -1401,7 +1403,7 @@ var TimeLineModule = (function () {
      var dialog;
 
      var TimeLinesendSelectionMenu;
-     var TimeLineSelectionButton;
+//     var TimeLineSelectionButton;
      var CalculatedEvents =[{Name:"Survival", Event1: "Diagnosis", Event2: "Status", TimeScale: "Months"},
                             {Name:"AgeDx",Event1: "DOB", Event2: "Diagnosis", TimeScale: "Years"},
                             {Name:"TimeToProgression",Event1: "Diagnosis", Event2: "Progression", TimeScale: "Days"},
@@ -1438,16 +1440,8 @@ var TimeLineModule = (function () {
            }
         }  
         TimeLinesendSelectionMenu.prop("disabled",true);
-
  
-          TimeLineSelectionButton = $("#timelineSaveSelection");
-              TimeLineSelectionButton.click(function(){
-                  var selectionname = PromptForSelectionName()
-                  if(typeof(selectionname) == "string")  
-                      timelineBroadcastSelection(selectionname);
-              });
            $(window).resize(TimeLineHandleWindowResize);
-           TimeLineSelectionButton.prop("disabled",true);
 
            dispatch.load();
       };
@@ -1513,51 +1507,6 @@ var TimeLineModule = (function () {
     } // sendToModuleChanged
 
    //--------------------------------------------------------------------------------------------
-   function timelineBroadcastSelection(selectionname){
- //     console.log("broadcastSelection: " + TimeLineSelectedRegion);
-      x1=TimeLineSelectedRegion[0][0];
-      y1=TimeLineSelectedRegion[0][1];
-      x2=TimeLineSelectedRegion[1][0];
-      y2=TimeLineSelectedRegion[1][1];
-      ids = [];
-      
-      function LogTime(t){
-                     if(AlignBy === "--"){ 
-                               return t;
-                     } else{ var Dir = (t<0 ? -1 : 1); 
-                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2)
-                    }
-               }     
-  
-      for(var i=0; i < Events.length; i++){
-         event = Events[i];
-         if(event.PtNum >= y1/PatientHeight & event.PtNum <= y2/PatientHeight){
-			// Patient within range
-            
-            if(event.date.length>1 ){
-                 if( (LogTime(event.date[0]-event.offset) >=x1 & LogTime(event.date[0]-event.offset) <= x2) ||
-	                 (LogTime(event.date[1]-event.offset) >=x1 & LogTime(event.date[1]-event.offset) <= x2) ){
-	                  // date endpoints within range
-	                
-                      if(ids.indexOf(event.PatientID) === -1)
-                        	ids.push(event.PatientID);
-                }
-            } else{
-                 if (LogTime(event.date-event.offset) >=x1 & LogTime(event.date-event.offset) <= x2) {
-	                  // date within range
-                      if(ids.indexOf(event.PatientID) === -1)
-                        	ids.push(event.PatientID);
-                }
-            }
-         }
-      } // for i
-    
-    if(ids.length > 0)
-         if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
-         settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
-         sendTimelineCurrentIDsToSelection(ids,selectionname, settings);
-    };
-   //--------------------------------------------------------------------------------------------
    function timelineSelectionToModule(ModuleName){
 //      console.log("broadcastSelection: " + TimeLineSelectedRegion);
       x1=TimeLineSelectedRegion[0][0];
@@ -1566,13 +1515,10 @@ var TimeLineModule = (function () {
       y2=TimeLineSelectedRegion[1][1];
       ids = [];
       
-      function LogTime(t){
-                     if(AlignBy === "--"){ 
-                               return t;
-                     } else{ var Dir = (t<0 ? -1 : 1); 
-                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2)
-                    }
-               }     
+      function 
+        LogTime(t){ if(AlignBy === "--"){ return t;}
+                    else{ var Dir = (t<0 ? -1 : 1); 
+                         return Dir * Math.log(Math.abs(t/OneDay)+1)/Math.log(2) }  }     
   
       for(var i=0; i < Events.length; i++){
          event = Events[i];
@@ -1597,24 +1543,13 @@ var TimeLineModule = (function () {
          }
       } // for i
     
-    var metadata = null;
-    if(ModuleName == "Save Selection"){
-        var selectionname = PromptForSelectionName()
-        if(typeof(selectionname) !== "string")  
-          return;
-        if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
-        settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
-        var metadata = {   
-                    "selectionname": selectionname,
-         			"Tab": "Timeline",
-         			"Settings": settings
-         		}
-    }
-    
+    if(AlignBy === "--") {x1 = FormatDate(x1); x2 = FormatDate(x2)}
+    var settings = {AlignBy: AlignBy, OrderBy: OrderBy, x: [x1, x2], y: [y1, y2]}
+    var metadata = {"Tab": "timeline",
+         			"Settings": settings }
     if(ids.length > 0)
          sendSelectionToModule(ModuleName, ids, metadata);
     };
-
 //--------------------------------------------------------------------------------------------
   function timelineD3PlotBrushReader(){
      console.log("plotBrushReader");
@@ -1624,29 +1559,11 @@ var TimeLineModule = (function () {
      y1 = TimeLineSelectedRegion[1][1];
      selectHeight = Math.abs(y0-y1);
      if(selectHeight > 1){
-        TimeLineSelectionButton.prop("disabled", false);
         TimeLinesendSelectionMenu.prop("disabled",false);
      } else {
-        TimeLineSelectionButton.prop("disabled", true);
         TimeLinesendSelectionMenu.prop("disabled",true);
      }
      }; // d3PlotBrushReader
-
-  //--------------------------------------------------------------------------------------------
-   function sendTimelineCurrentIDsToSelection (ids,selectionname, settings) {
-      console.log("entering sendTimelineCurrentIDsToSelection");
-       console.log(ids.length + " patientIDs going to SavedSelection")
-      
-      var NewSelection = {   
-                    "selectionname": selectionname,
-         			"PatientIDs" : ids,
-         			"Tab": "Timeline",
-         			"Settings": settings
-         		}
- 
-          addSelection(NewSelection, callback="");
- 
-      } // sendTissueIDsToModule
 
    //--------------------------------------------------------------------------------------------------     
    function handlePatientIDs(msg){
@@ -1673,7 +1590,6 @@ var TimeLineModule = (function () {
     function loadPatientDemoData(){
 
        console.log("==== patientTimeLines  get Events from File");
-//       TimeLineInitialLoad=true;
        cmd = "getCaisisPatientHistory";
        status = "request"
        callback = "DisplayPatientTimeLine"
@@ -1843,7 +1759,6 @@ var TimeLineModule = (function () {
                var PatientOrderBy = []
                var Categories = []
 
-               
                console.log("Display Current Side Plot Event: " + SidePlotEvent)
 
                if(SidePlotEvent === "--"){     return;     
@@ -4024,7 +3939,6 @@ th, td { white-space: nowrap; }
               <button id="showAllClinicalTablesRowsButton" class="tblClinicalControlButton" type="button">Remove Filters</button>
               <!-- button id="toggleMoreFewerColumnsButton" class="tblClinicalControlButton" type="button">More Columns</button -->
            </div>
-             <button id="toSavedSelectionButton" class="tblClinicalControlButton" type="button">Save Selection</button>
              <span id="useSavedSelectionButton" class="tblClinicalControlButton" type="button">Use Selection</span>
 
           <div id="clinicalDataTableOutboundButtonDiv" style="display: inline-block">
@@ -4096,8 +4010,8 @@ circle.highlighted {
 </style>
 
 <div id="pcaDiv">
-<!--   <button id="pcaBroadcastSelectionToClinicalTable">To Clinical Data... </button>
--->   <select id="PCAsendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
+   <span id="useSelectionPCA">Use Selection</span>
+   <select id="PCAsendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
    <div id="pcaDisplay"></div>
    <div id="pcaLegend"></div>
    <div id="pcaTextDisplayDiv"></div>
@@ -4153,7 +4067,6 @@ circle.highlighted {
          	 <button id="SendSelectionToClinicalTable">To Clinical Data... </button>
 -->	     <span id="PatientSetDiv">Use Selection:</span> 
          <select id="TimeLinesendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
-     	 <button id="timelineSaveSelection">Save Selection</button>
      </div>
      <div id="TimeLineDisplay">
       </div>
