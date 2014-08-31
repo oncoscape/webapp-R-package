@@ -249,6 +249,17 @@ function setupFilteredPatients()
     }
 }
 //--------------------------------------------------------------------------------------------------
+// the nginx proxy server, used by fhcrc IT for the publicly-visible version of Oncoscape
+// times out web sockets at 90 seconds.
+// this function, when called more often that that, will keep the websocket open.
+keepAlive = function()
+{   
+    console.log("keep alive"); 
+    msg = {cmd: "keepAlive", callback: "", status:"request", payload:""}
+    socket.send(JSON.stringify(msg));
+
+} // keepAlive
+//--------------------------------------------------------------------------------------------------
 $(document).ready(function()
 {
     console.log("==== index.common document.ready #1");
@@ -265,11 +276,11 @@ $(document).ready(function()
     // labkeyWS - labkey launched Oncoscape; local R must be run with WS
     // labkeyRS - labkey launched oncoscape; Rserve is used
     //
-    if (typeof labkey == "undefined")
-    {
+    if (typeof labkey == "undefined") {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-     }
+        setInterval(keepAlive, 30000);
+        }
     else
     if (labkey.mode == "WS")
     {
@@ -291,8 +302,74 @@ $(document).ready(function()
     setupFilteredPatients();
 })
 //--------------------------------------------------------------------------------------------------
+
+
 </script>
 
+<script>
+var ActiveModules = [];
+
+//----------------------------------------------------------------------------------------------------
+addSelectionDestination = function(module)
+{
+   if(module in ActiveModules){
+        alert("Selection Destination message handler for '" +  module + " already set");
+   } else{  ActiveModules.push(module)  }
+}
+
+//----------------------------------------------------------------------------------------------------
+getSelectionDestinations = function(){
+     return ActiveModules;
+//   return tissueMenu.children().map(function() {return $(this).val();}).get();
+}
+
+ //--------------------------------------------------------------------------------------------
+   function validSelectionToSend(modulename, ids){
+       if(modulename == "PCA") 
+          return checkBeforeSendSelectionsToPCA(ids)
+       return true;
+    }
+   //--------------------------------------------------------------------------------------------
+   function checkBeforeSendSelectionsToPCA(ids){
+      var minimumPatientsForPCA = 8;
+      if(ids.length < minimumPatientsForPCA){
+         alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
+         return false;
+         }
+      return true;
+      } // checkBeforeSendSelectionsToPCA
+
+
+//--------------------------------------------------------------------------------------------
+function sendSelectionToModule(moduleName, currentIDs, metadata){
+    
+       if(moduleName == "Save Selection"){
+          var selectionname = PromptForSelectionName()
+          if(typeof(selectionname) !== "string")  
+             return;
+          metadata.selectionname = selectionname;
+        }
+    
+       if(validSelectionToSend(ModuleName, currentIDs)){    
+          console.log(currentIDs.length + " patientIDs going to " + moduleName)    
+       
+          callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
+          msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
+                 callback: callback,
+                 status:"request",
+                 payload:{targetModule: ModuleName,
+                          ids: currentIDs,
+                          metadata: metadata}
+                 };
+         socket.send(JSON.stringify(msg));
+         }
+
+    } // sendSelectionToModule
+//--------------------------------------------------------------------------------------------
+
+</script>
+
+ 
 
 
 <script>
@@ -306,6 +383,7 @@ var gbmPathwaysModule = (function () {
   var searchBox;
   var mouseOverReadout;
   var edgeSelectionOn = false;
+  var ThisModuleName = "gbmPathways"
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -431,11 +509,64 @@ var gbmPathwaysModule = (function () {
          } // if 13 (return key)
       } // doSearch
 
+    //----------------------------------------------------------------------------------------------------
+    function handlePatientIDs(msg){
+        console.log("=== entering handleTissueIDsForGBMPathways");
+        console.log("status: " + msg.status);
+   
+        tissueIDCount = msg.payload.count;
+        tissueIDs = msg.payload.ids;
+ 
+        // solve the R/javascript difference about vectors of length 1 vs a single scalar
+        if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
+
+//        console.log("count: " + tissueIDCount + "  ids: " + tissueIDs);
+        addTissueIDsToSelector(tissueIDs);
+
+        // expression data for the currently-selected tissueID will be used 
+
+    } // handleTissueIDsForGBMPathways
+
+    //----------------------------------------------------------------------------------------------------
+    addTissueIDsToSelector = function(tissueIDs)
+    {
+       $("#sampleSelector").empty();
+
+       if(tissueIDs.length == 0) {
+          alert("GBMPathways received empty tissueIDs list")
+          return;
+          }
+      
+      // every set of tissueIDs needs an aggregate, or average tissue
+      //optionMarkup = "<option> average (of " + tissueIDs.length + ") </option>";
+      optionMarkup = "<option>average</option>";
+      $("#sampleSelector").append(optionMarkup);
+
+//       window.gbmPathways.flags.averageExpressionDataReady = false;
+
+       msg = {cmd: "requestAverageExpression", status: "request", payload: tissueIDs};
+//       socket.send(JSON.stringify(msg));
+
+       for(var i=0; i < tissueIDs.length; i++){
+          tissueName = tissueIDs[i]
+          optionMarkup = "<option>" + tissueName + "</option>";
+          $("#sampleSelector").append(optionMarkup);
+          } // for i
+
+        tabIndex = $('#tabs a[href="#gbmPathwaysDiv"]').parent().index();
+        $("#tabs").tabs( "option", "active", tabIndex);
+
+
+} // addTissueIDsToSelector
+
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
+      addSelectionDestination(ThisModuleName)   
        onReadyFunctions.push(initializeUI);
-       //addJavascriptMessageHandler("pairedDistributionsPlot", pairedDistributionsPlot);
+       addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
+ 
+
        //socketConnectedFunctions.push(runDemo);
        }
      };
@@ -9064,6 +9195,7 @@ div {
       <input type="text" id="gbmPathwaysSearchBox"></input>
    </div>
    <div id="cyGbmPathways"></div>
+   
 </div>
 
 

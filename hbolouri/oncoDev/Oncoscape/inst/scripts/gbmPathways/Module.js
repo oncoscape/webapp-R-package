@@ -146,7 +146,6 @@ var gbmPathwaysModule = (function () {
         // solve the R/javascript difference about vectors of length 1 vs a single scalar
         if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
 
-//        console.log("count: " + tissueIDCount + "  ids: " + tissueIDs);
         addTissueIDsToSelector(tissueIDs);
 
         // expression data for the currently-selected tissueID will be used 
@@ -188,7 +187,7 @@ var gbmPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
-      addSelectionDestination(ThisModuleName)   
+       addSelectionDestination(ThisModuleName);
        onReadyFunctions.push(initializeUI);
        addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
  
