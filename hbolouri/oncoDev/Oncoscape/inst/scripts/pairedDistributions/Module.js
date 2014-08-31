@@ -199,14 +199,14 @@ var PairedDistributionsModule = (function () {
   };
   //-------------------------------------------------------------------------------------------   
   getColor = function(population){
-  	console.log("called");
+  	//console.log("called");
   	if(currentPopulationForColor!=(population.name)||currentPopulationForColor==null){
   		var letters = '0123456789ABCDEF'.split('');
     	currentColor = '#';
     	for (var i = 0; i < 6; i++ ) {
         currentColor += letters[Math.floor(Math.random() * 16)];
     	}
-    	console.log("switched color");
+    	//console.log("switched color");
     	currentPopulationForColor = population.name;
     }
     return currentColor;
