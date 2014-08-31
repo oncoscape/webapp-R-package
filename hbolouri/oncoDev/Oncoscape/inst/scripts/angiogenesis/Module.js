@@ -394,6 +394,7 @@ var angioPathwaysModule = (function () {
        addTissueIDsToSelector(expressionData.tissues);
        movieButton.prop("disabled", false);
        selectLabel.css("color", "black");
+       raiseTab("angiogenesisDiv");
        } // handle_mRNA_data
 
     //----------------------------------------------------------------------------------------------------
