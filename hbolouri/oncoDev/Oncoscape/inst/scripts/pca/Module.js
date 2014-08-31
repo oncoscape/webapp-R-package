@@ -14,6 +14,7 @@ var PCAModule = (function () {
   var pcaTextDisplay;
   var PCAsendSelectionMenu;
   var ThisModuleName = "PCA"
+  var tempTest;
   
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -133,40 +134,6 @@ var PCAModule = (function () {
   }
   
   //--------------------------------------------------------------------------------------------
-  function highlightPoints(data){
-     console.log("DATA === ");
-     console.log(data);
-     selectPoints(data, true);
-  };
-  
-  //--------------------------------------------------------------------------------------------
-  function selectPoints(selectIds, clearExistingSelectionFirst){
-      if(clearExistingSelectionFirst){
-          clearSelection();
-      }
-      var ids = selectIds.ids;
-//      for(i=0;i<selectIds.ids.length;i++){
-//          ids.push(listOfPoints[i].ID);
-//      }
-
-    console.log("selectIds: ");
-    console.log(selectIds.ids);
-      d3.selectAll("circle")
-          .filter(function(d, i) { return ids.indexOf(d.id) > -1;})
-          .classed("highlighted", true)
-          .transition()
-          .attr("r", 5)
-          .duration(500);
-      };
-  
-  //--------------------------------------------------------------------------------------------
-  function clearSelection(){
-      d3.selectAll("circle")
-          .classed("highlighted", false)
-          .attr("r", 3);
-      };
-  
-  //--------------------------------------------------------------------------------------------
   function pcaHandleWindowResize () {
      pcaDisplay.width($(window).width() * 0.95);
      pcaDisplay.height($(window).height() * 0.80);
@@ -225,30 +192,42 @@ var PCAModule = (function () {
   function highlightPatientIDs(msg){
       console.log("Module.pca: highlight Patient IDs")
       console.log(msg)
+      selectPoints(msg, true);
    }
+  //--------------------------------------------------------------------------------------------
+  function selectPoints(msg, clearIDs){
+//      if(clearIDs){
+//          clear();
+//      }
+      var ids = msg.payload.ids;
+      console.log("****IDS****")
+      d3.selectAll("circle")
+          .filter(function(d, i) {return ids.indexOf(d.PatientID) > -1;})
+          .classed("highlighted", true)
+          .transition()
+          .attr("r", 5)
+          .duration(500);
+      };
+  
+  //--------------------------------------------------------------------------------------------
+  function clear(){
+      d3.selectAll("circle")
+          .classed("highlighted", false)
+          .attr("r", 3);
+      };
 
   //--------------------------------------------------------------------------------------------
   function handlePatientIDs(msg){
       console.log("Module.pca: handlePatientIDs");
       console.log(msg)
       if(msg.status == "success"){
-         patientIDs = msg.payload.ids
-         //console.log("pca handlePatientIds: " + patientIDs);
-         payload = patientIDs;
-         console.log(payload);
-         if(payload.Higlight == "Highlight"){
-            console.log("HIGHLIGHTED!!!!!!");
-            highlightPoints(payload);
-        }else{
-            console.log("NOT HIGHLIGHTED!!!!!!");
-            msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request",
+         payload = msg.payload.ids;
+         msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request",
                 payload: payload};
-            socket.send(JSON.stringify(msg));
-            }
-        }
-    else{
-      console.log("handlePatientIDs about to call alert: " + msg)
-      alert(msg.payload)
+         socket.send(JSON.stringify(msg));
+      }else{
+         console.log("handlePatientIDs about to call alert: " + msg);
+         alert(msg.payload);
       }
      }; // handlePatientIDs
 
@@ -405,6 +384,10 @@ var PCAModule = (function () {
             .text("PC2");
             
     
+    tempTest = dataset;
+//    console.log("TEMPTEST=======");
+//    console.log(dataset);
+//    console.log(tempTest);
      var circle = svg.append("g").selectAll("circle")
                      .data(dataset)
                      .enter()
