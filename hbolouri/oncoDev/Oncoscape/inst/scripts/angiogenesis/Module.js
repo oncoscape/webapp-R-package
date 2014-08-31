@@ -5,15 +5,17 @@ var cwAngio;   // move this into module when debugging settles down
 var angioPathwaysModule = (function () {
 
   var cyDiv;
-  var viewAbstractsButton, zoomSelectedButton, demoVizChangesButton;
+  var viewAbstractsButton, zoomSelectedButton; //, demoVizChangesButton;
   var tissueMenu, movieButton;
+  var selectLabel;
 
   var slowerMovieButton, fasterMovieButton;
-  var currentMovieSpeed = 1500;
+  var currentMovieSpeed = 750;
+  var movieSpeedReadout;
   var movieIntervalID;
 
   var searchBox;
-  var mouseOverReadout;
+  //var mouseOverReadout;
   var edgeSelectionOn = false;
   var expressionData;   // consists of a gene list, a tissue list, and the data (a list of 
                         // gene/value pairs, each list named by a tissue (patient) id
@@ -26,6 +28,8 @@ var angioPathwaysModule = (function () {
   function initializeUI () {
       cyDiv = $("#cwAngiogenesisDiv");
 
+      selectLabel = $("#angiogenesisSelectLabel");
+      selectLabel.css("color", "lightgray");   // not functional until some tissueIDs have been been added
       viewAbstractsButton = $("#angioViewAbstractsButton");
       viewAbstractsButton.button();
       viewAbstractsButton.click(toggleEdgeSelection);
@@ -34,25 +38,29 @@ var angioPathwaysModule = (function () {
       zoomSelectedButton.button()
       zoomSelectedButton.click(zoomSelection);
 
-      tissueMenu = $("#hypoxiaSampleSelector");
+      tissueMenu = $("#angiogenesisSampleSelector");
       tissueMenu.change(tissueSelectorChanged);
 
-      movieButton = $("#hypoxiaMovieButton");
+      movieButton = $("#angiogenesisMovieButton");
       movieButton.button();
+      movieButton.prop("disabled", true);
 
       slowerMovieButton = $("#slowerMovieButton");
-      slowerMovieButton.button()
+      slowerMovieButton.button();
       fasterMovieButton = $("#fasterMovieButton");
-      fasterMovieButton.button()
+      fasterMovieButton.button();
+
+      movieSpeedReadout = $("#angiogenesisMovieSpeedReadout");
+      movieSpeedReadout.text(Number(currentMovieSpeed/1000).toFixed(2));
 
       fasterMovieButton.click(function() {changeMovieSpeed(-250);})
       slowerMovieButton.click(function() {changeMovieSpeed(250);})
 
       movieButton.click(togglePlayMovie);
-      demoVizChangesButton = $("#angiogenesisDemoVizUpdateButton")
-      demoVizChangesButton.click(angiogenesisDemoVizChanges);
+      //demoVizChangesButton = $("#angiogenesisDemoVizUpdateButton")
+      //demoVizChangesButton.click(angiogenesisDemoVizChanges);
       searchBox = $("#angiogenesisSearchBox");
-      mouseOverReadout = $("#angioPathwaysMouseOverReadoutDiv")
+      //mouseOverReadout = $("#angioPathwaysMouseOverReadoutDiv")
       loadNetwork();
       $(window).resize(handleWindowResize);
       };
@@ -195,12 +203,12 @@ var angioPathwaysModule = (function () {
       }
 
    //----------------------------------------------------------------------------------------------------
-   function angiogenesisDemoVizChanges() {
-      console.log("===== entering angiogenesisDemoVizChanges");
+     // run all that should happen when this module receives an incoming selection of patientIDs
+   demoIncomingSelectionOfPatientIDs = function() {
       request_mRNA_data(demoTissues(), geneSymbols());   // entities: patient, tissue or sample ids
       request_cnv_data(demoTissues(), geneSymbols());
       request_mutation_data(demoTissues(), geneSymbols());
-      } // angiogenesisDemoVizChanges
+      } // demoIncomingSelectionOfPatientIDs
 
    //----------------------------------------------------------------------------------------------------
    function nodeIDs(){
@@ -247,6 +255,7 @@ var angioPathwaysModule = (function () {
       console.log("currentMovieSpeed: " + currentMovieSpeed);
       currentMovieSpeed += delta;
       console.log("currentMovieSpeed: " + currentMovieSpeed);
+      movieSpeedReadout.text(Number(currentMovieSpeed/1000).toFixed(2));
       if(moviePlaying){
          clearInterval(movieIntervalID);
          movieIntervalID = setInterval(oneFrame, currentMovieSpeed);
@@ -262,7 +271,7 @@ var angioPathwaysModule = (function () {
      oneFrame = function(){
         tissueIndex = currentTissueIndex  % allCurrentTissues.length;
         tissueName =  allCurrentTissues[tissueIndex]
-        console.log(" movie about to display frame " + tissueIndex + ", " + tissueName);
+        //console.log(" movie about to display frame " + tissueIndex + ", " + tissueName);
         currentTissueIndex = currentTissueIndex + 1;
         tissueMenu.val(tissueName);
         tissueSelectorChanged()
@@ -364,7 +373,8 @@ var angioPathwaysModule = (function () {
        var mtx = JSON.parse(msg.payload.mtx);
        expressionData = transformMatrixToPatientOrientedNamedList(mtx);
        addTissueIDsToSelector(expressionData.tissues);
-
+       movieButton.prop("disabled", false);
+       selectLabel.css("color", "black");
        } // handle_mRNA_data
 
     //----------------------------------------------------------------------------------------------------
@@ -524,9 +534,9 @@ var angioPathwaysModule = (function () {
        addJavascriptMessageHandler("handle_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_mutation_data",  handle_mutation_data);
        socketConnectedFunctions.push(SetModifiedDate);
-       if(typeof(window.tabsAppRunning) == "undefined") {
-          socketConnectedFunctions.push(angiogenesisDemoVizChanges)
-          }
+       //if(typeof(window.tabsAppRunning) == "undefined") {
+       //   socketConnectedFunctions.push(angiogenesisDemoVizChanges)
+       //   }
        } // init
      }; 
 
