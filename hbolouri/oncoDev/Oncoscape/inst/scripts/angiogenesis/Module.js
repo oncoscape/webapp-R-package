@@ -5,7 +5,7 @@ var cwAngio;   // move this into module when debugging settles down
 var angioPathwaysModule = (function () {
 
   var cyDiv;
-  var viewAbstractsButton, zoomSelectedButton; //, demoVizChangesButton;
+  var viewAbstractsButton, zoomSelectedButton;
   var tissueMenu, movieButton;
   var selectLabel;
 
@@ -15,7 +15,6 @@ var angioPathwaysModule = (function () {
   var movieIntervalID;
 
   var searchBox;
-  //var mouseOverReadout;
   var edgeSelectionOn = false;
   var expressionData;   // consists of a gene list, a tissue list, and the data (a list of 
                         // gene/value pairs, each list named by a tissue (patient) id
@@ -23,11 +22,12 @@ var angioPathwaysModule = (function () {
   var mutationData;
 
   var moviePlaying = false;
-  var thisModuleName = "angiogenesis"
+  var thisModuleName = "angiogenesis";
+
 
 
   //--------------------------------------------------------------------------------------------
-  function initializeUI () {
+  function initializeUI (network, vizmap) {
       cyDiv = $("#cwAngiogenesisDiv");
 
       selectLabel = $("#angiogenesisSelectLabel");
@@ -59,24 +59,19 @@ var angioPathwaysModule = (function () {
       slowerMovieButton.click(function() {changeMovieSpeed(250);})
 
       movieButton.click(togglePlayMovie);
-      //demoVizChangesButton = $("#angiogenesisDemoVizUpdateButton")
-      //demoVizChangesButton.click(angiogenesisDemoVizChanges);
       searchBox = $("#angiogenesisSearchBox");
-      //mouseOverReadout = $("#angioPathwaysMouseOverReadoutDiv")
-      loadNetwork();
+      loadNetwork(network, vizmap);
       $(window).resize(handleWindowResize);
       };
 
   //--------------------------------------------------------------------------------------------
-  function loadNetwork () {
+  function loadNetwork (network, vizmap) {
 
-       // the pathways graph is included explicitly by widget.html, so the
-       // angiogenesisNetwork is already defined
-    console.log("loadANGIOPathwaysNetwork, node count: " + angiogenesisNetwork.elements.nodes.length);
+    console.log("loading network, node count: " + network.nodes.length);
     cwAngio = $("#cwAngiogenesisDiv");
     cwAngio.cytoscape({
-       elements: angiogenesisNetwork.elements,
-       style: angiogenesisVizmap[0].style,
+       elements: network,
+       style: vizmap,
        showOverlay: false,
        minZoom: 0.01,
        maxZoom: 8.0,
@@ -196,7 +191,7 @@ var angioPathwaysModule = (function () {
                   "TCGA.06.0155", "TCGA.06.0162", "TCGA.06.1087", "TCGA.12.0778", 
                   "TCGA.14.0871", "TCGA.06.0192"];
 
-        // has about a dozen mutations
+        // has about a dozen mutations, much richer than average, with good cn and expression variation too
       patients = ["neutral", "TCGA.06.0125", "TCGA.06.0126", "TCGA.06.0128", "TCGA.06.0130", "TCGA.06.0184",
                   "TCGA.06.0188", "TCGA.06.0221", "TCGA.06.0882", "TCGA.12.0692", "TCGA.76.6282",
                   "TCGA.81.5910"]
@@ -424,7 +419,6 @@ var angioPathwaysModule = (function () {
     //----------------------------------------------------------------------------------------------------
     setInfoNodeLabel = function(newLabel){
        infoNodeID = cwAngio.filter('node[canonicalName="info.node"]').data("id")
-       //console.log("setting info.node label to '" + newLabel + "'");
        noa = {};
        noa[infoNodeID] = {label: newLabel};
        cwAngio.batchData(noa);
@@ -444,14 +438,12 @@ var angioPathwaysModule = (function () {
           for(i=0; i < allNodes.length; i++){
              node = allNodes[i];
              id = node.data("id");
-           //console.log("neutral tissue, node id: " + id);
              if(Object.keys(node.data()).indexOf("geneSymbol") >= 0){
                 geneSymbol = node.data("geneSymbol");
                 ids.push(id);
                 noa[id] = {score:0, label: geneSymbol, copyNumber:0}
                 } // if node has geneSymbol attribute
              } // for i
-        //console.log("all ids: " + ids + "  noa: " + noa);
           cwAngio.batchData(noa);
           return;
           } // neutral pseudo-tissue
@@ -464,7 +456,6 @@ var angioPathwaysModule = (function () {
        mRNA = expressionData.values
        genes = expressionData.genes;
        tissues = expressionData.tissues;
-     //console.log("expr for " + genes.length + " genes, and " + tissues.length + " tissues");
 
        noa = {};  // new node attributes to assign in the network
 
@@ -472,9 +463,7 @@ var angioPathwaysModule = (function () {
           gene = genes[g];
 
           newScore = mRNA[tissueID][gene][0];
-        //console.log("  set score of " + gene + " to " + newScore);
           filterString = '[geneSymbol="' + gene + '"]'
-        //console.log("  finding id for geneSymbol: " + gene);
           nodeID = cwAngio.nodes(filterString)[0].data("id");
           noa[nodeID] = {score: newScore};
           } // for g
@@ -484,16 +473,13 @@ var angioPathwaysModule = (function () {
        cnv = cnvData.values
        genes = cnvData.genes;
        tissues = cnvData.tissues;
-     //console.log("cnv for " + genes.length + " genes, and " + tissues.length + " tissues");
 
        noa = {};  // new node attributes to assign in the network
 
        for(var g=0; g < genes.length; g++){
          gene = genes[g];
          newCopyNumber = cnv[tissueID][gene][0];
-       //console.log("  set score of " + gene + " to " + newCopyNumber);
          filterString = '[geneSymbol="' + gene + '"]'
-       //console.log("  finding id for geneSymbol: " + gene);
          nodeID = cwAngio.nodes(filterString)[0].data("id");
          noa[nodeID] = {copyNumber: newCopyNumber};
          } // for g
@@ -516,14 +502,11 @@ var angioPathwaysModule = (function () {
          if(newMutation == null){
             newGeneLabel = gene;
             newNodeType = "gene";
-          //console.log("setting wt label: " + newGeneLabel);
             }
          else{
             newGeneLabel = gene + " (" + newMutation + ")";
             newNodeType = "mutation";
-          //console.log("setting  mut label: " + newGeneLabel);
             }
-       //console.log(" setting noa for " + nodeID + " " + newGeneLabel + "  " + newNodeType);
          noa[nodeID] = {label: newGeneLabel, nodeType: newNodeType};
          } // for g, mutations
        cwAngio.batchData(noa);
@@ -549,7 +532,11 @@ var angioPathwaysModule = (function () {
    return{
      init: function(){
        addSelectionDestination(thisModuleName);
-       onReadyFunctions.push(initializeUI);
+       onReadyFunctions.push(function() {
+          initializeUI(angiogenesisNetwork.elements, angiogenesisVizmap[0].style);
+          });
+
+
        addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
        addJavascriptMessageHandler("handle_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_cnv_data",  handle_cnv_data);
