@@ -561,10 +561,10 @@ var markersAndTissuesModule = (function () {
          for(var e=0; e < edgeTypes.length; e++){
             edgeType = edgeTypes[e];
             filterString = '[edgeType="' + edgeType + '"][source="' + nodeID + '"]';
-            console.log("filter string: " + filterString);
+            //console.log("filter string: " + filterString);
             cw.edges(filterString).show();
             filterString = '[edgeType="' + edgeType + '"][target="' + nodeID + '"]';
-            console.log("filter string: " + filterString);
+            //console.log("filter string: " + filterString);
             cw.edges(filterString).show();
             } // for e
          } // for n
@@ -80015,9 +80015,9 @@ div {
       <button id="cyMarkersClearSelectionButton" class="markersAndTissuesButton">Clear Selection</button>
       <button id="cyMarkersHideEdgesButton" class="markersAndTissuesButton">Hide Edges</button>
         <select class="chosen-select" data-placeholder="Select edge types to display" multiple id="markersEdgeTypeSelector">
-            <option value="mutantIn">Mutation</option>
-            <option value="copyNumberGain">Copy Number Gain</option>
-            <option value="copyNumberLoss">Copy Number Loss</option>
+            <option value="mutantIn" selected>Mutation</option>
+            <option value="copyNumberGain" selected>Copy Number Gain</option>
+            <option value="copyNumberLoss" selected>Copy Number Loss</option>
        </select>
       <button id="cyMarkersShowEdgesButton" class="markersAndTissuesButton">Show Edges</button>
       <button id="cyMarkersShowAllEdgesButton" class="markersAndTissuesButton">Show All Edges</button>

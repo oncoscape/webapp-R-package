@@ -286,7 +286,7 @@ displayNanoStringData = function()
              mutationInfo = window.gbmPathwaysMutationData[tissueName];
              mutation = mutationInfo[gene][0];
              console.log("    looking for mutations in " + gene + ": " + mutation);
-             filterString = 'node[label="' + gene  + '"]';
+             filterString = 'node[geneSymbol="' + gene  + '"]';
              nodeID = cwGBM.filter(filterString).id();
              filterString = 'node[id="' + nodeID + '"]';
              if(mutation == null){

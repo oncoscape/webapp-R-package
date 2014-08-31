@@ -495,7 +495,34 @@ var SavedSelectionModule = (function (){
        }
     
     }
+    //--------------------------------------------------------------------------------------------
+     getSelectionbyName = function(selectionname, callback){
+               
+            msg = {cmd:"getUserSelectPatientHistory",
+              callback: callback,
+              status:"request",
+              payload:{userID: getUserID(),
+                       selectionname: selectionname}
+             };
+     
+        socket.send(JSON.stringify(msg));
+               
+    }
+        //--------------------------------------------------------------------------------------------
+     getSelectionNames = function(){
+           
+        if(typeof(SelectionTableRef) == "undefined") return ""
+             
+        var rows = SelectionTableRef._('tr', {"filter":"applied"});   // cryptic, no?
+//       var rows = SelectionTableRef.rows().data()
+        var currentNames = []
+        for(var i=0; i < rows.length; i++) 
+          currentNames.push(rows[i][0]);
+      
+        console.log(currentNames.length + " selection names being reported")
 
+       return currentNames;
+      }
   
 //----------------------------------------------------------------------------------------------------
      
@@ -586,7 +613,7 @@ table.dataTable.order-column.hover tbody tr.even:hover.selected > .sorting_3 {
 </style>
 
 <div id="SavedSelectionDiv">
-   <button id="addRandomSelection">AddRandom<div>
+   <button id="addRandomSelection">AddRandom</button>
    <h3>Saved Selections: Patients</h3>
    <div id="SavedSelectionTableDiv"> </div>
   

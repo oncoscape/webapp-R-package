@@ -15,6 +15,7 @@ var PCAModule = (function () {
   var PCAsendSelectionMenu;
   var ThisModuleName = "PCA"
   var tempTest;
+  var clearSelectionButton;
   
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -22,6 +23,10 @@ var PCAModule = (function () {
       d3pcaDisplay = d3.select("#pcaDisplay");
       pcaHandleWindowResize();
       $(window).resize(pcaHandleWindowResize);
+
+      clearSelectionButton = $("#pcaClearSelectionButton");
+      clearSelectionButton.button();
+      clearSelectionButton.click(clearSelection);
  
       PatientMenu = d3.select("#useSelectionPCA")
             .append("g")
@@ -30,7 +35,6 @@ var PCAModule = (function () {
             .on("change", function() {
                    getSelectionbyName(this.value, callback="changePCAids"); 
             });
-
 
         PCAsendSelectionMenu = $("#PCAsendSelectiontoModuleButton")
         PCAsendSelectionMenu.change(sendToModuleChanged);
@@ -49,6 +53,13 @@ var PCAModule = (function () {
 
       pcaTextDisplay = $("#pcaTextDisplayDiv");
       };
+
+  //--------------------------------------------------------------------------------------------
+   // a simple test.  can be called from the console in global scope
+  demoPCAHighlight = function (){
+     ids = ["TCGA.06.0192", "TCGA.12.0775", "TCGA.14.0789"];
+     selectPoints(ids, true);
+     } // demoHighlight
 
   //--------------------------------------------------------------------------------------------
   function runDemo (){
@@ -216,27 +227,33 @@ var PCAModule = (function () {
 
   //--------------------------------------------------------------------------------------------
   function highlightPatientIDs(msg){
-      console.log("Module.pca: highlight Patient IDs")
-      console.log(msg)
-      selectPoints(msg, true);
-   }
+     console.log("Module.pca: highlight Patient IDs")
+     console.log(msg)
+     selectPoints(msg.payload.ids, true);
+     }
   //--------------------------------------------------------------------------------------------
-  function selectPoints(msg, clearIDs){
+  function selectPoints(ids, clearIDs){
 //      if(clearIDs){
-//          clear();
+//          clearSelection();
 //      }
-      var ids = msg.payload.ids;
-      console.log("****IDS****")
+      //var ids = msg.payload.ids;
+      console.log("****IDS****");
+      console.log("ids to select: " + ids);
       d3.selectAll("circle")
-          .filter(function(d, i) {return ids.indexOf(d.PatientID) > -1;})
+          .filter(function(d){
+             if(typeof(d.id) == "undefined")
+                return(false);
+             match = ids.indexOf(d.id[0]);
+             return (match >= 0);
+             })
           .classed("highlighted", true)
           .transition()
-          .attr("r", 5)
+          .attr("r", 8)
           .duration(500);
       };
   
   //--------------------------------------------------------------------------------------------
-  function clear(){
+  function clearSelection(){
       d3.selectAll("circle")
           .classed("highlighted", false)
           .attr("r", 3);
@@ -464,3 +481,4 @@ pca = PCAModule();
 pca.init();
 
 </script>
+

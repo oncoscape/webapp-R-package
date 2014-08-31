@@ -510,8 +510,10 @@ function sendSelectionToModule(moduleName, currentIDs, metadata){
                           metadata: metadata}
                  };
          socket.send(JSON.stringify(msg));
-        }
-    }
+         }
+
+    } // sendSelectionToModule
+//--------------------------------------------------------------------------------------------
 
 </script>
 
@@ -915,6 +917,8 @@ var PCAModule = (function () {
   var PatientMenu;
   var PCAsendSelectionMenu;
   var ThisModuleName = "PCA"
+  var tempTest;
+  var clearSelectionButton;
   
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -922,6 +926,10 @@ var PCAModule = (function () {
       d3pcaDisplay = d3.select("#pcaDisplay");
       pcaHandleWindowResize();
       $(window).resize(pcaHandleWindowResize);
+
+      clearSelectionButton = $("#pcaClearSelectionButton");
+      clearSelectionButton.button();
+      clearSelectionButton.click(clearSelection);
  
       PatientMenu = d3.select("#useSelectionPCA")
             .append("g")
@@ -930,7 +938,6 @@ var PCAModule = (function () {
             .on("change", function() {
                    getSelectionbyName(this.value, callback="changePCAids"); 
             });
-
 
         PCAsendSelectionMenu = $("#PCAsendSelectiontoModuleButton")
         PCAsendSelectionMenu.change(sendToModuleChanged);
@@ -949,6 +956,13 @@ var PCAModule = (function () {
 
       pcaTextDisplay = $("#pcaTextDisplayDiv");
       };
+
+  //--------------------------------------------------------------------------------------------
+   // a simple test.  can be called from the console in global scope
+  demoPCAHighlight = function (){
+     ids = ["TCGA.06.0192", "TCGA.12.0775", "TCGA.14.0789"];
+     selectPoints(ids, true);
+     } // demoHighlight
 
   //--------------------------------------------------------------------------------------------
   function runDemo (){
@@ -1055,40 +1069,6 @@ var PCAModule = (function () {
   }
   
   //--------------------------------------------------------------------------------------------
-  function highlightPoints(data){
-     console.log("DATA === ");
-     console.log(data);
-     selectPoints(data, true);
-  };
-  
-  //--------------------------------------------------------------------------------------------
-  function selectPoints(selectIds, clearExistingSelectionFirst){
-      if(clearExistingSelectionFirst){
-          clearSelection();
-      }
-      var ids = selectIds.ids;
-//      for(i=0;i<selectIds.ids.length;i++){
-//          ids.push(listOfPoints[i].ID);
-//      }
-
-    console.log("selectIds: ");
-    console.log(selectIds.ids);
-      d3.selectAll("circle")
-          .filter(function(d, i) { return ids.indexOf(d.id) > -1;})
-          .classed("highlighted", true)
-          .transition()
-          .attr("r", 5)
-          .duration(500);
-      };
-  
-  //--------------------------------------------------------------------------------------------
-  function clearSelection(){
-      d3.selectAll("circle")
-          .classed("highlighted", false)
-          .attr("r", 3);
-      };
-  
-  //--------------------------------------------------------------------------------------------
   function pcaHandleWindowResize () {
      pcaDisplay.width($(window).width() * 0.95);
      pcaDisplay.height($(window).height() * 0.80);
@@ -1150,32 +1130,50 @@ var PCAModule = (function () {
 
   //--------------------------------------------------------------------------------------------
   function highlightPatientIDs(msg){
-      console.log("Module.pca: highlight Patient IDs")
-      console.log(msg)
-   }
+     console.log("Module.pca: highlight Patient IDs")
+     console.log(msg)
+     selectPoints(msg.payload.ids, true);
+     }
+  //--------------------------------------------------------------------------------------------
+  function selectPoints(ids, clearIDs){
+//      if(clearIDs){
+//          clearSelection();
+//      }
+      //var ids = msg.payload.ids;
+      console.log("****IDS****");
+      console.log("ids to select: " + ids);
+      d3.selectAll("circle")
+          .filter(function(d){
+             if(typeof(d.id) == "undefined")
+                return(false);
+             match = ids.indexOf(d.id[0]);
+             return (match >= 0);
+             })
+          .classed("highlighted", true)
+          .transition()
+          .attr("r", 8)
+          .duration(500);
+      };
+  
+  //--------------------------------------------------------------------------------------------
+  function clearSelection(){
+      d3.selectAll("circle")
+          .classed("highlighted", false)
+          .attr("r", 3);
+      };
 
   //--------------------------------------------------------------------------------------------
   function handlePatientIDs(msg){
       console.log("Module.pca: handlePatientIDs");
       console.log(msg)
       if(msg.status == "success"){
-         patientIDs = msg.payload.ids
-         //console.log("pca handlePatientIds: " + patientIDs);
-         payload = patientIDs;
-         console.log(payload);
-         if(payload.Higlight == "Highlight"){
-            console.log("HIGHLIGHTED!!!!!!");
-            highlightPoints(payload);
-        }else{
-            console.log("NOT HIGHLIGHTED!!!!!!");
-            msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request",
+         payload = msg.payload.ids;
+         msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request",
                 payload: payload};
-            socket.send(JSON.stringify(msg));
-            }
-        }
-    else{
-      console.log("handlePatientIDs about to call alert: " + msg)
-      alert(msg.payload)
+         socket.send(JSON.stringify(msg));
+      }else{
+         console.log("handlePatientIDs about to call alert: " + msg);
+         alert(msg.payload);
       }
      }; // handlePatientIDs
 
@@ -1328,6 +1326,10 @@ var PCAModule = (function () {
             .text("PC2");
             
     
+    tempTest = dataset;
+//    console.log("TEMPTEST=======");
+//    console.log(dataset);
+//    console.log(tempTest);
      var circle = svg.append("g").selectAll("circle")
                      .data(dataset)
                      .enter()
@@ -1382,6 +1384,8 @@ pca = PCAModule();
 pca.init();
 
 </script>
+
+
 <script>
 //----------------------------------------------------------------------------------------------------
 var TimeLineModule = (function () {
@@ -2831,7 +2835,6 @@ var markersAndTissuesModule = (function () {
         cwMarkers.elements().qtip({
             content: function() {
               return (this.data().canonicalName);
-              //return ('Example qTip on ele ' + this.id() + ": ");
               },
             position: {
               my: 'top center',
@@ -3758,7 +3761,7 @@ ul.UserDocs {
 
 <div id="DashboardDiv">
 <h3> Oncoscape </h3>
-   <p> Welcome to Oncoscape!  &nbsp; (version 1.1.18, <i>17 aug 2014</i>)</p>
+   <p> Welcome to Oncoscape!  &nbsp; (version 1.1.21, <i>25 aug 2014</i>)</p>
    <p> You are logged in as:  <span id="UserName"> </span>   </p>
 
    <p> Welcome Message </p>
@@ -3976,6 +3979,10 @@ th, td { white-space: nowrap; }
     stroke-width: 1px;
     }
 
+circle {
+   opacity: 0.5;
+   }
+
 circle.highlighted {
    fill: orange;
    opacity: 1;
@@ -4007,11 +4014,17 @@ circle.highlighted {
    font-size: 10pt;
    }
 
+.pcaButton {
+   font-size: 8pt;
+   }
+
+
 </style>
 
 <div id="pcaDiv">
    <span id="useSelectionPCA">Use Selection</span>
    <select id="PCAsendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
+   <button id="pcaClearSelectionButton" class="pcaButton">Clear Selection</button>
    <div id="pcaDisplay"></div>
    <div id="pcaLegend"></div>
    <div id="pcaTextDisplayDiv"></div>

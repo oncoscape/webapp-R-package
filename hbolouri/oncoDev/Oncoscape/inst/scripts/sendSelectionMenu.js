@@ -54,8 +54,10 @@ function sendSelectionToModule(moduleName, currentIDs, metadata){
                           metadata: metadata}
                  };
          socket.send(JSON.stringify(msg));
-        }
-    }
+         }
+
+    } // sendSelectionToModule
+//--------------------------------------------------------------------------------------------
 
 </script>
 

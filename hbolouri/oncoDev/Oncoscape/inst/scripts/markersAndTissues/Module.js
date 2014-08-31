@@ -78,7 +78,6 @@ var markersAndTissuesModule = (function () {
         cwMarkers.elements().qtip({
             content: function() {
               return (this.data().canonicalName);
-              //return ('Example qTip on ele ' + this.id() + ": ");
               },
             position: {
               my: 'top center',
