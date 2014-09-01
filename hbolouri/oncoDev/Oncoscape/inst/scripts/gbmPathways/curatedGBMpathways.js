@@ -1,4 +1,4 @@
-curatedGBMpathways = {
+network = {
   "format_version" : "1.0",
   "generated_by" : "cytoscape-3.1.0",
   "target_cytoscapejs_version" : "~2.1",

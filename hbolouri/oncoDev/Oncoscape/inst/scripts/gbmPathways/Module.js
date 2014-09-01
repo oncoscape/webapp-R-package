@@ -68,7 +68,7 @@ var gbmPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
     function showAbout_gbmPathway(){
   
-          var   info ={Modulename: ThisModuleName,
+          var   info ={Modulename: thisModuleName,
                     CreatedBy: "Hamid Boulori,\nPaul Shannon",
                     MaintainedBy: "Hamid Boulori,\nPaul Shannon",
                     Folder: "gbmPathways"}
@@ -79,7 +79,6 @@ var gbmPathwaysModule = (function () {
   //--------------------------------------------------------------------------------------------
   function loadNetwork (network, vizmap) {
 
-    console.log("loading network, node count: " + network.nodes.length);
     cwGbm = $("#cwGbmPathwaysDiv");
     cwGbm.cytoscape({
        elements: network,
@@ -268,7 +267,6 @@ var gbmPathwaysModule = (function () {
        if(typeof(sym) != "undefined")
           result.push(sym)
        } // for i
-     console.log("geneSymbols: " + result);
      return(result)
      } // geneSymbols
 
@@ -545,15 +543,13 @@ var gbmPathwaysModule = (function () {
      init: function(){
        addSelectionDestination(thisModuleName);
        onReadyFunctions.push(function() {
-          initializeUI(curatedGBMpathways.elements, vizmap[0].style);
+          initializeUI(network.elements, vizmap[0].style);
           })
 
        addJavascriptMessageHandler("DisplayGbmPathwaysModifiedDate", DisplayGbmPathwaysModifiedDate);
        addJavascriptMessageHandler("handle_gbmPathways_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_gbmPathways_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_gbmPathways_mutation_data",  handle_mutation_data);
-       addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
-       socketConnectedFunctions.push(SetModifiedDate);
        } // init
      }; 
 
