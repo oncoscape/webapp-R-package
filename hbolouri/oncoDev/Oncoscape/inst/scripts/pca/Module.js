@@ -246,12 +246,14 @@ var PCAModule = (function () {
           .filter(function(d){
              if(typeof(d) == "undefined")
                 return(false);
+             if(typeof(d.id) == "undefined")
+                return(false);
              match = ids.indexOf(d.id[0]);
              return (match >= 0);
              })
           .classed("highlighted", true)
           .transition()
-          .attr("r", 8)
+          .attr("r", 7)
           .duration(500);
       };
   
