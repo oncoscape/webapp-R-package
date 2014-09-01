@@ -1,6 +1,6 @@
 <script>
 //----------------------------------------------------------------------------------------------------
-var cwGbm;   // move this into module when debugging settles down
+var cwGbm;   // keep this public so that the tabsApp can see it, reset on tab activate
 
 var gbmPathwaysModule = (function () {
 
@@ -28,6 +28,9 @@ var gbmPathwaysModule = (function () {
 
   //--------------------------------------------------------------------------------------------
   function initializeUI (network, vizmap) {
+
+      console.log("=== Module.gbm, initializeUI");
+
       cyDiv = $("#cwGbmPathwaysDiv");
 
       selectLabel = $("#gbmPathwaysSelectLabel");
@@ -212,7 +215,7 @@ var gbmPathwaysModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
      // run all that should happen when this module receives an incoming selection of patientIDs
-   demoIncomingSelectionOfPatientIDs = function() {
+   demoGBMIncomingSelectionOfPatientIDs = function() {
       request_mRNA_data(demoTissues(), geneSymbols());   // entities: patient, tissue or sample ids
       request_cnv_data(demoTissues(), geneSymbols());
       request_mutation_data(demoTissues(), geneSymbols());
@@ -313,7 +316,7 @@ var gbmPathwaysModule = (function () {
         }
    
 
-    } // cwGBMtogglePlayMovie
+    } // togglePlayMovie
    //----------------------------------------------------------------------------------------------------
    function doSearch(e) {
 
@@ -427,7 +430,7 @@ var gbmPathwaysModule = (function () {
        } // tissueSelectorChanged
 
     //----------------------------------------------------------------------------------------------------
-    setInfoNodeLabel = function(newLabel){
+    function setInfoNodeLabel (newLabel){
        infoNodeID = cwGbm.filter('node[canonicalName="info.node"]').data("id")
        noa = {};
        noa[infoNodeID] = {label: newLabel};
