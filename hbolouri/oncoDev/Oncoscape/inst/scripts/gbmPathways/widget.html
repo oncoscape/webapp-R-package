@@ -1,6 +1,6 @@
 <script>
 include(../gbmPathways/curatedGBMpathways.js)
-include(../gbmPathways/curatedGBMVizmap.js)
+include(../gbmPathways/vizmap.js)
 
 </script>
 <style>
@@ -45,13 +45,18 @@ div {
    </div>
    <div id="gbmPathwaysMouseOverReadoutDiv"></div>
    <div id="gbmPathwaysButtonDiv">
-      <label for="select">Select a sample:</label>
-      <select id="sampleSelector"></select>
-      <button id="cwGBMMovieButton" class="fubar">Movie</button>
-      <!-- button id="clearSamplesButton">Clear Sample Selector</button -->
-      <button id="cwGBMZoomSelectedButton" class="fubar">Zoom Selected</button>
-      <button id="cwGBMViewAbstractsButton" class="fubar">Enable Abstracts</button>
-      <input type="text" id="gbmPathwaysSearchBox"></input>
+      <label id="gbmPathwaysSelectLabel" for="select">Select a sample:</label>
+      <select id="gbmPathwaysSampleSelector" class="gbmButton"></select>
+      <button id="gbmPathwaysMovieButton" style="width:100px"  class="gbmButton">Movie</button>
+      <button id="slowerMovieButton" class="gbmButton"> + </button>
+      <button id="fasterMovieButton" class="gbmButton"> - </button>
+      <span id="gbmPathwaysMovieSpeedReadout" style="width: 50px"></span>
+      &nbsp;
+      <button id="gbmViewAbstractsButton" class="gbmButton">Enable Abstracts</button>
+      <button id="gbmZoomSelectedButton" class="gbmButton">Zoom Selected</button>
+      <input type="text" id="gbmPathwaysSearchBox" value="search"></input>
+
+
    </div>
    <div id="cyGbmPathways"></div>
    

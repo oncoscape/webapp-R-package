@@ -21,6 +21,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "ABCA1",
         "name" : "ABCA1",
+        "geneSymbol" : "ABCA1",
         "nodeType" : "gene",
         "shared_name" : "ABCA1"
       },
@@ -78,6 +79,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "ATM",
         "name" : "ATM",
+        "geneSymbol" : "ATM",
         "nodeType" : "gene",
         "shared_name" : "ATM"
       },
@@ -116,6 +118,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "BCL2L1",
         "name" : "BCL2L1",
+        "geneSymbol" : "BCL2L1",
         "nodeType" : "gene",
         "shared_name" : "BCL2L1"
       },
@@ -154,6 +157,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CBL",
         "name" : "CBL",
+        "geneSymbol" : "CBL",
         "nodeType" : "gene",
         "shared_name" : "CBL"
       },
@@ -173,6 +177,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CCND2",
         "name" : "CCND2",
+        "geneSymbol" : "CCND2",
         "nodeType" : "gene",
         "shared_name" : "CCND2"
       },
@@ -249,6 +254,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CDKN1A",
         "name" : "CDKN1A",
+        "geneSymbol" : "CDKN1A",
         "nodeType" : "gene",
         "shared_name" : "CDKN1A"
       },
@@ -268,6 +274,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CDKN1B",
         "name" : "CDKN1B",
+        "geneSymbol" : "CDKN1B",
         "nodeType" : "gene",
         "shared_name" : "CDKN1B"
       },
@@ -287,6 +294,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CDKN2A:ARF",
         "name" : "CDKN2A:ARF",
+        "geneSymbol" : "CDKN2A:ARF",
         "nodeType" : "gene",
         "shared_name" : "CDKN2A:ARF"
       },
@@ -306,6 +314,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CENTG1",
         "name" : "CENTG1",
+        "geneSymbol" : "CENTG1",
         "nodeType" : "gene",
         "shared_name" : "CENTG1"
       },
@@ -325,6 +334,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CIC",
         "name" : "CIC",
+        "geneSymbol" : "CIC",
         "nodeType" : "gene",
         "shared_name" : "CIC"
       },
@@ -363,6 +373,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CTNNB1",
         "name" : "CTNNB1",
+        "geneSymbol" : "CTNNB1",
         "nodeType" : "gene",
         "shared_name" : "CTNNB1"
       },
@@ -382,6 +393,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "E2F1",
         "name" : "E2F1",
+        "geneSymbol" : "E2F1",
         "nodeType" : "gene",
         "shared_name" : "E2F1"
       },
@@ -420,6 +432,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "EP300",
         "name" : "EP300",
+        "geneSymbol" : "EP300",
         "nodeType" : "gene",
         "shared_name" : "EP300"
       },
@@ -439,6 +452,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "ERK1/2",
         "name" : "ERK1/2",
+        "geneSymbol" : "ERK1/2",
         "nodeType" : "gene",
         "shared_name" : "ERK1/2"
       },
@@ -458,6 +472,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "ERRFI1",
         "name" : "ERRFI1",
+        "geneSymbol" : "ERRFI1",
         "nodeType" : "gene",
         "shared_name" : "ERRFI1"
       },
@@ -515,6 +530,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "FUBP1",
         "name" : "FUBP1",
+        "geneSymbol" : "FUBP1",
         "nodeType" : "gene",
         "shared_name" : "FUBP1"
       },
@@ -534,6 +550,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "GAB1",
         "name" : "GAB1",
+        "geneSymbol" : "GAB1",
         "nodeType" : "gene",
         "shared_name" : "GAB1"
       },
@@ -553,6 +570,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "GLUT1",
         "name" : "GLUT1",
+        "geneSymbol" : "GLUT1",
         "nodeType" : "gene",
         "shared_name" : "GLUT1"
       },
@@ -572,6 +590,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "GRB2",
         "name" : "GRB2",
+        "geneSymbol" : "GRB2",
         "nodeType" : "gene",
         "shared_name" : "GRB2"
       },
@@ -648,6 +667,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "IDH1",
         "name" : "IDH1",
+        "geneSymbol" : "IDH1",
         "nodeType" : "gene",
         "shared_name" : "IDH1"
       },
@@ -667,6 +687,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "IDH2",
         "name" : "IDH2",
+        "geneSymbol" : "IDH2",
         "nodeType" : "gene",
         "shared_name" : "IDH2"
       },
@@ -686,6 +707,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "IGF1R",
         "name" : "IGF1R",
+        "geneSymbol" : "IGF1R",
         "nodeType" : "gene",
         "shared_name" : "IGF1R"
       },
@@ -724,6 +746,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "IRS1",
         "name" : "IRS1",
+        "geneSymbol" : "IRS1",
         "nodeType" : "gene",
         "shared_name" : "IRS1"
       },
@@ -743,6 +766,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "LDHA",
         "name" : "LDHA",
+        "geneSymbol" : "LDHA",
         "nodeType" : "gene",
         "shared_name" : "LDHA"
       },
@@ -762,6 +786,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "LDLR",
         "name" : "LDLR",
+        "geneSymbol" : "LDLR",
         "nodeType" : "gene",
         "shared_name" : "LDLR"
       },
@@ -819,6 +844,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "MDM2",
         "name" : "MDM2",
+        "geneSymbol" : "MDM2",
         "nodeType" : "gene",
         "shared_name" : "MDM2"
       },
@@ -838,6 +864,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "MDM4",
         "name" : "MDM4",
+        "geneSymbol" : "MDM4",
         "nodeType" : "gene",
         "shared_name" : "MDM4"
       },
@@ -857,6 +884,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "MEK1/2",
         "name" : "MEK1/2",
+        "geneSymbol" : "MEK1/2",
         "nodeType" : "gene",
         "shared_name" : "MEK1/2"
       },
@@ -952,6 +980,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "MSK1/2",
         "name" : "MSK1/2",
+        "geneSymbol" : "MSK1/2",
         "nodeType" : "gene",
         "shared_name" : "MSK1/2"
       },
@@ -990,6 +1019,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "MYC",
         "name" : "MYC",
+        "geneSymbol" : "MYC",
         "nodeType" : "gene",
         "shared_name" : "MYC"
       },
@@ -1009,6 +1039,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "MYLIP",
         "name" : "MYLIP",
+        "geneSymbol" : "MYLIP",
         "nodeType" : "gene",
         "shared_name" : "MYLIP"
       },
@@ -1028,6 +1059,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "NF1",
         "name" : "NF1",
+        "geneSymbol" : "NF1",
         "nodeType" : "gene",
         "shared_name" : "NF1"
       },
@@ -1085,6 +1117,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PDPK1",
         "name" : "PDPK1",
+        "geneSymbol" : "PDPK1",
         "nodeType" : "gene",
         "shared_name" : "PDPK1"
       },
@@ -1161,6 +1194,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PI-3-P",
         "name" : "PI-3-P",
+        "geneSymbol" : "PI-3-P",
         "nodeType" : "gene",
         "shared_name" : "PI-3-P"
       },
@@ -1180,6 +1214,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIK3C2B",
         "name" : "PIK3C2B",
+        "geneSymbol" : "PIK3C2B",
         "nodeType" : "gene",
         "shared_name" : "PIK3C2B"
       },
@@ -1199,6 +1234,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIP3",
         "name" : "PIP3",
+        "geneSymbol" : "PIP3",
         "nodeType" : "gene",
         "shared_name" : "PIP3"
       },
@@ -1237,6 +1273,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PKM2",
         "name" : "PKM2",
+        "geneSymbol" : "PKM2",
         "nodeType" : "gene",
         "shared_name" : "PKM2"
       },
@@ -1256,6 +1293,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PLCG",
         "name" : "PLCG",
+        "geneSymbol" : "PLCG",
         "nodeType" : "gene",
         "shared_name" : "PLCG"
       },
@@ -1294,6 +1332,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PRKCE",
         "name" : "PRKCE",
+        "geneSymbol" : "PRKCE",
         "nodeType" : "gene",
         "shared_name" : "PRKCE"
       },
@@ -1332,6 +1371,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PTEN",
         "name" : "PTEN",
+        "geneSymbol" : "PTEN",
         "nodeType" : "gene",
         "shared_name" : "PTEN"
       },
@@ -1389,6 +1429,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "RB1",
         "name" : "RB1",
+        "geneSymbol" : "RB1",
         "nodeType" : "gene",
         "shared_name" : "RB1"
       },
@@ -1427,6 +1468,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "SPRY2",
         "name" : "SPRY2",
+        "geneSymbol" : "SPRY2",
         "nodeType" : "gene",
         "shared_name" : "SPRY2"
       },
@@ -1446,6 +1488,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "SRC",
         "name" : "SRC",
+        "geneSymbol" : "SRC",
         "nodeType" : "gene",
         "shared_name" : "SRC"
       },
@@ -1484,6 +1527,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "SREBP1a",
         "name" : "SREBP1a",
+        "geneSymbol" : "SREBP1a",
         "nodeType" : "gene",
         "shared_name" : "SREBP1a"
       },
@@ -1522,6 +1566,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "STAT3",
         "name" : "STAT3",
+        "geneSymbol" : "STAT3",
         "nodeType" : "gene",
         "shared_name" : "STAT3"
       },
@@ -1541,6 +1586,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "STAT5",
         "name" : "STAT5",
+        "geneSymbol" : "STAT5",
         "nodeType" : "gene",
         "shared_name" : "STAT5"
       },
@@ -1560,6 +1606,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "TET2",
         "name" : "TET2",
+        "geneSymbol" : "TET2",
         "nodeType" : "gene",
         "shared_name" : "TET2"
       },
@@ -1579,6 +1626,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "TP53",
         "name" : "TP53",
+        "geneSymbol" : "TP53",
         "nodeType" : "gene",
         "shared_name" : "TP53"
       },
@@ -1674,6 +1722,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "AKT2",
         "name" : "AKT2",
+        "geneSymbol" : "AKT2",
         "nodeType" : "gene",
         "shared_name" : "AKT2"
       },
@@ -1693,6 +1742,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "AKT3",
         "name" : "AKT3",
+        "geneSymbol" : "AKT3",
         "nodeType" : "gene",
         "shared_name" : "AKT3"
       },
@@ -1712,6 +1762,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "BRCA1",
         "name" : "BRCA1",
+        "geneSymbol" : "BRCA1",
         "nodeType" : "gene",
         "shared_name" : "BRCA1"
       },
@@ -1750,6 +1801,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "MSH6",
         "name" : "MSH6",
+        "geneSymbol" : "MSH6",
         "nodeType" : "gene",
         "shared_name" : "MSH6"
       },
@@ -1788,6 +1840,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "BRCA2",
         "name" : "BRCA2",
+        "geneSymbol" : "BRCA2",
         "nodeType" : "gene",
         "shared_name" : "BRCA2"
       },
@@ -1807,6 +1860,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CCND1",
         "name" : "CCND1",
+        "geneSymbol" : "CCND1",
         "nodeType" : "gene",
         "shared_name" : "CCND1"
       },
@@ -1826,6 +1880,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CDK4",
         "name" : "CDK4",
+        "geneSymbol" : "CDK4",
         "nodeType" : "gene",
         "shared_name" : "CDK4"
       },
@@ -1845,6 +1900,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CDK6",
         "name" : "CDK6",
+        "geneSymbol" : "CDK6",
         "nodeType" : "gene",
         "shared_name" : "CDK6"
       },
@@ -1864,6 +1920,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CDK2",
         "name" : "CDK2",
+        "geneSymbol" : "CDK2",
         "nodeType" : "gene",
         "shared_name" : "CDK2"
       },
@@ -1883,6 +1940,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CCNE1",
         "name" : "CCNE1",
+        "geneSymbol" : "CCNE1",
         "nodeType" : "gene",
         "shared_name" : "CCNE1"
       },
@@ -1921,6 +1979,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "ETV1/4/5",
         "name" : "ETV1/4/5",
+        "geneSymbol" : "ETV1/4/5",
         "nodeType" : "gene",
         "shared_name" : "ETV1/4/5"
       },
@@ -1940,6 +1999,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "EGFR",
         "name" : "EGFR",
+        "geneSymbol" : "EGFR",
         "nodeType" : "gene",
         "shared_name" : "EGFR"
       },
@@ -1959,6 +2019,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "ERBB2",
         "name" : "ERBB2",
+        "geneSymbol" : "ERBB2",
         "nodeType" : "gene",
         "shared_name" : "ERBB2"
       },
@@ -1978,6 +2039,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "ERBB3",
         "name" : "ERBB3",
+        "geneSymbol" : "ERBB3",
         "nodeType" : "gene",
         "shared_name" : "ERBB3"
       },
@@ -1997,6 +2059,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "FGFR2",
         "name" : "FGFR2",
+        "geneSymbol" : "FGFR2",
         "nodeType" : "gene",
         "shared_name" : "FGFR2"
       },
@@ -2016,6 +2079,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "FGFR1",
         "name" : "FGFR1",
+        "geneSymbol" : "FGFR1",
         "nodeType" : "gene",
         "shared_name" : "FGFR1"
       },
@@ -2035,6 +2099,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "FOXO1",
         "name" : "FOXO1",
+        "geneSymbol" : "FOXO1",
         "nodeType" : "gene",
         "shared_name" : "FOXO1"
       },
@@ -2054,6 +2119,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "FOXO3",
         "name" : "FOXO3",
+        "geneSymbol" : "FOXO3",
         "nodeType" : "gene",
         "shared_name" : "FOXO3"
       },
@@ -2073,6 +2139,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "FOXO4",
         "name" : "FOXO4",
+        "geneSymbol" : "FOXO4",
         "nodeType" : "gene",
         "shared_name" : "FOXO4"
       },
@@ -2111,6 +2178,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "MET",
         "name" : "MET",
+        "geneSymbol" : "MET",
         "nodeType" : "gene",
         "shared_name" : "MET"
       },
@@ -2168,6 +2236,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CDKN2A:p16",
         "name" : "CDKN2A:p16",
+        "geneSymbol" : "CDKN2A:p16",
         "nodeType" : "gene",
         "shared_name" : "CDKN2A:p16"
       },
@@ -2187,6 +2256,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CDKN2C",
         "name" : "CDKN2C",
+        "geneSymbol" : "CDKN2C",
         "nodeType" : "gene",
         "shared_name" : "CDKN2C"
       },
@@ -2206,6 +2276,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "CDKN2B",
         "name" : "CDKN2B",
+        "geneSymbol" : "CDKN2B",
         "nodeType" : "gene",
         "shared_name" : "CDKN2B"
       },
@@ -2225,6 +2296,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "NR1H1",
         "name" : "NR1H1",
+        "geneSymbol" : "NR1H1",
         "nodeType" : "gene",
         "shared_name" : "NR1H1"
       },
@@ -2244,6 +2316,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "NR1H2",
         "name" : "NR1H2",
+        "geneSymbol" : "NR1H2",
         "nodeType" : "gene",
         "shared_name" : "NR1H2"
       },
@@ -2263,6 +2336,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "NR1H3",
         "name" : "NR1H3",
+        "geneSymbol" : "NR1H3",
         "nodeType" : "gene",
         "shared_name" : "NR1H3"
       },
@@ -2301,6 +2375,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "OLIG2",
         "name" : "OLIG2",
+        "geneSymbol" : "OLIG2",
         "nodeType" : "gene",
         "shared_name" : "OLIG2"
       },
@@ -2415,6 +2490,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "NFKB1",
         "name" : "NFKB1",
+        "geneSymbol" : "NFKB1",
         "nodeType" : "gene",
         "shared_name" : "NFKB1"
       },
@@ -2434,6 +2510,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "RELA",
         "name" : "RELA",
+        "geneSymbol" : "RELA",
         "nodeType" : "gene",
         "shared_name" : "RELA"
       },
@@ -2453,6 +2530,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PDGFRB",
         "name" : "PDGFRB",
+        "geneSymbol" : "PDGFRB",
         "nodeType" : "gene",
         "shared_name" : "PDGFRB"
       },
@@ -2472,6 +2550,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PDGFRA",
         "name" : "PDGFRA",
+        "geneSymbol" : "PDGFRA",
         "nodeType" : "gene",
         "shared_name" : "PDGFRA"
       },
@@ -2491,6 +2570,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIK3R1",
         "name" : "PIK3R1",
+        "geneSymbol" : "PIK3R1",
         "nodeType" : "gene",
         "shared_name" : "PIK3R1"
       },
@@ -2510,6 +2590,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIK3R2",
         "name" : "PIK3R2",
+        "geneSymbol" : "PIK3R2",
         "nodeType" : "gene",
         "shared_name" : "PIK3R2"
       },
@@ -2529,6 +2610,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIK3CA",
         "name" : "PIK3CA",
+        "geneSymbol" : "PIK3CA",
         "nodeType" : "gene",
         "shared_name" : "PIK3CA"
       },
@@ -2548,6 +2630,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIK3CB",
         "name" : "PIK3CB",
+        "geneSymbol" : "PIK3CB",
         "nodeType" : "gene",
         "shared_name" : "PIK3CB"
       },
@@ -2567,6 +2650,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIK3CD",
         "name" : "PIK3CD",
+        "geneSymbol" : "PIK3CD",
         "nodeType" : "gene",
         "shared_name" : "PIK3CD"
       },
@@ -2586,6 +2670,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIK3CG",
         "name" : "PIK3CG",
+        "geneSymbol" : "PIK3CG",
         "nodeType" : "gene",
         "shared_name" : "PIK3CG"
       },
@@ -2605,6 +2690,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIK3C2A",
         "name" : "PIK3C2A",
+        "geneSymbol" : "PIK3C2A",
         "nodeType" : "gene",
         "shared_name" : "PIK3C2A"
       },
@@ -2624,6 +2710,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PIK3C2G",
         "name" : "PIK3C2G",
+        "geneSymbol" : "PIK3C2G",
         "nodeType" : "gene",
         "shared_name" : "PIK3C2G"
       },
@@ -2643,6 +2730,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PRKCA",
         "name" : "PRKCA",
+        "geneSymbol" : "PRKCA",
         "nodeType" : "gene",
         "shared_name" : "PRKCA"
       },
@@ -2662,6 +2750,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PRKCB1",
         "name" : "PRKCB1",
+        "geneSymbol" : "PRKCB1",
         "nodeType" : "gene",
         "shared_name" : "PRKCB1"
       },
@@ -2681,6 +2770,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PRKCD",
         "name" : "PRKCD",
+        "geneSymbol" : "PRKCD",
         "nodeType" : "gene",
         "shared_name" : "PRKCD"
       },
@@ -2700,6 +2790,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PRKCG",
         "name" : "PRKCG",
+        "geneSymbol" : "PRKCG",
         "nodeType" : "gene",
         "shared_name" : "PRKCG"
       },
@@ -2719,6 +2810,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PRKCH",
         "name" : "PRKCH",
+        "geneSymbol" : "PRKCH",
         "nodeType" : "gene",
         "shared_name" : "PRKCH"
       },
@@ -2738,6 +2830,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PRKCI",
         "name" : "PRKCI",
+        "geneSymbol" : "PRKCI",
         "nodeType" : "gene",
         "shared_name" : "PRKCI"
       },
@@ -2757,6 +2850,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PRKCQ",
         "name" : "PRKCQ",
+        "geneSymbol" : "PRKCQ",
         "nodeType" : "gene",
         "shared_name" : "PRKCQ"
       },
@@ -2776,6 +2870,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "PRKCZ",
         "name" : "PRKCZ",
+        "geneSymbol" : "PRKCZ",
         "nodeType" : "gene",
         "shared_name" : "PRKCZ"
       },
@@ -2795,6 +2890,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "RAF1",
         "name" : "RAF1",
+        "geneSymbol" : "RAF1",
         "nodeType" : "gene",
         "shared_name" : "RAF1"
       },
@@ -2814,6 +2910,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "ARAF",
         "name" : "ARAF",
+        "geneSymbol" : "ARAF",
         "nodeType" : "gene",
         "shared_name" : "ARAF"
       },
@@ -2833,6 +2930,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "BRAF",
         "name" : "BRAF",
+        "geneSymbol" : "BRAF",
         "nodeType" : "gene",
         "shared_name" : "BRAF"
       },
@@ -2852,6 +2950,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "HRAS",
         "name" : "HRAS",
+        "geneSymbol" : "HRAS",
         "nodeType" : "gene",
         "shared_name" : "HRAS"
       },
@@ -2871,6 +2970,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "KRAS",
         "name" : "KRAS",
+        "geneSymbol" : "KRAS",
         "nodeType" : "gene",
         "shared_name" : "KRAS"
       },
@@ -2890,6 +2990,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "NRAS",
         "name" : "NRAS",
+        "geneSymbol" : "NRAS",
         "nodeType" : "gene",
         "shared_name" : "NRAS"
       },
@@ -2947,6 +3048,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "TSC1",
         "name" : "TSC1",
+        "geneSymbol" : "TSC1",
         "nodeType" : "gene",
         "shared_name" : "TSC1"
       },
@@ -2966,6 +3068,7 @@ curatedGBMpathways = {
         "selected" : false,
         "canonicalName" : "TSC2",
         "name" : "TSC2",
+        "geneSymbol" : "TSC2",
         "nodeType" : "gene",
         "shared_name" : "TSC2"
       },
