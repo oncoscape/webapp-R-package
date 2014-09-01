@@ -53,7 +53,7 @@ function sendSelectionToModule(moduleName, currentIDs, metadata, raiseDiv){
           msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
                  callback: callback,
                  status:"request",
-                 payload:{targetModule: ModuleName,
+                 payload:{targetModule: moduleName,
                           ids: currentIDs,
                           metadata: metadata}
                  };
