@@ -20,9 +20,9 @@ onReadyFunctions.push(function() {
                cwMarkers.resize(); 
                cwMarkers.fit(50);
                }
-            if(typeof(cwGBM) != "undefined") {
-                cwGBM.resize();
-                cwGBM.fit(50);
+            if(typeof(cwGbm) != "undefined") {
+                cwGbm.resize();
+                cwGbm.fit(50);
                 }
             if(typeof(cwAngio) != "undefined") {
                 cwAngio.resize();
