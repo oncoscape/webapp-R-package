@@ -25,11 +25,6 @@ circle.highlighted {
    opacity: 1;
    }
 
-#pcaDiv {
-   margin: 0px;
-   padding: 0px;
-   }
-
 #pcaDisplay {
    border: 1px solid #aaa;
    width: 50px;
@@ -59,11 +54,17 @@ circle.highlighted {
 </style>
 
 <div id="pcaDiv">
-   <span id="useSelectionPCA">Use Selection</span>
-   <select id="PCAsendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
-   <button id="pcaClearSelectionButton" class="pcaButton">Clear Selection</button>
+  <div id="pcaInfoLinks" class="HeaderLinks" align="right">
+      <span id="pcaAboutLink" >About</span>
+      <span id="pcaTooltipsLink"  dx=10>Tooltips</span>
+  </div>
+  <div id="pcaSelectionDiv">
+       <span id="useSelectionPCA"></span>
+       <select id="PCAsendSelectiontoModuleButton" name="SendSelectionToModule"></select>
+       <button id="pcaClearSelectionButton" class="pcaButton">Clear Selection</button>
+  </div>
    <div id="pcaDisplay"></div>
-   <div id="pcaLegend"></div>
+   <div id="pcaLegend">   </div>
    <div id="pcaTextDisplayDiv"></div>
    
 </div>

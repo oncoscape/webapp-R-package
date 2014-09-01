@@ -60,7 +60,19 @@ var TimeLineModule = (function () {
            $(window).resize(TimeLineHandleWindowResize);
 
            dispatch.load();
-      };
+      $("#timelineAboutLink").click(showAbout_timeline)
+    };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_timeline(){
+  
+          var   info ={Modulename: ThisModuleName,
+                    CreatedBy: "Oncoscape Core",
+                    MaintainedBy: "Lisa McFerrin",
+                    Folder: "patientTimeLines"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
      //--------------------------------------------------------------------------------------------------     
      function getDateDiff(Name, Event1, Event2, TimeScale){
@@ -426,7 +438,7 @@ var TimeLineModule = (function () {
 
 //			var HorizLine = svg.append("g").attr("class", "rect")
 
-             var tooltip = d3.select("body")
+             var tooltip = Timeline
                 .attr("class", "tooltip")
                 .append("div")
                 .style("position", "absolute")
@@ -677,7 +689,8 @@ var TimeLineModule = (function () {
                      .on("focus",function(d){
                           UpdateSelectionMenu()})
                      .on("change", function() {
-                        getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
+                        if(this.value !== "Load Selection")
+                            getSelectionbyName(this.value, callback="FilterTimelinePatients"); 
                          })
                  ;
                 
@@ -686,8 +699,8 @@ var TimeLineModule = (function () {
                function UpdateSelectionMenu(){           
                   
                       PatientMenu.selectAll("option")
-                           .data(getSelectionNames(), function(d){return d;})
-                           .enter()
+                         .data(["Load Selection", getSelectionNames()], function(d){return d;})
+                            .enter()
                              .append("option")
                              .attr("value", function(d){return d})
                              .text(function(d) { return d})
@@ -1142,7 +1155,7 @@ var TimeLineModule = (function () {
 
   return{
    init: function(){
-          addSelectionDestination("timelines")   
+          addSelectionDestination("Timelines", "patientTimeLinesDiv")   
           onReadyFunctions.push(initializeUI);
           addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
           addJavascriptMessageHandler("timelinesHandlePatientIDs", handlePatientIDs);

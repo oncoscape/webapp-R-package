@@ -1,17 +1,19 @@
 <script>
-var ActiveModules = [];
+var ActiveModules = {};
 
 //----------------------------------------------------------------------------------------------------
-addSelectionDestination = function(module)
+addSelectionDestination = function(modulename, modulediv)
 {
-   if(module in ActiveModules){
-        alert("Selection Destination message handler for '" +  module + " already set");
-   } else{  ActiveModules.push(module)  }
+   if(modulename in ActiveModules){
+        alert("Selection Destination message handler for '" + modulediv +": "+ modulename + " already set");
+   } else{  ActiveModules[modulename] = modulediv  }
 }
 
 //----------------------------------------------------------------------------------------------------
 getSelectionDestinations = function(){
-     return ActiveModules;
+    var keys = [];
+    for(var k in ActiveModules) keys.push(k);
+    return keys;
 //   return tissueMenu.children().map(function() {return $(this).val();}).get();
 }
 
@@ -33,16 +35,18 @@ getSelectionDestinations = function(){
 
 
 //--------------------------------------------------------------------------------------------
-function sendSelectionToModule(moduleName, currentIDs, metadata){
+function sendSelectionToModule(moduleName, currentIDs, metadata, raiseDiv){
     
+       raiseDiv = true;
        if(moduleName == "Save Selection"){
           var selectionname = PromptForSelectionName()
           if(typeof(selectionname) !== "string")  
              return;
           metadata.selectionname = selectionname;
+          raiseDiv = false;
         }
     
-       if(validSelectionToSend(ModuleName, currentIDs)){    
+       if(validSelectionToSend(moduleName, currentIDs)){    
           console.log(currentIDs.length + " patientIDs going to " + moduleName)    
        
           callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
@@ -54,10 +58,11 @@ function sendSelectionToModule(moduleName, currentIDs, metadata){
                           metadata: metadata}
                  };
          socket.send(JSON.stringify(msg));
-         }
 
-    } // sendSelectionToModule
-//--------------------------------------------------------------------------------------------
+         if(raiseDiv == true)
+           raiseTab(ActiveModules[moduleName])
+        }
+    }
 
 </script>
 

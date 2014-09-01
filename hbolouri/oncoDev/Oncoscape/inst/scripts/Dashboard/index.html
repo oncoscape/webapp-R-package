@@ -86,6 +86,22 @@ String.prototype.beginsWith = function (string)
     return(this.toLowerCase().indexOf(string.toLowerCase()) === 0);
 };
 //----------------------------------------------------------------------------------------------------
+// if jQuery-style tabs are in use with Oncoscape, this function raised the named tab to the
+// the front (visible) position in the tabset
+// the argument, "tabIDString" is the tab id used in the module's widget.html, reproduced exactly
+// in tabsApp/widget.html, with some current examples being
+//  pcaDiv, patientTimeLinesDiv, gbmPathwaysDiv
+function raiseTab(tabIDString)
+{
+  tabsWidget = $("#oncoscapeTabs");
+  if(tabsWidget.length > 0){
+     selectionString = '#oncoscapeTabs a[href="#' + tabIDString + '"]';
+     tabIndex = $(selectionString).parent().JAVASCRIPT_INDEX ();
+     tabsWidget.tabs( "option", "active", tabIndex);
+     } // if tabs exist
+
+} // raiseTab
+//----------------------------------------------------------------------------------------------------
 // from http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 function openCenteredBrowserWindow(url, title, w, h) {
     // Fixes dual-screen position                         Most browsers      Firefox
@@ -249,6 +265,17 @@ function setupFilteredPatients()
     }
 }
 //--------------------------------------------------------------------------------------------------
+// the nginx proxy server, used by fhcrc IT for the publicly-visible version of Oncoscape
+// times out web sockets at 90 seconds.
+// this function, when called more often that that, will keep the websocket open.
+keepAlive = function()
+{   
+    console.log("keep alive"); 
+    msg = {cmd: "keepAlive", callback: "", status:"request", payload:""}
+    socket.send(JSON.stringify(msg));
+
+} // keepAlive
+//--------------------------------------------------------------------------------------------------
 $(document).ready(function()
 {
     console.log("==== index.common document.ready #1");
@@ -265,11 +292,11 @@ $(document).ready(function()
     // labkeyWS - labkey launched Oncoscape; local R must be run with WS
     // labkeyRS - labkey launched oncoscape; Rserve is used
     //
-    if (typeof labkey == "undefined")
-    {
+    if (typeof labkey == "undefined") {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-     }
+        setInterval(keepAlive, 30000);
+        }
     else
     if (labkey.mode == "WS")
     {
@@ -291,6 +318,8 @@ $(document).ready(function()
     setupFilteredPatients();
 })
 //--------------------------------------------------------------------------------------------------
+
+
 </script>
 
 <script>
@@ -364,6 +393,17 @@ var UserSettingsModule = (function () {
             return SelectionNames;
      }
 
+//--------------------------------------------------------------------------------------------
+     PromptForSelectionName = function(){
+        var selectionname = prompt("Please enter a selection name", "e.g. high survival")
+        if (selectionname != null & selectionname !== "e.g. high survival") 
+               return selectionname;
+ 
+        alert("Invalid Selection name: ", selectionname,". Please try again.")
+        return null;
+
+     }
+
 //----------------------------------------------------------------------------------------------------
 //======= PRIVATE FUNCTIONS ==========
 //----------------------------------------------------------------------------------------------------
@@ -406,6 +446,7 @@ var UserSettingsModule = (function () {
            if(typeof(SavedSelection) != "undefined")  SavedSelection.addSelectionToTable(msg);
            if(typeof(PatientTimeLine) != "undefined") PatientTimeLine.RefreshSelectionMenu()
            if(typeof(ctbl) != "undefined") ctbl.UpdateSelectionMenu()
+           if(typeof(pca) != "undefined") pca.UpdateSelectionMenu() 
          }
      }
   
@@ -433,55 +474,45 @@ UserSettings.init();
 //----------------------------------------------------------------------------------------------------
 var DashboardModule = (function () {
 
-     
- 
-//----------------------------------------------------------------------------------------------------
+ //----------------------------------------------------------------------------------------------------
      function DashboardInitializeUI(){
         
         console.log("===== Display User Information")        
         document.getElementById("UserName").innerHTML = getUsername();
 
-        
-        document.getElementById("DashboardAcknowledgement").style.fontSize = "x-small"
-        
+        $("#DashboardAccordion" ).accordion({
+              heightStyle: "content",
+              collapsible: true,
+              activate: function(event, ui){
+                 console.log(" activating accordion");
+                 window.cwCuration.resize().fit(50);
+               }
+            });
+            
+          $("#dashboardAboutLink").click(showAbout_dashboard)
     };
-    
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_dashboard(){
+  
+          var   info ={Modulename: ThisModuleName,
+                    CreatedBy: "Oncoscape Core",
+                    MaintainedBy: "Lisa McFerrin",
+                    Folder: "Dashboard"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 //----------------------------------------------------------------------------------------------------
     function UpdateUserInfo(){
         console.log("===== Display User Information")        
         document.getElementById("UserName").innerHTML = getUsername();
 
-      }
-
-//----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplayDashboardModifiedDate",
-             status:"request",
-             payload:"Dashboard"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
-//----------------------------------------------------------------------------------------------------
-    function DisplayDashboardModifiedDate(msg){
-
-     FormatDate = d3.time.format ("%x");
-
-        console.log("==== Dashboard Date: ", msg.payload)
-        DateModified = document.getElementById("DashboardDateModified");
-        DateModified.innerHTML = msg.payload;
-        DateModified.style.fontSize = "x-small"
-    }
-     
+      }    
 //----------------------------------------------------------------------------------------------------
 return{
 
    init: function(){
       onReadyFunctions.push(DashboardInitializeUI);
-      socketConnectedFunctions.push(SetModifiedDate);
-      addJavascriptMessageHandler("DisplayDashboardModifiedDate", DisplayDashboardModifiedDate);
       }
    };
 
@@ -500,23 +531,23 @@ ul.UserDocs {
 
 
 <div id="DashboardDiv">
+   <div id="dashboardInfoLinks" class="HeaderLinks" align="right">
+      <span id="dashboardAboutLink" >About</span>
+      <span id="dashboardTooltipsLink"  dx=10>Tooltips</span>
+   </div>
 <h3> Oncoscape </h3>
-   <i>August 19th, 2014: version 1.1.19 </i>
-   <p> Welcome to Oncoscape!</p>
-   <p> You are logged in as: 
-       <span id="UserName"> </span>
-   </p>
-   <p> This page will include:</p>
-   <ul class="UserDocs">
-     <li> a welcome message</li>
-     <li> links to download vignettes </li>
-     <li> Explanation of available data </li>
-     <li> Tooltips/Tutorial </li>
-     <li> link to download/install software </li>
-   </ul>
-   
-   <div id=DashboardAcknowledgement>Created by Lisa McFerrin</div>
-   <div id=DashboardDateModified>Last Modified: </div>
+   <p> Welcome to Oncoscape!  &nbsp; (version 1.1.18, <i>17 aug 2014</i>)</p>
+   <p> You are logged in as:  <span id="UserName"> </span>   </p>
+
+   <p> Welcome Message </p>
+
+ <div id="DashboardAccordion">
+     <h3> Available Data </h3><div></div>
+     <h3> Vignettes </h3><div></div>
+     <h3> Tutorials/Use Cases </h3><div></div>
+     <h3> Download Software </h3><div></div>
+     <h3> Features To Come... </h3><div></div> 
+ </div>
 </div>
 
 </body>

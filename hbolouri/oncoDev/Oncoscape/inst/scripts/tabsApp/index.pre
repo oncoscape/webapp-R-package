@@ -5,6 +5,7 @@ include(../UserSettings.js)
 include(../sendSelectionMenu.js)
 include(code.js)
 <body>
+include(../experiment/AboutLink/widget.html)
 include(widget.html)
 </body>
 </html>

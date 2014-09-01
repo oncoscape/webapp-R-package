@@ -16,11 +16,6 @@
     stroke-width: 1px;
     }
 
-#pairedDistributionsDiv {
-   margin: 0px;
-   padding: 0px;
-   }
-
 #pairedDistributionsDisplay {
    border: 1px solid #aaa;
    width: 50px;
@@ -37,6 +32,10 @@
 </style>
 
 <div id="pairedDistributionsDiv">
+  <div id="pairedDistributionInfoLinks" class="HeaderLinks" align="right">
+      <span id="pairedDistributionAboutLink" >About</span>
+      <span id="pairedDistributionTooltipsLink"  dx=10>Tooltips</span>
+   </div>
    <button id="generateRandomPairedDistributionsDataButton">Generate Random Paired Distributions</button>
    <select id="numberOfPopulationDropDown">
    		<option>1</option>

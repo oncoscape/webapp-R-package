@@ -8,7 +8,6 @@ var PCAModule = (function () {
   var firstTime = true;
   var pcaSelectedRegion;    // from brushing
   var d3PlotBrush;
-  var pcaTabNumber = 2;
   var d3pcaDisplay;
   var pcaTextDisplay;
   var PatientMenu;
@@ -33,6 +32,7 @@ var PCAModule = (function () {
             .append("select")
             .on("focus",function(d){ pca.UpdateSelectionMenu()})
             .on("change", function() {
+                if(this.value !== "Load Selection")
                    getSelectionbyName(this.value, callback="changePCAids"); 
             });
 
@@ -52,7 +52,19 @@ var PCAModule = (function () {
         PCAsendSelectionMenu.prop("disabled",true);
 
       pcaTextDisplay = $("#pcaTextDisplayDiv");
-      };
+      $("#pcaAboutLink").click(showAbout_pca)
+    };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_pca(){
+  
+          var   info ={Modulename: ThisModuleName,
+                    CreatedBy: "Oncoscape Core",
+                    MaintainedBy: "Oncoscape Core",
+                    Folder: "pca"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
   //--------------------------------------------------------------------------------------------
    // a simple test.  can be called from the console in global scope
@@ -84,11 +96,11 @@ var PCAModule = (function () {
         patientClassification = JSON.parse(msg.payload)
         console.log("got classification, length " + patientClassification.length);
         console.log(patientClassification.payload);
-        drawLegend();
         }
      else{
        alert("error!" + msg.payload)
        }
+       drawLegend()
       }; // handlePatientIDs
  
     //--------------------------------------------------------------------------------------------
@@ -117,52 +129,40 @@ var PCAModule = (function () {
               .key(function(d) { return d.gbmDzSubType[0]; })
               .map(patientClassification, d3.map);
 
-   var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
-                      .attr("width", $("#pcaDisplay").width())
-
     var LegendLabels = d3.values(Classifications.keys())
-         
-    var legend = Legendsvg
-                   .append("g")
-                   .attr("class", "legend")
-                   .attr("transform", "translate(" + 10 + "," + 10 + ")")  
-                   .selectAll(".legend")
-                     .data(LegendLabels)
-                     .enter().append("g")
-                ;
-
-    var text = legend.append("text")
-            .attr("id", "legendtext")
-            .attr("y", 10)
-            .attr("x", 0)
-            .style("font-size", 12)
-            .text(function(d) { return d})
-           ;
-
-    console.log(d3.select("legendtext").node().getComputedTextLength())
-
-    var TextOffset = []
-    var xPosition = 0
-
-   text.selectAll("legendtext").attr("transform", function(d, i){
-        TextOffset.push(xPosition)
-        console.log(this.getComputedTextLength())
-        xPosition = xPosition + this.getComputedTextLength() +20
-     return "translate(" + (TextOffset[i]+10) +",0)"
-   })
-  
-  
- console.log("BBox node: ", text.node().getBBox())  
-// console.log("BBox node: ", text.node().getBBox())  
  
-     legend.append("circle")
-            .attr("cx", 0)
-            .attr("cy", 5)
-            .attr("r", function(d) { return 6;})
-            .style("fill", function(d) { return Classifications.get(d)[0].color[0]})
-            .attr("transform", function(d, i){
-               return "translate(" + (TextOffset[i]) +",0)"
-             })
+    var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
+                      .attr("width", $("#pcaDisplay").width())
+                      ;
+
+    var Legendtext = Legendsvg.append("text").attr('transform', 'translate(10, 20)');
+
+    for(var i=0; i<LegendLabels.length; i++){
+         Legendtext.append('tspan').text(LegendLabels[i]).attr("dx", 20).attr("class", "legendtext")
+     }
+
+    var TextOffset = [];    var xPosition = 0
+    console.log(Legendtext)
+    console.log("Get LegendText: ",  document.getElementsByClassName("legendtext")  )
+
+    for(var i=0; i<LegendLabels.length; i++){
+        var textNode = document.getElementsByClassName("legendtext")[i]
+        TextOffset.push(xPosition)
+        console.log(textNode)
+        xPosition = xPosition + textNode.getComputedTextLength() +20
+    }
+
+   console.log(TextOffset)
+   var Legendcircle = Legendsvg.append("g")
+   for(var i=0;i<LegendLabels.length;i++){
+    Legendcircle.append("circle")
+           .attr("cx", 20)
+           .attr("cy", 15)
+           .attr("r",  6)
+           .attr("fill", Classifications.get(LegendLabels[i])[0].color[0])
+           .attr("transform", "translate(" + (TextOffset[i]) +",0)")
+  }
+ 
   }
   
   //--------------------------------------------------------------------------------------------
@@ -211,12 +211,15 @@ var PCAModule = (function () {
       if(msg.status == "success"){
          pcaScores = JSON.parse(msg.payload.tbl);
          d3PcaScatterPlot(pcaScores);
+
          console.log(msg.payload.importance)
 //         pcaData = JSON.parse(msg.payload.importance);
 //         pcaDataTable(pcaData);
          
-         if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
-             $("#tabs").tabs( "option", "active", pcaTabNumber);
+         if(!firstTime){  // first call comes at startup.  do not want to raise tab then.
+            tabIndex = $('#tabs a[href="#pcaDiv"]').parent().index();
+            $("#tabs").tabs( "option", "active", tabIndex);
+            }
          } // success
     else{
       console.log("pcaPlot about to call alert: " + msg)
@@ -383,9 +386,8 @@ var PCAModule = (function () {
                    .orient("left")
                    .ticks(5);
 
-     var tooltip = d3.select("body")
+     var tooltip = d3pcaDisplay.append("div")
                      .attr("class", "tooltip")
-                     .append("div")
                      .style("position", "absolute")
                      .style("z-index", "10")
                      .style("visibility", "hidden")
@@ -450,8 +452,8 @@ var PCAModule = (function () {
 //--------------------------------------------------------------------------------------------
   return{
    init: function(){
-      addSelectionDestination("PCA")   
-      addSelectionDestination("PCA (highlight)")   
+      addSelectionDestination("PCA", "pcaDiv")   
+      addSelectionDestination("PCA (highlight)", "pcaDiv")   
       onReadyFunctions.push(initializeUI);
       addJavascriptMessageHandler("pcaPlot", pcaPlot);
       addJavascriptMessageHandler("PCAHandlePatientIDs", handlePatientIDs);
@@ -466,7 +468,7 @@ var PCAModule = (function () {
        UpdateSelectionMenu: function(){           
                   
           PatientMenu.selectAll("option")
-                 .data(getSelectionNames(), function(d){return d;})
+                .data(["Load Selection", getSelectionNames()], function(d){return d;})
                  .enter()
                         .append("option")
                         .attr("value", function(d){return d})

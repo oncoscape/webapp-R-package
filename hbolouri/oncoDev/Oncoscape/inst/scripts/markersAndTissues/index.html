@@ -86,6 +86,22 @@ String.prototype.beginsWith = function (string)
     return(this.toLowerCase().indexOf(string.toLowerCase()) === 0);
 };
 //----------------------------------------------------------------------------------------------------
+// if jQuery-style tabs are in use with Oncoscape, this function raised the named tab to the
+// the front (visible) position in the tabset
+// the argument, "tabIDString" is the tab id used in the module's widget.html, reproduced exactly
+// in tabsApp/widget.html, with some current examples being
+//  pcaDiv, patientTimeLinesDiv, gbmPathwaysDiv
+function raiseTab(tabIDString)
+{
+  tabsWidget = $("#oncoscapeTabs");
+  if(tabsWidget.length > 0){
+     selectionString = '#oncoscapeTabs a[href="#' + tabIDString + '"]';
+     tabIndex = $(selectionString).parent().JAVASCRIPT_INDEX ();
+     tabsWidget.tabs( "option", "active", tabIndex);
+     } // if tabs exist
+
+} // raiseTab
+//----------------------------------------------------------------------------------------------------
 // from http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 function openCenteredBrowserWindow(url, title, w, h) {
     // Fixes dual-screen position                         Most browsers      Firefox
@@ -249,6 +265,17 @@ function setupFilteredPatients()
     }
 }
 //--------------------------------------------------------------------------------------------------
+// the nginx proxy server, used by fhcrc IT for the publicly-visible version of Oncoscape
+// times out web sockets at 90 seconds.
+// this function, when called more often that that, will keep the websocket open.
+keepAlive = function()
+{   
+    console.log("keep alive"); 
+    msg = {cmd: "keepAlive", callback: "", status:"request", payload:""}
+    socket.send(JSON.stringify(msg));
+
+} // keepAlive
+//--------------------------------------------------------------------------------------------------
 $(document).ready(function()
 {
     console.log("==== index.common document.ready #1");
@@ -265,11 +292,11 @@ $(document).ready(function()
     // labkeyWS - labkey launched Oncoscape; local R must be run with WS
     // labkeyRS - labkey launched oncoscape; Rserve is used
     //
-    if (typeof labkey == "undefined")
-    {
+    if (typeof labkey == "undefined") {
         socket = new WebSocket("ws://" + window.location.host);
         setupSocket(socket);
-     }
+        setInterval(keepAlive, 30000);
+        }
     else
     if (labkey.mode == "WS")
     {
@@ -291,7 +318,11 @@ $(document).ready(function()
     setupFilteredPatients();
 })
 //--------------------------------------------------------------------------------------------------
+
+
 </script>
+
+
 
 
 
@@ -350,7 +381,19 @@ var markersAndTissuesModule = (function () {
       //   $(selector).chosen(config[selector]);
       //   }
       $(window).resize(handleWindowResize);
-      };
+      $("#markerpatientsAboutLink").click(showAbout_markerpatients)
+    };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_markerpatients(){
+  
+          var   info ={Modulename: "Markers and Patients",
+                    CreatedBy: "Hamid Boulori,\nPaul Shannon",
+                    MaintainedBy: "Hamid Boulori,\nPaul Shannon",
+                    Folder: "markersAndTissues"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
   //--------------------------------------------------------------------------------------------
   function loadNetwork () {
@@ -375,7 +418,6 @@ var markersAndTissuesModule = (function () {
         cwMarkers.elements().qtip({
             content: function() {
               return (this.data().canonicalName);
-              //return ('Example qTip on ele ' + this.id() + ": ");
               },
             position: {
               my: 'top center',
@@ -603,7 +645,6 @@ var markersAndTissuesModule = (function () {
    return{
      init: function(){
        onReadyFunctions.push(initializeUI);
-       //addJavascriptMessageHandler("pairedDistributionsPlot", pairedDistributionsPlot);
        //socketConnectedFunctions.push(runDemo);
        }
      };
@@ -80010,6 +80051,10 @@ div {
 </style>
 
 <div id="markersAndTissuesDiv">
+  <div id="markerpatientsInfoLinks" class="HeaderLinks" align="right">
+      <span id="markerpatientsAboutLink" >About</span>
+      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>
+   </div>
    <div id="markersAndTissuesButtonDiv">
        &nbsp; Search: <input type="text" id="markersAndTissuesSearchBox"></input>
       <button id="cyMarkersClearSelectionButton" class="markersAndTissuesButton">Clear Selection</button>
@@ -80025,6 +80070,7 @@ div {
 
    </div>
    <div id="cyMarkersDiv"></div>
+   
 </div>
 
 

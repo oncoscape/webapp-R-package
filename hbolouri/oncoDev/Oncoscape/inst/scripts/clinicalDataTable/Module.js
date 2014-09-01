@@ -4,8 +4,6 @@ var ClinicalTableModule = (function () {
 
 var currentIDs;   // assign this to the full content in the tbl on startup
 var tableRef;
-//var pcaButton;
-//var timeLinesButton;
 var ClTblsendSelectionMenu;
 var PatientMenu;
 var displayDiv;
@@ -23,16 +21,17 @@ var ThisModuleName = "ClinicalTable"
             .append("select")
             .on("focus",function(d){ ctbl.UpdateSelectionMenu()})
             .on("change", function() {
+                if(this.value !== "Load Selection")
                    getSelectionbyName(this.value, callback="ChangeTablePatientSelection"); 
             })
             ;
- 
+
         ClTblsendSelectionMenu = $("#ClTblsendSelectiontoModuleButton")
         ClTblsendSelectionMenu.change(sendToModuleChanged);
         ClTblsendSelectionMenu.empty();
         
         ClTblsendSelectionMenu.append("<option>Send Selection to:</option>")
-        ModuleNames = getSelectionDestinations()
+        var ModuleNames = getSelectionDestinations()
         for(var i=0;i< ModuleNames.length; i++){
            var SendToModule = ModuleNames[i]
            if(SendToModule !== ThisModuleName){
@@ -42,7 +41,10 @@ var ThisModuleName = "ClinicalTable"
         }  
 
       $("#ageAtDxMinSlider").slider({
-         change: function(event, ui) {$("#ageAtDxMinSliderReadout").text (ui.value)},
+         change: function(event, ui) {
+            $("#ageAtDxMinSliderReadout").text (ui.value)
+            tableRef.fnDraw()
+         },
          min: 10,
          max: 89,
          value: 10
@@ -50,7 +52,9 @@ var ThisModuleName = "ClinicalTable"
     $("#ageAtDxMinSliderReadout").text(10);
 
     $("#ageAtDxMaxSlider").slider({
-       change: function(event, ui) {$("#ageAtDxMaxSliderReadout").text (ui.value)},
+       change: function(event, ui) {
+         $("#ageAtDxMaxSliderReadout").text (ui.value)
+         tableRef.fnDraw()},
        min: 10,
        max: 89,
        value: 89
@@ -58,7 +62,9 @@ var ThisModuleName = "ClinicalTable"
     $("#ageAtDxMaxSliderReadout").text(89);
 
     $("#overallSurvivalMinSlider").slider({
-       change: function(event, ui) {$("#overallSurvivalMinSliderReadout").text (ui.value)},
+       change: function(event, ui) {
+          $("#overallSurvivalMinSliderReadout").text (ui.value)
+          tableRef.fnDraw()},
        min: 0,
        max: 11,
        value: 0
@@ -66,21 +72,34 @@ var ThisModuleName = "ClinicalTable"
     $("#overallSurvivalMinSliderReadout").text(0);
 
     $("#overallSurvivalMaxSlider").slider({
-       change: function(event, ui) {$("#overallSurvivalMaxSliderReadout").text (ui.value)},
+       change: function(event, ui) {
+          $("#overallSurvivalMaxSliderReadout").text (ui.value)
+          },
        min: 0,
        max: 11,
        value: 11
        });
     $("#overallSurvivalMaxSliderReadout").text(11);
-    //$("#applyClinicalTablesFiltersSlidersButton").button();
-    //$("#showAllClinicalTablesRowsButton").button()
+
     $("#showAllClinicalTablesRowsButton").click(showAllRows)
-    $("#applyClinicalTablesFiltersSlidersButton").click(readAndApplyClinicalTableFilters);
     $("#toMarkersAndTissuesButton").prop("disabled",true);
     $("#toGBMPathwaysButton").prop("disabled",true);
     $("#toSurvivalStatsButton").prop("disabled",true);
     $("#toTimeLinesButton").prop("disabled",false);
+    
+    $("#cltblAboutLink").click(showAbout_ClTbl)
     };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_ClTbl(){
+  
+          var   info ={Modulename: ThisModuleName,
+                    CreatedBy: "Paul Shannon",
+                    MaintainedBy: "Paul Shannon",
+                    Folder: "clinicalDataTable"}
+
+         about.OpenAboutWindow(info) ;
+    }
 
     //----------------------------------------------------------------------------------------------------
      function sendToModuleChanged() {
@@ -113,26 +132,6 @@ var ThisModuleName = "ClinicalTable"
    function showAllRows() {
       tableRef.fnFilter("", 0);
       }
-
-   //--------------------------------------------------------------------------------------------
-   function readAndApplyClinicalTableFilters() {
-      console.log("readAndApplyClinicalTableFilters")
-      var ageAtDxMin = $("#ageAtDxMinSliderReadout").val()
-      var ageAtDxMax = $("#ageAtDxMaxSliderReadout").val()
-      var overallSurvivalMin = $("#overallSurvivalMinSliderReadout").val()
-      var overallSurvivalMax = $("#overallSurvivalMaxSliderReadout").val()
-
-      msg = {cmd:"filterPatientHistory", 
-             callback: "handleFilterPatientHistory",
-             status:"request",
-             payload:{ageAtDxMin: ageAtDxMin,
-                      ageAtDxMax: ageAtDxMax,
-                      overallSurvivalMin: overallSurvivalMin,
-                      overallSurvivalMax: overallSurvivalMax}};
-      msg.json = JSON.stringify(msg);
-      console.log(msg.json);
-      socket.send(msg.json);
-      } // readAndApplyClinicalTableFilters 
 
     //--------------------------------------------------------------------------------------------
     function SendSelectionToFilterTable(msg){
@@ -243,7 +242,6 @@ var ThisModuleName = "ClinicalTable"
         "iDisplayLength": 25,
          bPaginate: true,
         "scrollX": true,
-        "scrollY": true,
         "fnInitComplete": function(){
             $(".display_results").show();
             }
@@ -252,13 +250,46 @@ var ThisModuleName = "ClinicalTable"
      console.log("displayTable adding data to table");
      tableRef = $("#clinicalTable").dataTable();
      tableRef.fnAddData(msg.payload.mtx);
+
+     var allowFilter = ['clinicalTable'];
+
+    $.fn.dataTableExt.afnFiltering.push(
+      function( oSettings, aData, iDataIndex ) {
+          if ( $.inArray( oSettings.nTable.getAttribute('id'), allowFilter ) == -1 )
+          {// if not table should be ignored
+              return true;
+          }
+   
+          var agemin = parseInt( $("#ageAtDxMinSliderReadout").val(), 10 );
+          var agemax = parseInt( $("#ageAtDxMaxSliderReadout").val(), 10 );
+          var age = parseFloat( aData[1] ) || 0; // use data for the age column
+
+          var survmin = parseInt( $("#overallSurvivalMinSliderReadout").val(), 10 );
+          var survmax = parseInt( $("#overallSurvivalMaxSliderReadout").val(), 10 );
+          var surv= parseFloat( aData[3] ) || 0; // use data for the age column
+ 
+        if ((( isNaN( agemin ) && isNaN( agemax) ) ||
+             ( isNaN( agemin ) && age <= agemax  ) ||
+             ( agemin <= age   && isNaN( agemax) ) ||
+             ( agemin <= age   && age <= agemax) ) &&
+            (( isNaN( survmin )  && isNaN(  survmax) ) ||
+             ( isNaN( survmin )  && surv <= survmax  ) ||
+             ( survmin <= surv   && isNaN(  survmax) ) ||
+             ( survmin <= surv   && surv <= survmax) )
+             )
+        {
+            return true;
+        }
+        return false;
+    }
+);
      }; // displayTable
 
 //----------------------------------------------------------------------------------------------------
   return{
     requestData: requestData,
     init: function(){
-      addSelectionDestination(ThisModuleName)   
+      addSelectionDestination(ThisModuleName, "clinicalDataModuleDiv")   
       onReadyFunctions.push(initializeUI);
       addJavascriptMessageHandler("handlePatientHistory", displayTable);
       addJavascriptMessageHandler("handleFilterPatientHistory", handleFilterPatientHistory);
@@ -267,18 +298,17 @@ var ThisModuleName = "ClinicalTable"
       addJavascriptMessageHandler("ClinicalTableHandlePatientIDs", handleFilterPatientHistory)
 
       socketConnectedFunctions.push(requestData);
-      },
+       },
     
     //--------------------------------------------------------------------------------------------
     UpdateSelectionMenu: function(){           
-                  
+        
       PatientMenu.selectAll("option")
-                 .data(getSelectionNames(), function(d){return d;})
+                 .data(["Load Selection", getSelectionNames()], function(d){return d;})
                  .enter()
                         .append("option")
                         .attr("value", function(d){return d})
-                        .text(function(d) { return d})
-                ;
+                        .text(function(d) { return d});
      }
 
 

@@ -32,7 +32,19 @@ var SavedSelectionModule = (function (){
 
      $("#addRandomSelection").click(addRandomSelectionData);
 
-       };
+      $("#savedselectionAboutLink").click(showAbout_savedselection)
+    };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_savedselection(){
+  
+          var   info ={Modulename: ThisModuleName,
+                    CreatedBy: "Oncoscape Core",
+                    MaintainedBy: "Lisa McFerrin",
+                    Folder: "SavedSelection"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
 //----------------------------------------------------------------------------------------------------
   function displaySelectionTable(){
@@ -191,7 +203,7 @@ var SavedSelectionModule = (function (){
         },
         //----------------------------------------------------------------------------------------------------
         init: function(){
-           addSelectionDestination(ThisModuleName)   
+           addSelectionDestination(ThisModuleName, "SavedSelectionDiv")   
            onReadyFunctions.push(initializeSelectionUI);
            addJavascriptMessageHandler("SetupSavedSelection", SetupSavedSelection);
    		   addJavascriptMessageHandler("addSelectionToTable", SavedSelection.addSelectionToTable);

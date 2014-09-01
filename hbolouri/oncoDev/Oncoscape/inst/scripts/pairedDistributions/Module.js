@@ -30,7 +30,19 @@ var PairedDistributionsModule = (function () {
       //pairedDistributionsBroadcastButton.button();
       $(window).resize(pairedDistributionsHandleWindowResize);
       pairedDistributionsBroadcastButton.prop("disabled",true);
-      };
+      $("#pairedDistributionAboutLink").click(showAbout_pairedDistribution)
+    };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_pairedDistribution(){
+  
+          var   info ={Modulename: "Paired Distribution",
+                    CreatedBy: "Cliff Rostomily",
+                    MaintainedBy: "Cliff Rostomily",
+                    Folder: "pairedDistributions"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
   //--------------------------------------------------------------------------------------------
   function requestRandomPairedDistributions(){
@@ -260,7 +272,7 @@ var PairedDistributionsModule = (function () {
                  .attr("height", height)
                  .call(d3PlotBrush);
 
-    var tooltip = d3.select("body")
+    var tooltip = svg
                      .attr("class", "tooltip")
                      .append("div")
                      .style("position", "absolute")

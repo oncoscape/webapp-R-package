@@ -62,7 +62,19 @@ var angioPathwaysModule = (function () {
       searchBox = $("#angiogenesisSearchBox");
       loadNetwork(network, vizmap);
       $(window).resize(handleWindowResize);
-      };
+      $("#angiogenesisAboutLink").click(showAbout_angiogenesis)
+    };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_angiogenesis(){
+  
+          var   info ={Modulename: "Angiogenesis",
+                    CreatedBy: "Paul Shannon",
+                    MaintainedBy: "Paul Shannon",
+                    Folder: "angiogenesis"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
   //--------------------------------------------------------------------------------------------
   function loadNetwork (network, vizmap) {
@@ -531,7 +543,7 @@ var angioPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
-       addSelectionDestination(thisModuleName);
+       addSelectionDestination(thisModuleName, "angiogenesisDiv");
        onReadyFunctions.push(function() {
           initializeUI(angiogenesisNetwork.elements, angiogenesisVizmap[0].style);
           });

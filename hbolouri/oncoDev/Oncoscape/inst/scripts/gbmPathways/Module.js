@@ -20,7 +20,19 @@ var gbmPathwaysModule = (function () {
       mouseOverReadout = $("#gbmPathwaysMouseOverReadoutDiv")
       loadNetwork();
       $(window).resize(handleWindowResize);
-      };
+      $("#gbmPathwayAboutLink").click(showAbout_gbmPathway)
+    };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_gbmPathway(){
+  
+          var   info ={Modulename: ThisModuleName,
+                    CreatedBy: "Hamid Boulori,\nPaul Shannon",
+                    MaintainedBy: "Hamid Boulori,\nPaul Shannon",
+                    Folder: "gbmPathways"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
   //--------------------------------------------------------------------------------------------
   function loadNetwork () {
@@ -187,7 +199,7 @@ var gbmPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
-       addSelectionDestination(ThisModuleName);
+       addSelectionDestination(ThisModuleName, "gbmPathwaysDiv");
        onReadyFunctions.push(initializeUI);
        addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
  

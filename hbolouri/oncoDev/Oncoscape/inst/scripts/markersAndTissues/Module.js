@@ -53,7 +53,19 @@ var markersAndTissuesModule = (function () {
       //   $(selector).chosen(config[selector]);
       //   }
       $(window).resize(handleWindowResize);
-      };
+      $("#markerpatientsAboutLink").click(showAbout_markerpatients)
+    };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_markerpatients(){
+  
+          var   info ={Modulename: "Markers and Patients",
+                    CreatedBy: "Hamid Boulori,\nPaul Shannon",
+                    MaintainedBy: "Hamid Boulori,\nPaul Shannon",
+                    Folder: "markersAndTissues"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
   //--------------------------------------------------------------------------------------------
   function loadNetwork () {

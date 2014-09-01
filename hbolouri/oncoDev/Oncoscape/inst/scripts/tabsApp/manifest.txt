@@ -6,9 +6,11 @@ patientHistoryEvents: caisisEvents:///tcgaGBM/testTCGApatientHistory_7-28-14.RDa
 #mRNA: pkg://tcgaGBM/mrnaGBM.RData
 mRNA: pkg://tcgaGBM/mrnaGBM-304patients-1375genes.RData
 cnv:  pkg://tcgaGBM/cnvGBM-563patients-1582genes.RData
+#cnv:  pkg://tcgaGBM/cnvGBM.RData
 mut:  pkg://tcgaGBM/mutGBM-574patients-1582genes.RData
+#mut:  pkg://tcgaGBM/mutGBM.RData
 patientClassification: pkg://tcgaGBM/tbl.dzSubTypes.RData
-patientClassification: pkg://tcgaGBM/tbl.dzSubTypes.RData
+#patientClassification: pkg://tcgaGBM/tbl.dzSubTypes.RData
 
 
 
