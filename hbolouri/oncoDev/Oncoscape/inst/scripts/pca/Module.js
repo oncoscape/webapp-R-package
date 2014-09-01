@@ -244,7 +244,7 @@ var PCAModule = (function () {
       console.log("ids to select: " + ids);
       d3.selectAll("circle")
           .filter(function(d){
-             if(typeof(d.id) == "undefined")
+             if(typeof(d) == "undefined")
                 return(false);
              match = ids.indexOf(d.id[0]);
              return (match >= 0);
