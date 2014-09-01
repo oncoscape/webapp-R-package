@@ -553,6 +553,8 @@ var gbmPathwaysModule = (function () {
        addJavascriptMessageHandler("handle_gbmPathways_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_gbmPathways_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_gbmPathways_mutation_data",  handle_mutation_data);
+       addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
+
        } // init
      }; 
 
