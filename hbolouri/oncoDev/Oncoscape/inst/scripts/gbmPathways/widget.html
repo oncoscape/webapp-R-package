@@ -1,7 +1,6 @@
 <script>
 include(../gbmPathways/curatedGBMpathways.js)
 include(../gbmPathways/vizmap.js)
-
 </script>
 <style>
 
@@ -9,41 +8,51 @@ div {
    display: block;
    }
 
-#cyGbmPathways {
+#gbmPathwaysDiv {
+  }
+
+#cwGbmPathwaysDiv {
   background-color: #DDD;
+
+  position: relative;
+
   height: 400px;
   width: 600px;
-  position: relative;
+
+  border: 1px solid #aaa;
+
   margin-top: 0px;
   margin-left: 0px;
-  border: 1px solid #aaa;
+
   padding: 0px;
-  display:block;
-  margin-bottom: 0px;
   }
+
+.gbmButton {
+   font-size: 8pt;
+   }
 
 #gbmPathwaysMouseOverReadoutDiv{
   border: 1px solid #aaa;
   width: 800px;
   height: 20px;
+  margin: 0px;
   }
 
 #gbmPathwaysButtonDiv{
-  margin-top: 1px;
-  margin-bottom: 1px;
+  margin-top: 0px;
+  margin-bottom: 0px;
   }
 
-.fubar{
-   font-size:8pt !important;
-}
+#gbmPathwaysMovieSpeedReadout{
+   border: 1px solid #aaa;
+   width: 50px;
+   height: 20px;
+   margin: 0px;
+   }
+
 </style>
 
 <div id="gbmPathwaysDiv">
-  <div id="gbmPathwayInfoLinks" class="HeaderLinks" align="right">
-      <span id="gbmPathwayAboutLink" >About</span>
-      <span id="gbmPathwayTooltipsLink"  dx=10>Tooltips</span>
-   </div>
-   <div id="gbmPathwaysMouseOverReadoutDiv"></div>
    <div id="gbmPathwaysButtonDiv">
       <label id="gbmPathwaysSelectLabel" for="select">Select a sample:</label>
       <select id="gbmPathwaysSampleSelector" class="gbmButton"></select>
@@ -55,11 +64,9 @@ div {
       <button id="gbmViewAbstractsButton" class="gbmButton">Enable Abstracts</button>
       <button id="gbmZoomSelectedButton" class="gbmButton">Zoom Selected</button>
       <input type="text" id="gbmPathwaysSearchBox" value="search"></input>
-
-
    </div>
-   <div id="cyGbmPathways"></div>
-   
+   <div id="cwGbmPathwaysDiv"></div>
+   <span style="font-size:x-small">Last Modified: <span id=gbmPathwaysDateModified style="font-size:x-small"></span></span>
 </div>
 
 
