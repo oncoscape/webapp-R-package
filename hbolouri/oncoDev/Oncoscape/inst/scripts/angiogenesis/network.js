@@ -15,7 +15,7 @@ angiogenesisNetwork = {
         "SUID" : 81,
         "node_size" : "40.0",
         "score" : 0.0,
-        "label" : "info.node",
+        "label" : "**",
         "type" : "gene",
         "node_opacity" : "0.0",
         "node_fontSize" : "30.0",

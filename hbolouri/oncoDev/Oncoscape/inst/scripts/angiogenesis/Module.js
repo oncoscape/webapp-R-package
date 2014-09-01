@@ -1,6 +1,6 @@
 <script>
 //----------------------------------------------------------------------------------------------------
-var cwAngio;   // move this into module when debugging settles down
+var cwAngio;   // keep this public so that the tabsApp can see it, reset on tab activate
 
 var angioPathwaysModule = (function () {
 
@@ -24,10 +24,14 @@ var angioPathwaysModule = (function () {
   var moviePlaying = false;
   var thisModuleName = "angiogenesis";
 
-
+  var sendSelectionMenu;
+  var destinationModule;
 
   //--------------------------------------------------------------------------------------------
   function initializeUI (network, vizmap) {
+
+      console.log("=== Module.angio, initializeUI");
+
       cyDiv = $("#cwAngiogenesisDiv");
 
       selectLabel = $("#angiogenesisSelectLabel");
@@ -60,10 +64,25 @@ var angioPathwaysModule = (function () {
 
       movieButton.click(togglePlayMovie);
       searchBox = $("#angiogenesisSearchBox");
+
+      sendSelectionMenu = $("#angioSendSelectionMenu");
+      sendSelectionMenu.change(sendToModuleChanged);
+      sendSelectionMenu.empty();
+        
+      sendSelectionMenu.append("<option>Send Selection to:</option>")
+      var ModuleNames = getSelectionDestinations()
+      for(var i=0;i< ModuleNames.length; i++){
+         var sendToModule = ModuleNames[i]
+         if(sendToModule !== thisModuleName){
+            optionMarkup = "<option>" + sendToModule + "</option>";
+            sendSelectionMenu.append(optionMarkup);
+           }
+         } // for i
+
       loadNetwork(network, vizmap);
       $(window).resize(handleWindowResize);
       $("#angiogenesisAboutLink").click(showAbout_angiogenesis)
-    };
+      };
 
    //----------------------------------------------------------------------------------------------------
     function showAbout_angiogenesis(){
@@ -130,6 +149,7 @@ var angioPathwaysModule = (function () {
         cwAngio.edges().unselectify();
         console.log("cwAngio.reset");
         cwAngio.reset();
+        console.log("Module.angio about to call setInfoNodeLabel from loadNetwork ('neutral')");
         setInfoNodeLabel("neutral");
         handleWindowResize();
         } // cy.ready
@@ -146,6 +166,29 @@ var angioPathwaysModule = (function () {
       cwAngio.fit(50);
       } // handleWindowResize
 
+
+   //----------------------------------------------------------------------------------------------------
+   function sendToModuleChanged() {
+      destinationMdoule = sendSelectionMenu.val()
+      broadcastSelection(destinationModule);
+      sendSelectionMenu.val("Send Selection to:")
+      } // sendToModuleChanged
+
+   //----------------------------------------------------------------------------------------------------
+   function broadcastSelection(destinationModule) {
+      selectedNodes = cwAngio.filter("node:selected");
+      if(selectedNodes.length == 0)
+          return;
+      ids = []
+      for(var i=0; i < selectedNodes.length; i++){
+         geneSymbol = selectedNodes[i].data("geneSymbol");
+         if(typeof(geneSymbol) != "undefined")
+            ids.push(geneSymbol);
+         } // for i
+      metadata = null;
+      if(ids.length > 0)
+        sendSelectionToModule(destinationModule, ids, metadata);
+      } // broadcastSelection
 
    //----------------------------------------------------------------------------------------------------
    function zoomSelection() {
@@ -213,7 +256,7 @@ var angioPathwaysModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
      // run all that should happen when this module receives an incoming selection of patientIDs
-   demoIncomingSelectionOfPatientIDs = function() {
+   demoAngioIncomingSelectionOfPatientIDs = function() {
       request_mRNA_data(demoTissues(), geneSymbols());   // entities: patient, tissue or sample ids
       request_cnv_data(demoTissues(), geneSymbols());
       request_mutation_data(demoTissues(), geneSymbols());
@@ -341,7 +384,7 @@ var angioPathwaysModule = (function () {
     function request_mRNA_data(entities, features) {
 
       msg = {cmd:"get_mRNA_data",
-              callback: "handle_mRNA_data",
+              callback: "handle_angio_mRNA_data",
               status:"request",
               payload:{entities: entities, features: features}
               };
@@ -353,7 +396,7 @@ var angioPathwaysModule = (function () {
     function request_cnv_data(entities, features) {
 
       msg = {cmd:"get_cnv_data",
-              callback: "handle_cnv_data",
+              callback: "handle_angio_cnv_data",
               status:"request",
               payload:{entities: entities, features: features}
               };
@@ -365,7 +408,7 @@ var angioPathwaysModule = (function () {
     function request_mutation_data(entities, features) {
 
       msg = {cmd:"get_mutation_data",
-              callback: "handle_mutation_data",
+              callback: "handle_angio_mutation_data",
               status:"request",
               payload:{entities: entities, features: features}
               };
@@ -429,7 +472,8 @@ var angioPathwaysModule = (function () {
        } // tissueSelectorChanged
 
     //----------------------------------------------------------------------------------------------------
-    setInfoNodeLabel = function(newLabel){
+    function setInfoNodeLabel (newLabel){
+       console.log("angio setInfoNodeLabel: " + newLabel);
        infoNodeID = cwAngio.filter('node[canonicalName="info.node"]').data("id")
        noa = {};
        noa[infoNodeID] = {label: newLabel};
@@ -439,6 +483,7 @@ var angioPathwaysModule = (function () {
     //----------------------------------------------------------------------------------------------------
     function displayTissue(tissueID) {
 
+       console.log("Module.angio about to call setInfoNodeLabel from displayTissue (" + tissueID + ")");
        setInfoNodeLabel(tissueID);
 
        var noa = {};
@@ -548,11 +593,10 @@ var angioPathwaysModule = (function () {
           initializeUI(angiogenesisNetwork.elements, angiogenesisVizmap[0].style);
           });
 
-
        addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
-       addJavascriptMessageHandler("handle_mRNA_data", handle_mRNA_data);
-       addJavascriptMessageHandler("handle_cnv_data",  handle_cnv_data);
-       addJavascriptMessageHandler("handle_mutation_data",  handle_mutation_data);
+       addJavascriptMessageHandler("handle_angio_mRNA_data", handle_mRNA_data);
+       addJavascriptMessageHandler("handle_angio_cnv_data",  handle_cnv_data);
+       addJavascriptMessageHandler("handle_angio_mutation_data",  handle_mutation_data);
        addJavascriptMessageHandler("angiogenesisHandlePatientIDs", handlePatientIDs);
        socketConnectedFunctions.push(SetModifiedDate);
        //if(typeof(window.tabsAppRunning) == "undefined") {

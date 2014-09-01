@@ -323,19 +323,21 @@ $(document).ready(function()
 </script>
 
 <script>
-var ActiveModules = [];
+var ActiveModules = {};
 
 //----------------------------------------------------------------------------------------------------
-addSelectionDestination = function(module)
+addSelectionDestination = function(modulename, modulediv)
 {
-   if(module in ActiveModules){
-        alert("Selection Destination message handler for '" +  module + " already set");
-   } else{  ActiveModules.push(module)  }
+   if(modulename in ActiveModules){
+        alert("Selection Destination message handler for '" + modulediv +": "+ modulename + " already set");
+   } else{  ActiveModules[modulename] = modulediv  }
 }
 
 //----------------------------------------------------------------------------------------------------
 getSelectionDestinations = function(){
-     return ActiveModules;
+    var keys = [];
+    for(var k in ActiveModules) keys.push(k);
+    return keys;
 //   return tissueMenu.children().map(function() {return $(this).val();}).get();
 }
 
@@ -357,31 +359,34 @@ getSelectionDestinations = function(){
 
 
 //--------------------------------------------------------------------------------------------
-function sendSelectionToModule(moduleName, currentIDs, metadata){
+function sendSelectionToModule(moduleName, currentIDs, metadata, raiseDiv){
     
+       raiseDiv = true;
        if(moduleName == "Save Selection"){
           var selectionname = PromptForSelectionName()
           if(typeof(selectionname) !== "string")  
              return;
           metadata.selectionname = selectionname;
+          raiseDiv = false;
         }
     
-       if(validSelectionToSend(ModuleName, currentIDs)){    
+       if(validSelectionToSend(moduleName, currentIDs)){    
           console.log(currentIDs.length + " patientIDs going to " + moduleName)    
        
           callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
           msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
                  callback: callback,
                  status:"request",
-                 payload:{targetModule: ModuleName,
+                 payload:{targetModule: moduleName,
                           ids: currentIDs,
                           metadata: metadata}
                  };
          socket.send(JSON.stringify(msg));
-         }
 
-    } // sendSelectionToModule
-//--------------------------------------------------------------------------------------------
+         if(raiseDiv == true)
+           raiseTab(ActiveModules[moduleName])
+        }
+    }
 
 </script>
 
@@ -392,10 +397,10 @@ function sendSelectionToModule(moduleName, currentIDs, metadata){
 
 <script>
 //----------------------------------------------------------------------------------------------------
-var cwAngio;   // move this into module when debugging settles down
 
 var angioPathwaysModule = (function () {
 
+  var cwAngio;   // move this into module when debugging settles down
   var cyDiv;
   var viewAbstractsButton, zoomSelectedButton;
   var tissueMenu, movieButton;
@@ -416,10 +421,14 @@ var angioPathwaysModule = (function () {
   var moviePlaying = false;
   var thisModuleName = "angiogenesis";
 
-
+  var sendSelectionMenu;
+  var destinationModule;
 
   //--------------------------------------------------------------------------------------------
   function initializeUI (network, vizmap) {
+
+      console.log("=== Module.angio, initializeUI");
+
       cyDiv = $("#cwAngiogenesisDiv");
 
       selectLabel = $("#angiogenesisSelectLabel");
@@ -452,9 +461,36 @@ var angioPathwaysModule = (function () {
 
       movieButton.click(togglePlayMovie);
       searchBox = $("#angiogenesisSearchBox");
+
+      sendSelectionMenu = $("#angioSendSelectionMenu");
+      sendSelectionMenu.change(sendToModuleChanged);
+      sendSelectionMenu.empty();
+        
+      sendSelectionMenu.append("<option>Send Selection to:</option>")
+      var ModuleNames = getSelectionDestinations()
+      for(var i=0;i< ModuleNames.length; i++){
+         var sendToModule = ModuleNames[i]
+         if(sendToModule !== thisModuleName){
+            optionMarkup = "<option>" + sendToModule + "</option>";
+            sendSelectionMenu.append(optionMarkup);
+           }
+         } // for i
+
       loadNetwork(network, vizmap);
       $(window).resize(handleWindowResize);
+      $("#angiogenesisAboutLink").click(showAbout_angiogenesis)
       };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_angiogenesis(){
+  
+          var   info ={Modulename: "Angiogenesis",
+                    CreatedBy: "Paul Shannon",
+                    MaintainedBy: "Paul Shannon",
+                    Folder: "angiogenesis"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
   //--------------------------------------------------------------------------------------------
   function loadNetwork (network, vizmap) {
@@ -510,6 +546,7 @@ var angioPathwaysModule = (function () {
         cwAngio.edges().unselectify();
         console.log("cwAngio.reset");
         cwAngio.reset();
+        console.log("Module.angio about to call setInfoNodeLabel from loadNetwork ('neutral')");
         setInfoNodeLabel("neutral");
         handleWindowResize();
         } // cy.ready
@@ -526,6 +563,29 @@ var angioPathwaysModule = (function () {
       cwAngio.fit(50);
       } // handleWindowResize
 
+
+   //----------------------------------------------------------------------------------------------------
+   function sendToModuleChanged() {
+      destinationMdoule = sendSelectionMenu.val()
+      broadcastSelection(destinationModule);
+      sendSelectionMenu.val("Send Selection to:")
+      } // sendToModuleChanged
+
+   //----------------------------------------------------------------------------------------------------
+   function broadcastSelection(destinationModule) {
+      selectedNodes = cwAngio.filter("node:selected");
+      if(selectedNodes.length == 0)
+          return;
+      ids = []
+      for(var i=0; i < selectedNodes.length; i++){
+         geneSymbol = selectedNodes[i].data("geneSymbol");
+         if(typeof(geneSymbol) != "undefined")
+            ids.push(geneSymbol);
+         } // for i
+      metadata = null;
+      if(ids.length > 0)
+        sendSelectionToModule(destinationModule, ids, metadata);
+      } // broadcastSelection
 
    //----------------------------------------------------------------------------------------------------
    function zoomSelection() {
@@ -593,7 +653,7 @@ var angioPathwaysModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
      // run all that should happen when this module receives an incoming selection of patientIDs
-   demoIncomingSelectionOfPatientIDs = function() {
+   demoAngioIncomingSelectionOfPatientIDs = function() {
       request_mRNA_data(demoTissues(), geneSymbols());   // entities: patient, tissue or sample ids
       request_cnv_data(demoTissues(), geneSymbols());
       request_mutation_data(demoTissues(), geneSymbols());
@@ -721,7 +781,7 @@ var angioPathwaysModule = (function () {
     function request_mRNA_data(entities, features) {
 
       msg = {cmd:"get_mRNA_data",
-              callback: "handle_mRNA_data",
+              callback: "handle_angio_mRNA_data",
               status:"request",
               payload:{entities: entities, features: features}
               };
@@ -733,7 +793,7 @@ var angioPathwaysModule = (function () {
     function request_cnv_data(entities, features) {
 
       msg = {cmd:"get_cnv_data",
-              callback: "handle_cnv_data",
+              callback: "handle_angio_cnv_data",
               status:"request",
               payload:{entities: entities, features: features}
               };
@@ -745,7 +805,7 @@ var angioPathwaysModule = (function () {
     function request_mutation_data(entities, features) {
 
       msg = {cmd:"get_mutation_data",
-              callback: "handle_mutation_data",
+              callback: "handle_angio_mutation_data",
               status:"request",
               payload:{entities: entities, features: features}
               };
@@ -809,7 +869,8 @@ var angioPathwaysModule = (function () {
        } // tissueSelectorChanged
 
     //----------------------------------------------------------------------------------------------------
-    setInfoNodeLabel = function(newLabel){
+    function setInfoNodeLabel (newLabel){
+       console.log("angio setInfoNodeLabel: " + newLabel);
        infoNodeID = cwAngio.filter('node[canonicalName="info.node"]').data("id")
        noa = {};
        noa[infoNodeID] = {label: newLabel};
@@ -819,6 +880,7 @@ var angioPathwaysModule = (function () {
     //----------------------------------------------------------------------------------------------------
     function displayTissue(tissueID) {
 
+       console.log("Module.angio about to call setInfoNodeLabel from displayTissue (" + tissueID + ")");
        setInfoNodeLabel(tissueID);
 
        var noa = {};
@@ -923,16 +985,15 @@ var angioPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
-       addSelectionDestination(thisModuleName);
+       addSelectionDestination(thisModuleName, "angiogenesisDiv");
        onReadyFunctions.push(function() {
           initializeUI(angiogenesisNetwork.elements, angiogenesisVizmap[0].style);
           });
 
-
        addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
-       addJavascriptMessageHandler("handle_mRNA_data", handle_mRNA_data);
-       addJavascriptMessageHandler("handle_cnv_data",  handle_cnv_data);
-       addJavascriptMessageHandler("handle_mutation_data",  handle_mutation_data);
+       addJavascriptMessageHandler("handle_angio_mRNA_data", handle_mRNA_data);
+       addJavascriptMessageHandler("handle_angio_cnv_data",  handle_cnv_data);
+       addJavascriptMessageHandler("handle_angio_mutation_data",  handle_mutation_data);
        addJavascriptMessageHandler("angiogenesisHandlePatientIDs", handlePatientIDs);
        socketConnectedFunctions.push(SetModifiedDate);
        //if(typeof(window.tabsAppRunning) == "undefined") {
@@ -967,7 +1028,7 @@ angiogenesisNetwork = {
         "SUID" : 81,
         "node_size" : "40.0",
         "score" : 0.0,
-        "label" : "info.node",
+        "label" : "**",
         "type" : "gene",
         "node_opacity" : "0.0",
         "node_fontSize" : "30.0",
@@ -3856,6 +3917,10 @@ div {
 </style>
 
 <div id="angiogenesisDiv">
+ <div id="angiogenesisInfoLinks" class="HeaderLinks" align="right">
+      <span id="angiogenesisAboutLink" >About</span>
+      <span id="angiogenesisTooltipsLink"  dx=10>Tooltips</span>
+   </div>
    <div id="angioGenesisButtonDiv">
       <label id="angiogenesisSelectLabel" for="select">Select a sample:</label>
       <select id="angiogenesisSampleSelector" class="angioButton"></select>
@@ -3867,6 +3932,7 @@ div {
       <button id="angioViewAbstractsButton" class="angioButton">Enable Abstracts</button>
       <button id="angioZoomSelectedButton" class="angioButton">Zoom Selected</button>
       <input type="text" id="angiogenesisSearchBox" value="search"></input>
+      <select id="angioSendSelectionMenu" name="SendSelectionToModule">Send Selection to...</select>
    </div>
    <div id="cwAngiogenesisDiv"></div>
    <span style="font-size:x-small">Last Modified: <span id=angioPathwaysDateModified style="font-size:x-small"></span></span>
