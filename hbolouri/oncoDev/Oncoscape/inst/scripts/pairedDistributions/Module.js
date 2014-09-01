@@ -122,7 +122,7 @@ var PairedDistributionsModule = (function () {
   //--------------------------------------------------------------------------------------------
   function pairedDistributionsPlot(msg){
       console.log("==== pairedDistributionsPlot");
-      console.log(msg.payload);
+      //console.log(msg.payload);
       if(msg.status == "success"){
          pairedDistributionsResults = msg.payload;
          d3PairedDistributionsScatterPlot(pairedDistributionsResults);
@@ -132,7 +132,6 @@ var PairedDistributionsModule = (function () {
          //    $("#tabs").tabs( "option", "active", tabIndex);
          } // success
     else{
-      console.log("pairedDistributionsPlot about to call alert: " + msg)
       alert(msg.payload)
       }
      firstTime = false;
