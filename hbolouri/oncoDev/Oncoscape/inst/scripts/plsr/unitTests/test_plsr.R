@@ -6,7 +6,7 @@ runTests <- function()
     startOncoscape()
     test_oliveOilExampleFromManPage()
     test_createClassificationMatrix()
-    demo.with.tcga.gbm.data()
+    fit.demo <<- demo.with.tcga.gbm.data()
     
 } # runTests
 #----------------------------------------------------------------------------------------------------
@@ -78,13 +78,11 @@ demo.with.tcga.gbm.data <- function()
    print(colSums(mtx.classify))
    mtx.mrna <- as.matrix(tbl.mrna)
    mtx.classify <- mtx.classify[rownames(mtx.mrna),]
-   set.seed(17)
-   random.samples <- sample(1:ncol(mtx.mrna), 1000)
-   fit <- plsr(mtx.classify ~ mtx.mrna[,random.samples], ncomp=4, scale=TRUE,validation="LOO")
-   browser()
-   x <- 99
-    #fit <- plsr(mtx.categories ~ mtx.mrna, ncomp=numberOfComponents,  validation="LOO")
-    #fit
+     #set.seed(17)
+     # genes.indices <- sample(1:ncol(mtx.mrna), 100)
+   gene.indices <-  1:ncol(mtx.mrna)
+   fit <- plsr(mtx.classify ~ mtx.mrna[, gene.indices], ncomp=2, scale=TRUE,validation="LOO")
+   return(fit)
 
 } # demo.with.tcga.gbm.data
 #----------------------------------------------------------------------------------------------------
