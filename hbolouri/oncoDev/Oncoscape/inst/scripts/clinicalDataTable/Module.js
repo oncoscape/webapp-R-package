@@ -40,53 +40,38 @@ var ThisModuleName = "ClinicalTable"
            }
         }  
 
-      $("#ageAtDxMinSlider").slider({
-         change: function(event, ui) {
-            $("#ageAtDxMinSliderReadout").text (ui.value)
-            tableRef.fnDraw()
+      $("#ageAtDxSlider").slider({
+         slide: function(event, ui) {
+            if(ui.values[0] > ui.values[1]){
+               return false;
+            }          
+            $("#ageAtDxMinSliderReadout").text (ui.values[0])
+            $("#ageAtDxMaxSliderReadout").text (ui.values[1])
+                      tableRef.fnDraw()
          },
          min: 10,
          max: 89,
-         value: 10
+         values: [10,89]
          });
     $("#ageAtDxMinSliderReadout").text(10);
-
-    $("#ageAtDxMaxSlider").slider({
-       change: function(event, ui) {
-         $("#ageAtDxMaxSliderReadout").text (ui.value)
-         tableRef.fnDraw()},
-       min: 10,
-       max: 89,
-       value: 89
-       });
     $("#ageAtDxMaxSliderReadout").text(89);
 
-    $("#overallSurvivalMinSlider").slider({
-       change: function(event, ui) {
-          $("#overallSurvivalMinSliderReadout").text (ui.value)
-          tableRef.fnDraw()},
+    $("#overallSurvivalSlider").slider({
+       slide: function(event, ui) {
+           if(ui.values[0] > ui.values[1]){
+               return false;
+            }  
+          $("#overallSurvivalMinSliderReadout").text (ui.values[0])
+          $("#overallSurvivalMaxSliderReadout").text (ui.values[1])
+                    tableRef.fnDraw()},
        min: 0,
        max: 11,
-       value: 0
+       values: [0,11]
        });
     $("#overallSurvivalMinSliderReadout").text(0);
-
-    $("#overallSurvivalMaxSlider").slider({
-       change: function(event, ui) {
-          $("#overallSurvivalMaxSliderReadout").text (ui.value)
-          },
-       min: 0,
-       max: 11,
-       value: 11
-       });
     $("#overallSurvivalMaxSliderReadout").text(11);
 
-    $("#showAllClinicalTablesRowsButton").click(showAllRows)
-    $("#toMarkersAndTissuesButton").prop("disabled",true);
-    $("#toGBMPathwaysButton").prop("disabled",true);
-    $("#toSurvivalStatsButton").prop("disabled",true);
-    $("#toTimeLinesButton").prop("disabled",false);
-    
+    $("#showAllClinicalTablesRowsButton").click(showAllRows)    
     $("#cltblAboutLink").click(showAbout_ClTbl)
     };
 
@@ -94,7 +79,7 @@ var ThisModuleName = "ClinicalTable"
     function showAbout_ClTbl(){
   
           var   info ={Modulename: ThisModuleName,
-                    CreatedBy: "Paul Shannon",
+                    CreatedBy: "Oncoscape Core",
                     MaintainedBy: "Paul Shannon",
                     Folder: "clinicalDataTable"}
 
@@ -131,6 +116,15 @@ var ThisModuleName = "ClinicalTable"
 //----------------------------------------------------------------------------------------------------
    function showAllRows() {
       tableRef.fnFilter("", 0);
+      $("#ageAtDxSlider").slider("values", [10,89])
+      $("#overallSurvivalSlider").slider("values", [0,11])
+     
+      $("#ageAtDxMinSliderReadout").text(10);
+      $("#ageAtDxMaxSliderReadout").text(89);
+
+      $("#overallSurvivalMinSliderReadout").text(0);
+      $("#overallSurvivalMaxSliderReadout").text(11);
+
       }
 
     //--------------------------------------------------------------------------------------------

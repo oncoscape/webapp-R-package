@@ -475,6 +475,76 @@ UserSettings.init();
 
 </script>
 <script>
+//----------------------------------------------------------------------------------------------------
+var AboutModule = (function () {
+
+    initializeUI = function(){     
+ 
+       $("#AboutDiv").dialog({  
+           autoOpen: false,
+        });
+ 
+ //       ClearAboutInfo()      
+    };
+
+//----------------------------------------------------------------------------------------------------
+    function ClearAboutInfo(){
+       document.getElementById("ModuleNameSlot").innerHTML = "";
+       document.getElementById("CreatorSlot").innerHTML =      "Created by:    ";
+       document.getElementById("MaintainerSlot").innerHTML =   "Maintained by: ";
+       document.getElementById("LastModifiedSlot").innerHTML = "Last Modified: ";
+    }
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(ModuleFolderName){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayModifiedDate",
+             status:"request",
+             payload:ModuleFolderName
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayModifiedDate(msg){
+        
+        console.log("Date Modified: ", msg)
+        
+        document.getElementById("LastModifiedSlot").innerHTML = 
+        document.getElementById("LastModifiedSlot").innerHTML + "\t" + msg.payload;
+    }
+
+ return{
+
+   init: function(){
+      onReadyFunctions.push(initializeUI);
+//      socketConnectedFunctions.push(SetModifiedDate)
+      addJavascriptMessageHandler("DisplayModifiedDate", DisplayModifiedDate);
+      },
+      
+      //----------------------------------------------------------------------------------------------------
+     OpenAboutWindow: function(info){
+       
+       ClearAboutInfo()  
+       $("#AboutDiv").dialog('option', 'title',info.Modulename )
+       document.getElementById("CreatorSlot").innerHTML = 
+         document.getElementById("CreatorSlot").innerHTML + "\t"+info.CreatedBy;
+       document.getElementById("MaintainerSlot").innerHTML = 
+              document.getElementById("MaintainerSlot").innerHTML + "\t"+info.MaintainedBy;
+       SetModifiedDate(info.Folder)
+
+         $( "#AboutDiv" ).dialog( "open" )
+    }
+    
+ }; // return
+
+}); // SelectionExample
+//----------------------------------------------------------------------------------------------------
+about = AboutModule();
+about.init();
+
+</script>
+<script>
 var ActiveModules = {};
 
 //----------------------------------------------------------------------------------------------------
@@ -582,6 +652,41 @@ onReadyFunctions.push(function() {
 
 <body>
 <style>
+
+.HeaderLinks {
+  color: blue;
+  font-size: small;
+  cursor: pointer;
+    display: block;
+     margin-right: 20px;
+     clear:both;
+
+}
+
+#AboutDiv{
+   overflow: hidden;
+   border:1px solid #CCC;
+   background-color:#F9F9F9;
+   border:1px solid #333;
+   padding:5px;
+   font-size: medium
+   width: 50%
+}
+</style>
+
+<div id="AboutDiv" style="display:none">
+  <div id="CreditsList">
+   <div id="ModuleNameSlot"></div>
+   <div id="CreatorSlot"     >Created by:    </div>
+   <div id="MaintainerSlot"  >Maintained by: </div>
+   <div id="LastModifiedSlot">Last Modified: </div>
+<!--   <div id="ContactSlot">Contact: </div>  -->
+  </div>
+   <br></br>
+   <div><p>Oncoscape is supported by Fred Hutch and STTR</p></div>
+ </div>
+
+<style>
 .ui-tabs .ui-tabs-nav li a {font-size:10pt !important;}
 </style>
 
@@ -608,6 +713,12 @@ var DashboardModule = (function () {
             });
             
           $("#dashboardAboutLink").click(showAbout_dashboard)
+          
+        var ToDobutton = $("#ToDoLink");
+        var ToDoURL = "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/edit?usp=sharing"
+
+        ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
+
     };
 
    //----------------------------------------------------------------------------------------------------
@@ -682,53 +793,38 @@ var ThisModuleName = "ClinicalTable"
            }
         }  
 
-      $("#ageAtDxMinSlider").slider({
-         change: function(event, ui) {
-            $("#ageAtDxMinSliderReadout").text (ui.value)
-            tableRef.fnDraw()
+      $("#ageAtDxSlider").slider({
+         slide: function(event, ui) {
+            if(ui.values[0] > ui.values[1]){
+               return false;
+            }          
+            $("#ageAtDxMinSliderReadout").text (ui.values[0])
+            $("#ageAtDxMaxSliderReadout").text (ui.values[1])
+                      tableRef.fnDraw()
          },
          min: 10,
          max: 89,
-         value: 10
+         values: [10,89]
          });
     $("#ageAtDxMinSliderReadout").text(10);
-
-    $("#ageAtDxMaxSlider").slider({
-       change: function(event, ui) {
-         $("#ageAtDxMaxSliderReadout").text (ui.value)
-         tableRef.fnDraw()},
-       min: 10,
-       max: 89,
-       value: 89
-       });
     $("#ageAtDxMaxSliderReadout").text(89);
 
-    $("#overallSurvivalMinSlider").slider({
-       change: function(event, ui) {
-          $("#overallSurvivalMinSliderReadout").text (ui.value)
-          tableRef.fnDraw()},
+    $("#overallSurvivalSlider").slider({
+       slide: function(event, ui) {
+           if(ui.values[0] > ui.values[1]){
+               return false;
+            }  
+          $("#overallSurvivalMinSliderReadout").text (ui.values[0])
+          $("#overallSurvivalMaxSliderReadout").text (ui.values[1])
+                    tableRef.fnDraw()},
        min: 0,
        max: 11,
-       value: 0
+       values: [0,11]
        });
     $("#overallSurvivalMinSliderReadout").text(0);
-
-    $("#overallSurvivalMaxSlider").slider({
-       change: function(event, ui) {
-          $("#overallSurvivalMaxSliderReadout").text (ui.value)
-          },
-       min: 0,
-       max: 11,
-       value: 11
-       });
     $("#overallSurvivalMaxSliderReadout").text(11);
 
-    $("#showAllClinicalTablesRowsButton").click(showAllRows)
-    $("#toMarkersAndTissuesButton").prop("disabled",true);
-    $("#toGBMPathwaysButton").prop("disabled",true);
-    $("#toSurvivalStatsButton").prop("disabled",true);
-    $("#toTimeLinesButton").prop("disabled",false);
-    
+    $("#showAllClinicalTablesRowsButton").click(showAllRows)    
     $("#cltblAboutLink").click(showAbout_ClTbl)
     };
 
@@ -736,7 +832,7 @@ var ThisModuleName = "ClinicalTable"
     function showAbout_ClTbl(){
   
           var   info ={Modulename: ThisModuleName,
-                    CreatedBy: "Paul Shannon",
+                    CreatedBy: "Oncoscape Core",
                     MaintainedBy: "Paul Shannon",
                     Folder: "clinicalDataTable"}
 
@@ -773,6 +869,15 @@ var ThisModuleName = "ClinicalTable"
 //----------------------------------------------------------------------------------------------------
    function showAllRows() {
       tableRef.fnFilter("", 0);
+      $("#ageAtDxSlider").slider("values", [10,89])
+      $("#overallSurvivalSlider").slider("values", [0,11])
+     
+      $("#ageAtDxMinSliderReadout").text(10);
+      $("#ageAtDxMaxSliderReadout").text(89);
+
+      $("#overallSurvivalMinSliderReadout").text(0);
+      $("#overallSurvivalMaxSliderReadout").text(11);
+
       }
 
     //--------------------------------------------------------------------------------------------
@@ -1209,6 +1314,8 @@ var PCAModule = (function () {
       console.log("ids to select: " + ids);
       d3.selectAll("circle")
           .filter(function(d){
+             if(typeof(d) == "undefined")
+                return(false);
              if(typeof(d.id) == "undefined")
                 return(false);
              match = ids.indexOf(d.id[0]);
@@ -1216,7 +1323,7 @@ var PCAModule = (function () {
              })
           .classed("highlighted", true)
           .transition()
-          .attr("r", 8)
+          .attr("r", 7)
           .duration(500);
       };
   
@@ -3172,7 +3279,7 @@ var gbmPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
-       addSelectionDestination(thisModuleName);
+       addSelectionDestination("gbmPathways", "gbmPathwaysDiv");
        onReadyFunctions.push(function() {
           initializeUI(network.elements, vizmap[0].style);
           })
@@ -3181,6 +3288,8 @@ var gbmPathwaysModule = (function () {
        addJavascriptMessageHandler("handle_gbmPathways_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_gbmPathways_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_gbmPathways_mutation_data",  handle_mutation_data);
+       addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
+
        } // init
      }; 
 
@@ -4177,8 +4286,8 @@ onReadyFunctions.push(function() {
    <ul>
      <li><a href="#DashboardDiv">Dashboard</a></li>
      <li><a href="#clinicalDataModuleDiv">Clinical Data</a></li>
-     <li><a href="#pcaDiv">PCA</a></li>
      <li><a href="#patientTimeLinesDiv">Timelines</a></li>
+     <li><a href="#pcaDiv">PCA</a></li>
      <li><a href="#gbmPathwaysDiv">GBM Pathways</a></li>
      <li><a href="#angiogenesisDiv">Angiogenesis</a></li>
      <li><a href="#markersAndTissuesDiv">Markers &amp; Patients</a></li>
@@ -4199,16 +4308,38 @@ ul.UserDocs {
    </div>
 <h3> Oncoscape </h3>
    <p> Welcome to Oncoscape!  &nbsp; (version 1.1.23, 1 sep 2014)</p>
+   <p> <font color="red">This website is undergoing frequent (hourly) modifications.  <br> Use at your own risk.</font></p>
    <p> You are logged in as:  <span id="UserName"> </span>   </p>
 
-   <p> Welcome Message </p>
+   <p> Thank you for visiting Oncoscape.  Please see the menus below for tips and examples. </p>
+   <p> Note: Oncoscape works best with Chrome Version X or higher and a minimum screen resolution of x </p>
 
  <div id="DashboardAccordion">
      <h3> Available Data </h3><div></div>
      <h3> Vignettes </h3><div></div>
      <h3> Tutorials/Use Cases </h3><div></div>
      <h3> Download Software </h3><div></div>
-     <h3> Features To Come... </h3><div></div> 
+     <h3> Features To Come... </h3>
+        <div>
+           <ul id="FeaturesToCome">
+              <li> Saved Selections </li>
+              <li> Interactive Kaplan Meier Plots </li>
+           </ul>
+           <button id=ToDoLink>Edit The To-Do Table</button>
+        </div> 
+      <h3> About </h3>
+         <div>
+            <p>Oncoscape is developed at the <a href= "www.fhcrc.org">Fred Hutchinson Cancer Research Center</a> under the auspices of the <a href="www.sttrcancer.org">Solid Tumor Translational Research</a> initiative.
+            </p>
+            <p> Oncoscape is a web-based, menu-driven analysis and visualization platform for large-scale, heterogeneous clinical and molecular patient timeline data as exemplified by the <a href= "www.fhcrc.org">Fred Hutch</a> and <a href="http://www.fhcrc.org/en/labs/hidra.html">HIDRA</a> database.
+            </p>
+            <p>Oncoscape was conceived, and is managed, by a Steering Committee comprising: Eric Holland, Desert Horse-Grant, Paul Fearn, Paul Shannon, Lisa McFerrin, and Hamid Bolouri.
+            </p>
+            <p> Paul Shannon (lead) and Lisa McFerrin are the primary developers of Oncoscape, with additional code contributions by Cliff Rostomily and Hamid Bolouri.
+            </p>
+            
+            <div id="LegalNotice">Legal Notice</div>
+         </div>
  </div>
 </div>
 
@@ -4223,23 +4354,7 @@ ul.UserDocs {
    font-size: 14px;
    }
 
-#oldclinicalDataTableDiv {
-   border: 1px solid #aaa;
-   height: 500px;
-   font-family: sans-serif;
-   background-color: #E8E8E8;
-   font-size: 12px;
-   margin-top: 1px;
-   margin-left: 10px;
-   margin-right: 10px;
-   margin-bottom: 1px;
-   padding: 1px;
-   padding-bottom: 20px;
-   }
-
 th, td { white-space: nowrap; } 
-
-
 
 #compactViewButton{
    margin-left: 40px;
@@ -4253,7 +4368,7 @@ th, td { white-space: nowrap; }
    margin-top: 2px;
    min-width: 100px;
    margin: 0 auto;
-   margin-bottom: 5px;
+   margin-bottom: 2px;
    background-color: #E8E8E8;
    }
 
@@ -4265,20 +4380,19 @@ th, td { white-space: nowrap; }
 #clinicalDataTableFilterControlsDiv{
    font-family: sans-serif;
    font-size: 14px;
-   margin-top: 20px;
+   margin-top: 10px;
    margin-left: 100px;
    margin-right: 100px;
-   margin-bottom: 20px;
+   margin-bottom: 10px;
    }
 
 
 .clinicalDataFilterSlider { 
-   margin-left:20px; 
+   margin-left:5px; 
    margin-right:5px; 
    margin-top:0px;
    border: 1px solid #FFF;
    height: 20px;
-   max: 0;  min: 10; 
    orientation: 'horizontal';
    background-color: #FFF;
    color: #00F;
@@ -4291,10 +4405,11 @@ th, td { white-space: nowrap; }
   font-size: 14px;
   border: 1px solid #DDD;
   width: 20px;
-  height: 16px;
+  height: 20px;
   resize: none;
   margin-top: 4px;
   margin-left: 2px;
+  margin-right: 2px;
   }
 
 .clinicalDataFilterSliderTitleDiv {
@@ -4312,7 +4427,6 @@ th, td { white-space: nowrap; }
 
 </style>
 
-
 <div id="clinicalDataModuleDiv">
    <div id="cltblInfoLinks" class="HeaderLinks" align="right">
       <span id="cltblAboutLink" >About</span>
@@ -4321,41 +4435,27 @@ th, td { white-space: nowrap; }
    <div id="clinicalDataTableControlsDiv">
       <div id="clinicalDataTableFilterControlsDiv" style="border: 1px;" align="center">
 
-       <div id="slider1Div" style="display: inline-block">
-           <div id="sliderTitleDiv" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 0px;">ageAtDx min</div>
-           <div style="width: 200px; overflow: hidden;">
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxMinSlider" class="clinicalDataFilterSlider"></div>
-               <div style="margin-left: 20px;" id='msgBox'>  
+       <div id="ageSliderDiv" style="display: inline-block">
+           <div id="sliderTitleDiv" class="clinicalDataFilterSliderTitleDiv" style="align: center; width=100%">ageAtDx</div>
+           <div style="width: 250px; overflow: hidden;">
+               <div id='msgBox' style="float: left" >  
                   <textarea id="ageAtDxMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
-           </div>
-        </div>
-
-       <div id="slider2Div" style="display: inline-block">
-           <div id="sliderTitleDiv"  class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">ageAtDx max</div>
-           <div style="width: 200px; overflow: hidden;">
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxMaxSlider" class="clinicalDataFilterSlider"></div>
-               <div style="margin-left: 20px;" id='msgBox'>  
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px; margin-left: 10px; margin-right: 10px;" id="ageAtDxSlider" class="clinicalDataFilterSlider"></div>
+               <div id='msgBox' style="float: left">  
                   <textarea id="ageAtDxMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
            </div>
         </div>
 
-       <div id="slider3Div" style="display: inline-block">
-           <div id="sliderTitle3Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">survival min</div>
-           <div style="width: 200px; overflow: hidden;">
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalMinSlider" class="clinicalDataFilterSlider"></div>
-               <div style="margin-left: 20px;" id='msgBox'>  
+       <div id="survivalSliderDiv" style="display: inline-block">
+           <div id="sliderTitle3Div" class="clinicalDataFilterSliderTitleDiv" style="align: center; width=100%">survival</div>
+           <div style="width: 250px; overflow: hidden;">
+               <div id='msgBox'style="float: left" >  
                   <textarea id="overallSurvivalMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
-           </div>
-        </div>
-
-       <div id="slider4Div" style="display: inline-block">
-           <div id="sliderTitle4Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">survival max</div>
-           <div style="width: 200px; overflow: hidden;">
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalMaxSlider" class="clinicalDataFilterSlider"></div>
-               <div style="margin-left: 20px;" id='msgBox'>  
+               <div style="width: 120px; height: 10px; float: left;  margin-top: 10px;margin-left: 10px; margin-right: 10px;" id="overallSurvivalSlider" class="clinicalDataFilterSlider"></div>
+               <div id='msgBox' style="float: left" >  
                   <textarea id="overallSurvivalMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
            </div>
@@ -11553,7 +11653,11 @@ div {
 </style>
 
 <div id="gbmPathwaysDiv">
-   <div id="gbmPathwaysButtonDiv">
+  <div id="gbmPathwayInfoLinks" class="HeaderLinks" align="right">
+      <span id="gbmPathwayAboutLink" >About</span>
+      <span id="gbmPathwayTooltipsLink"  dx=10>Tooltips</span>
+   </div>
+     <div id="gbmPathwaysButtonDiv">
       <label id="gbmPathwaysSelectLabel" for="select">Select a sample:</label>
       <select id="gbmPathwaysSampleSelector" class="gbmButton"></select>
       <button id="gbmPathwaysMovieButton" style="width:100px"  class="gbmButton">Movie</button>

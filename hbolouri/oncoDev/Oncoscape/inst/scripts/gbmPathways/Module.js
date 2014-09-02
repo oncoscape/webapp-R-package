@@ -544,7 +544,7 @@ var gbmPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
-       addSelectionDestination(thisModuleName);
+       addSelectionDestination("gbmPathways", "gbmPathwaysDiv");
        onReadyFunctions.push(function() {
           initializeUI(network.elements, vizmap[0].style);
           })

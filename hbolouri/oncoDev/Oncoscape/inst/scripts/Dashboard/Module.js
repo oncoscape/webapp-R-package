@@ -18,6 +18,12 @@ var DashboardModule = (function () {
             });
             
           $("#dashboardAboutLink").click(showAbout_dashboard)
+          
+        var ToDobutton = $("#ToDoLink");
+        var ToDoURL = "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/edit?usp=sharing"
+
+        ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
+
     };
 
    //----------------------------------------------------------------------------------------------------

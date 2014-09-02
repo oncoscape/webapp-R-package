@@ -2,9 +2,11 @@ include(../m4-workarounds.txt)
 include(../index.common)
 include(../common.js)
 include(../UserSettings.js)
+include(../experiment/AboutLink/Module.js)
 include(../sendSelectionMenu.js)
 include(code.js)
 <body>
+include(../experiment/AboutLink/widget.html)
 include(widget.html)
 </body>
 </html>

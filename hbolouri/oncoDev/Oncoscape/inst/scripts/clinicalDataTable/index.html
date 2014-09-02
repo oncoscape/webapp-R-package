@@ -525,7 +525,7 @@ function sendSelectionToModule(moduleName, currentIDs, metadata, raiseDiv){
           msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
                  callback: callback,
                  status:"request",
-                 payload:{targetModule: ModuleName,
+                 payload:{targetModule: moduleName,
                           ids: currentIDs,
                           metadata: metadata}
                  };
@@ -651,55 +651,32 @@ var ThisModuleName = "ClinicalTable"
            }
         }  
 
-      $("#ageAtDxMinSlider").slider({
+      $("#ageAtDxSlider").slider({
          change: function(event, ui) {
-            $("#ageAtDxMinSliderReadout").text (ui.value)
-            tableRef.fnDraw()
+            $("#ageAtDxMinSliderReadout").text (ui.values[0])
+            $("#ageAtDxMaxSliderReadout").text (ui.values[1])
+                      tableRef.fnDraw()
          },
          min: 10,
          max: 89,
-         value: 10
+         values: [10,89]
          });
     $("#ageAtDxMinSliderReadout").text(10);
-
-    $("#ageAtDxMaxSlider").slider({
-       change: function(event, ui) {
-         $("#ageAtDxMaxSliderReadout").text (ui.value)
-         tableRef.fnDraw()},
-       min: 10,
-       max: 89,
-       value: 89
-       });
     $("#ageAtDxMaxSliderReadout").text(89);
 
-    $("#overallSurvivalMinSlider").slider({
+    $("#overallSurvivalSlider").slider({
        change: function(event, ui) {
-          $("#overallSurvivalMinSliderReadout").text (ui.value)
-          tableRef.fnDraw()},
+          $("#overallSurvivalMinSliderReadout").text (ui.values[0])
+          $("#overallSurvivalMaxSliderReadout").text (ui.values[1])
+                    tableRef.fnDraw()},
        min: 0,
        max: 11,
-       value: 0
+       values: [0,11]
        });
     $("#overallSurvivalMinSliderReadout").text(0);
-
-    $("#overallSurvivalMaxSlider").slider({
-       change: function(event, ui) {
-          $("#overallSurvivalMaxSliderReadout").text (ui.value)
-          },
-       min: 0,
-       max: 11,
-       value: 11
-       });
     $("#overallSurvivalMaxSliderReadout").text(11);
-    //$("#applyClinicalTablesFiltersSlidersButton").button();
-    //$("#showAllClinicalTablesRowsButton").button()
-    $("#showAllClinicalTablesRowsButton").click(showAllRows)
-    $("#applyClinicalTablesFiltersSlidersButton").click(readAndApplyClinicalTableFilters);
-    $("#toMarkersAndTissuesButton").prop("disabled",true);
-    $("#toGBMPathwaysButton").prop("disabled",true);
-    $("#toSurvivalStatsButton").prop("disabled",true);
-    $("#toTimeLinesButton").prop("disabled",false);
-    
+
+    $("#showAllClinicalTablesRowsButton").click(showAllRows)    
     $("#cltblAboutLink").click(showAbout_ClTbl)
     };
 
@@ -744,27 +721,16 @@ var ThisModuleName = "ClinicalTable"
 //----------------------------------------------------------------------------------------------------
    function showAllRows() {
       tableRef.fnFilter("", 0);
+      $("#ageAtDxSlider").slider("values", [10,89])
+      $("#overallSurvivalSlider").slider("values", [0,11])
+     
+      $("#ageAtDxMinSliderReadout").text(10);
+      $("#ageAtDxMaxSliderReadout").text(89);
+
+      $("#overallSurvivalMinSliderReadout").text(0);
+      $("#overallSurvivalMaxSliderReadout").text(11);
+
       }
-
-   //--------------------------------------------------------------------------------------------
-   function readAndApplyClinicalTableFilters() {
-      console.log("readAndApplyClinicalTableFilters")
-      var ageAtDxMin = $("#ageAtDxMinSliderReadout").val()
-      var ageAtDxMax = $("#ageAtDxMaxSliderReadout").val()
-      var overallSurvivalMin = $("#overallSurvivalMinSliderReadout").val()
-      var overallSurvivalMax = $("#overallSurvivalMaxSliderReadout").val()
-
-      msg = {cmd:"filterPatientHistory", 
-             callback: "handleFilterPatientHistory",
-             status:"request",
-             payload:{ageAtDxMin: ageAtDxMin,
-                      ageAtDxMax: ageAtDxMax,
-                      overallSurvivalMin: overallSurvivalMin,
-                      overallSurvivalMax: overallSurvivalMax}};
-      msg.json = JSON.stringify(msg);
-      console.log(msg.json);
-      socket.send(msg.json);
-      } // readAndApplyClinicalTableFilters 
 
     //--------------------------------------------------------------------------------------------
     function SendSelectionToFilterTable(msg){
@@ -884,9 +850,15 @@ var ThisModuleName = "ClinicalTable"
      tableRef = $("#clinicalTable").dataTable();
      tableRef.fnAddData(msg.payload.mtx);
 
+     var allowFilter = ['clinicalTable'];
+
     $.fn.dataTableExt.afnFiltering.push(
       function( oSettings, aData, iDataIndex ) {
-  
+          if ( $.inArray( oSettings.nTable.getAttribute('id'), allowFilter ) == -1 )
+          {// if not table should be ignored
+              return true;
+          }
+   
           var agemin = parseInt( $("#ageAtDxMinSliderReadout").val(), 10 );
           var agemax = parseInt( $("#ageAtDxMaxSliderReadout").val(), 10 );
           var age = parseFloat( aData[1] ) || 0; // use data for the age column
@@ -910,8 +882,6 @@ var ThisModuleName = "ClinicalTable"
         return false;
     }
 );
-
-
      }; // displayTable
 
 //----------------------------------------------------------------------------------------------------
@@ -937,8 +907,7 @@ var ThisModuleName = "ClinicalTable"
                  .enter()
                         .append("option")
                         .attr("value", function(d){return d})
-                        .text(function(d) { return d})
-                ;
+                        .text(function(d) { return d});
      }
 
 
@@ -998,23 +967,7 @@ ctbl.init();
    font-size: 14px;
    }
 
-#oldclinicalDataTableDiv {
-   border: 1px solid #aaa;
-   height: 500px;
-   font-family: sans-serif;
-   background-color: #E8E8E8;
-   font-size: 12px;
-   margin-top: 1px;
-   margin-left: 10px;
-   margin-right: 10px;
-   margin-bottom: 1px;
-   padding: 1px;
-   padding-bottom: 20px;
-   }
-
 th, td { white-space: nowrap; } 
-
-
 
 #compactViewButton{
    margin-left: 40px;
@@ -1026,7 +979,7 @@ th, td { white-space: nowrap; }
    font-family: sans-serif;
    font-size: 12px;
    margin-top: 2px;
-   min-width: 900px;
+   min-width: 100px;
    margin: 0 auto;
    margin-bottom: 5px;
    background-color: #E8E8E8;
@@ -1040,23 +993,19 @@ th, td { white-space: nowrap; }
 #clinicalDataTableFilterControlsDiv{
    font-family: sans-serif;
    font-size: 14px;
-   margin-top: 40px;
+   margin-top: 20px;
    margin-left: 100px;
    margin-right: 100px;
    margin-bottom: 20px;
    }
 
-#clinicalDataTableOutboundButtonDiv{
-   margin-left: 240px;
-   }
 
 .clinicalDataFilterSlider { 
-   margin-left:20px; 
+   margin-left:5px; 
    margin-right:5px; 
    margin-top:0px;
    border: 1px solid #FFF;
    height: 20px;
-   max: 0;  min: 10; 
    orientation: 'horizontal';
    background-color: #FFF;
    color: #00F;
@@ -1073,6 +1022,7 @@ th, td { white-space: nowrap; }
   resize: none;
   margin-top: 4px;
   margin-left: 2px;
+  margin-right: 2px;
   }
 
 .clinicalDataFilterSliderTitleDiv {
@@ -1080,7 +1030,7 @@ th, td { white-space: nowrap; }
   color: #000000;
   font-size: 14px;
   padding-top: 10px;
-  padding-left: 40px;
+  padding-left: 10px;
   }
 
 .tblClinicalControlButton {
@@ -1090,62 +1040,43 @@ th, td { white-space: nowrap; }
 
 </style>
 
-
 <div id="clinicalDataModuleDiv">
    <div id="cltblInfoLinks" class="HeaderLinks" align="right">
       <span id="cltblAboutLink" >About</span>
       <span id="cltblTooltipsLink"  dx=10>Tooltips</span>
    </div>
    <div id="clinicalDataTableControlsDiv">
-      <div id=clinicalDataTableFilterControlsDiv" style="border: 1px;">
+      <div id="clinicalDataTableFilterControlsDiv" style="border: 1px;" align="center">
 
-       <div id="slider1Div" style="display: inline-block">
-           <div id="sliderTitleDiv" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">ageAtDx min</div>
-           <div style="width: 200px; overflow: hidden;">
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxMinSlider" class="clinicalDataFilterSlider"></div>
-               <div style="margin-left: 20px;" id='msgBox'>  
+       <div id="ageSliderDiv" style="display: inline-block">
+           <div id="sliderTitleDiv" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 1px;">ageAtDx</div>
+           <div style="width: 350px; overflow: hidden;">
+               <div id='msgBox' style="float: left;" >  
                   <textarea id="ageAtDxMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
-           </div>
-        </div>
-
-       <div id="slider2Div" style="display: inline-block">
-           <div id="sliderTitleDiv"  class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">ageAtDx max</div>
-           <div style="width: 300px; overflow: hidden;">
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxMaxSlider" class="clinicalDataFilterSlider"></div>
-               <div style="margin-left: 20px;" id='msgBox'>  
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxSlider" class="clinicalDataFilterSlider"></div>
+               <div id='msgBox'>  
                   <textarea id="ageAtDxMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
            </div>
         </div>
 
-       <div id="slider3Div" style="display: inline-block">
-           <div id="sliderTitle3Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">survival min</div>
-           <div style="width: 200px; overflow: hidden;">
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalMinSlider" class="clinicalDataFilterSlider"></div>
-               <div style="margin-left: 20px;" id='msgBox'>  
+       <div id="survivalSliderDiv" style="display: inline-block">
+           <div id="sliderTitle3Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 1px;">survival</div>
+           <div style="width: 350px; overflow: hidden;">
+               <div id='msgBox' style="float: left;" >  
                   <textarea id="overallSurvivalMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
-           </div>
-        </div>
-
-       <div id="slider4Div" style="display: inline-block">
-           <div id="sliderTitle4Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 10px;">survival max</div>
-           <div style="width: 200px; overflow: hidden;">
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalMaxSlider" class="clinicalDataFilterSlider"></div>
-               <div style="margin-left: 20px;" id='msgBox'>  
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalSlider" class="clinicalDataFilterSlider"></div>
+               <div id='msgBox'>  
                   <textarea id="overallSurvivalMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
            </div>
         </div>
 
        <div id="clinicalTablesButtonsDiv" style="display: block">
-           <div id="sliderApplyDiv" style="display: inline-block">
-              <button id="applyClinicalTablesFiltersSlidersButton" class="tblClinicalControlButton" type="button">Apply Filters</button>
-           </div>
            <div id="viewButtonDiv" style="display: inline-block">
               <button id="showAllClinicalTablesRowsButton" class="tblClinicalControlButton" type="button">Remove Filters</button>
-              <!-- button id="toggleMoreFewerColumnsButton" class="tblClinicalControlButton" type="button">More Columns</button -->
            </div>
              <span id="useSavedSelectionButton" class="tblClinicalControlButton" type="button"></span>
 
