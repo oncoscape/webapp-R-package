@@ -1,0 +1,5 @@
+mRNA: pkg://tcgaGBM/mrnaGBM-304patients-1375genes.RData
+cnv:  pkg://tcgaGBM/cnvGBM-563patients-1582genes.RData
+mut:  pkg://tcgaGBM/mutGBM-574patients-1582genes.RData
+patientClassification: pkg://tcgaGBM/tbl.dzSubTypes.RData
+patientHistoryTable: tbl://tcgaGBM/tbl.ptHistory.RData
