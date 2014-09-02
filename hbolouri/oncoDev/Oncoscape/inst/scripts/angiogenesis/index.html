@@ -397,10 +397,10 @@ function sendSelectionToModule(moduleName, currentIDs, metadata, raiseDiv){
 
 <script>
 //----------------------------------------------------------------------------------------------------
+var cwAngio;   // keep this public so that the tabsApp can see it, reset on tab activate
 
 var angioPathwaysModule = (function () {
 
-  var cwAngio;   // move this into module when debugging settles down
   var cyDiv;
   var viewAbstractsButton, zoomSelectedButton;
   var tissueMenu, movieButton;

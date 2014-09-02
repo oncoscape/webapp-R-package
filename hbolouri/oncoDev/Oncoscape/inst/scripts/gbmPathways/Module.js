@@ -50,9 +50,9 @@ var gbmPathwaysModule = (function () {
       movieButton.button();
       movieButton.prop("disabled", true);
 
-      slowerMovieButton = $("#slowerMovieButton");
+      slowerMovieButton = $("#gbmPathwaysSlowerMovieButton");
       slowerMovieButton.button();
-      fasterMovieButton = $("#fasterMovieButton");
+      fasterMovieButton = $("#gbmPathwaysFasterMovieButton");
       fasterMovieButton.button();
 
       movieSpeedReadout = $("#gbmPathwaysMovieSpeedReadout");

@@ -51,9 +51,9 @@ var angioPathwaysModule = (function () {
       movieButton.button();
       movieButton.prop("disabled", true);
 
-      slowerMovieButton = $("#slowerMovieButton");
+      slowerMovieButton = $("#angioSlowerMovieButton");
       slowerMovieButton.button();
-      fasterMovieButton = $("#fasterMovieButton");
+      fasterMovieButton = $("#angioFasterMovieButton");
       fasterMovieButton.button();
 
       movieSpeedReadout = $("#angiogenesisMovieSpeedReadout");

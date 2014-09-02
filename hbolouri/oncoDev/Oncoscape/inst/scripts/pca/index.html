@@ -86,6 +86,22 @@ String.prototype.beginsWith = function (string)
     return(this.toLowerCase().indexOf(string.toLowerCase()) === 0);
 };
 //----------------------------------------------------------------------------------------------------
+// if jQuery-style tabs are in use with Oncoscape, this function raised the named tab to the
+// the front (visible) position in the tabset
+// the argument, "tabIDString" is the tab id used in the module's widget.html, reproduced exactly
+// in tabsApp/widget.html, with some current examples being
+//  pcaDiv, patientTimeLinesDiv, gbmPathwaysDiv
+function raiseTab(tabIDString)
+{
+  tabsWidget = $("#oncoscapeTabs");
+  if(tabsWidget.length > 0){
+     selectionString = '#oncoscapeTabs a[href="#' + tabIDString + '"]';
+     tabIndex = $(selectionString).parent().JAVASCRIPT_INDEX ();
+     tabsWidget.tabs( "option", "active", tabIndex);
+     } // if tabs exist
+
+} // raiseTab
+//----------------------------------------------------------------------------------------------------
 // from http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 function openCenteredBrowserWindow(url, title, w, h) {
     // Fixes dual-screen position                         Most browsers      Firefox
@@ -455,19 +471,21 @@ UserSettings.init();
 
 </script>
 <script>
-var ActiveModules = [];
+var ActiveModules = {};
 
 //----------------------------------------------------------------------------------------------------
-addSelectionDestination = function(module)
+addSelectionDestination = function(modulename, modulediv)
 {
-   if(module in ActiveModules){
-        alert("Selection Destination message handler for '" +  module + " already set");
-   } else{  ActiveModules.push(module)  }
+   if(modulename in ActiveModules){
+        alert("Selection Destination message handler for '" + modulediv +": "+ modulename + " already set");
+   } else{  ActiveModules[modulename] = modulediv  }
 }
 
 //----------------------------------------------------------------------------------------------------
 getSelectionDestinations = function(){
-     return ActiveModules;
+    var keys = [];
+    for(var k in ActiveModules) keys.push(k);
+    return keys;
 //   return tissueMenu.children().map(function() {return $(this).val();}).get();
 }
 
@@ -489,31 +507,34 @@ getSelectionDestinations = function(){
 
 
 //--------------------------------------------------------------------------------------------
-function sendSelectionToModule(moduleName, currentIDs, metadata){
+function sendSelectionToModule(moduleName, currentIDs, metadata, raiseDiv){
     
+       raiseDiv = true;
        if(moduleName == "Save Selection"){
           var selectionname = PromptForSelectionName()
           if(typeof(selectionname) !== "string")  
              return;
           metadata.selectionname = selectionname;
+          raiseDiv = false;
         }
     
-       if(validSelectionToSend(ModuleName, currentIDs)){    
+       if(validSelectionToSend(moduleName, currentIDs)){    
           console.log(currentIDs.length + " patientIDs going to " + moduleName)    
        
           callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
           msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
                  callback: callback,
                  status:"request",
-                 payload:{targetModule: ModuleName,
+                 payload:{targetModule: moduleName,
                           ids: currentIDs,
                           metadata: metadata}
                  };
          socket.send(JSON.stringify(msg));
-         }
 
-    } // sendSelectionToModule
-//--------------------------------------------------------------------------------------------
+         if(raiseDiv == true)
+           raiseTab(ActiveModules[moduleName])
+        }
+    }
 
 </script>
 
@@ -552,6 +573,7 @@ var PCAModule = (function () {
             .append("select")
             .on("focus",function(d){ pca.UpdateSelectionMenu()})
             .on("change", function() {
+                if(this.value !== "Load Selection")
                    getSelectionbyName(this.value, callback="changePCAids"); 
             });
 
@@ -571,7 +593,19 @@ var PCAModule = (function () {
         PCAsendSelectionMenu.prop("disabled",true);
 
       pcaTextDisplay = $("#pcaTextDisplayDiv");
-      };
+      $("#pcaAboutLink").click(showAbout_pca)
+    };
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_pca(){
+  
+          var   info ={Modulename: ThisModuleName,
+                    CreatedBy: "Oncoscape Core",
+                    MaintainedBy: "Oncoscape Core",
+                    Folder: "pca"}
+
+         about.OpenAboutWindow(info) ;
+    }  
 
   //--------------------------------------------------------------------------------------------
    // a simple test.  can be called from the console in global scope
@@ -663,28 +697,13 @@ var PCAModule = (function () {
    var Legendcircle = Legendsvg.append("g")
    for(var i=0;i<LegendLabels.length;i++){
     Legendcircle.append("circle")
-           .attr("cx", 10)
+           .attr("cx", 20)
            .attr("cy", 15)
            .attr("r",  6)
-           .attr("fill", "red")
+           .attr("fill", Classifications.get(LegendLabels[i])[0].color[0])
            .attr("transform", "translate(" + (TextOffset[i]) +",0)")
   }
  
-
- //  text.attr("transform", function(d, i){
- //             return "translate(" + (TextOffset[i]+10) +",0)"
- //          })
-   
- //    legend.append("circle")
- //          .attr("cx", 0)
- //           .attr("cy", 5)
- //           .attr("r", function(d) { return 6;})
- //           .style("fill", function(d) { return Classifications.get(d)[0].color[0]})
- //           .attr("transform", function(d, i){
- //              return "translate(" + (TextOffset[i]) +",0)"
- //            })
-       
-//    console.log(TextOffset)      
   }
   
   //--------------------------------------------------------------------------------------------
@@ -766,6 +785,8 @@ var PCAModule = (function () {
       console.log("ids to select: " + ids);
       d3.selectAll("circle")
           .filter(function(d){
+             if(typeof(d) == "undefined")
+                return(false);
              if(typeof(d.id) == "undefined")
                 return(false);
              match = ids.indexOf(d.id[0]);
@@ -974,8 +995,8 @@ var PCAModule = (function () {
 //--------------------------------------------------------------------------------------------
   return{
    init: function(){
-      addSelectionDestination("PCA")   
-      addSelectionDestination("PCA (highlight)")   
+      addSelectionDestination("PCA", "pcaDiv")   
+      addSelectionDestination("PCA (highlight)", "pcaDiv")   
       onReadyFunctions.push(initializeUI);
       addJavascriptMessageHandler("pcaPlot", pcaPlot);
       addJavascriptMessageHandler("PCAHandlePatientIDs", handlePatientIDs);
@@ -990,7 +1011,7 @@ var PCAModule = (function () {
        UpdateSelectionMenu: function(){           
                   
           PatientMenu.selectAll("option")
-                 .data(getSelectionNames(), function(d){return d;})
+                .data(["Load Selection", getSelectionNames()], function(d){return d;})
                  .enter()
                         .append("option")
                         .attr("value", function(d){return d})
@@ -1035,11 +1056,6 @@ circle.highlighted {
    opacity: 1;
    }
 
-#pcaDiv {
-   margin: 0px;
-   padding: 0px;
-   }
-
 #pcaDisplay {
    border: 1px solid #aaa;
    width: 50px;
@@ -1069,9 +1085,15 @@ circle.highlighted {
 </style>
 
 <div id="pcaDiv">
-   <span id="useSelectionPCA">Use Selection</span>
-   <select id="PCAsendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
-   <button id="pcaClearSelectionButton" class="pcaButton">Clear Selection</button>
+  <div id="pcaInfoLinks" class="HeaderLinks" align="right">
+      <span id="pcaAboutLink" >About</span>
+      <span id="pcaTooltipsLink"  dx=10>Tooltips</span>
+  </div>
+  <div id="pcaSelectionDiv">
+       <span id="useSelectionPCA"></span>
+       <select id="PCAsendSelectiontoModuleButton" name="SendSelectionToModule"></select>
+       <button id="pcaClearSelectionButton" class="pcaButton">Clear Selection</button>
+  </div>
    <div id="pcaDisplay"></div>
    <div id="pcaLegend">   </div>
    <div id="pcaTextDisplayDiv"></div>
