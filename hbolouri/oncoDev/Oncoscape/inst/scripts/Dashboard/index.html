@@ -472,6 +472,76 @@ UserSettings.init();
 </script>
 <script>
 //----------------------------------------------------------------------------------------------------
+var AboutModule = (function () {
+
+    initializeUI = function(){     
+ 
+       $("#AboutDiv").dialog({  
+           autoOpen: false,
+        });
+ 
+ //       ClearAboutInfo()      
+    };
+
+//----------------------------------------------------------------------------------------------------
+    function ClearAboutInfo(){
+       document.getElementById("ModuleNameSlot").innerHTML = "";
+       document.getElementById("CreatorSlot").innerHTML =      "Created by:    ";
+       document.getElementById("MaintainerSlot").innerHTML =   "Maintained by: ";
+       document.getElementById("LastModifiedSlot").innerHTML = "Last Modified: ";
+    }
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(ModuleFolderName){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayModifiedDate",
+             status:"request",
+             payload:ModuleFolderName
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayModifiedDate(msg){
+        
+        console.log("Date Modified: ", msg)
+        
+        document.getElementById("LastModifiedSlot").innerHTML = 
+        document.getElementById("LastModifiedSlot").innerHTML + "\t" + msg.payload;
+    }
+
+ return{
+
+   init: function(){
+      onReadyFunctions.push(initializeUI);
+//      socketConnectedFunctions.push(SetModifiedDate)
+      addJavascriptMessageHandler("DisplayModifiedDate", DisplayModifiedDate);
+      },
+      
+      //----------------------------------------------------------------------------------------------------
+     OpenAboutWindow: function(info){
+       
+       ClearAboutInfo()  
+       $("#AboutDiv").dialog('option', 'title',info.Modulename )
+       document.getElementById("CreatorSlot").innerHTML = 
+         document.getElementById("CreatorSlot").innerHTML + "\t"+info.CreatedBy;
+       document.getElementById("MaintainerSlot").innerHTML = 
+              document.getElementById("MaintainerSlot").innerHTML + "\t"+info.MaintainedBy;
+       SetModifiedDate(info.Folder)
+
+         $( "#AboutDiv" ).dialog( "open" )
+    }
+    
+ }; // return
+
+}); // SelectionExample
+//----------------------------------------------------------------------------------------------------
+about = AboutModule();
+about.init();
+
+</script>
+<script>
+//----------------------------------------------------------------------------------------------------
 var DashboardModule = (function () {
 
  //----------------------------------------------------------------------------------------------------
@@ -481,6 +551,7 @@ var DashboardModule = (function () {
         document.getElementById("UserName").innerHTML = getUsername();
 
         $("#DashboardAccordion" ).accordion({
+              active: false,
               heightStyle: "content",
               collapsible: true,
               activate: function(event, ui){
@@ -490,12 +561,18 @@ var DashboardModule = (function () {
             });
             
           $("#dashboardAboutLink").click(showAbout_dashboard)
+          
+        var ToDobutton = $("#ToDoLink");
+        var ToDoURL = "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/edit?usp=sharing"
+
+        ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
+
     };
 
    //----------------------------------------------------------------------------------------------------
     function showAbout_dashboard(){
   
-          var   info ={Modulename: ThisModuleName,
+          var   info ={Modulename: "Dashboard",
                     CreatedBy: "Oncoscape Core",
                     MaintainedBy: "Lisa McFerrin",
                     Folder: "Dashboard"}
@@ -524,6 +601,41 @@ Dashboard.init();
 </script>
 <body>
 <style>
+
+.HeaderLinks {
+  color: blue;
+  font-size: medium;
+  cursor: pointer;
+    display: block;
+     margin-right: 20px;
+     clear:both;
+
+}
+
+#AboutDiv{
+   overflow: hidden;
+   border:1px solid #CCC;
+   background-color:#F9F9F9;
+   border:1px solid #333;
+   padding:5px;
+   font-size: medium
+   width: 50%
+}
+</style>
+
+<div id="AboutDiv" style="display:none">
+  <div id="CreditsList">
+   <div id="ModuleNameSlot"></div>
+   <div id="CreatorSlot"     >Created by:    </div>
+   <div id="MaintainerSlot"  >Maintained by: </div>
+   <div id="LastModifiedSlot">Last Modified: </div>
+<!--   <div id="ContactSlot">Contact: </div>  -->
+  </div>
+   <br></br>
+   <div><p>Oncoscape is supported by Fred Hutch and STTR</p></div>
+ </div>
+
+<style>
 ul.UserDocs {
     list-style-type: circle;
 }
@@ -535,20 +647,68 @@ ul.UserDocs {
       <span id="dashboardAboutLink" >About</span>
       <span id="dashboardTooltipsLink"  dx=10>Tooltips</span>
    </div>
-<h3> Oncoscape </h3>
-   <p> Welcome to Oncoscape!  &nbsp; (version 1.1.18, <i>17 aug 2014</i>)</p>
-   <p> You are logged in as:  <span id="UserName"> </span>   </p>
+   <span id="LogIn" style="float:right; font-size:medium; margin-right: 20px"> User:  <span id="UserName"> </span></span>
 
-   <p> Welcome Message </p>
+   <div align="center"> <h1 > Oncoscape </h1>
+       <span> (version 1.1.23, 1 sep 2014)<br></span>
+       <p> <font color="red">This website is undergoing frequent (hourly) modifications.  <br> Use at your own risk.</font></p>
+   </div>   
+ 
+   <p> Note: Oncoscape works best with Chrome Version 37 or higher and a minimum screen resolution of 1280x800 </p>
 
- <div id="DashboardAccordion">
-     <h3> Available Data </h3><div></div>
+   <div id="DashboardAccordion">
+     <h3> Available Data </h3>
+        <div id="AvailableData">
+          <div id="TCGAdata"> <h3 align="center">The Cancer Genome Atlas (TCGA)</h3>
+             <div id="TCGApatientdata"><h3><u>Patients</u></h3>
+             </div>
+             <div id="TCGArnadata"><h3><u>RNA</u></h3>
+                <b>Subtypes: </b> Defined by centroid genes
+             </div>
+             <div id="TCGAcnvdata"><h3><u>CNV</u></h3>
+             </div>
+             <div id="TCGAmutdata"><h3><u>Mutation</u></h3>
+             </div>
+          </div>
+        </div>
      <h3> Vignettes </h3><div></div>
      <h3> Tutorials/Use Cases </h3><div></div>
      <h3> Download Software </h3><div></div>
-     <h3> Features To Come... </h3><div></div> 
+     <h3> Features To Come... </h3>
+        <div>
+           <ul id="FeaturesToCome">
+              <li> Saved Selections </li>
+              <li> Interactive Kaplan Meier Plots </li>
+           </ul>
+           <button id=ToDoLink>Edit The To-Do Table</button>
+        </div> 
+      <h3> About </h3>
+         <div>
+            <p>Oncoscape is developed at the <a href= "www.fhcrc.org">Fred Hutchinson Cancer Research Center</a> under the auspices of the <a href="www.sttrcancer.org">Solid Tumor Translational Research</a> initiative.
+            </p>
+            <p> Oncoscape is a web-based, menu-driven analysis and visualization platform for large-scale, heterogeneous clinical and molecular patient timeline data as exemplified by the <a href= "www.fhcrc.org">Fred Hutch</a> and <a href="http://www.fhcrc.org/en/labs/hidra.html">HIDRA</a> database.
+            </p>
+            <p>Oncoscape was conceived, and is managed, by a Steering Committee comprising: Eric Holland, Desert Horse-Grant, Paul Fearn, Paul Shannon, Lisa McFerrin, and Hamid Bolouri.
+            </p>
+            <p> Paul Shannon (lead) and Lisa McFerrin are the primary developers of Oncoscape, with additional code contributions by Cliff Rostomily and Hamid Bolouri.
+            </p>
+            
+            <div id="LegalNotice">Legal Notice
+              <p>Oncoscape is free for academic, nonprofit, and personal use. Any use of the public browser requires credits.  For assistance, questions or problems contact STTR. 
+              </p>
+              <p>Data provided in Oncoscape is under the same condition of use as specified in the original data source.
+              </p>
+            </div>
+         </div>
+   </div>
+ 
+   <div id="footerLogos" align="center">
+        <a href="http://www.fhcrc.org"><img width="235" height="80" src="../../../data/img/FHCRC_COLOR high res.jpg" alt="Fred Hutchinson Cancer Research Center"/></a>
+        <a href="http://www.sttrcancer.org"><img width="236" height="80" src="data/img/STTR_logo_240x67.jpg" alt="STTR"/></a> 
+   </div>
+ 
  </div>
-</div>
+
 
 </body>
 </html>

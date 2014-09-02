@@ -36,6 +36,8 @@ var TimeLineModule = (function () {
      var dispatch = d3.dispatch("load","LoadOptions", "DisplayPatients", "Update", "UpdateMenuOptions");
      var TimeLineInitialLoad=true;
        
+     var GreyOutPts = ["TCGA.02.0055", "TCGA.06.0169", "TCGA.02.0099", "TCGA.28.5211", "TCGA.02.0023", "TCGA.76.6286"]  
+       
         //--------------------------------------------------------------------------------------------
        function initializeUI(){
              console.log("========== initializing Timeline UI")
@@ -84,9 +86,7 @@ var TimeLineModule = (function () {
                
           EventsByID.forEach(function(ID, Patient){
                var dateDiff = 0; var date1, date2;
-                if( Name=== "Survival" & (!Patient.has("Status") | Patient.get("Status")[0].Type !== "Dead")) {
-                     dateDiff = null;
-                } else{
+             
                   if(Patient.has(Event1) && Patient.has(Event2) ){
                      if(Patient.get(Event1)[0].date.length >1){
                          date1 = Patient.get(Event1).sort(AscendingStartDate)[0].date[0] }
@@ -96,9 +96,8 @@ var TimeLineModule = (function () {
                      else{ date2 = Patient.get(Event2).sort(AscendingDate)[0].date         }
                     
                      dateDiff = (date2 - date1 )/TimeScaleValue
-//                    DateDiff.push( {ID: ID,PtNum: Patient.get(Event1)[0].PtNum, value: dateDiff, Scale: TimeScale})
                    }else{ dateDiff=null;}
-               }
+               
 
             DateDiff.push( {ID: ID,PtNum: Patient.get(Patient.keys()[0])[0].PtNum, value: dateDiff, Scale: TimeScale})
           })
@@ -438,7 +437,7 @@ var TimeLineModule = (function () {
 
 //			var HorizLine = svg.append("g").attr("class", "rect")
 
-             var tooltip = Timeline
+             var tooltip = TimeLine
                 .attr("class", "tooltip")
                 .append("div")
                 .style("position", "absolute")
@@ -511,7 +510,6 @@ var TimeLineModule = (function () {
                console.log("======== DisplayPatients.TimeLineDisplay")
                TimeLine.selectAll("g").remove();
 
-
                 var tooltip = d3.select("body")
                 .attr("class", "tooltip")
                 .append("div")
@@ -520,7 +518,6 @@ var TimeLineModule = (function () {
                 .style("visibility", "hidden")
                 .text("a simple tooltip");
 
- 
                 var x,TimeScale, xTitle, xAxis, 
                     y = d3.scale.linear().range([TimeLineSize.height, 0]), 
                     yAxis = d3.svg.axis().scale(y).orient("left").ticks(0)
@@ -533,7 +530,10 @@ var TimeLineModule = (function () {
                     }
                }     
           
-               if(OrderBy !== "--"){ OrderEvents();}
+               if(OrderBy !== "--"){ 
+                   if(OrderBy == "Survival") { OrderBy = "Status"; OrderEvents(); OrderBy = "Survival"}
+                    OrderEvents();
+                }
                if(AlignBy === "--"){ 
                      x = d3.time.scale().range([0, TimeLineSize.width]); TimeScale =1;
                      Xtitle="Year";
@@ -607,6 +607,8 @@ var TimeLineModule = (function () {
                     .attr("x2", function(d) { return x(LogTime((d.date[1] - d.offset)/TimeScale));  })
                     .attr("y2", function(d) { return y(PatientHeight*(d.PtNum+ EventOffset.get(d.Name))); })
                     .attr("stroke", function(d){ 
+                        if(GreyOutPts.indexOf(d.PatientID) !== -1) return "grey"
+                    
                          var ColorShade = d3.rgb(TimeLineColor(d.Name)); 
                          if(d3.keys(d).indexOf("Type") !== -1){ 
                               return ColorShade.brighter((EventTypes.get(d.Name).indexOf(d.Type) % 5)/2) };
@@ -643,7 +645,9 @@ var TimeLineModule = (function () {
                TimePoint.enter()
                     .append("circle")
                     .attr("class", "circle")
-                    .style("fill", function(d){ return TimeLineColor(d.Name) })
+                    .style("fill", function(d){ 
+                       if(GreyOutPts.indexOf(d.PatientID) !== -1) return "grey";
+                       return TimeLineColor(d.Name) })
                     .attr("cx", function(d) {return x(LogTime((d.date -d.offset)/TimeScale)); })
                     .attr("cy", function(d) { return y(PatientHeight*d.PtNum); })
                     .attr("r", function(d) { return PatientHeight;})
@@ -735,9 +739,8 @@ var TimeLineModule = (function () {
                               OpenDialogForAddedEvents("OrderBy");
                          } else{
                               console.log("== changing OrderBy ", OrderBy)
-                         OrderEvents();      
+//test                         OrderEvents();      
                               dispatch.DisplayPatients();
-//                              dialog.dialog("destroy");
                          }
                     })
                  ;
@@ -916,7 +919,7 @@ var TimeLineModule = (function () {
                             if(MenuType == "OrderBy"){
                                    OrderBy = value;
                                    console.log("OrderBy is now: " + OrderBy);
-                                   OrderEvents();
+//test                                   OrderEvents();
                               } else if (MenuType == "SidePlot"){
                                    SidePlotEvent = value;
                                    console.log("SidePlotEvent is now: " + SidePlotEvent);
@@ -966,10 +969,8 @@ var TimeLineModule = (function () {
           console.log("========Order Event: "+ OrderBy);
           var PatientOrderBy = []
 
-
           if(CalculatedEvents.has(OrderBy) ){
                 var event = CalculatedEvents.get(OrderBy)[0]
-//                console.log(event)
                 PatientOrderBy = getDateDiff(OrderBy, event.Event1,event.Event2,""); 
           } else if(EventTypes.keys().indexOf(OrderBy) !== -1){
                EventsByID.forEach(function(ID, Patient){
@@ -981,7 +982,7 @@ var TimeLineModule = (function () {
                          PatientOrderBy.push({ID: ID, value: 0} )
                     }   })
           } 
-     
+   
           PatientOrderBy.sort(DescendingValues).forEach(function(Ordered, i){
                          Events.filter(function(d){return d.PatientID === Ordered.ID})
                                    .forEach(function(d){ d.PtNum = i})
@@ -990,6 +991,7 @@ var TimeLineModule = (function () {
                })
           console.log("Reordered")
           console.log(PatientOrderBy)
+          return true;
      }     
      //--------------------------------------------------------------------------------------------------
      function OrderBySidePlot(){
@@ -1158,7 +1160,7 @@ var TimeLineModule = (function () {
           addSelectionDestination("Timelines", "patientTimeLinesDiv")   
           onReadyFunctions.push(initializeUI);
           addJavascriptMessageHandler("DisplayPatientTimeLine", DisplayPatientTimeLine);
-          addJavascriptMessageHandler("timelinesHandlePatientIDs", handlePatientIDs);
+          addJavascriptMessageHandler("TimelinesHandlePatientIDs", handlePatientIDs);
           addJavascriptMessageHandler("FilterTimelinePatients", FilterTimelinePatients);
           socketConnectedFunctions.push(loadPatientDemoData);
    },

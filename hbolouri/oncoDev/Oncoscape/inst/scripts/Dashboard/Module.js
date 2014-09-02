@@ -9,14 +9,19 @@ var DashboardModule = (function () {
         document.getElementById("UserName").innerHTML = getUsername();
 
         $("#DashboardAccordion" ).accordion({
+              active: false,
               heightStyle: "content",
               collapsible: true,
-              activate: function(event, ui){
-                 console.log(" activating accordion");
-                 window.cwCuration.resize().fit(50);
-               }
-            });
+              });
             
+        $("#AvailableDataAccordian" ).accordion({
+              active: false,
+              heightStyle: "content",
+              collapsible: true,
+              });
+
+        LoadDatainfo();
+     
           $("#dashboardAboutLink").click(showAbout_dashboard)
           
         var ToDobutton = $("#ToDoLink");
@@ -25,6 +30,20 @@ var DashboardModule = (function () {
         ToDobutton.on("click",function(d){window.open(ToDoURL) }   )
 
     };
+
+   //----------------------------------------------------------------------------------------------------
+    function LoadDatainfo(){
+ 
+      var TCGAdata =  $("#TCGAdataInfo")
+     console.log(TCGAdata)
+      TCGAdata.append("<p>The Cancer Genome Atlas (TCGA)</p>")
+          
+          TCGAdata.append("<div id='TCGApatientdata'><h4><u>Patients</u></h4>Publication? Download site?</div>")
+          TCGAdata.append("<div id='TCGArnadata'><h4><u>RNA</u></h4><b>Subtypes: </b> Defined by centroid genes <p>304patients-1375genes</p></div>")
+          TCGAdata.append("<div id='TCGAcnvdata'><h4><u>CNV</u></h4></div>")
+          TCGAdata.append("<div id='TCGAmutdata'><h4><u>Mutation</u></h4></div>")
+
+   }
 
    //----------------------------------------------------------------------------------------------------
     function showAbout_dashboard(){
