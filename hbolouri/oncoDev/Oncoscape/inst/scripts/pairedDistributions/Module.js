@@ -22,7 +22,7 @@ var PairedDistributionsModule = (function () {
   //--------------------------------------------------------------------------------------------
   function initializeUI (){
       generatePairedDistributionsDataButton =  $("#generatePairedDistributionsDataButton");
-      generatePairedDistributionsDataButton.click(runDemo);//runBasicDemo (run w/o server), runDemo (run w/ server)
+      generatePairedDistributionsDataButton.click(runBasicDemo);//runBasicDemo (run w/o server), runDemo (run w/ server)
       generatePairedDistributionsDataButton =  $("#clearPairedDistributionsButton");
       generatePairedDistributionsDataButton.click(clear);
       pairedDistributionsDisplay = $("#pairedDistributionsDisplay");
@@ -49,9 +49,10 @@ var PairedDistributionsModule = (function () {
   	  console.log("Module.pairedDistributions: runBasicDemo");
   	  var patient = 0;
   	  numberOfSelections ++;
+  	  var max = getRandomInt (0, 500);
   	  for(i=0;i<15;i++){
   	 	patient ++;
-  	 	var value = Math.random()*100;
+  	 	var value = Math.random()*max;
   	    storage.push({ID: patient, value: value, name: "pop" + numberOfSelections});
   	    }
   	 d3PairedDistributionsScatterPlot(storage);
@@ -79,8 +80,9 @@ var PairedDistributionsModule = (function () {
   //--------------------------------------------------------------------------------------------
   function handlePatientIds(msg){
       console.log("Module.pairedDistributions: handlePatientIDs");
+      console.log(msg);
       if(msg.status == "success"){
-         requestValues(msg.payload);
+         requestValues(msg.payload.ids);
       }else{
          console.log("handlePatientIDs about to call alert: " + msg)
          alert(msg.payload)
@@ -352,7 +354,8 @@ var PairedDistributionsModule = (function () {
   return{
    init: function(){
       onReadyFunctions.push(initializeUI);
-      addJavascriptMessageHandler("handlePatientIds", handlePatientIds);
+      addSelectionDestination("Distributions", "pairedDistributionsDiv");
+      addJavascriptMessageHandler("DistributionsHandlePatientIDs", handlePatientIds);
       addJavascriptMessageHandler("handlePatientData", handlePatientData);
       addJavascriptMessageHandler("DisplaypairedDistributionsModifiedDate", DisplaypairedDistributionsModifiedDate);
       socketConnectedFunctions.push(SetModifiedDate);
