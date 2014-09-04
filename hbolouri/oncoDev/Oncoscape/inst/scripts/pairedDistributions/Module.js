@@ -311,7 +311,7 @@ var PairedDistributionsModule = (function () {
     		.attr("y",yNameScale(0))
         	.attr("x", xScale(getNameX()))
         	.attr("font-size",15)
-        	.attr("font-family","serif")
+        	.attr("font-family", "Arial, Sans-serif")
         	.attr("text-anchor","middle");
         }
      
