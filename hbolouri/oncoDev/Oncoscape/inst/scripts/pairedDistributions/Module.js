@@ -23,8 +23,8 @@ var PairedDistributionsModule = (function () {
   function initializeUI (){
 //       generatePairedDistributionsDataButton =  $("#generatePairedDistributionsDataButton");
 //       generatePairedDistributionsDataButton.click(runBasicDemo);//runBasicDemo (run w/o server), runDemo (run w/ server)
-//       generatePairedDistributionsDataButton =  $("#clearPairedDistributionsButton");
-//       generatePairedDistributionsDataButton.click(clear);
+      generatePairedDistributionsDataButton =  $("#clearPairedDistributionsButton");
+      generatePairedDistributionsDataButton.click(clear);
       pairedDistributionsDisplay = $("#pairedDistributionsDisplay");
       pairedDistributionsHandleWindowResize();
       //pairedDistributionsBroadcastButton = $("#pairedDistributionsBroadcastSelectionToClinicalTable");
