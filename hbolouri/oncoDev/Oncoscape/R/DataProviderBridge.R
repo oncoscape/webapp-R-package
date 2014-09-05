@@ -367,7 +367,7 @@ getPatientHistoryDataVector <- function(WS, msg)
    return.cmd = msg$callback
    result <- as.numeric(tbl[, columnOfInterest])
    names(result) <- tbl$ID
-   if(!is.na(patients))
+   if(!all(is.na(patients)))
       result <- result[patients];
        
    printf("returning %d values from column %s", length(result), columnOfInterest)
