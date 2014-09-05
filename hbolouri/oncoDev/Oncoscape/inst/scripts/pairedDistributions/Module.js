@@ -21,10 +21,10 @@ var PairedDistributionsModule = (function () {
   
   //--------------------------------------------------------------------------------------------
   function initializeUI (){
-      generatePairedDistributionsDataButton =  $("#generatePairedDistributionsDataButton");
-      generatePairedDistributionsDataButton.click(runBasicDemo);//runBasicDemo (run w/o server), runDemo (run w/ server)
-      generatePairedDistributionsDataButton =  $("#clearPairedDistributionsButton");
-      generatePairedDistributionsDataButton.click(clear);
+//       generatePairedDistributionsDataButton =  $("#generatePairedDistributionsDataButton");
+//       generatePairedDistributionsDataButton.click(runBasicDemo);//runBasicDemo (run w/o server), runDemo (run w/ server)
+//       generatePairedDistributionsDataButton =  $("#clearPairedDistributionsButton");
+//       generatePairedDistributionsDataButton.click(clear);
       pairedDistributionsDisplay = $("#pairedDistributionsDisplay");
       pairedDistributionsHandleWindowResize();
       //pairedDistributionsBroadcastButton = $("#pairedDistributionsBroadcastSelectionToClinicalTable");
@@ -80,7 +80,6 @@ var PairedDistributionsModule = (function () {
   //--------------------------------------------------------------------------------------------
   function handlePatientIds(msg){
       console.log("Module.pairedDistributions: handlePatientIDs");
-      console.log(msg);
       if(msg.status == "success"){
          requestValues(msg.payload.ids);
       }else{
@@ -314,7 +313,6 @@ var PairedDistributionsModule = (function () {
     		.attr("y",yNameScale(0))
         	.attr("x", xScale(getNameX()))
         	.attr("font-size",15)
-        	.attr("font-family", "Arial, Sans-serif")
         	.attr("text-anchor","middle")
         	.attr("fill","black");
         }
