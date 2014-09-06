@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------------------------------------
 var PLSRModule = (function () {
 
-   var plsrDiv;
-   var plsrPlotDiv;
+   var plsrDisplay
+   var d3plsrDisplay;
 
       // these are reported by the server, from an inspection of the data
    var ageAtDxMin, ageAtDxMax, survivalMin, survivalMax;
@@ -25,8 +25,10 @@ var PLSRModule = (function () {
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
 
-      plsrDiv = $("#plsrDiv");
-      plsrPlotDiv = d3.select("#plsrPlotDiv");
+      plsrDisplay = $("#plsrDisplay");
+      d3plsrDisplay = d3.select("#plsrDisplay");
+      console.log("== intiailizeUI, plsrDisplay: " + plsrDisplay);
+      console.log("== intiailizeUI, d3plsrDisplay: " + d3plsrDisplay);
 
       ageAtDxMinSlider = $("#plsrAgeAtDxMinSlider");
       ageAtDxMinSliderReadout = $("#plsrAgeAtDxMinSliderReadout");
@@ -80,6 +82,12 @@ var PLSRModule = (function () {
    //--------------------------------------------------------------------------------------------------
    requestPLSRByOnsetAndSurvival = function() {
    
+
+     ageAtDxMinThreshold = Number(ageAtDxMinSliderReadout.val()); 
+     ageAtDxMaxThreshold = Number(ageAtDxMaxSliderReadout.val());
+     survivalMinThreshold = Number(survivalMinSliderReadout.val());
+     survivalMaxThreshold = Number(survivalMaxSliderReadout.val());
+
      console.log("=== requesting plsr, ageAtDx: " + ageAtDxMinThreshold + " - " + ageAtDxMaxThreshold);
      console.log("=== requesting plsr, survival: " + survivalMinThreshold + " - " + survivalMaxThreshold);
 
@@ -171,7 +179,6 @@ var PLSRModule = (function () {
    
         //todo: investigate why labkey is returning array[1] for properties in some cases
         //flattenArrays will not affect JSON without array[1] members
-
      
       var genes = JSON.parse(msg.payload.genes);
       for (var i = 0; i < genes.length; i++)
@@ -192,7 +199,6 @@ var PLSRModule = (function () {
    
       console.log("=== calling d3PlsrscatterPlot");
       svg = d3PlsrScatterPlot(allObjs, absMaxValue);
-   
 
       } // handlePlsrResults
 
@@ -200,10 +206,12 @@ var PLSRModule = (function () {
    function d3PlsrScatterPlot(dataset, absMaxValue) {
 
       var padding = 70;
-      var width = 800;
-      var height = 500;
-   
-      d3.select("svg").remove();  // so that append("svg") is not cumulative
+      var width = plsrDisplay.width();
+      var height = plsrDisplay.height();
+
+      debugger;
+
+      d3plsrDisplay.select("#plsrSVG").remove();  // so that append("svg") is not cumulative
    
       geneDataset = dataset.filter(function(x) {return(x.category=="gene")});
       vectorDataset = dataset.filter(function(x) {return(x.category=="vector")});
@@ -212,30 +220,31 @@ var PLSRModule = (function () {
       console.log("==== genes: " + geneDataset.length);
       console.log("==== vectors: " + vectorDataset.length);
 
+      absMaxValue = 1.2 * absMaxValue
       var negAbsMaxValue = -1.0 * absMaxValue
    
       var xScale = d3.scale.linear()
-                    .domain([negAbsMaxValue, absMaxValue])
-                    .range([padding, width - padding * 2]);
+                     .domain([negAbsMaxValue, absMaxValue])
+                     .range([padding, width - padding * 2]);
    
       var yScale = d3.scale.linear()
-                    .domain([negAbsMaxValue, absMaxValue])
-                    .range([height - padding, padding]); // note inversion 
+                     .domain([negAbsMaxValue, absMaxValue])
+                     .range([height - padding, padding]); // note inversion 
    
       var xAxis = d3.svg.axis()
-                 .scale(xScale)
-                 .orient("bottom")
-                 .ticks(5);
+                    .scale(xScale)
+                    .orient("bottom")
+                    .ticks(5);
    
       var yAxis = d3.svg.axis()
-                 .scale(yScale)
-                 .orient("left")
-                 .ticks(5);
+                    .scale(yScale)
+                    .orient("left")
+                    .ticks(5);
    
       var brush = d3.svg.brush()
-          .x(xScale)
-          .y(yScale)
-          .on("brushend", brushend);
+                    .x(xScale)
+                    .y(yScale)
+                    .on("brushend", brushend);
    
      function brushend() {
        console.log("brushend");
@@ -253,28 +262,27 @@ var PLSRModule = (function () {
                                 .domain(["gene",     "vector"])
                                 .range(["lightgray", "red"]);
    
-      var svg = d3.select("#plsrPlotDiv")
-                  .append("svg")
+      debugger;
+      var svg = d3plsrDisplay.append("svg")
+                  .attr("id", "plsrSVG")
                   .attr("width", width)
                   .attr("height", height)
-                  .append("g")
-                  .attr("transform", "translate(" + padding + "," + padding + ")");
+                  .append("g");
+                  //.attr("transform", "translate(" + padding + "," + padding + ")");
    
         svg.append("g")
            .attr("class", "brush")
            .call(brush);
     
-       var tooltip = d3.select("body")
-         .attr("class", "tooltip")
-         .append("div")
-         .style("position", "absolute")
-         .style("z-index", "10")
-         .style("visibility", "hidden")
-         .text("a simple tooltip");
+       var tooltip = d3plsrDisplay.append("div")
+                                  .attr("class", "tooltip")
+                                  .style("position", "absolute")
+                                  .style("z-index", "10")
+                                  .style("visibility", "hidden")
+                                  .text("a simple tooltip");
    
            // draw the genes
         console.log("=== drawing genes: " + geneDataset.length);
-        debugger;
 
         var circle= svg.selectAll("circle")
           .data(geneDataset)
@@ -283,7 +291,7 @@ var PLSRModule = (function () {
           .attr("cx", function(d,i) {return xScale(d["Comp 1"]);})
           .attr("cy", function(d,i) {return yScale(d["Comp 2"]);})
           .attr("r",  function(d) {
-              console.log("appending gene circle: " + d.rowname); 
+              //console.log("appending gene circle: " + d.rowname); 
               return 2;})
           .text(function(d) {
               return(d.rowname);
@@ -295,8 +303,8 @@ var PLSRModule = (function () {
               })
           .on("mousemove", function(){return tooltip.style("top",
               (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
-          .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
-          .attr("transform", transform);
+          .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+          //.attr("transform", transform);
    
             //-----------------------
             // draw the vectors
@@ -358,12 +366,9 @@ var PLSRModule = (function () {
 
   //--------------------------------------------------------------------------------------------
   function handleWindowResize () {
-     plsrDiv.width($(window).width() * 0.99);
-     plsrDiv.height($(window).height() * 0.98);
-     //debugger;
-     //plsrPlotDiv.width($(window).width() * 0.99);
-     //plsrPlotDiv.height($(window).height() * 0.98);
-     //if(!firstTime) {d3PcaScatterPlot(pcaResults);}
+     console.log("=== Module.plsr handleWindowResize");
+     plsrDisplay.width($(window).width() * 0.99);
+     plsrDisplay.height($(window).height() * 0.90);
      };
 
    //--------------------------------------------------------------------------------------------
