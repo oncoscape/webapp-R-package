@@ -69,9 +69,10 @@ test_plsr <- function()
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
    checkEquals(msg.incoming$status, "fit")
-   checkEquals(names(msg.incoming$payload), c("genes", "vectors"))
+   checkEquals(names(msg.incoming$payload), c("genes", "vectors", "absMaxValue"))
    checkTrue(nchar(msg.incoming$payload[["vectors"]]) > 300)  # 404 on (5 sep 2014)
    checkTrue(nchar(msg.incoming$payload[["genes"]]) > 10000)  # 83k on (5 sep 2014)
+   checkTrue(nchar(msg.incoming$payload[["absMaxValue"]]) > 0.3)  # 0.31785 on (5 sep 2014)
 
 } # test_plsr
 #----------------------------------------------------------------------------------------------------

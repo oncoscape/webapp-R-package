@@ -77,11 +77,16 @@ demo.with.tcga.gbm.data <- function()
    mtx.classify <- createClassificationMatrix(tbl.ptHis, ageAtDx.lo, ageAtDx.hi, survival.lo, survival.hi)
    print(colSums(mtx.classify))
    mtx.mrna <- as.matrix(tbl.mrna)
+
+   keepers <- setdiff(colnames(mtx.mrna), getClassifierGenes())   
+   mtx.mrna <- mtx.mrna[, keepers]
+
    mtx.classify <- mtx.classify[rownames(mtx.mrna),]
      #set.seed(17)
      # genes.indices <- sample(1:ncol(mtx.mrna), 100)
    gene.indices <-  1:ncol(mtx.mrna)
-   fit <- plsr(mtx.classify ~ mtx.mrna[, gene.indices], ncomp=2, scale=TRUE,validation="LOO")
+   fit <- plsr(mtx.classify ~ mtx.mrna[, gene.indices], ncomp=2, scale=TRUE,validation="none")
+   biplot(fit$loadings[,1:2],fit$Yloadings[,1:2],col=c("gray","red"),cex=c(0.5,1))
    return(fit)
 
 } # demo.with.tcga.gbm.data
@@ -417,4 +422,13 @@ patientActualTimesPLSR <- function(ageAtDx.threshold.low,
     return(list(genes=gene.coordinates, vectors=vectors))
 
 } # patientActualTimesPLSR
+#----------------------------------------------------------------------------------------------------
+# 840 genes from Verhaak 2010
+getClassifierGenes <- function()
+{
+  file <- "~/s/data/hamid/repo/hbolouri/oncoDev/prep/tcgaMarkersAndTissues/markers/ClaNC840_centroids.txt"
+  tbl <- read.table(file, sep="\t", header=TRUE, as.is=TRUE);
+  tbl$Symbol
+  
+} # getClassifierGenes
 #----------------------------------------------------------------------------------------------------
