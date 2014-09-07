@@ -6,6 +6,11 @@ var PLSRModule = (function () {
    var plsrDisplay
    var d3plsrDisplay;
 
+   var firstTime = true;
+
+   var currentData;    // the most recently calculated points and load vectors;
+   var currentAbsoluteMaxValue; // most recent max value, used for scaling
+
       // these are reported by the server, from an inspection of the data
    var ageAtDxMin, ageAtDxMax, survivalMin, survivalMax;
 
@@ -172,6 +177,7 @@ var PLSRModule = (function () {
 
       console.log("=== handlePlsrResults");
 
+      firstTime = false;
       if(msg.status == "error"){
          alert(msg.payload);
          return;
@@ -196,6 +202,9 @@ var PLSRModule = (function () {
 
       // genes = genes.slice(1,8);
       allObjs = genes.concat(vectors);
+      currentData = allObjs;    // the most recently calculated points and load vectors;
+      currentAbsoluteMaxValue = absMaxValue; // most recent max value, used for scaling
+
    
       console.log("=== calling d3PlsrscatterPlot");
       svg = d3PlsrScatterPlot(allObjs, absMaxValue);
@@ -368,7 +377,9 @@ var PLSRModule = (function () {
   function handleWindowResize () {
      console.log("=== Module.plsr handleWindowResize");
      plsrDisplay.width($(window).width() * 0.99);
-     plsrDisplay.height($(window).height() * 0.90);
+     plsrDisplay.height($(window).height() * 0.85);
+     if(!firstTime)
+       d3PlsrScatterPlot(currentData, currentAbsoluteMaxValue);
      };
 
    //--------------------------------------------------------------------------------------------
