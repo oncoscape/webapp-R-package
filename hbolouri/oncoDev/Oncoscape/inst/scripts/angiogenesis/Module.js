@@ -65,19 +65,19 @@ var angioPathwaysModule = (function () {
       movieButton.click(togglePlayMovie);
       searchBox = $("#angiogenesisSearchBox");
 
-      sendSelectionMenu = $("#angioSendSelectionMenu");
-      sendSelectionMenu.change(sendToModuleChanged);
-      sendSelectionMenu.empty();
+ //     sendSelectionMenu = $("#angioSendSelectionMenu");
+ //     sendSelectionMenu.change(sendToModuleChanged);
+ //     sendSelectionMenu.empty();
         
-      sendSelectionMenu.append("<option>Send Selection to:</option>")
-      var ModuleNames = getSelectionDestinations()
-      for(var i=0;i< ModuleNames.length; i++){
-         var sendToModule = ModuleNames[i]
-         if(sendToModule !== thisModuleName){
-            optionMarkup = "<option>" + sendToModule + "</option>";
-            sendSelectionMenu.append(optionMarkup);
-           }
-         } // for i
+ //     sendSelectionMenu.append("<option>Send Selection to:</option>")
+ //     var ModuleNames = getSelectionDestinations()
+ //     for(var i=0;i< ModuleNames.length; i++){
+ //        var sendToModule = ModuleNames[i]
+ //        if(sendToModule !== thisModuleName){
+ //           optionMarkup = "<option>" + sendToModule + "</option>";
+ //           sendSelectionMenu.append(optionMarkup);
+ //          }
+ //       } // for i
 
       loadNetwork(network, vizmap);
       $(window).resize(handleWindowResize);
@@ -168,11 +168,11 @@ var angioPathwaysModule = (function () {
 
 
    //----------------------------------------------------------------------------------------------------
-   function sendToModuleChanged() {
-      destinationMdoule = sendSelectionMenu.val()
-      broadcastSelection(destinationModule);
-      sendSelectionMenu.val("Send Selection to:")
-      } // sendToModuleChanged
+//   function sendToModuleChanged() {
+//      destinationMdoule = sendSelectionMenu.val()
+//      broadcastSelection(destinationModule);
+//      sendSelectionMenu.val("Send Selection to:")
+//      } // sendToModuleChanged
 
    //----------------------------------------------------------------------------------------------------
    function broadcastSelection(destinationModule) {
@@ -569,22 +569,6 @@ var angioPathwaysModule = (function () {
        cwAngio.batchData(noa);
        } // displayTissue
 
-    //----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-               callback: "DisplayAngioPathwaysModifiedDate",
-               status:"request",
-               payload:"angioPathways"
-               };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-        }
-    //----------------------------------------------------------------------------------------------------
-    function DisplayAngioPathwaysModifiedDate(msg){
-       document.getElementById("angioPathwaysDateModified").innerHTML = msg.payload;
-       }
-
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
@@ -593,12 +577,10 @@ var angioPathwaysModule = (function () {
           initializeUI(angiogenesisNetwork.elements, angiogenesisVizmap[0].style);
           });
 
-       addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
-       addJavascriptMessageHandler("handle_angio_mRNA_data", handle_mRNA_data);
+        addJavascriptMessageHandler("handle_angio_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_angio_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_angio_mutation_data",  handle_mutation_data);
        addJavascriptMessageHandler("angiogenesisHandlePatientIDs", handlePatientIDs);
-       socketConnectedFunctions.push(SetModifiedDate);
        //if(typeof(window.tabsAppRunning) == "undefined") {
        //   socketConnectedFunctions.push(angiogenesisDemoVizChanges)
        //   }

@@ -652,7 +652,10 @@ var ThisModuleName = "ClinicalTable"
         }  
 
       $("#ageAtDxSlider").slider({
-         change: function(event, ui) {
+         slide: function(event, ui) {
+            if(ui.values[0] > ui.values[1]){
+               return false;
+            }          
             $("#ageAtDxMinSliderReadout").text (ui.values[0])
             $("#ageAtDxMaxSliderReadout").text (ui.values[1])
                       tableRef.fnDraw()
@@ -665,7 +668,10 @@ var ThisModuleName = "ClinicalTable"
     $("#ageAtDxMaxSliderReadout").text(89);
 
     $("#overallSurvivalSlider").slider({
-       change: function(event, ui) {
+       slide: function(event, ui) {
+           if(ui.values[0] > ui.values[1]){
+               return false;
+            }  
           $("#overallSurvivalMinSliderReadout").text (ui.values[0])
           $("#overallSurvivalMaxSliderReadout").text (ui.values[1])
                     tableRef.fnDraw()},
@@ -684,7 +690,7 @@ var ThisModuleName = "ClinicalTable"
     function showAbout_ClTbl(){
   
           var   info ={Modulename: ThisModuleName,
-                    CreatedBy: "Paul Shannon",
+                    CreatedBy: "Oncoscape Core",
                     MaintainedBy: "Paul Shannon",
                     Folder: "clinicalDataTable"}
 
@@ -925,7 +931,7 @@ ctbl.init();
 
 .HeaderLinks {
   color: blue;
-  font-size: small;
+  font-size: medium;
   cursor: pointer;
     display: block;
      margin-right: 20px;
@@ -981,7 +987,7 @@ th, td { white-space: nowrap; }
    margin-top: 2px;
    min-width: 100px;
    margin: 0 auto;
-   margin-bottom: 5px;
+   margin-bottom: 2px;
    background-color: #E8E8E8;
    }
 
@@ -993,10 +999,10 @@ th, td { white-space: nowrap; }
 #clinicalDataTableFilterControlsDiv{
    font-family: sans-serif;
    font-size: 14px;
-   margin-top: 20px;
+   margin-top: 10px;
    margin-left: 100px;
    margin-right: 100px;
-   margin-bottom: 20px;
+   margin-bottom: 10px;
    }
 
 
@@ -1018,7 +1024,7 @@ th, td { white-space: nowrap; }
   font-size: 14px;
   border: 1px solid #DDD;
   width: 20px;
-  height: 16px;
+  height: 20px;
   resize: none;
   margin-top: 4px;
   margin-left: 2px;
@@ -1046,41 +1052,42 @@ th, td { white-space: nowrap; }
       <span id="cltblTooltipsLink"  dx=10>Tooltips</span>
    </div>
    <div id="clinicalDataTableControlsDiv">
+
       <div id="clinicalDataTableFilterControlsDiv" style="border: 1px;" align="center">
 
        <div id="ageSliderDiv" style="display: inline-block">
-           <div id="sliderTitleDiv" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 1px;">ageAtDx</div>
-           <div style="width: 350px; overflow: hidden;">
-               <div id='msgBox' style="float: left;" >  
+           <div id="sliderTitleDiv" class="clinicalDataFilterSliderTitleDiv" style="align: center; width=100%">ageAtDx</div>
+           <div style="width: 210px; overflow: hidden;">
+               <div id='msgBox' style="float: left" >  
                   <textarea id="ageAtDxMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="ageAtDxSlider" class="clinicalDataFilterSlider"></div>
-               <div id='msgBox'>  
+               <div style="width: 120px; height: 10px; float: left; margin-top: 10px; margin-left: 10px; margin-right: 10px;" id="ageAtDxSlider" class="clinicalDataFilterSlider"></div>
+               <div id='msgBox' style="float: left">  
                   <textarea id="ageAtDxMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
            </div>
         </div>
 
        <div id="survivalSliderDiv" style="display: inline-block">
-           <div id="sliderTitle3Div" class="clinicalDataFilterSliderTitleDiv" style="margin-left: 1px;">survival</div>
-           <div style="width: 350px; overflow: hidden;">
-               <div id='msgBox' style="float: left;" >  
+           <div id="sliderTitle3Div" class="clinicalDataFilterSliderTitleDiv" style="align: center; width=100%">survival</div>
+           <div style="width: 210px; overflow: hidden;">
+               <div id='msgBox'style="float: left" >  
                   <textarea id="overallSurvivalMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
-               <div style="width: 120px; height: 10px; float: left; margin-top: 10px;" id="overallSurvivalSlider" class="clinicalDataFilterSlider"></div>
-               <div id='msgBox'>  
+               <div style="width: 120px; height: 10px; float: left;  margin-top: 10px;margin-left: 10px; margin-right: 10px;" id="overallSurvivalSlider" class="clinicalDataFilterSlider"></div>
+               <div id='msgBox' style="float: left" >  
                   <textarea id="overallSurvivalMaxSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
            </div>
         </div>
 
-       <div id="clinicalTablesButtonsDiv" style="display: block">
-           <div id="viewButtonDiv" style="display: inline-block">
+       <div id="clinicalTablesButtonsDiv" style="display: inline-block; margin-top:14px ">
+           <div id="viewButtonDiv" style="float:right">
               <button id="showAllClinicalTablesRowsButton" class="tblClinicalControlButton" type="button">Remove Filters</button>
            </div>
              <span id="useSavedSelectionButton" class="tblClinicalControlButton" type="button"></span>
 
-          <div id="clinicalDataTableOutboundButtonDiv" style="display: inline-block">
+          <div id="clinicalDataTableOutboundButtonDiv"  style="float:right; ">
             <select id="ClTblsendSelectiontoModuleButton" name="SendSelectionToModule"></select>
 
           </div>

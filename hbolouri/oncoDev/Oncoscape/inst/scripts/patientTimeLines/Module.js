@@ -394,7 +394,8 @@ var TimeLineModule = (function () {
                      console.log("Using event: ", event)
                      PatientOrderBy =  getHorizontalBarSize(getDateDiff(SidePlotEvent, event.Event1,event.Event2,event.TimeScale)); 
                     
-               } else if(["Chemo", "Radiation", "Diagnosis", "OR", "Status", "MRI"].indexOf(SidePlotEvent) !== -1){
+     //          } else if(["Chemo", "Radiation", "Diagnosis", "OR", "Status", "MRI"].indexOf(SidePlotEvent) !== -1){
+                 } else if([ "Diagnosis", "OR", "Status", "MRI"].indexOf(SidePlotEvent) !== -1){
                     //get number of categories
                     EventsByID.forEach(function(ID, Patient){
                          if(Patient.has(SidePlotEvent) && Patient.get(SidePlotEvent)[0].showPatient){
@@ -828,7 +829,8 @@ var TimeLineModule = (function () {
            ;
            
            AddSideBarMenu.selectAll("option")
-                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys(), ["Radiation", "Chemo", "Diagnosis", "OR", "MRI", "Status"].filter(function(d){ return EventTypes.has(d) })]))
+//                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys(), ["Radiation", "Chemo", "Diagnosis", "OR", "MRI", "Status"].filter(function(d){ return EventTypes.has(d) })]))
+                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys(), ["Diagnosis", "OR", "MRI", "Status"].filter(function(d){ return EventTypes.has(d) })]))
                     .enter()
                          .append("option")
                          .attr("value", function(d){return d})

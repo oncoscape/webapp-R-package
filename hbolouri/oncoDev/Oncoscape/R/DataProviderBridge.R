@@ -357,6 +357,7 @@ getPatientHistoryDataVector <- function(WS, msg)
        
    columnOfInterest <- payload$colname
    printf("getting colname: %s", columnOfInterest)
+   printf("All column names %s", colnames(tbl))
    if(!columnOfInterest %in% colnames(tbl)){
       error.message <- sprintf("Oncoscape DataProviderBridge patientHistoryDataVector error:  '%s' is not a column title", columnOfInterest);
       return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")

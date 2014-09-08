@@ -134,35 +134,67 @@ var PCAModule = (function () {
  
     var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
                       .attr("width", $("#pcaDisplay").width())
+                      .attr("height", 50)
                       ;
+  
+     var TextOffset =  [0, 87, 87, 87, 87, 87, 87];
+     var TextOffSet = d3.scale.ordinal()
+               .range(TextOffset)
+               .domain(Classifications.keys());
+        
+    var legend =    Legendsvg
+                   .append("g")
+                   .attr("class", "legend")
+                   .attr("transform", "translate(" + 10 + "," + 10 + ")")  
+                   .selectAll(".legend")
+                     .data(LegendLabels)
+                     .enter().append("g")
+                     .attr("transform", function(d, i) { 
+                      return "translate(" + i*TextOffSet(d) + ",0)" })
+               ;
 
-    var Legendtext = Legendsvg.append("text").attr('transform', 'translate(10, 20)');
+    var text = legend.append("text")
+            .attr("y", 10)
+            .attr("x", 0)
+            .style("font-size", 12)
+            .text(function(d) { return d})
+            .attr("transform", function(d, i) { 
+                      return "translate(" + 15 + ",0)" })
+           ;
 
-    for(var i=0; i<LegendLabels.length; i++){
-         Legendtext.append('tspan').text(LegendLabels[i]).attr("dx", 20).attr("class", "legendtext")
-     }
+     legend.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 5)
+            .attr("r", function(d) { return 6;})
+            .style("fill", function(d) { return Classifications.get(d)[0].color[0]})
+   
+//    var Legendtext = Legendsvg.append("text").attr('transform', 'translate(10, 20)');
 
-    var TextOffset = [];    var xPosition = 0
-    console.log(Legendtext)
-    console.log("Get LegendText: ",  document.getElementsByClassName("legendtext")  )
+//    for(var i=0; i<LegendLabels.length; i++){
+//         Legendtext.append('tspan').text(LegendLabels[i]).attr("dx", 20).attr("class", "legendtext")
+//     }
 
-    for(var i=0; i<LegendLabels.length; i++){
-        var textNode = document.getElementsByClassName("legendtext")[i]
-        TextOffset.push(xPosition)
-        console.log(textNode)
-        xPosition = xPosition + textNode.getComputedTextLength() +20
-    }
+//    var TextOffset = [];    var xPosition = 0
+//    console.log(Legendtext)
+//    console.log("Get LegendText: ",  document.getElementsByClassName("legendtext")  )
 
-   console.log(TextOffset)
-   var Legendcircle = Legendsvg.append("g")
-   for(var i=0;i<LegendLabels.length;i++){
-    Legendcircle.append("circle")
-           .attr("cx", 20)
-           .attr("cy", 15)
-           .attr("r",  6)
-           .attr("fill", Classifications.get(LegendLabels[i])[0].color[0])
-           .attr("transform", "translate(" + (TextOffset[i]) +",0)")
-      }
+//    for(var i=0; i<LegendLabels.length; i++){
+//        var textNode = document.getElementsByClassName("legendtext")[i]
+//        TextOffset.push(xPosition)
+//        console.log(textNode)
+//        xPosition = xPosition + textNode.getComputedTextLength() +20
+//    }
+
+//   console.log(TextOffset)
+//   var Legendcircle = Legendsvg.append("g")
+//   for(var i=0;i<LegendLabels.length;i++){
+//    Legendcircle.append("circle")
+//           .attr("cx", 20)
+//           .attr("cy", 15)
+//           .attr("r",  6)
+//           .attr("fill", Classifications.get(LegendLabels[i])[0].color[0])
+//           .attr("transform", "translate(" + (TextOffset[i]) +",0)")
+//  }
  
     } // drawLegend
   
@@ -214,8 +246,16 @@ var PCAModule = (function () {
          d3PcaScatterPlot(pcaScores);
 
          console.log(msg.payload.importance)
-//         pcaData = JSON.parse(msg.payload.importance);
-//         pcaDataTable(pcaData);
+         pcaData = msg.payload.importance
+        var pcaText = $("#pcaTextDisplayDiv")
+        pcaText.append("Proportion of Variance<br>")
+        pcaText.append("PC1: "+100*pcaData[1].PC1 + "%, PC2: "+100*pcaData[1].PC2+"%")
+
+
+//         var pcaTable = [ ["Standard Deviation", pcaData[0].PC1, pcaData[0].PC2],
+//                      ["Proportion of Variance", pcaData[1].PC1, pcaData[1].PC2],
+//                      ["Cumulative Proportion",  pcaData[2].PC1, pcaData[2].PC2] ]
+//         pcaDataTable(pcaTable);
          
          if(!firstTime){  // first call comes at startup.  do not want to raise tab then.
             tabIndex = $('#tabs a[href="#pcaDiv"]').parent().index();
@@ -313,32 +353,28 @@ var PCAModule = (function () {
      }
   //-------------------------------------------------------------------------------------------
    function pcaDataTable(pcaData){
-        var pcaText = d3.select("#pcaTextDisplay")
+        var pcaText = $("#pcaTextDisplayDiv")
         console.log(pcaData)
-        var tblColumnNames = ["A", "B", "C"];
+        var tblColumnNames = ["name", "PC1", "PC2"]
+//        var tblColumnNames = ["Standard Deviation", "Proportion of Variance", "Cumulative Proportion"];
         columnTitles = [];
         for(var i=0; i < tblColumnNames.length; i++){
           columnTitles.push({sTitle: tblColumnNames[i]});
         }
 
-     displayDiv.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="pcaTable"></table>');
+     pcaText.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="pcaTable"></table>');
      $("#pcaTable").dataTable({
-        "sDom": "Rlfrtip",
-         sDom: 'C<"clear">lfrtip',
         "aoColumns": columnTitles,
-	    "sScrollX": "100px",
-        "iDisplayLength": 25,
-         bPaginate: true,
-        "scrollX": true,
         "fnInitComplete": function(){
             $(".display_results").show();
             }
          }); // dataTable
 
      console.log("displayTable adding data to table");
-     tableRef = $("#pcaTable").dataTable();
-//     tableRef.fnAddData(pcaData);
-
+     PCAtableRef = $("#pcaTable").dataTable();
+     for(var i=0; i< pcaData.length; i++){
+        PCAtableRef.fnAddData(pcaData[i]);
+     }
         
    }
  //-------------------------------------------------------------------------------------------

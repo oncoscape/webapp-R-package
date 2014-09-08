@@ -8,9 +8,7 @@
    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
    <link   rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 
-   <script src="http://localhost/home/js/cytoscape-2.2.4.min.js"></script>
-
-   <!-- script src="http://s3.amazonaws.com/oncoscape/js/cytoscape-2.2.2.min.js"></script -->
+   <script src="http://s3.amazonaws.com/oncoscape/js/cytoscape-2.2.9.min.js"></script>
 
    <script src="http://s3.amazonaws.com/oncoscape/js/jquery.cytoscape.js-panzoom.js"></script>
    <link   href="http://s3.amazonaws.com/oncoscape/fonts/font-awesome-4.0.3/css/font-awesome.css" rel="stylesheet" type="text/css" />
@@ -23,17 +21,56 @@
    <link   rel="stylesheet" type="text/css"
            href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
 
-   <script src="//cdn.datatables.net/colreorder/1.1.0/css/dataTables.colReorder.min.css"></script>
-   <script src="//cdn.datatables.net/colreorder/1.1.0/images/insert.png"></script>
+   <link   rel="stylesheet" type="text/css"
+           href="http://cdn.datatables.net/colreorder/1.1.0/css/dataTables.colReorder.min.css"></script>
+
+   <!-- img src="//cdn.datatables.net/colreorder/1.1.0/images/insert.png" -->
    <script src="//cdn.datatables.net/colreorder/1.1.0/js/dataTables.colReorder.min.js"></script>
+   <script src="//cdn.datatables.net/colvis/1.1.0/js/dataTables.colVis.min.js"></script>
+
+   <link   rel="stylesheet" type="text/css"
+           href="http://cdn.datatables.net/colvis/1.1.0/css/dataTables.colVis.css"></script>
+
+   <script src="http://s3.amazonaws.com/oncoscape/js/jquery.multi-select.js" type="text/javascript"></script>
+   <link href="http://s3.amazonaws.com/oncoscape/js/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+   <script src="http://s3.amazonaws.com/oncoscape/js/chosen.jquery.min.js" type="text/javascript"></script>
+   <link href="http://s3.amazonaws.com/oncoscape/css/chosen.min.css" media="screen" rel="stylesheet" type="text/css">
+   <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.js"></script>
+   <script src="http://s3.amazonaws.com/oncoscape/js/cytoscape.js-qtip.js"></script>
+   <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.css">
+
+	 
 
 <script>
 
+</script>
+</head>
+
+
+<script>
 var socket;
 var dispatchOptions = {};
 var socketConnectedFunctions = [];
+var onReadyFunctions = [];
 
-//--------------------------------------------------------------------------------------------------
+//
+// Do not modify the following line.  If Oncoscape is launched from LabKey then a new labkey javascript
+// object will be created with members {.mode, .reportSession, .filteredPatients}
+//
+//var labkey = {labkeyOncoscape};
+
+var filteredPatients = [];
+//----------------------------------------------------------------------------------------------------
+addJavascriptMessageHandler = function(cmd, func)
+{
+   if(cmd in dispatchOptions){
+      alert("javascript message handler for '" +  cmd + " already set");
+      }
+   else{
+      dispatchOptions[cmd] = func
+      }
+}
+//----------------------------------------------------------------------------------------------------
 function getRandomFloat (min, max)
 {
     return Math.random() * (max - min) + min;
@@ -44,16 +81,46 @@ function getRandomInt (min, max)
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 //----------------------------------------------------------------------------------------------------
-addJavascriptMessageHandler = function(cmd, func)
+String.prototype.beginsWith = function (string) 
 {
-   dispatchOptions[cmd] = func
-}
+    return(this.toLowerCase().indexOf(string.toLowerCase()) === 0);
+};
 //----------------------------------------------------------------------------------------------------
-//addDispatchOption = function(cmd, func)
-//{
-//   dispatchOptions[cmd] = func
-//}
-//--------------------------------------------------------------------------------------------------
+// if jQuery-style tabs are in use with Oncoscape, this function raised the named tab to the
+// the front (visible) position in the tabset
+// the argument, "tabIDString" is the tab id used in the module's widget.html, reproduced exactly
+// in tabsApp/widget.html, with some current examples being
+//  pcaDiv, patientTimeLinesDiv, gbmPathwaysDiv
+function raiseTab(tabIDString)
+{
+  tabsWidget = $("#oncoscapeTabs");
+  if(tabsWidget.length > 0){
+     selectionString = '#oncoscapeTabs a[href="#' + tabIDString + '"]';
+     tabIndex = $(selectionString).parent().JAVASCRIPT_INDEX ();
+     tabsWidget.tabs( "option", "active", tabIndex);
+     } // if tabs exist
+
+} // raiseTab
+//----------------------------------------------------------------------------------------------------
+// from http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
+function openCenteredBrowserWindow(url, title, w, h) {
+    // Fixes dual-screen position                         Most browsers      Firefox
+    var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+    var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+    width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+    height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+    var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+    var top = ((height / 2) - (h / 2)) + dualScreenTop;
+    var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+    if (window.focus) {
+       newWindow.focus();
+       }
+
+} // openCenteredBrowserWindow
+//----------------------------------------------------------------------------------------------------
 dispatchMessage = function(msg)
 {
    console.log("--- webapp, index.common, dispatchMessage: " + msg.cmd);
@@ -89,108 +156,611 @@ setupSocket = function (socket)
     }
 
 } // setupSocket
+//----------------------------------------------------------------------------------------------------
+function invokeSuccess(r)
+{
+    socket.rserveExecuting = false;
+
+    if (r.errors.length > 0)
+    {
+        for (var i=0; i < r.errors.length; i++)
+        {
+        $("#status").text("Error: " + r.errors[i]);
+        }
+    }
+    else
+    if (r.outputParams.length > 0)
+    {
+        // note that LabKey has handled the JSON parsing already
+        var msg = r.outputParams[0].value;
+        console.log("index.common onmessage sees " + msg.cmd);
+        dispatchMessage(msg);
+    }
+
+    //
+    // call the next pending command if available
+    //
+    if (socket.rservePendingCommands.length > 0)
+    {
+        // note that M4 macro language uses 'shift' so quote it below
+        executeRserveCommand(socket.rservePendingCommands.shift());
+    }
+}
+//----------------------------------------------------------------------------------------------------
+function invokeFailure(error)
+{
+    $("#status").text("Error: " + error.exception);
+}
+//----------------------------------------------------------------------------------------------------
+function executeRserveCommand(data)
+{
+    if (socket.rserveExecuting)
+    {
+        //
+        // put this command on our pending list and execute when the server has responded.
+        //
+
+        //console.log("in executeRserveCommand - pending:" + data);
+        socket.rservePendingCommands.push(data);
+    }
+    else
+    {
+        //
+        // execute immediately
+        //
+        socket.rserveExecuting = true;
+
+        //console.log("in executeRserveCommand - executing:" + data);
+        LABKEY.Report.execute( {
+            success: invokeSuccess,
+            failure: invokeFailure,
+            script : 'invokeCommand',
+            reportSessionId : socket.rserveSession,
+            inputParams : { DATA : data }
+        });
+    }
+}
+//----------------------------------------------------------------------------------------------------
+// todo: investigate why json returned by LabKey is creating array[1] in some cases.
+// both JSON.parse and the LabKey util decode function do this
+//----------------------------------------------------------------------------------------------------
+function flattenArrays(d)
+{
+    for (var key in d)
+    {
+        if (d.hasOwnProperty(key))
+        {
+            var val = d[key];
+            if ((val instanceof Array) && val.length == 1)
+            {
+                d[key] = val[0];
+            }
+        }
+    }
+}
+//----------------------------------------------------------------------------------------------------
+setupLabKey = function(socket)
+{
+    // replace socket send for LabKey
+    socket.send = executeRserveCommand;
+    socket.rservePendingCommands = [];
+    socket.rserveExecuting = false;
+    socket.rserveSession = labkey.reportSession;
+    console.log("rserveSession:  " + labkey.reportSession);
+
+    // kick off init functions
+    for(var f=0; f < socketConnectedFunctions.length; f++)
+    {
+        console.log("calling the next sockectConnectedFunction");
+        socketConnectedFunctions[f]();
+    }
+}
+
+function setupFilteredPatients()
+{
+    if (typeof labkey != "undefined" && labkey.filteredPatients)
+    {
+        filteredPatients = labkey.filteredPatients.split(';');
+        console.log("==== filteredPatients: " + filteredPatients.length)
+    }
+}
 //--------------------------------------------------------------------------------------------------
-$(document).ready(function() {
+// the nginx proxy server, used by fhcrc IT for the publicly-visible version of Oncoscape
+// times out web sockets at 90 seconds.
+// this function, when called more often that that, will keep the websocket open.
+keepAlive = function()
+{   
+    console.log("keep alive"); 
+    msg = {cmd: "keepAlive", callback: "", status:"request", payload:""}
+    socket.send(JSON.stringify(msg));
+
+} // keepAlive
+//--------------------------------------------------------------------------------------------------
+$(document).ready(function()
+{
     console.log("==== index.common document.ready #1");
-    socket = new WebSocket("ws://" + window.location.host);
-    setupSocket(socket);
-    })
+
+    for (var f = 0; f < onReadyFunctions.length; f++)
+    {
+        console.log("calling on ready function");
+        onReadyFunctions[f]();
+    }
+
+    //
+    // labkeyMode has three states:
+    // undefined - labkey not involved
+    // labkeyWS - labkey launched Oncoscape; local R must be run with WS
+    // labkeyRS - labkey launched oncoscape; Rserve is used
+    //
+    if (typeof labkey == "undefined") {
+        socket = new WebSocket("ws://" + window.location.host);
+        setupSocket(socket);
+        setInterval(keepAlive, 30000);
+        }
+    else
+    if (labkey.mode == "WS")
+    {
+        socket = new WebSocket("ws://localhost:7777/");
+        setupSocket(socket);
+    }
+    else
+    if (labkey.mode == "RS")
+    {
+        socket = {};
+        setupLabKey(socket);
+    }
+    else
+    {
+        console.log("unrecognized labkey.mode was provided: " + labkey.mode);
+    }
+
+    // todo: probably a better place to put this
+    setupFilteredPatients();
+})
 //--------------------------------------------------------------------------------------------------
+
+
 </script>
-
-</head>
-
 
 <script>
-//--------------------------------------------------------------------------------------------------
-demoTissueSet = function()
-{
-   return ["0525.T.2", "0598.T.1", "0622.T.1", "0636.T.1", "0664.T.1", "0761.T.1", "135.1.T.1", 
-           "249.T.1", "270X.T.1", "286X.T.1", "349.T.1", "392.1.T.1", "443.1.T.1", "450.T.1", 
-           "480.T.1", "821.T.1", "891.T.1", "929.T.1", "958.T.1"];
-
-
-} // demoTissueSet
-//--------------------------------------------------------------------------------------------------
-$(document).ready(function() {
-    console.log("==== survivalStats code.js document.ready");
-    if(typeof(window.tabsAppRunning) == "undefined") {
-       socketConnectedFunctions.push(analyzeSelectedTissuesWithDemoData);
-       }
-    addJavascriptMessageHandler("tissueIDsForSurvivalStats", handleTissueIDsForSurvivalStats);
-    });
-//--------------------------------------------------------------------------------------------------
-handleTissueIDsForSurvivalStats = function(msg)
-{
-   console.log("--- handleTissueIDsForSurvivalStats");
-   console.log(msg.cmd)
-   console.log(msg)
-   sampleCount = msg.payload.tissueIDs.length;
-   console.log("   sampleCount: " + sampleCount);
-   tissueIDs = msg.payload.tissueIDs;
-
-   analyzeSelectedTissues(tissueIDs);
-   $("#tabs").tabs( "option", "active", 6); 
-
-   
-} // handleTissueIDsForSurivalStats
-//--------------------------------------------------------------------------------------------------
-analyzeSelectedTissuesWithDemoData = function()
-{
-   analyzeSelectedTissues(demoTissueSet());
-}  
-//--------------------------------------------------------------------------------------------------
-analyzeSelectedTissues = function(tissueIDs)
-{
-    msg = {cmd:"predictDzSubtypes", status: "request", payload: tissueIDs};
-    msg.json = JSON.stringify(msg);
-    socket.send(msg.json);
-    msg = {cmd:"calculateSurvivalCurves", status: "request", payload: tissueIDs};
-    msg.json = JSON.stringify(msg);
-    socket.send(msg.json);
-    msg = {cmd:"drawSurvivalBoxPlot", status: "request", payload: tissueIDs};
-    msg.json = JSON.stringify(msg);
-    socket.send(msg.json);
-
-} // analyzeSelectedTissues
-//--------------------------------------------------------------------------------------------------
-displaySamplesVsSubtypePvals = function(msg)
-{
-   console.log("=== displaySamplesVsSubtypePvals");
-   $("#dzSubTypeDataTableDiv").html(msg.payload)
-
-} // displaySamplesVsSubtypePvals
-//--------------------------------------------------------------------------------------------------
-displaySurvivalCurves = function(msg)
-{
-   console.log("about to add survival curve image to survivalCurve div");
-   encodedImage = msg.payload;
-   document.getElementById("survivalCurveImage").src = encodedImage;
-}
-//--------------------------------------------------------------------------------------------------
-displaySurvivalBoxPlot = function(msg)
-{
-   console.log("about to add survival boxplot image to survivalBoxPlot div");
-   encodedImage = msg.payload;
-   document.getElementById("survivalBoxPlotImage").src = encodedImage;
-}
-//--------------------------------------------------------------------------------------------------
-addJavascriptMessageHandler("samplesVsSubtypePvals", displaySamplesVsSubtypePvals);
-addJavascriptMessageHandler("displaySurvivalCurves", displaySurvivalCurves);
-addJavascriptMessageHandler("displaySurvivalBoxPlot", displaySurvivalBoxPlot);
 //----------------------------------------------------------------------------------------------------
+var UserSettingsModule = (function () {
+
+     var username = "Guest"
+     var userID = null
+     var SelectionNames = [];
+     
+//----------------------------------------------------------------------------------------------------
+//======= PUBLIC FUNCTIONS ==========
+//----------------------------------------------------------------------------------------------------
+      getUserID = function(){
+           console.log("Sending User ID: ", userID)
+           return userID;
+      }      
+//----------------------------------------------------------------------------------------------------
+      getUsername = function(){
+           console.log("Sending Username: ", username)
+           return username;
+      }      
+
+//----------------------------------------------------------------------------------------------------
+      setUsername = function(msg){
+           console.log("Set username: ", msg.payload.username)
+           username = msg.payload.username
+      }      
+
+    //--------------------------------------------------------------------------------------------
+     addSelection = function(NewSelection){
+  
+           //Check NewSelection values for completeness/accuracy
+           // should have selectionnames, patientIDs, Tab, and Settings
+           
+           NewSelection.userID = getUserID() 
+     
+           msg = {cmd: "addNewUserSelection",
+                  callback: "UpdateSelectionListeners",
+                  status:"request",
+                  payload: NewSelection 
+                 };
+ 
+           msg.json = JSON.stringify(msg);
+//           console.log(msg.json);
+           socket.send(msg.json);
+     }
+    //--------------------------------------------------------------------------------------------
+     getSelectionbyName = function(selectionname, callback){
+               
+			if(SelectionNames.indexOf(selectionname) == -1){
+   			     alert("Error: ",selectionname, " not in list")
+                  return;
+			} else{
+  
+                msg = {cmd:"getUserSelection",
+                  callback: callback,
+                  status:"request",
+                  payload:{userID: getUserID(),
+                           selectionname: selectionname}
+                  };
+     
+                 console.log(JSON.stringify(msg));
+                  socket.send(JSON.stringify(msg));
+          }     
+    }
+
+   //--------------------------------------------------------------------------------------------
+     getSelectionNames = function(){
+
+            return SelectionNames;
+     }
+
+//--------------------------------------------------------------------------------------------
+     PromptForSelectionName = function(){
+        var selectionname = prompt("Please enter a selection name", "e.g. high survival")
+        if (selectionname != null & selectionname !== "e.g. high survival") 
+               return selectionname;
+ 
+        alert("Invalid Selection name: ", selectionname,". Please try again.")
+        return null;
+
+     }
+
+//----------------------------------------------------------------------------------------------------
+//======= PRIVATE FUNCTIONS ==========
+//----------------------------------------------------------------------------------------------------
+      function CreateNewUser(){
+      
+         console.log("======= creating new guest user")
+  
+            userID = Math.random().toString(36).substring(7)
+            console.log(userID);
+      }
+//----------------------------------------------------------------------------------------------------
+     function UserSettingsInitializeUI(){
+
+           CreateNewUser();
+       };
+
+//----------------------------------------------------------------------------------------------------
+     function addNewUser(){
+              
+            msg = {cmd:"addNewUserToList",
+                 callback: "UpdateUserInfo",
+                 status:"request",
+                 payload: { userID: userID, username: username}
+                };
+                console.log(JSON.stringify(msg))
+          socket.send(JSON.stringify(msg));
+     }
+ 
+         
+
+//----------------------------------------------------------------------------------------------------
+    function UpdateSelectionListeners(msg){
+    
+        console.log("===== Updating JS Selection Lists")
+        console.log(msg)
+         
+         if(msg.status === "success"){
+           SelectionNames.push(msg.payload.selectionname)  
+           
+           if(typeof(SavedSelection) != "undefined")  SavedSelection.addSelectionToTable(msg);
+           if(typeof(PatientTimeLine) != "undefined") PatientTimeLine.RefreshSelectionMenu()
+           if(typeof(ctbl) != "undefined") ctbl.UpdateSelectionMenu()
+           if(typeof(pca) != "undefined") pca.UpdateSelectionMenu() 
+         }
+     }
+  
+ 
+     
+//----------------------------------------------------------------------------------------------------
+return{
+
+   init: function(){
+      onReadyFunctions.push(UserSettingsInitializeUI);
+      socketConnectedFunctions.push(addNewUser);
+     addJavascriptMessageHandler("UpdateSelectionListeners", UpdateSelectionListeners);
+     addJavascriptMessageHandler("UpdateUserInfo", setUsername);
+
+      }
+   };
+
+}); // DateAndTimeModule
+//----------------------------------------------------------------------------------------------------
+UserSettings = UserSettingsModule();
+UserSettings.init();
+
+</script>
+<script>
+//----------------------------------------------------------------------------------------------------
+var AboutModule = (function () {
+
+    initializeUI = function(){     
+ 
+       $("#AboutDiv").dialog({  
+           autoOpen: false,
+        });
+ 
+ //       ClearAboutInfo()      
+    };
+
+//----------------------------------------------------------------------------------------------------
+    function ClearAboutInfo(){
+       document.getElementById("ModuleNameSlot").innerHTML = "";
+       document.getElementById("CreatorSlot").innerHTML =      "Created by:    ";
+       document.getElementById("MaintainerSlot").innerHTML =   "Maintained by: ";
+       document.getElementById("LastModifiedSlot").innerHTML = "Last Modified: ";
+    }
+//----------------------------------------------------------------------------------------------------
+    function SetModifiedDate(ModuleFolderName){
+
+        msg = {cmd:"getModuleModificationDate",
+             callback: "DisplayModifiedDate",
+             status:"request",
+             payload:ModuleFolderName
+             };
+        msg.json = JSON.stringify(msg);
+        socket.send(msg.json);
+    }
+//----------------------------------------------------------------------------------------------------
+    function DisplayModifiedDate(msg){
+        
+        console.log("Date Modified: ", msg)
+        
+        document.getElementById("LastModifiedSlot").innerHTML = 
+        document.getElementById("LastModifiedSlot").innerHTML + "\t" + msg.payload;
+    }
+
+ return{
+
+   init: function(){
+      onReadyFunctions.push(initializeUI);
+//      socketConnectedFunctions.push(SetModifiedDate)
+      addJavascriptMessageHandler("DisplayModifiedDate", DisplayModifiedDate);
+      },
+      
+      //----------------------------------------------------------------------------------------------------
+     OpenAboutWindow: function(info){
+       
+       ClearAboutInfo()  
+       $("#AboutDiv").dialog('option', 'title',info.Modulename )
+       document.getElementById("CreatorSlot").innerHTML = 
+         document.getElementById("CreatorSlot").innerHTML + "\t"+info.CreatedBy;
+       document.getElementById("MaintainerSlot").innerHTML = 
+              document.getElementById("MaintainerSlot").innerHTML + "\t"+info.MaintainedBy;
+       SetModifiedDate(info.Folder)
+
+         $( "#AboutDiv" ).dialog( "open" )
+    }
+    
+ }; // return
+
+}); // SelectionExample
+//----------------------------------------------------------------------------------------------------
+about = AboutModule();
+about.init();
+
+</script>
+<script>
+var ActiveModules = {};
+
+//----------------------------------------------------------------------------------------------------
+addSelectionDestination = function(modulename, modulediv)
+{
+   if(modulename in ActiveModules){
+        alert("Selection Destination message handler for '" + modulediv +": "+ modulename + " already set");
+   } else{  ActiveModules[modulename] = modulediv  }
+}
+
+//----------------------------------------------------------------------------------------------------
+getSelectionDestinations = function(){
+    var keys = [];
+    for(var k in ActiveModules) keys.push(k);
+    return keys;
+//   return tissueMenu.children().map(function() {return $(this).val();}).get();
+}
+
+ //--------------------------------------------------------------------------------------------
+   function validSelectionToSend(modulename, ids){
+       if(modulename == "PCA") 
+          return checkBeforeSendSelectionsToPCA(ids)
+       return true;
+    }
+   //--------------------------------------------------------------------------------------------
+   function checkBeforeSendSelectionsToPCA(ids){
+      var minimumPatientsForPCA = 8;
+      if(ids.length < minimumPatientsForPCA){
+         alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
+         return false;
+         }
+      return true;
+      } // checkBeforeSendSelectionsToPCA
+
+
+//--------------------------------------------------------------------------------------------
+function sendSelectionToModule(moduleName, currentIDs, metadata, raiseDiv){
+    
+       raiseDiv = true;
+       if(moduleName == "Save Selection"){
+          var selectionname = PromptForSelectionName()
+          if(typeof(selectionname) !== "string")  
+             return;
+          metadata.selectionname = selectionname;
+          raiseDiv = false;
+        }
+    
+       if(validSelectionToSend(moduleName, currentIDs)){    
+          console.log(currentIDs.length + " patientIDs going to " + moduleName)    
+       
+          callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
+          msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
+                 callback: callback,
+                 status:"request",
+                 payload:{targetModule: moduleName,
+                          ids: currentIDs,
+                          metadata: metadata}
+                 };
+         socket.send(JSON.stringify(msg));
+
+         if(raiseDiv == true)
+           raiseTab(ActiveModules[moduleName])
+        }
+    }
+
 </script>
 
+ 
+<script>
+//----------------------------------------------------------------------------------------------------
+var SurvivalModule = (function () {
+
+     function demoTissueSet()
+     {
+//       return ["0525.T.2", "0598.T.1", "0622.T.1", "0636.T.1", "0664.T.1", "0761.T.1", "135.1.T.1", 
+//               "249.T.1", "270X.T.1", "286X.T.1", "349.T.1", "392.1.T.1", "443.1.T.1", "450.T.1", 
+//               "480.T.1", "821.T.1", "891.T.1", "929.T.1", "958.T.1"];
+        return ["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155",
+                  "TCGA.06.0155", "TCGA.06.0162", "TCGA.06.1087", "TCGA.12.0778", 
+                  "TCGA.14.0871", "TCGA.06.0192"];
+     } // demoTissueSet
+     //--------------------------------------------------------------------------------------------
+       function SurvivalInitializeUI(){
+           console.log("==== survivalStats code.js document.ready");
+  
+           if(typeof(window.tabsAppRunning) == "undefined") {
+              socketConnectedFunctions.push(analyzeSelectedTissuesWithDemoData);
+           }
+     }
+     //--------------------------------------------------------------------------------------------------
+     function handlePatientIDs(msg)
+     {
+         console.log("--- handlePatientIDs SurvivalStats");
+         console.log(msg)
+         sampleCount = msg.payload.tissueIDs.length;
+         console.log("   sampleCount: " + sampleCount);
+
+         patientIDs = msg.payload.ids
+ 
+         analyzeSelectedTissues(patientIDs);
+
+     } // handleTissueIDsForSurivalStats
+     //--------------------------------------------------------------------------------------------------
+     function analyzeSelectedTissuesWithDemoData(){
+              analyzeSelectedTissues(demoTissueSet());
+     }  
+     //--------------------------------------------------------------------------------------------------
+     function analyzeSelectedTissues(patientIDs)
+     {
+         return_msg = {cmd:"calculateSurvivalCurves", callback: "displaySurvivalCurves", status: "request", payload: {patients:patientIDs}};
+         socket.send(JSON.stringify(return_msg));
+
+//        msg = {cmd: "getPatientHistoryDataVector", callback: "getSurvivalPlot", status:"request", 
+//               payload: {colname: ["FirstProgression", "Death"], patients:patientIDs} }
+//        socket.send(JSON.stringify(msg))
+     
+     }
+     //--------------------------------------------------------------------------------------------------
+     function getSurvivalPlot(msg){
+        
+         console.log(" create Survival Plot for: ", msg)
+     	 var payload = JSON.parse(msg.payload);
+     	 var storage = [];
+//  	     var patientIDs = Object.keys(payload)
+  	     for(i=0;i<Object.keys(payload).length;i++){
+  	 	     var patient = Object.keys(payload)[i];
+  	         storage.push({ID: patient, value: payload[patient]});
+  	     }
+
+     
+ //        return_msg = {cmd:"calculateSurvivalCurves", callback: "displaySurvivalCurves", status: "request", payload: tissueIDs};
+ //        socket.send(JSON.stringify(return_msg));
+
+     } // analyzeSelectedTissues
+    //--------------------------------------------------------------------------------------------------
+     function displaySurvivalCurves(msg)
+    {
+        console.log("about to add survival curve image to survivalCurve div");
+        encodedImage = msg.payload;
+        document.getElementById("survivalCurveImage").src = encodedImage;
+     }
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_survival(){
+  
+          var   info ={Modulename: "Survival",
+                    CreatedBy: "Oncoscape Core",
+                    MaintainedBy: "Oncoscape Core",
+                    Folder: "survivalStats"}
+
+         about.OpenAboutWindow(info) ;
+    }  
+
+     //----------------------------------------------------------------------------------------------------
+     return{
+
+        init: function(){
+           addSelectionDestination("Survival", "survivalStatsDiv")   
+           onReadyFunctions.push(SurvivalInitializeUI);
+           addJavascriptMessageHandler("displaySurvivalCurves", displaySurvivalCurves);
+           addJavascriptMessageHandler("SurvivalHandlePatientIDs", handlePatientIDs);
+           addJavascriptMessageHandler("getSurvivalPlot", getSurvivalPlot);
+
+        }
+     };
+
+}); // SurvivalModule
+//----------------------------------------------------------------------------------------------------
+survival = SurvivalModule();
+survival.init();
+
+</script>
+
+<body>
+<style>
+
+.HeaderLinks {
+  color: blue;
+  font-size: medium;
+  cursor: pointer;
+    display: block;
+     margin-right: 20px;
+     clear:both;
+
+}
+
+#AboutDiv{
+   overflow: hidden;
+   border:1px solid #CCC;
+   background-color:#F9F9F9;
+   border:1px solid #333;
+   padding:5px;
+   font-size: medium
+   width: 50%
+}
+</style>
+
+<div id="AboutDiv" style="display:none">
+  <div id="CreditsList">
+   <div id="ModuleNameSlot"></div>
+   <div id="CreatorSlot"     >Created by:    </div>
+   <div id="MaintainerSlot"  >Maintained by: </div>
+   <div id="LastModifiedSlot">Last Modified: </div>
+<!--   <div id="ContactSlot">Contact: </div>  -->
+  </div>
+   <br></br>
+   <div><p>Oncoscape is supported by Fred Hutch and STTR</p></div>
+ </div>
 
 <style>
 </style>
 
 <div id="survivalStatsDiv">
-  <div id="statisticsNotesDiv"></div>
-  <div id="dzSubTypeDataTableDiv"></div>
+   <div id="survivalInfoLinks" class="HeaderLinks" align="right">
+      <span id="survivalAboutLink" >About  </span>
+ <!--     <span id="dashboardTooltipsLink"  dx=10>Tooltips</span> -->
+   </div>
+
   <div id="survivalCurveDiv">
       <img id="survivalCurveImage" width="500" height="500"></img>
-      <img id="survivalBoxPlotImage" width="500" height="500"></img>
   </div>
  </div>
 

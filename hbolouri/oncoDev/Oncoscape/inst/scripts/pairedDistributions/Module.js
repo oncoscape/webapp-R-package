@@ -335,30 +335,13 @@ var PairedDistributionsModule = (function () {
         .call(yAxis);
 
      };
-  //----------------------------------------------------------------------------------------------------
-  function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplaypairedDistributionsModifiedDate",
-             status:"request",
-             payload:"pairedDistributions"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
-  //----------------------------------------------------------------------------------------------------
-  function DisplaypairedDistributionsModifiedDate(msg){
-        document.getElementById("pairedDistributionsDateModified").innerHTML = msg.payload;
-    }
-  //--------------------------------------------------------------------------------------------
+   //--------------------------------------------------------------------------------------------
   return{
    init: function(){
       onReadyFunctions.push(initializeUI);
       addSelectionDestination("Distributions", "pairedDistributionsDiv");
       addJavascriptMessageHandler("DistributionsHandlePatientIDs", handlePatientIds);
       addJavascriptMessageHandler("handlePatientData", handlePatientData);
-      addJavascriptMessageHandler("DisplaypairedDistributionsModifiedDate", DisplaypairedDistributionsModifiedDate);
-      socketConnectedFunctions.push(SetModifiedDate);
       //socketConnectedFunctions.push(runDemo);
       }
    };

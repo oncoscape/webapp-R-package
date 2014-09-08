@@ -93,20 +93,116 @@ calculateSurvivalCurves <- function(WS, msg)
    #print(sampleNames)
 
    temp.file <- tempfile(fileext="jpg")
+
+    signature <- "patientHistoryTable";
    
-   fit <- survivalCurve(sampleNames, file=temp.file)
+   patientHistoryProvider <- DATA.PROVIDERS$patientHistoryTable
+   tbl <- getTable(patientHistoryProvider)
+
+   if(!signature %in% ls(DATA.PROVIDERS)){
+       error.message <- sprintf("Oncoscape DataProviderBridge error:  no %s provider defined", signature)
+       return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       return()
+       }
+
+      # payload must be a list
+   payload <- msg$payload;
+   printf("--- payload");
+   print(payload)
+
+   constraint.fields <- sort(names(payload))
+   legal.constraint.fields <- constraint.fields == c("patients")
+   if (!"patients" %in% names(payload)){
+      status <- "failure"
+      error.message <- sprintf("payload field doesn't include 'patients': %s",
+                               paste(constraint.fields, collapse=", "))
+      return.msg <- list(cmd=msg$callback, callback="", status="error", payload=error.message)
+      sendOutput(DATA=toJSON(return.msg), WS=WS)
+      return()
+      }
+   
+   printf("extracting payload field values");
+   patients <- payload$patients
+   print(patients)
+   if(all(nchar(patients) == 0))
+      patients <- NA
+       
+   attribute <- NA
+   if("colname" %in% names(payload)){
+     attribute <- payload$colname
+
+     if(!attribute %in% colnames(tbl)){
+       error.message <- sprintf("Oncoscape DataProviderBridge patientHistoryDataVector error:  '%s' is not a column title", attribute);
+       return.msg <- list(cmd=msg$callback, callback="", payload=error.message, status="error")
+       sendOutput(DATA=toJSON(return.msg), WS=WS)
+       return()
+      } # 
+   }
+   fit <- survivalCurvebyAttribute(tbl = tbl, patients,attribute=attribute, filename=temp.file)
    p = base64encode(readBin(temp.file,what="raw",n=1e6))
    p = paste("data:image/jpg;base64,\n",p,sep="")
 
-   return.cmd <- "displaySurvivalCurves"
+   return.cmd <- msg$callback
 
-   return.msg <- toJSON(list(cmd=return.cmd, payload=p))
+   return.msg <- toJSON(list(cmd=return.cmd, status="success", payload=p))
    sendOutput(DATA=return.msg, WS=WS)
    file.remove(temp.file)
 
 } # calculateSurvivalCurves
 #-------------------------------------------------------------------------------
-survivalCurve <- function(samples=NA, filename=NA)
+survivalCurvebyAttribute <- function(tbl, samples=NA, attribute=NA, filename=NA)
+{
+    if(all(is.na(tbl))) return();
+    
+    if(!is.na(attribute)){ tbl <- tbl[which(!is.na(tbl[,attribute])),] 
+    } else { attribute <- "FirstProgression"} 
+
+   if(all(is.na(samples))) {
+
+      mean.time <- mean(tbl[,attribute])  # about 20 months
+      grp1.indx <- which(tbl[,attribute] < 0.5 * mean.time)
+      grp2.indx<-which(tbl[,attribute] > 0.5 * mean.time)
+      }
+   else {
+       grp1.indx <- match(samples, tbl$ID)
+       grp1.indx <- grp1.indx[!is.na(grp1.indx)]
+       grp2.indx <- match(setdiff(tbl$ID, samples), tbl$ID)
+       grp2.indx <- grp2.indx[!is.na(grp2.indx)]
+       }
+  
+   status <- c(tbl$Death[grp1.indx], tbl$Death[grp2.indx])
+   
+   Alive <- is.na(status)
+   status[Alive] <- 0
+   status[!Alive] <- 1
+   status <- as.numeric(status)
+
+   df <- data.frame(group=c(rep(1,length(grp1.indx)),rep(2,length(grp2.indx))),
+                    status=status,
+                    days=c(tbl$survival[grp1.indx],tbl$survival[grp2.indx]))
+
+   fit <- survfit(Surv(days, status)~group, data=df)
+
+   if(!is.na(filename))
+      jpeg(file=filename, width=600,height=600,quality=100)
+
+       
+   plot(fit,col=c(4,2),conf.int=FALSE,lty=c(1,3),
+	 xlab="Days",ylab="Fraction alive", 
+	 main="Kaplan-Meier Survival") 
+
+   legend("topright", legend=c("Selected Tissues", "Remaining"), lty=c(3,1), col=c(4,2)) 
+
+   if(!is.na(filename))
+       dev.off()
+   
+   invisible(fit)
+
+} # survivalCurve
+
+#-------------------------------------------------------------------------------
+survivalCurve <- function(samples=NA, attribute=NA, filename=NA)
 {
       # add error jpg, to be returned if inputs are unusable
    filter <- which(!is.na(tbl.clinical2$FirstProgression))   # 186

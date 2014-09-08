@@ -655,7 +655,7 @@ onReadyFunctions.push(function() {
 
 .HeaderLinks {
   color: blue;
-  font-size: medium;
+  font-size: small;
   cursor: pointer;
     display: block;
      margin-right: 20px;
@@ -669,7 +669,7 @@ onReadyFunctions.push(function() {
    background-color:#F9F9F9;
    border:1px solid #333;
    padding:5px;
-   font-size: medium
+   font-size: small
    width: 50%
 }
 </style>
@@ -698,6 +698,10 @@ onReadyFunctions.push(function() {
 //----------------------------------------------------------------------------------------------------
 var DashboardModule = (function () {
 
+  var HIDRAlink = "<a href='http://www.fhcrc.org/en/labs/hidra.html'>HIDRA</a>"
+  var TCGAdatalink = "<a href='https://tcga-data.nci.nih.gov/tcga/tcgaCancerDetails.jsp?diseaseType=GBM&diseaseName=Glioblastoma%20multiforme'>TCGA portal</a>"
+  var GBM2013paper = "<a href='http://www.ncbi.nlm.nih.gov/pubmed/24120142'>(Brennan et al, Cell 2013)</a>"
+
  //----------------------------------------------------------------------------------------------------
      function DashboardInitializeUI(){
         
@@ -717,9 +721,7 @@ var DashboardModule = (function () {
               });
 
         LoadDatainfo();
-     
-          $("#dashboardAboutLink").click(showAbout_dashboard)
-          
+               
         var ToDobutton = $("#ToDoLink");
         var ToDoURL = "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/edit?usp=sharing"
 
@@ -731,14 +733,30 @@ var DashboardModule = (function () {
     function LoadDatainfo(){
  
       var TCGAdata =  $("#TCGAdataInfo")
-     console.log(TCGAdata)
-      TCGAdata.append("<p>The Cancer Genome Atlas (TCGA)</p>")
+      TCGAdata.append("<p><h4 align=center>Glioblastoma multiforme (GBM) Pilot demo</h4></p>")
+      TCGAdata.append("<p>Copy Number Alterations, Single Nucleotide Alterations, indels and patient histories were downloaded from the " +
+                      TCGAdatalink + ", based off the 2013 publication "+GBM2013paper+" and supplemented by in-house data.</p>")          
           
-          TCGAdata.append("<div id='TCGApatientdata'><h4><u>Patients</u></h4>Publication? Download site?</div>")
-          TCGAdata.append("<div id='TCGArnadata'><h4><u>RNA</u></h4><b>Subtypes: </b> Defined by centroid genes <p>304patients-1375genes</p></div>")
-          TCGAdata.append("<div id='TCGAcnvdata'><h4><u>CNV</u></h4></div>")
-          TCGAdata.append("<div id='TCGAmutdata'><h4><u>Mutation</u></h4></div>")
+      TCGAdata.append("<div id='TCGArnadata'><p>The TCGA GBM expression data included in Oncoscape is for 304 patients that meet the following criteria:<br>" +
+           "<ol type='A'><li>TCGA clinical data has (529 GBM samples) <ul> <li>'GBM' by 'histologic type'</li><li>'primary' by 'sample type'</li><li>an assigned subtype (ie != '')</li></ul>"+
+           "<li>TCGA expression data within unified (Agilent + Affymetrix) set defined in comparative paper (PMID:21436879)  (323 GBM samples).</li></ol>"+
+           "</p></div>")
+ 
+      var UWMSCCAdata =  $("#UWMSCCAdataInfo")
+      UWMSCCAdata.append("<p>Access to information regarding <a href='http://www.uwmedicine.org/'>University of Washington Medicine</a> and <a href='http://www.seattlecca.org/'>SCCA</a> patients is restricted by IRB approval.  Please contact <a href='http://www.fhcrc.org/en/diseases/featured-researchers/fearn-paul.html'>Paul Fearn</a> for questions regarding access.</p>")
+//      UWMSCCAdata.append("<div id='UWMSCCApatientdata'>UWM and SCCA patient information is accessed through "+HIDRAlink+", which centralizes records for thousands of patients in a common <a href='http://www.caisis.org/'>Caisis</a> table format.</div>")
+//      UWMSCCAdata.append("<div id='UWMSCCAcnvdata'><h4><u>CNV: Oncoplex</u></h4><br></div>")
 
+      var TableContents = $("#TableContentsDiv")
+      TableContents.append("<p><h4>Clinical Table:</h4> Table view of patient information.  Filter data by Age of Diagnosis & survival sliders or by specific search terms.</p>")
+      TableContents.append("<p><h4>Patient Timelines:</h4> Visual representation of patient histories.  Align or Order patient histories by clinical events.  Couple calculated features with patient timelines. </p>")
+      TableContents.append("<p><h4>Principle Component Analysis (PCA):</h4> Transform RNA expression levels to cluster patients by patterns of variation.</p>")
+      TableContents.append("<p><h4>Partial Least Squares Regression (PLSR):</h4> Use linear regression to correlate genes with clinical features using RNA expression </p>")
+      TableContents.append("<p><h4>GBM Pathways:</h4> Map patient specific expression levels on a hand curated network of genes associated with GBM.  Click on edges to view the abstracts defining the relationship. </p>")   
+      TableContents.append("<p><h4>Angiogenesis:</h4> Map patient specific expression levels on a small network of genes associated with angiogenesis.  Click on edges to view the abstracts defining the relationship. </p>")   
+      TableContents.append("<p><h4>Markers & Patients:</h4> Link copy number variation and mutation data to patients grouped by GBM classification: mesenchymal, classicial, neural, proneural, and G-CIMP </p>")
+      TableContents.append("<p><h4>Distributions:</h4> Plot clinical features of defined populations. </p>")
+      TableContents.append("<p><h4>Survival:</h4> Compare survival rates of selected patients against the remaining population in a Kaplan Meier plot.</p>")
    }
 
    //----------------------------------------------------------------------------------------------------
@@ -746,7 +764,7 @@ var DashboardModule = (function () {
   
           var   info ={Modulename: "Dashboard",
                     CreatedBy: "Oncoscape Core",
-                    MaintainedBy: "Lisa McFerrin",
+                    MaintainedBy: "Oncoscape Core",
                     Folder: "Dashboard"}
 
          about.OpenAboutWindow(info) ;
@@ -1005,7 +1023,9 @@ var ThisModuleName = "ClinicalTable"
         "sDom": "Rlfrtip",
          sDom: 'C<"clear">lfrtip',
         "aoColumns": columnTitles,
-	"sScrollX": "100px",
+	    "sScrollX": "100px",
+        "scrollY":  (0.75*displayDiv.height),
+        "scrollCollapse": true,
         "iDisplayLength": 25,
          bPaginate: true,
         "scrollX": true,
@@ -1484,7 +1504,8 @@ var TimeLineModule = (function () {
                      console.log("Using event: ", event)
                      PatientOrderBy =  getHorizontalBarSize(getDateDiff(SidePlotEvent, event.Event1,event.Event2,event.TimeScale)); 
                     
-               } else if(["Chemo", "Radiation", "Diagnosis", "OR", "Status", "MRI"].indexOf(SidePlotEvent) !== -1){
+     //          } else if(["Chemo", "Radiation", "Diagnosis", "OR", "Status", "MRI"].indexOf(SidePlotEvent) !== -1){
+                 } else if([ "Diagnosis", "OR", "Status", "MRI"].indexOf(SidePlotEvent) !== -1){
                     //get number of categories
                     EventsByID.forEach(function(ID, Patient){
                          if(Patient.has(SidePlotEvent) && Patient.get(SidePlotEvent)[0].showPatient){
@@ -1918,7 +1939,8 @@ var TimeLineModule = (function () {
            ;
            
            AddSideBarMenu.selectAll("option")
-                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys(), ["Radiation", "Chemo", "Diagnosis", "OR", "MRI", "Status"].filter(function(d){ return EventTypes.has(d) })]))
+//                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys(), ["Radiation", "Chemo", "Diagnosis", "OR", "MRI", "Status"].filter(function(d){ return EventTypes.has(d) })]))
+                    .data(d3.merge([["--", "+Add"], CalculatedEvents.keys(), ["Diagnosis", "OR", "MRI", "Status"].filter(function(d){ return EventTypes.has(d) })]))
                     .enter()
                          .append("option")
                          .attr("value", function(d){return d})
@@ -2402,35 +2424,67 @@ var PCAModule = (function () {
  
     var Legendsvg = d3.select("#pcaLegend").append("svg").attr("id", "pcaLegendSVG")
                       .attr("width", $("#pcaDisplay").width())
+                      .attr("height", 50)
                       ;
+  
+     var TextOffset =  [0, 87, 87, 87, 87, 87, 87];
+     var TextOffSet = d3.scale.ordinal()
+               .range(TextOffset)
+               .domain(Classifications.keys());
+        
+    var legend =    Legendsvg
+                   .append("g")
+                   .attr("class", "legend")
+                   .attr("transform", "translate(" + 10 + "," + 10 + ")")  
+                   .selectAll(".legend")
+                     .data(LegendLabels)
+                     .enter().append("g")
+                     .attr("transform", function(d, i) { 
+                      return "translate(" + i*TextOffSet(d) + ",0)" })
+               ;
 
-    var Legendtext = Legendsvg.append("text").attr('transform', 'translate(10, 20)');
+    var text = legend.append("text")
+            .attr("y", 10)
+            .attr("x", 0)
+            .style("font-size", 12)
+            .text(function(d) { return d})
+            .attr("transform", function(d, i) { 
+                      return "translate(" + 15 + ",0)" })
+           ;
 
-    for(var i=0; i<LegendLabels.length; i++){
-         Legendtext.append('tspan').text(LegendLabels[i]).attr("dx", 20).attr("class", "legendtext")
-     }
+     legend.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 5)
+            .attr("r", function(d) { return 6;})
+            .style("fill", function(d) { return Classifications.get(d)[0].color[0]})
+   
+//    var Legendtext = Legendsvg.append("text").attr('transform', 'translate(10, 20)');
 
-    var TextOffset = [];    var xPosition = 0
-    console.log(Legendtext)
-    console.log("Get LegendText: ",  document.getElementsByClassName("legendtext")  )
+//    for(var i=0; i<LegendLabels.length; i++){
+//         Legendtext.append('tspan').text(LegendLabels[i]).attr("dx", 20).attr("class", "legendtext")
+//     }
 
-    for(var i=0; i<LegendLabels.length; i++){
-        var textNode = document.getElementsByClassName("legendtext")[i]
-        TextOffset.push(xPosition)
-        console.log(textNode)
-        xPosition = xPosition + textNode.getComputedTextLength() +20
-    }
+//    var TextOffset = [];    var xPosition = 0
+//    console.log(Legendtext)
+//    console.log("Get LegendText: ",  document.getElementsByClassName("legendtext")  )
 
-   console.log(TextOffset)
-   var Legendcircle = Legendsvg.append("g")
-   for(var i=0;i<LegendLabels.length;i++){
-    Legendcircle.append("circle")
-           .attr("cx", 20)
-           .attr("cy", 15)
-           .attr("r",  6)
-           .attr("fill", Classifications.get(LegendLabels[i])[0].color[0])
-           .attr("transform", "translate(" + (TextOffset[i]) +",0)")
-      }
+//    for(var i=0; i<LegendLabels.length; i++){
+//        var textNode = document.getElementsByClassName("legendtext")[i]
+//        TextOffset.push(xPosition)
+//        console.log(textNode)
+//        xPosition = xPosition + textNode.getComputedTextLength() +20
+//    }
+
+//   console.log(TextOffset)
+//   var Legendcircle = Legendsvg.append("g")
+//   for(var i=0;i<LegendLabels.length;i++){
+//    Legendcircle.append("circle")
+//           .attr("cx", 20)
+//           .attr("cy", 15)
+//           .attr("r",  6)
+//           .attr("fill", Classifications.get(LegendLabels[i])[0].color[0])
+//           .attr("transform", "translate(" + (TextOffset[i]) +",0)")
+//  }
  
     } // drawLegend
   
@@ -2482,8 +2536,16 @@ var PCAModule = (function () {
          d3PcaScatterPlot(pcaScores);
 
          console.log(msg.payload.importance)
-//         pcaData = JSON.parse(msg.payload.importance);
-//         pcaDataTable(pcaData);
+         pcaData = msg.payload.importance
+        var pcaText = $("#pcaTextDisplayDiv")
+        pcaText.append("Proportion of Variance<br>")
+        pcaText.append("PC1: "+100*pcaData[1].PC1 + "%, PC2: "+100*pcaData[1].PC2+"%")
+
+
+//         var pcaTable = [ ["Standard Deviation", pcaData[0].PC1, pcaData[0].PC2],
+//                      ["Proportion of Variance", pcaData[1].PC1, pcaData[1].PC2],
+//                      ["Cumulative Proportion",  pcaData[2].PC1, pcaData[2].PC2] ]
+//         pcaDataTable(pcaTable);
          
          if(!firstTime){  // first call comes at startup.  do not want to raise tab then.
             tabIndex = $('#tabs a[href="#pcaDiv"]').parent().index();
@@ -2581,32 +2643,28 @@ var PCAModule = (function () {
      }
   //-------------------------------------------------------------------------------------------
    function pcaDataTable(pcaData){
-        var pcaText = d3.select("#pcaTextDisplay")
+        var pcaText = $("#pcaTextDisplayDiv")
         console.log(pcaData)
-        var tblColumnNames = ["A", "B", "C"];
+        var tblColumnNames = ["name", "PC1", "PC2"]
+//        var tblColumnNames = ["Standard Deviation", "Proportion of Variance", "Cumulative Proportion"];
         columnTitles = [];
         for(var i=0; i < tblColumnNames.length; i++){
           columnTitles.push({sTitle: tblColumnNames[i]});
         }
 
-     displayDiv.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="pcaTable"></table>');
+     pcaText.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="pcaTable"></table>');
      $("#pcaTable").dataTable({
-        "sDom": "Rlfrtip",
-         sDom: 'C<"clear">lfrtip',
         "aoColumns": columnTitles,
-	    "sScrollX": "100px",
-        "iDisplayLength": 25,
-         bPaginate: true,
-        "scrollX": true,
         "fnInitComplete": function(){
             $(".display_results").show();
             }
          }); // dataTable
 
      console.log("displayTable adding data to table");
-     tableRef = $("#pcaTable").dataTable();
-//     tableRef.fnAddData(pcaData);
-
+     PCAtableRef = $("#pcaTable").dataTable();
+     for(var i=0; i< pcaData.length; i++){
+        PCAtableRef.fnAddData(pcaData[i]);
+     }
         
    }
  //-------------------------------------------------------------------------------------------
@@ -3916,19 +3974,19 @@ var angioPathwaysModule = (function () {
       movieButton.click(togglePlayMovie);
       searchBox = $("#angiogenesisSearchBox");
 
-      sendSelectionMenu = $("#angioSendSelectionMenu");
-      sendSelectionMenu.change(sendToModuleChanged);
-      sendSelectionMenu.empty();
+ //     sendSelectionMenu = $("#angioSendSelectionMenu");
+ //     sendSelectionMenu.change(sendToModuleChanged);
+ //     sendSelectionMenu.empty();
         
-      sendSelectionMenu.append("<option>Send Selection to:</option>")
-      var ModuleNames = getSelectionDestinations()
-      for(var i=0;i< ModuleNames.length; i++){
-         var sendToModule = ModuleNames[i]
-         if(sendToModule !== thisModuleName){
-            optionMarkup = "<option>" + sendToModule + "</option>";
-            sendSelectionMenu.append(optionMarkup);
-           }
-         } // for i
+ //     sendSelectionMenu.append("<option>Send Selection to:</option>")
+ //     var ModuleNames = getSelectionDestinations()
+ //     for(var i=0;i< ModuleNames.length; i++){
+ //        var sendToModule = ModuleNames[i]
+ //        if(sendToModule !== thisModuleName){
+ //           optionMarkup = "<option>" + sendToModule + "</option>";
+ //           sendSelectionMenu.append(optionMarkup);
+ //          }
+ //       } // for i
 
       loadNetwork(network, vizmap);
       $(window).resize(handleWindowResize);
@@ -4019,11 +4077,11 @@ var angioPathwaysModule = (function () {
 
 
    //----------------------------------------------------------------------------------------------------
-   function sendToModuleChanged() {
-      destinationMdoule = sendSelectionMenu.val()
-      broadcastSelection(destinationModule);
-      sendSelectionMenu.val("Send Selection to:")
-      } // sendToModuleChanged
+//   function sendToModuleChanged() {
+//      destinationMdoule = sendSelectionMenu.val()
+//      broadcastSelection(destinationModule);
+//      sendSelectionMenu.val("Send Selection to:")
+//      } // sendToModuleChanged
 
    //----------------------------------------------------------------------------------------------------
    function broadcastSelection(destinationModule) {
@@ -4420,22 +4478,6 @@ var angioPathwaysModule = (function () {
        cwAngio.batchData(noa);
        } // displayTissue
 
-    //----------------------------------------------------------------------------------------------------
-    function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-               callback: "DisplayAngioPathwaysModifiedDate",
-               status:"request",
-               payload:"angioPathways"
-               };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-        }
-    //----------------------------------------------------------------------------------------------------
-    function DisplayAngioPathwaysModifiedDate(msg){
-       document.getElementById("angioPathwaysDateModified").innerHTML = msg.payload;
-       }
-
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
@@ -4444,12 +4486,10 @@ var angioPathwaysModule = (function () {
           initializeUI(angiogenesisNetwork.elements, angiogenesisVizmap[0].style);
           });
 
-       addJavascriptMessageHandler("DisplayAngioPathwaysModifiedDate", DisplayAngioPathwaysModifiedDate);
-       addJavascriptMessageHandler("handle_angio_mRNA_data", handle_mRNA_data);
+        addJavascriptMessageHandler("handle_angio_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_angio_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_angio_mutation_data",  handle_mutation_data);
        addJavascriptMessageHandler("angiogenesisHandlePatientIDs", handlePatientIDs);
-       socketConnectedFunctions.push(SetModifiedDate);
        //if(typeof(window.tabsAppRunning) == "undefined") {
        //   socketConnectedFunctions.push(angiogenesisDemoVizChanges)
        //   }
@@ -4818,8 +4858,8 @@ var PairedDistributionsModule = (function () {
   function initializeUI (){
 //       generatePairedDistributionsDataButton =  $("#generatePairedDistributionsDataButton");
 //       generatePairedDistributionsDataButton.click(runBasicDemo);//runBasicDemo (run w/o server), runDemo (run w/ server)
-//       generatePairedDistributionsDataButton =  $("#clearPairedDistributionsButton");
-//       generatePairedDistributionsDataButton.click(clear);
+      generatePairedDistributionsDataButton =  $("#clearPairedDistributionsButton");
+      generatePairedDistributionsDataButton.click(clear);
       pairedDistributionsDisplay = $("#pairedDistributionsDisplay");
       pairedDistributionsHandleWindowResize();
       //pairedDistributionsBroadcastButton = $("#pairedDistributionsBroadcastSelectionToClinicalTable");
@@ -5130,30 +5170,13 @@ var PairedDistributionsModule = (function () {
         .call(yAxis);
 
      };
-  //----------------------------------------------------------------------------------------------------
-  function SetModifiedDate(){
-
-        msg = {cmd:"getModuleModificationDate",
-             callback: "DisplaypairedDistributionsModifiedDate",
-             status:"request",
-             payload:"pairedDistributions"
-             };
-        msg.json = JSON.stringify(msg);
-        socket.send(msg.json);
-    }
-  //----------------------------------------------------------------------------------------------------
-  function DisplaypairedDistributionsModifiedDate(msg){
-        document.getElementById("pairedDistributionsDateModified").innerHTML = msg.payload;
-    }
-  //--------------------------------------------------------------------------------------------
+   //--------------------------------------------------------------------------------------------
   return{
    init: function(){
       onReadyFunctions.push(initializeUI);
       addSelectionDestination("Distributions", "pairedDistributionsDiv");
       addJavascriptMessageHandler("DistributionsHandlePatientIDs", handlePatientIds);
       addJavascriptMessageHandler("handlePatientData", handlePatientData);
-      addJavascriptMessageHandler("DisplaypairedDistributionsModifiedDate", DisplaypairedDistributionsModifiedDate);
-      socketConnectedFunctions.push(SetModifiedDate);
       //socketConnectedFunctions.push(runDemo);
       }
    };
@@ -5164,6 +5187,112 @@ pairedDistributions = PairedDistributionsModule();
 pairedDistributions.init();
 
 </script>
+<script>
+//----------------------------------------------------------------------------------------------------
+var SurvivalModule = (function () {
+
+     function demoTissueSet()
+     {
+//       return ["0525.T.2", "0598.T.1", "0622.T.1", "0636.T.1", "0664.T.1", "0761.T.1", "135.1.T.1", 
+//               "249.T.1", "270X.T.1", "286X.T.1", "349.T.1", "392.1.T.1", "443.1.T.1", "450.T.1", 
+//               "480.T.1", "821.T.1", "891.T.1", "929.T.1", "958.T.1"];
+        return ["TCGA.02.0058", "TCGA.06.0132", "TCGA.02.0034", "TCGA.12.0657", "TCGA.06.0155",
+                  "TCGA.06.0155", "TCGA.06.0162", "TCGA.06.1087", "TCGA.12.0778", 
+                  "TCGA.14.0871", "TCGA.06.0192"];
+     } // demoTissueSet
+     //--------------------------------------------------------------------------------------------
+       function SurvivalInitializeUI(){
+           console.log("==== survivalStats code.js document.ready");
+  
+           if(typeof(window.tabsAppRunning) == "undefined") {
+              socketConnectedFunctions.push(analyzeSelectedTissuesWithDemoData);
+           }
+           
+           $("#survivalAboutLink").click(showAbout_survival)
+           $("#survivalInstruction").append("Send a selection to 'survival' to generate a Kaplan Meier plot.")
+     }
+     //--------------------------------------------------------------------------------------------------
+     function handlePatientIDs(msg)
+     {
+         console.log("--- handlePatientIDs SurvivalStats");
+         console.log(msg)
+          patientIDs = msg.payload.ids
+ 
+         analyzeSelectedTissues(patientIDs);
+
+     } // handleTissueIDsForSurivalStats
+     //--------------------------------------------------------------------------------------------------
+     function analyzeSelectedTissuesWithDemoData(){
+              analyzeSelectedTissues(demoTissueSet());
+     }  
+     //--------------------------------------------------------------------------------------------------
+     function analyzeSelectedTissues(patientIDs)
+     {
+         return_msg = {cmd:"calculateSurvivalCurves", callback: "displaySurvivalCurves", status: "request", payload: {patients:patientIDs}};
+         socket.send(JSON.stringify(return_msg));
+
+//        msg = {cmd: "getPatientHistoryDataVector", callback: "getSurvivalPlot", status:"request", 
+//               payload: {colname: ["FirstProgression", "Death"], patients:patientIDs} }
+//        socket.send(JSON.stringify(msg))
+     
+     }
+     //--------------------------------------------------------------------------------------------------
+     function getSurvivalPlot(msg){
+        
+         console.log(" create Survival Plot for: ", msg)
+     	 var payload = JSON.parse(msg.payload);
+     	 var storage = [];
+//  	     var patientIDs = Object.keys(payload)
+  	     for(i=0;i<Object.keys(payload).length;i++){
+  	 	     var patient = Object.keys(payload)[i];
+  	         storage.push({ID: patient, value: payload[patient]});
+  	     }
+
+     
+ //        return_msg = {cmd:"calculateSurvivalCurves", callback: "displaySurvivalCurves", status: "request", payload: tissueIDs};
+ //        socket.send(JSON.stringify(return_msg));
+
+     } // analyzeSelectedTissues
+    //--------------------------------------------------------------------------------------------------
+     function displaySurvivalCurves(msg)
+    {
+        console.log("about to add survival curve image to survivalCurve div");
+        encodedImage = msg.payload;
+        document.getElementById("survivalCurveImage").src = encodedImage;
+     }
+
+   //----------------------------------------------------------------------------------------------------
+    function showAbout_survival(){
+  
+          var   info ={Modulename: "Survival",
+                    CreatedBy: "Oncoscape Core",
+                    MaintainedBy: "Oncoscape Core",
+                    Folder: "survivalStats"}
+
+         about.OpenAboutWindow(info) ;
+    }  
+
+     //----------------------------------------------------------------------------------------------------
+     return{
+
+        init: function(){
+           addSelectionDestination("Survival", "survivalStatsDiv")   
+           onReadyFunctions.push(SurvivalInitializeUI);
+           addJavascriptMessageHandler("displaySurvivalCurves", displaySurvivalCurves);
+           addJavascriptMessageHandler("SurvivalHandlePatientIDs", handlePatientIDs);
+           addJavascriptMessageHandler("getSurvivalPlot", getSurvivalPlot);
+//           socketConnectedFunctions.push(analyzeSelectedTissues);
+
+        }
+     };
+
+}); // SurvivalModule
+//----------------------------------------------------------------------------------------------------
+survival = SurvivalModule();
+survival.init();
+
+</script>
+
 <script>
 onReadyFunctions.push(function() {
     console.log("====== tabapps document ready");
@@ -5213,6 +5342,7 @@ onReadyFunctions.push(function() {
      <li><a href="#angiogenesisDiv">Angiogenesis</a></li>
      <li><a href="#markersAndTissuesDiv">Markers &amp; Patients</a></li>
      <li><a href="#pairedDistributionsDiv">Distributions</a></li>
+     <li><a href="#survivalStatsDiv">Survival</a></li>
    </ul>
 
 <style>
@@ -5223,10 +5353,6 @@ ul.UserDocs {
 
 
 <div id="DashboardDiv">
-   <div id="dashboardInfoLinks" class="HeaderLinks" align="right">
-      <span id="dashboardAboutLink" >About</span>
-      <span id="dashboardTooltipsLink"  dx=10>Tooltips</span>
-   </div>
    <span id="LogIn" style="float:right; font-size:medium; margin-right: 20px"> User:  <span id="UserName"> </span></span>
 
    <div align="center"> <h1 > Oncoscape </h1>
@@ -5234,44 +5360,49 @@ ul.UserDocs {
        <p> <font color="red">This website is undergoing frequent modifications.  <br> Use at your own risk.</font></p>
    </div>   
  
-   <p> Note: Oncoscape works best with Chrome Version 37 or higher and a screen resolution of 1280x800 or better. </p>
+   <p> Note: Oncoscape works best with Chrome Version 37 or higher and a high resolution screen. </p>
 
    <div id="DashboardAccordion">
      <h3> Available Data </h3>
         <div id="AvailableData">
           <div id="AvailableDataAccordian">
-             <h3>TCGA</h3><div id="TCGAdataInfo"></div>
-             <h3>Caisis</h3><div id="CaisisdataInfo"></div>
-             <h3>Oncoplex</h3><div id="OncoplexdataInfo"></div>
+             <h3>TCGA: The Cancer Genome Atlas</h3><div id="TCGAdataInfo"></div>
+             <h3>Restricted Data</h3><div id="UWMSCCAdataInfo"></div>
           </div>
         </div>
-     <h3> Vignettes </h3><div></div>
-     <h3> Tutorials/Use Cases </h3><div></div>
-     <h3> Download Software </h3><div></div>
+     <h3> Table of Contents </h3><div id="TableContentsDiv"></div>
+ <!--    <h3> Download Software </h3><div></div>  -->
      <h3> Features To Come... </h3>
         <div>
            <ul id="FeaturesToCome">
               <li> Saved Selections </li>
               <li> Interactive Kaplan Meier Plots </li>
+              <li> Expression subtyping tool </li>
+              <li> Expression correlation to TCGA samples using MDS </li>
+              <li> Tool to find TCGA samples with similar mutational profiles </li>
+              <li> Expression clustering and heatmaps </li>
+              <li> Gene set enrichment analysis for user-selected groups </li>
+              <li> Differential expression analysis for user-selected groups </li>
+              <li> Hallmarks of Cancer </li>
            </ul>
            <button id=ToDoLink>Edit The To-Do Table</button>
         </div> 
-      <h3> About </h3>
+      <h3> About Oncoscape</h3>
          <div>
             <p>Oncoscape is developed at the <a href= "www.fhcrc.org">Fred Hutchinson Cancer Research Center</a> under the auspices of the <a href="www.sttrcancer.org">Solid Tumor Translational Research</a> initiative.
             </p>
-            <p> Oncoscape is a web-based, menu-driven analysis and visualization platform for large-scale, heterogeneous clinical and molecular patient timeline data as exemplified by the <a href= "www.fhcrc.org">Fred Hutch</a> and <a href="http://www.fhcrc.org/en/labs/hidra.html">HIDRA</a> database.
+            <p> Oncoscape is a web-based, menu-driven analysis and visualization platform for large-scale, heterogeneous clinical and molecular patient timeline data as exemplified by the <a href="http://www.fhcrc.org/en/labs/hidra.html">Fred Hutch HIDRA</a> database.
             </p>
-            <p>Oncoscape was conceived, and is managed, by a Steering Committee comprising: Eric Holland, Desert Horse-Grant, Paul Fearn, Paul Shannon, Lisa McFerrin, and Hamid Bolouri.
+            <p>Oncoscape was conceived, and is managed, by a Steering Committee comprising: <a href="http://www.fhcrc.org/en/diseases/featured-researchers/holland-eric.html">Eric Holland</a>, <a href="http://www.sttrcancer.org/en/contact-us.html">Desert Horse-Grant</a>, <a href="http://www.fhcrc.org/en/diseases/featured-researchers/fearn-paul.html">Paul Fearn</a>, <a href="http://fhcrc.academia.edu/PaulShannon">Paul Shannon</a>,<a href="http://www.researchgate.net/profile/Lisa_McFerrin">Lisa McFerrin</a>, and <a href="http://research.fhcrc.org/bolouri/">Hamid Bolouri</a>.
             </p>
             <p> Paul Shannon (lead) and Lisa McFerrin are the primary developers of Oncoscape, with additional code contributions by Cliff Rostomily and Hamid Bolouri.
             </p>
          </div>   
-      <h3>Conditions Of Use</h3>
+      <h3>Terms Of Use</h3>
          <div id="LegalNotice">
-            <p>Oncoscape is free for academic, nonprofit, and personal use. Any use of the public browser requires credits.  For assistance, questions or problems contact STTR. 
-            </p>
-            <p>Data provided in Oncoscape is under the same condition of use as specified in the original data source.
+            <p>
+            Oncoscape source code is freely available via <a href="github.com">GitHub</a> under the minimally restrictive <a href="http://opensource.org/licenses/MIT">MIT open source license</a>.
+            Access to data in Oncoscape is restricted to the same conditions of use as specified in the original data source.
             </p>
          </div>
       
@@ -5371,15 +5502,16 @@ th, td { white-space: nowrap; }
 
 <div id="clinicalDataModuleDiv">
    <div id="cltblInfoLinks" class="HeaderLinks" align="right">
-      <span id="cltblAboutLink" >About</span>
-      <span id="cltblTooltipsLink"  dx=10>Tooltips</span>
+      <span id="cltblAboutLink" >Credits  </span>
+ <!--     <span id="cltblTooltipsLink"  dx=10>Tooltips</span>  -->
    </div>
    <div id="clinicalDataTableControlsDiv">
+
       <div id="clinicalDataTableFilterControlsDiv" style="border: 1px;" align="center">
 
        <div id="ageSliderDiv" style="display: inline-block">
            <div id="sliderTitleDiv" class="clinicalDataFilterSliderTitleDiv" style="align: center; width=100%">ageAtDx</div>
-           <div style="width: 250px; overflow: hidden;">
+           <div style="width: 210px; overflow: hidden;">
                <div id='msgBox' style="float: left" >  
                   <textarea id="ageAtDxMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
@@ -5392,7 +5524,7 @@ th, td { white-space: nowrap; }
 
        <div id="survivalSliderDiv" style="display: inline-block">
            <div id="sliderTitle3Div" class="clinicalDataFilterSliderTitleDiv" style="align: center; width=100%">survival</div>
-           <div style="width: 250px; overflow: hidden;">
+           <div style="width: 210px; overflow: hidden;">
                <div id='msgBox'style="float: left" >  
                   <textarea id="overallSurvivalMinSliderReadout" readonly class="clinicalDataFilterSliderReadout"'></textarea> 
                </div>
@@ -5403,13 +5535,13 @@ th, td { white-space: nowrap; }
            </div>
         </div>
 
-       <div id="clinicalTablesButtonsDiv" style="display: block">
-           <div id="viewButtonDiv" style="display: inline-block">
+       <div id="clinicalTablesButtonsDiv" style="display: inline-block; margin-top:14px ">
+           <div id="viewButtonDiv" style="float:right">
               <button id="showAllClinicalTablesRowsButton" class="tblClinicalControlButton" type="button">Remove Filters</button>
            </div>
-             <span id="useSavedSelectionButton" class="tblClinicalControlButton" type="button"></span>
-
-          <div id="clinicalDataTableOutboundButtonDiv" style="display: inline-block">
+ <!--            <span id="useSavedSelectionButton" class="tblClinicalControlButton" type="button"></span>
+-->
+          <div id="clinicalDataTableOutboundButtonDiv"  style="float:right; ">
             <select id="ClTblsendSelectiontoModuleButton" name="SendSelectionToModule"></select>
 
           </div>
@@ -5439,7 +5571,7 @@ th, td { white-space: nowrap; }
     }
 
 circle {
-   opacity: 0.5;
+   opacity: 1;
    }
 
 circle.highlighted {
@@ -5477,16 +5609,16 @@ circle.highlighted {
 
 <div id="pcaDiv">
   <div id="pcaInfoLinks" class="HeaderLinks" align="right">
-      <span id="pcaAboutLink" >About</span>
-      <span id="pcaTooltipsLink"  dx=10>Tooltips</span>
+      <span id="pcaAboutLink" >Credits  </span>
+<!--      <span id="pcaTooltipsLink"  dx=10>Tooltips</span>  -->
   </div>
   <div id="pcaSelectionDiv">
-       <span id="useSelectionPCA"></span>
+<!--       <span id="useSelectionPCA"></span>  -->
        <select id="PCAsendSelectiontoModuleButton" name="SendSelectionToModule"></select>
        <button id="pcaClearSelectionButton" class="pcaButton">Clear Selection</button>
   </div>
    <div id="pcaDisplay"></div>
-   <div id="pcaLegend">   </div>
+   <div id="pcaLegend"></div>
    <div id="pcaTextDisplayDiv"></div>
    
 </div>
@@ -5696,8 +5828,8 @@ circle.highlighted {
 
 <div id="patientTimeLinesDiv">
   <div id="timelineInfoLinks" class="HeaderLinks" align="right">
-      <span id="timelineAboutLink" >About</span>
-      <span id="timelineTooltipsLink"  dx=10>Tooltips</span>
+      <span id="timelineAboutLink" >Credits </span>
+ <!--     <span id="timelineTooltipsLink"  dx=10>Tooltips</span>  -->
    </div>
 	<div id="ArrangeDataDiv">
 	     <span id="AddSideBar">Features: </span>
@@ -5705,8 +5837,8 @@ circle.highlighted {
 	     <span id="OrderByDiv">Order By: </span>
 <!--	     <button id="SaveImageDiv">Save Image </button> 
          	 <button id="SendSelectionToClinicalTable">To Clinical Data... </button>
--->	     <span id="PatientSetDiv"></span> 
-         <select id="TimeLinesendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
+     <span id="PatientSetDiv"></span> 
+-->	         <select id="TimeLinesendSelectiontoModuleButton" name="SendSelectionToModule">Send Selection to...</select>
      </div>
      <div id="TimeLineDisplay">
       </div>
@@ -12759,8 +12891,8 @@ div {
 
 <div id="gbmPathwaysDiv">
   <div id="gbmPathwayInfoLinks" class="HeaderLinks" align="right">
-      <span id="gbmPathwayAboutLink" >About</span>
-      <span id="gbmPathwayTooltipsLink"  dx=10>Tooltips</span>
+      <span id="gbmPathwayAboutLink" >Credits  </span>
+<!--      <span id="gbmPathwayTooltipsLink"  dx=10>Tooltips</span>  -->
    </div>
      <div id="gbmPathwaysButtonDiv">
       <label id="gbmPathwaysSelectLabel" for="select">Select a sample:</label>
@@ -12775,7 +12907,6 @@ div {
       <input type="text" id="gbmPathwaysSearchBox" value="search"></input>
    </div>
    <div id="cwGbmPathwaysDiv"></div>
-   <span style="font-size:x-small">Last Modified: <span id=gbmPathwaysDateModified style="font-size:x-small"></span></span>
 </div>
 
 
@@ -15689,8 +15820,8 @@ div {
 
 <div id="angiogenesisDiv">
  <div id="angiogenesisInfoLinks" class="HeaderLinks" align="right">
-      <span id="angiogenesisAboutLink" >About</span>
-      <span id="angiogenesisTooltipsLink"  dx=10>Tooltips</span>
+      <span id="angiogenesisAboutLink" >Credits  </span>
+<!--      <span id="angiogenesisTooltipsLink"  dx=10>Tooltips</span> -->
    </div>
    <div id="angioGenesisButtonDiv">
       <label id="angiogenesisSelectLabel" for="select">Select a sample:</label>
@@ -15706,7 +15837,6 @@ div {
       <select id="angioSendSelectionMenu" name="SendSelectionToModule">Send Selection to...</select>
    </div>
    <div id="cwAngiogenesisDiv"></div>
-   <span style="font-size:x-small">Last Modified: <span id=angioPathwaysDateModified style="font-size:x-small"></span></span>
 </div>
 
 
@@ -95109,8 +95239,8 @@ button {font-size:10pt !important;}
 
 <div id="markersAndTissuesDiv">
   <div id="markerpatientsInfoLinks" class="HeaderLinks" align="right">
-      <span id="markerpatientsAboutLink" >About</span>
-      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>
+      <span id="markerpatientsAboutLink" >Credits  </span>
+<!--      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>  -->
    </div>
    <div id="markersAndTissuesButtonDiv">
        &nbsp; Search: <input type="text" id="markersAndTissuesSearchBox"></input>
@@ -95173,8 +95303,8 @@ button {font-size:10pt !important;}
 
 <div id="pairedDistributionsDiv">
    <div id="pairedDistributionInfoLinks" class="HeaderLinks" align="right">
-      <span id="pairedDistributionAboutLink" >About</span>
-      <span id="pairedDistributionTooltipsLink"  dx=10>Tooltips</span>
+      <span id="pairedDistributionAboutLink" >Credits  </span>
+ <!--     <span id="pairedDistributionTooltipsLink"  dx=10>Tooltips</span> -->
    </div>
    <label for="attributeDropDown">Select Attribute: </label>
    <select style="width:150px;" id="attributeDropDown">
@@ -95182,16 +95312,28 @@ button {font-size:10pt !important;}
   		<option value="FirstProgression">First Progression</option>
   		<option value="survival">Survival</option>
   	</select>
-<!-- 
-   <button id="generatePairedDistributionsDataButton">Add a Distribution</button>
+<!--    <button id="generatePairedDistributionsDataButton">Add a Distribution</button> -->
    <button id="clearPairedDistributionsButton">Clear Distributions</button>
- -->
+
   <div id="pairedDistributionsDisplay"></div>
    
-  <span id=pairedDistributionsAcknowledgement style="font-size:x-small">Created by Cliff Rostomily;</span>
-  <span style="font-size:x-small">Last Modified: <span id=pairedDistributionsDateModified style="font-size:x-small"></span></span>
-
 </div>
+
+<style>
+</style>
+
+<div id="survivalStatsDiv">
+   <div id="survivalInfoLinks" class="HeaderLinks" align="right">
+      <span id="survivalAboutLink" >Credits  </span>
+ <!--     <span id="dashboardTooltipsLink"  dx=10>Tooltips</span> -->
+   </div>
+
+  <div id="survivalCurveDiv">
+    <div id="survivalInstruction"></div>
+      <img id="survivalCurveImage" width="500" height="500"></img>
+  </div>
+ </div>
+
 
 
 </div>

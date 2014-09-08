@@ -55,8 +55,6 @@ var SavedSelectionModule = (function (){
         SelectionColumnTitles.push({sTitle: SelectionTblColumnNames[i]});
         }
      
-//     console.log(columnTitles);
-
      SaveSelectedDisplay.html('<table cellpadding="0" cellspacing="0" margin-left="10" border="1" class="display" id="SelectionTable"></table>');
      $("#SelectionTable").dataTable({
         "sDom": "Rlfrtip",

@@ -6,10 +6,6 @@ ul.UserDocs {
 
 
 <div id="DashboardDiv">
-   <div id="dashboardInfoLinks" class="HeaderLinks" align="right">
-      <span id="dashboardAboutLink" >About</span>
-      <span id="dashboardTooltipsLink"  dx=10>Tooltips</span>
-   </div>
    <span id="LogIn" style="float:right; font-size:medium; margin-right: 20px"> User:  <span id="UserName"> </span></span>
 
    <div align="center"> <h1 > Oncoscape </h1>
@@ -17,44 +13,49 @@ ul.UserDocs {
        <p> <font color="red">This website is undergoing frequent modifications.  <br> Use at your own risk.</font></p>
    </div>   
  
-   <p> Note: Oncoscape works best with Chrome Version 37 or higher and a screen resolution of 1280x800 or better. </p>
+   <p> Note: Oncoscape works best with Chrome Version 37 or higher and a high resolution screen. </p>
 
    <div id="DashboardAccordion">
      <h3> Available Data </h3>
         <div id="AvailableData">
           <div id="AvailableDataAccordian">
-             <h3>TCGA</h3><div id="TCGAdataInfo"></div>
-             <h3>Caisis</h3><div id="CaisisdataInfo"></div>
-             <h3>Oncoplex</h3><div id="OncoplexdataInfo"></div>
+             <h3>TCGA: The Cancer Genome Atlas</h3><div id="TCGAdataInfo"></div>
+             <h3>Restricted Data</h3><div id="UWMSCCAdataInfo"></div>
           </div>
         </div>
-     <h3> Vignettes </h3><div></div>
-     <h3> Tutorials/Use Cases </h3><div></div>
-     <h3> Download Software </h3><div></div>
+     <h3> Table of Contents </h3><div id="TableContentsDiv"></div>
+ <!--    <h3> Download Software </h3><div></div>  -->
      <h3> Features To Come... </h3>
         <div>
            <ul id="FeaturesToCome">
               <li> Saved Selections </li>
               <li> Interactive Kaplan Meier Plots </li>
+              <li> Expression subtyping tool </li>
+              <li> Expression correlation to TCGA samples using MDS </li>
+              <li> Tool to find TCGA samples with similar mutational profiles </li>
+              <li> Expression clustering and heatmaps </li>
+              <li> Gene set enrichment analysis for user-selected groups </li>
+              <li> Differential expression analysis for user-selected groups </li>
+              <li> Hallmarks of Cancer </li>
            </ul>
            <button id=ToDoLink>Edit The To-Do Table</button>
         </div> 
-      <h3> About </h3>
+      <h3> About Oncoscape</h3>
          <div>
             <p>Oncoscape is developed at the <a href= "www.fhcrc.org">Fred Hutchinson Cancer Research Center</a> under the auspices of the <a href="www.sttrcancer.org">Solid Tumor Translational Research</a> initiative.
             </p>
-            <p> Oncoscape is a web-based, menu-driven analysis and visualization platform for large-scale, heterogeneous clinical and molecular patient timeline data as exemplified by the <a href= "www.fhcrc.org">Fred Hutch</a> and <a href="http://www.fhcrc.org/en/labs/hidra.html">HIDRA</a> database.
+            <p> Oncoscape is a web-based, menu-driven analysis and visualization platform for large-scale, heterogeneous clinical and molecular patient timeline data as exemplified by the <a href="http://www.fhcrc.org/en/labs/hidra.html">Fred Hutch HIDRA</a> database.
             </p>
-            <p>Oncoscape was conceived, and is managed, by a Steering Committee comprising: Eric Holland, Desert Horse-Grant, Paul Fearn, Paul Shannon, Lisa McFerrin, and Hamid Bolouri.
+            <p>Oncoscape was conceived, and is managed, by a Steering Committee comprising: <a href="http://www.fhcrc.org/en/diseases/featured-researchers/holland-eric.html">Eric Holland</a>, <a href="http://www.sttrcancer.org/en/contact-us.html">Desert Horse-Grant</a>, <a href="http://www.fhcrc.org/en/diseases/featured-researchers/fearn-paul.html">Paul Fearn</a>, <a href="http://fhcrc.academia.edu/PaulShannon">Paul Shannon</a>,<a href="http://www.researchgate.net/profile/Lisa_McFerrin">Lisa McFerrin</a>, and <a href="http://research.fhcrc.org/bolouri/">Hamid Bolouri</a>.
             </p>
             <p> Paul Shannon (lead) and Lisa McFerrin are the primary developers of Oncoscape, with additional code contributions by Cliff Rostomily and Hamid Bolouri.
             </p>
          </div>   
-      <h3>Conditions Of Use</h3>
+      <h3>Terms Of Use</h3>
          <div id="LegalNotice">
-            <p>Oncoscape is free for academic, nonprofit, and personal use. Any use of the public browser requires credits.  For assistance, questions or problems contact STTR. 
-            </p>
-            <p>Data provided in Oncoscape is under the same condition of use as specified in the original data source.
+            <p>
+            Oncoscape source code is freely available via <a href="github.com">GitHub</a> under the minimally restrictive <a href="http://opensource.org/licenses/MIT">MIT open source license</a>.
+            Access to data in Oncoscape is restricted to the same conditions of use as specified in the original data source.
             </p>
          </div>
       
