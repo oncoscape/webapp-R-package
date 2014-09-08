@@ -1,5 +1,8 @@
 <script>
 
+   var currentData;    // the most recently calculated points and load vectors;
+   var currentAbsoluteMaxValue; // most recent max value, used for scaling
+
 //----------------------------------------------------------------------------------------------------
 var PLSRModule = (function () {
 
@@ -8,8 +11,6 @@ var PLSRModule = (function () {
 
    var firstTime = true;
 
-   var currentData;    // the most recently calculated points and load vectors;
-   var currentAbsoluteMaxValue; // most recent max value, used for scaling
 
       // these are reported by the server, from an inspection of the data
    var ageAtDxMin, ageAtDxMax, survivalMin, survivalMax;
@@ -26,6 +27,9 @@ var PLSRModule = (function () {
    var ageAtDxMinThreshold, ageAtDxMaxThreshold, survivalMinThreshold, survivalMaxThreshold;
 
    var calculateButton;
+   var sendSelectionMenu;
+   var d3brush;
+   var selectedRegion;
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -52,8 +56,15 @@ var PLSRModule = (function () {
       calculateButton.click(requestPLSRByOnsetAndSurvival)
 
       handleWindowResize();
-      //broadcastButton = $("#pcaBroadcastSelectionToClinicalTable");
-      //broadcastButton.click(pcaBroadcastSelection);
+
+      clearSelectionButton = $("#plsrClearSelectionButton");
+      clearSelectionButton.button();
+      //clearSelectionButton.click(clearSelection);
+
+      sendSelectionMenu = $("#plsrSendSelectiontoModuleButton")
+      sendSelectionMenu.change(sendSelectionToModule);
+      sendSelectionMenu.empty();
+
       $(window).resize(handleWindowResize);
       //broadcastButton.prop("disabled",true);
       };
@@ -212,13 +223,21 @@ var PLSRModule = (function () {
       } // handlePlsrResults
 
    //--------------------------------------------------------------------------------------------
+   function d3PlotBrushReader () {
+     console.log("=== plsr d3PlotBrushReader");
+     selectedRegion = d3brush.extent();
+     x0 = selectedRegion[0][0];
+     x1 = selectedRegion[1][0];
+     width = Math.abs(x0-x1);
+     console.log("width: " + width);
+     }; // d3PlotBrushReader
+
+  //-------------------------------------------------------------------------------------------
    function d3PlsrScatterPlot(dataset, absMaxValue) {
 
       var padding = 70;
       var width = plsrDisplay.width();
       var height = plsrDisplay.height();
-
-      debugger;
 
       d3plsrDisplay.select("#plsrSVG").remove();  // so that append("svg") is not cumulative
    
@@ -250,17 +269,15 @@ var PLSRModule = (function () {
                     .orient("left")
                     .ticks(5);
    
-      var brush = d3.svg.brush()
-                    .x(xScale)
-                    .y(yScale)
-                    .on("brushend", brushend);
+      d3brush = d3.svg.brush()
+                      .x(xScale)
+                      .y(yScale)
+                      .on("brushend", d3PlotBrushReader);
    
-     function brushend() {
-       console.log("brushend");
-       var extent = brush.extent();
-       console.log("e: " + extent);
-       window.selectedRegion = extent;
-       } ;// brushend
+     //function brushend() {
+     // console.log("brushend");
+     // selectedRegion = d3brush.extent()
+     //  } ;// brushend
    
    
       function transform(d) {
@@ -271,17 +288,17 @@ var PLSRModule = (function () {
                                 .domain(["gene",     "vector"])
                                 .range(["lightgray", "red"]);
    
-      debugger;
       var svg = d3plsrDisplay.append("svg")
                   .attr("id", "plsrSVG")
                   .attr("width", width)
                   .attr("height", height)
-                  .append("g");
+                  .call(d3brush);
+                  //.append("g");
                   //.attr("transform", "translate(" + padding + "," + padding + ")");
    
-        svg.append("g")
-           .attr("class", "brush")
-           .call(brush);
+      //svg.append("g")
+      //   .attr("class", "brush")
+      //   .call(d3brush);
     
        var tooltip = d3plsrDisplay.append("div")
                                   .attr("class", "tooltip")
@@ -345,14 +362,6 @@ var PLSRModule = (function () {
         } // d3PlsrScatterPlot
 
   //--------------------------------------------------------------------------------------------
-   function runDemo (){
-     payload = "";
-     msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request", 
-            payload: payload};
-     socket.send(JSON.stringify(msg));
-     };  // d3PlsrScatterPlot
-
-  //--------------------------------------------------------------------------------------------
   function getPatientClassification (){
      payload = "";
      msg = {cmd: "getPatientClassification", callback: "handlePatientClassification", 
@@ -383,21 +392,39 @@ var PLSRModule = (function () {
      };
 
    //--------------------------------------------------------------------------------------------
-  function pcaBroadcastSelection (){
-      console.log("pcaBroadcastSelection: " + pcaSelectedRegion);
-      x1=pcaSelectedRegion[0][0];
-      y1=pcaSelectedRegion[0][1];
-      x2=pcaSelectedRegion[1][0];
-      y2=pcaSelectedRegion[1][1];
+   function sendSelectionToModule() {
+       moduleName = sendSelectionMenu.val()
+       broadcastSelection()
+       sendSelectionMenu.val("Send Selection to:")
+    } // sendSelectionToModule
+
+
+   //--------------------------------------------------------------------------------------------
+   //function broadcastSelection (){
+   broadcastSelection = function(){
+      console.log("broadcastSelection: " + selectedRegion);
+      x1=selectedRegion[0][0];
+      y1=selectedRegion[0][1];
+      x2=selectedRegion[1][0];
+      y2=selectedRegion[1][1];
       ids = [];
-      for(var i=0; i < pcaResults.length; i++){
-         p = pcaResults[i];
-         if(p.PC1 >= x1 & p.PC1 <= x2 & p.PC2 >= y1 & p.PC2 <= y2)
-            ids.push(p.id[0]);
+      debugger;
+      for(var i=0; i < currentData.length; i++){
+         point = currentData[i];
+         if(point.category >= "gene"){
+           x = point[["Comp 1"]];
+           y = point[["Comp 2"]];
+           geneSymbol = point.rowname;
+           if(x >= x1 & x <= x2 & y >= y1 & y <= y2)         
+             ids.push(geneSymbol);
+           } // if gene
          } // for i
-      if(ids.length > 0)
-         sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
-      };
+      if(ids.length > 0){
+         console.log(" selected ids: " + ids);
+         //sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
+         }
+       
+      }; // broadcastSelection
 
   //--------------------------------------------------------------------------------------------
   function sendIDsToModule (ids, moduleName, title){
@@ -448,25 +475,6 @@ var PLSRModule = (function () {
      }; // handlePatientIDs
 
   //--------------------------------------------------------------------------------------------
-  function d3PlotBrushReader () {
-     console.log("plotBrushReader 1037a 22jul2014");
-     pcaSelectedRegion = d3PlotBrush.extent();
-     //console.log("region: " + pcaSelectedRegion);
-     x0 = pcaSelectedRegion[0][0];
-     x1 = pcaSelectedRegion[1][0];
-     width = Math.abs(x0-x1);
-     //console.log("width: " + width);
-     if(width > 1){
-        broadcastButton.prop("disabled", false);
-        console.log("width > 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
-        }
-     else{
-        broadcastButton.prop("disabled", true);
-        console.log("width !> 1, new button state, disabled?: " + broadcastButton.prop("disabled"));
-        }
-     }; // d3PlotBrushReader
-
-  //-------------------------------------------------------------------------------------------
   function chooseColor (d){
      id = d.id[0];
      for(var i=0; i<patientClassification.length; i++){

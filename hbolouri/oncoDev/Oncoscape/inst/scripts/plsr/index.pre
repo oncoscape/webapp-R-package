@@ -1,6 +1,8 @@
 include(../index.common)
 include(../common.js)
+include(../sendSelectionMenu.js)
 include(Module.js)
+
 <body>
 include(widget.html)
 </body>
