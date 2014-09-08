@@ -29,7 +29,8 @@ var PLSRModule = (function () {
    var calculateButton;
    var sendSelectionMenu;
    var d3brush;
-   var selectedRegion;
+   var currentlySelectedRegion;
+   var thisModuleName = "PLSR"
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -57,16 +58,28 @@ var PLSRModule = (function () {
 
       handleWindowResize();
 
-      clearSelectionButton = $("#plsrClearSelectionButton");
-      clearSelectionButton.button();
+      //clearSelectionButton = $("#plsrClearSelectionButton");
+      //clearSelectionButton.button();
       //clearSelectionButton.click(clearSelection);
 
-      sendSelectionMenu = $("#plsrSendSelectiontoModuleButton")
-      sendSelectionMenu.change(sendSelectionToModule);
+      sendSelectionMenu = $("#plsrSendSelectiontoModuleMenu")
+      sendSelectionMenu.change(sendSelection);
       sendSelectionMenu.empty();
 
+      sendSelectionMenu.append("<option>Send Selection to:</option>")
+      var destinationModules = getSelectionDestinations()
+      if(destinationModules.length == 0)
+         destinationModules = ["selfTest"];
+
+      for(var i=0;i< destinationModules.length; i++){
+         var module = destinationModules[i];
+         if(module != thisModuleName){
+            optionMarkup = "<option>" + module + "</option>";
+            sendSelectionMenu.append(optionMarkup);
+            } // if not current module
+         } // for i
+      sendSelectionMenu.prop("disabled",true);
       $(window).resize(handleWindowResize);
-      //broadcastButton.prop("disabled",true);
       };
 
   //--------------------------------------------------------------------------------------------
@@ -224,12 +237,17 @@ var PLSRModule = (function () {
 
    //--------------------------------------------------------------------------------------------
    function d3PlotBrushReader () {
+
      console.log("=== plsr d3PlotBrushReader");
-     selectedRegion = d3brush.extent();
-     x0 = selectedRegion[0][0];
-     x1 = selectedRegion[1][0];
+     currentlySelectedRegion = d3brush.extent();
+     x0 = currentlySelectedRegion[0][0];
+     x1 = currentlySelectedRegion[1][0];
      width = Math.abs(x0-x1);
      console.log("width: " + width);
+     selectedIDs = identifyEntitiesInCurrentSelection();
+     sendSelectionMenu.prop("disabled", true);
+     if(selectedIDs.length > 0) 
+        sendSelectionMenu.prop("disabled", false);
      }; // d3PlotBrushReader
 
   //-------------------------------------------------------------------------------------------
@@ -386,29 +404,35 @@ var PLSRModule = (function () {
   function handleWindowResize () {
      console.log("=== Module.plsr handleWindowResize");
      plsrDisplay.width($(window).width() * 0.99);
-     plsrDisplay.height($(window).height() * 0.85);
+     plsrDisplay.height($(window).height() * 0.80);
      if(!firstTime)
        d3PlsrScatterPlot(currentData, currentAbsoluteMaxValue);
      };
 
    //--------------------------------------------------------------------------------------------
-   function sendSelectionToModule() {
-       moduleName = sendSelectionMenu.val()
-       broadcastSelection()
-       sendSelectionMenu.val("Send Selection to:")
+   function sendSelection() {
+      ids = identifyEntitiesInCurrentSelection()
+      destinationModule = sendSelectionMenu.val();
+      console.log("=== sendSelection to '" + destinationModule + "': " + ids.length)
+      if(ids.length > 0) {
+        if(destinationModule == "Send Selection to:")
+          return;
+        if(destinationModule == "selfTest")
+           console.log("selfTest selection destination, id count: " + ids.length + ": " + ids);
+        else
+           sendSelectionToModule(destinationModule, ids, {}, true);
+        } // if ids
     } // sendSelectionToModule
 
 
    //--------------------------------------------------------------------------------------------
-   //function broadcastSelection (){
-   broadcastSelection = function(){
-      console.log("broadcastSelection: " + selectedRegion);
-      x1=selectedRegion[0][0];
-      y1=selectedRegion[0][1];
-      x2=selectedRegion[1][0];
-      y2=selectedRegion[1][1];
+   identifyEntitiesInCurrentSelection = function(){
+      console.log("identifyEntitiesInCurrentSelection: " + currentlySelectedRegion);
+      x1 = currentlySelectedRegion[0][0];
+      y1 = currentlySelectedRegion[0][1];
+      x2 = currentlySelectedRegion[1][0];
+      y2 = currentlySelectedRegion[1][1];
       ids = [];
-      debugger;
       for(var i=0; i < currentData.length; i++){
          point = currentData[i];
          if(point.category >= "gene"){
@@ -419,12 +443,17 @@ var PLSRModule = (function () {
              ids.push(geneSymbol);
            } // if gene
          } // for i
+      return(ids);
+      sendSelectionMenu.prop("disabled", true);  // default value
       if(ids.length > 0){
          console.log(" selected ids: " + ids);
+         sendSelectionMenu.prop("disabled", false);
+         destinationModule = sendSelectionMenu.val();
+         sendSelectionToModule(destinationModule, ids, {}, true);
          //sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
          }
        
-      }; // broadcastSelection
+      }; // identifyEntitiesInCurrentSelection
 
   //--------------------------------------------------------------------------------------------
   function sendIDsToModule (ids, moduleName, title){
@@ -438,55 +467,6 @@ var PLSRModule = (function () {
       socket.send(JSON.stringify(msg));
       } // sendTissueIDsToModule
 
-
-  //--------------------------------------------------------------------------------------------
-  function pcaPlot (msg){
-      console.log("==== pcaPlot");
-      //console.log(msg);
-      if(msg.status == "success"){
-         pcaResults = JSON.parse(msg.payload);
-         d3PcaScatterPlot(pcaResults);
-         if(!firstTime)  // first call comes at startup.  do not want to raise tab then.
-             $("#tabs").tabs( "option", "active", pcaTabNumber);
-         } // success
-    else{
-      console.log("pcaPlot about to call alert: " + msg)
-      alert(msg.payload)
-      }
-     firstTime = false;
-     };
-
-  //--------------------------------------------------------------------------------------------
-  function handlePatientIDs(msg){
-      console.log("Module.pca: handlePatientIDs");
-      //console.log(msg)
-      if(msg.status == "success"){
-         patientIDs = msg.payload
-         //console.log("pca handlePatientIds: " + patientIDs);
-         payload = patientIDs
-         msg = {cmd: "calculate_mRNA_PCA", callback: "pcaPlot", status: "request", 
-                payload: payload};
-         socket.send(JSON.stringify(msg));
-         }
-    else{
-      console.log("handlePatientIDs about to call alert: " + msg)
-      alert(msg.payload)
-      }
-     }; // handlePatientIDs
-
-  //--------------------------------------------------------------------------------------------
-  function chooseColor (d){
-     id = d.id[0];
-     for(var i=0; i<patientClassification.length; i++){
-        if (id == patientClassification[i].rowname[0]){
-          result = patientClassification[i].color[0]
-          return(result)
-          } // if match
-        } // for i
-     //console.log("chooseColor, no match for id " + id);
-     return("black");
-     }
-  //-------------------------------------------------------------------------------------------
 
   //--------------------------------------------------------------------------------------------
   return{
