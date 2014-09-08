@@ -85,7 +85,8 @@ addRMessageHandler <- function(key, function.name)
            stop()
            }
        printf("patientHistory: %s", path)
-       DATA.PROVIDERS$patientHistoryEvents <- PatientHistoryProvider(path);
+       provider <- PatientHistoryProvider(path);
+       DATA.PROVIDERS$patientHistoryEvents <- provider
        } # found patientHistoryEvents line
 
    #-------------------------- patientHistoryTable
@@ -105,7 +106,10 @@ addRMessageHandler <- function(key, function.name)
            stop()
            }
        printf("patientHistory: %s", path)
-       DATA.PROVIDERS$patientHistoryTable <- PatientHistoryProvider(path);
+       provider <- PatientHistoryProvider(path);
+       DATA.PROVIDERS$patientHistoryTable <- provider
+       tbl.patientHistory <<- getTable(provider);
+       printf("read %d rows into tbl.patientHistory", nrow(tbl.patientHistory))
        } # found patientHistoryEvents line
 
    #-------------------------- mRNA
