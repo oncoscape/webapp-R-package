@@ -38,18 +38,25 @@
 
 <div id="pairedDistributionsDiv">
    <div id="pairedDistributionInfoLinks" class="HeaderLinks" align="right">
-      <span id="pairedDistributionAboutLink" >Credits  </span>
- <!--     <span id="pairedDistributionTooltipsLink"  dx=10>Tooltips</span> -->
+      <span id="pairedDistributionAboutLink" >About</span>
+      <span id="pairedDistributionTooltipsLink"  dx=10>Tooltips</span>
    </div>
+   
    <label for="attributeDropDown">Select Attribute: </label>
-   <select style="width:150px;" id="attributeDropDown">
+   <select id="attributeDropDown">
    		<option value="ageAtDx">ageAtDx</option>
   		<option value="FirstProgression">First Progression</option>
   		<option value="survival">Survival</option>
-  	</select>
+   </select>
 <!--    <button id="generatePairedDistributionsDataButton">Add a Distribution</button> -->
    <button id="clearPairedDistributionsButton">Clear Distributions</button>
+<!--    <button id="pairedDistributionsBroadcastSelectionButton">Broadcast</button> -->
 
-  <div id="pairedDistributionsDisplay"></div>
+   <select id="DistributionSendSelectiontoModuleButton" name="SendSelectionToModule"></select>
    
+   <div id="pairedDistributionsDisplay"></div>
+   
+  <span id=pairedDistributionsAcknowledgement style="font-size:x-small">Created by Cliff Rostomily;</span>
+  <span style="font-size:x-small">Last Modified: <span id=pairedDistributionsDateModified style="font-size:x-small"></span></span>
+
 </div>
