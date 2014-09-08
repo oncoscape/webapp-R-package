@@ -544,6 +544,10 @@ about.init();
 //----------------------------------------------------------------------------------------------------
 var DashboardModule = (function () {
 
+  var HIDRAlink = "<a href='http://www.fhcrc.org/en/labs/hidra.html'>HIDRA</a>"
+  var TCGAdatalink = "<a href='https://tcga-data.nci.nih.gov/tcga/tcgaCancerDetails.jsp?diseaseType=GBM&diseaseName=Glioblastoma%20multiforme'>TCGA portal</a>"
+  var GBM2013paper = "<a href='http://www.ncbi.nlm.nih.gov/pubmed/24120142'>(Brennan et al, Cell 2013)</a>"
+
  //----------------------------------------------------------------------------------------------------
      function DashboardInitializeUI(){
         
@@ -554,14 +558,16 @@ var DashboardModule = (function () {
               active: false,
               heightStyle: "content",
               collapsible: true,
-              activate: function(event, ui){
-                 console.log(" activating accordion");
-                 window.cwCuration.resize().fit(50);
-               }
-            });
+              });
             
-          $("#dashboardAboutLink").click(showAbout_dashboard)
-          
+        $("#AvailableDataAccordian" ).accordion({
+              active: false,
+              heightStyle: "content",
+              collapsible: true,
+              });
+
+        LoadDatainfo();
+               
         var ToDobutton = $("#ToDoLink");
         var ToDoURL = "https://docs.google.com/spreadsheets/d/1Rqqpma1M8aF5bX4BM2cYYgDd5hazUysqzCxLhGUwldo/edit?usp=sharing"
 
@@ -570,11 +576,41 @@ var DashboardModule = (function () {
     };
 
    //----------------------------------------------------------------------------------------------------
+    function LoadDatainfo(){
+ 
+      var TCGAdata =  $("#TCGAdataInfo")
+      TCGAdata.append("<p><h4 align=center>Glioblastoma multiforme (GBM) Pilot demo</h4></p>")
+      TCGAdata.append("<p>Copy Number Alterations, Single Nucleotide Alterations, indels and patient histories were downloaded from the " +
+                      TCGAdatalink + ", based off the 2013 publication "+GBM2013paper+" and supplemented by in-house data.</p>")          
+          
+      TCGAdata.append("<div id='TCGArnadata'><p>The TCGA GBM expression data included in Oncoscape is for 304 patients that meet the following criteria:<br>" +
+           "<ol type='A'><li>TCGA clinical data has (529 GBM samples) <ul> <li>'GBM' by 'histologic type'</li><li>'primary' by 'sample type'</li><li>an assigned subtype (ie != '')</li></ul>"+
+           "<li>TCGA expression data within unified (Agilent + Affymetrix) set defined in comparative paper (PMID:21436879)  (323 GBM samples).</li></ol>"+
+           "</p></div>")
+ 
+      var UWMSCCAdata =  $("#UWMSCCAdataInfo")
+      UWMSCCAdata.append("<p>Access to information regarding <a href='http://www.uwmedicine.org/'>University of Washington Medicine</a> and <a href='http://www.seattlecca.org/'>SCCA</a> patients is restricted by IRB approval.  Please contact <a href='http://www.fhcrc.org/en/diseases/featured-researchers/fearn-paul.html'>Paul Fearn</a> for questions regarding access.</p>")
+//      UWMSCCAdata.append("<div id='UWMSCCApatientdata'>UWM and SCCA patient information is accessed through "+HIDRAlink+", which centralizes records for thousands of patients in a common <a href='http://www.caisis.org/'>Caisis</a> table format.</div>")
+//      UWMSCCAdata.append("<div id='UWMSCCAcnvdata'><h4><u>CNV: Oncoplex</u></h4><br></div>")
+
+      var TableContents = $("#TableContentsDiv")
+      TableContents.append("<p><h4>Clinical Table:</h4> Table view of patient information.  Filter data by Age of Diagnosis & survival sliders or by specific search terms.</p>")
+      TableContents.append("<p><h4>Patient Timelines:</h4> Visual representation of patient histories.  Align or Order patient histories by clinical events.  Couple calculated features with patient timelines. </p>")
+      TableContents.append("<p><h4>Principle Component Analysis (PCA):</h4> Transform RNA expression levels to cluster patients by patterns of variation.</p>")
+      TableContents.append("<p><h4>Partial Least Squares Regression (PLSR):</h4> Use linear regression to correlate genes with clinical features using RNA expression </p>")
+      TableContents.append("<p><h4>GBM Pathways:</h4> Map patient specific expression levels on a hand curated network of genes associated with GBM.  Click on edges to view the abstracts defining the relationship. </p>")   
+      TableContents.append("<p><h4>Angiogenesis:</h4> Map patient specific expression levels on a small network of genes associated with angiogenesis.  Click on edges to view the abstracts defining the relationship. </p>")   
+      TableContents.append("<p><h4>Markers & Patients:</h4> Link copy number variation and mutation data to patients grouped by GBM classification: mesenchymal, classicial, neural, proneural, and G-CIMP </p>")
+      TableContents.append("<p><h4>Distributions:</h4> Plot clinical features of defined populations. </p>")
+      TableContents.append("<p><h4>Survival:</h4> Compare survival rates of selected patients against the remaining population in a Kaplan Meier plot.</p>")
+   }
+
+   //----------------------------------------------------------------------------------------------------
     function showAbout_dashboard(){
   
           var   info ={Modulename: "Dashboard",
                     CreatedBy: "Oncoscape Core",
-                    MaintainedBy: "Lisa McFerrin",
+                    MaintainedBy: "Oncoscape Core",
                     Folder: "Dashboard"}
 
          about.OpenAboutWindow(info) ;
@@ -604,7 +640,7 @@ Dashboard.init();
 
 .HeaderLinks {
   color: blue;
-  font-size: medium;
+  font-size: small;
   cursor: pointer;
     display: block;
      margin-right: 20px;
@@ -618,7 +654,7 @@ Dashboard.init();
    background-color:#F9F9F9;
    border:1px solid #333;
    padding:5px;
-   font-size: medium
+   font-size: small
    width: 50%
 }
 </style>
@@ -643,70 +679,66 @@ ul.UserDocs {
 
 
 <div id="DashboardDiv">
-   <div id="dashboardInfoLinks" class="HeaderLinks" align="right">
-      <span id="dashboardAboutLink" >About</span>
-      <span id="dashboardTooltipsLink"  dx=10>Tooltips</span>
-   </div>
    <span id="LogIn" style="float:right; font-size:medium; margin-right: 20px"> User:  <span id="UserName"> </span></span>
 
    <div align="center"> <h1 > Oncoscape </h1>
-       <span> (version 1.1.23, 1 sep 2014)<br></span>
-       <p> <font color="red">This website is undergoing frequent (hourly) modifications.  <br> Use at your own risk.</font></p>
+       <span> (version 1.1.27, 8 sep 2014)<br></span>
+       <p> <font color="red">This website is undergoing frequent modifications.  <br> Use at your own risk.</font></p>
    </div>   
  
-   <p> Note: Oncoscape works best with Chrome Version 37 or higher and a minimum screen resolution of 1280x800 </p>
+   <p> Note: Oncoscape works best with Chrome Version 37 or higher and a high resolution screen. </p>
 
    <div id="DashboardAccordion">
      <h3> Available Data </h3>
         <div id="AvailableData">
-          <div id="TCGAdata"> <h3 align="center">The Cancer Genome Atlas (TCGA)</h3>
-             <div id="TCGApatientdata"><h3><u>Patients</u></h3>
-             </div>
-             <div id="TCGArnadata"><h3><u>RNA</u></h3>
-                <b>Subtypes: </b> Defined by centroid genes
-             </div>
-             <div id="TCGAcnvdata"><h3><u>CNV</u></h3>
-             </div>
-             <div id="TCGAmutdata"><h3><u>Mutation</u></h3>
-             </div>
+          <div id="AvailableDataAccordian">
+             <h3>TCGA: The Cancer Genome Atlas</h3><div id="TCGAdataInfo"></div>
+             <h3>Restricted Data</h3><div id="UWMSCCAdataInfo"></div>
           </div>
         </div>
-     <h3> Vignettes </h3><div></div>
-     <h3> Tutorials/Use Cases </h3><div></div>
-     <h3> Download Software </h3><div></div>
+     <h3> Table of Contents </h3><div id="TableContentsDiv"></div>
+ <!--    <h3> Download Software </h3><div></div>  -->
      <h3> Features To Come... </h3>
         <div>
            <ul id="FeaturesToCome">
               <li> Saved Selections </li>
               <li> Interactive Kaplan Meier Plots </li>
+              <li> Expression subtyping tool </li>
+              <li> Expression correlation to TCGA samples using MDS </li>
+              <li> Tool to find TCGA samples with similar mutational profiles </li>
+              <li> Expression clustering and heatmaps </li>
+              <li> Gene set enrichment analysis for user-selected groups </li>
+              <li> Differential expression analysis for user-selected groups </li>
+              <li> Hallmarks of Cancer </li>
            </ul>
            <button id=ToDoLink>Edit The To-Do Table</button>
         </div> 
-      <h3> About </h3>
+      <h3> About Oncoscape</h3>
          <div>
             <p>Oncoscape is developed at the <a href= "www.fhcrc.org">Fred Hutchinson Cancer Research Center</a> under the auspices of the <a href="www.sttrcancer.org">Solid Tumor Translational Research</a> initiative.
             </p>
-            <p> Oncoscape is a web-based, menu-driven analysis and visualization platform for large-scale, heterogeneous clinical and molecular patient timeline data as exemplified by the <a href= "www.fhcrc.org">Fred Hutch</a> and <a href="http://www.fhcrc.org/en/labs/hidra.html">HIDRA</a> database.
+            <p> Oncoscape is a web-based, menu-driven analysis and visualization platform for large-scale, heterogeneous clinical and molecular patient timeline data as exemplified by the <a href="http://www.fhcrc.org/en/labs/hidra.html">Fred Hutch HIDRA</a> database.
             </p>
-            <p>Oncoscape was conceived, and is managed, by a Steering Committee comprising: Eric Holland, Desert Horse-Grant, Paul Fearn, Paul Shannon, Lisa McFerrin, and Hamid Bolouri.
+            <p>Oncoscape was conceived, and is managed, by a Steering Committee comprising: <a href="http://www.fhcrc.org/en/diseases/featured-researchers/holland-eric.html">Eric Holland</a>, <a href="http://www.sttrcancer.org/en/contact-us.html">Desert Horse-Grant</a>, <a href="http://www.fhcrc.org/en/diseases/featured-researchers/fearn-paul.html">Paul Fearn</a>, <a href="http://fhcrc.academia.edu/PaulShannon">Paul Shannon</a>,<a href="http://www.researchgate.net/profile/Lisa_McFerrin">Lisa McFerrin</a>, and <a href="http://research.fhcrc.org/bolouri/">Hamid Bolouri</a>.
             </p>
             <p> Paul Shannon (lead) and Lisa McFerrin are the primary developers of Oncoscape, with additional code contributions by Cliff Rostomily and Hamid Bolouri.
             </p>
-            
-            <div id="LegalNotice">Legal Notice
-              <p>Oncoscape is free for academic, nonprofit, and personal use. Any use of the public browser requires credits.  For assistance, questions or problems contact STTR. 
-              </p>
-              <p>Data provided in Oncoscape is under the same condition of use as specified in the original data source.
-              </p>
-            </div>
+         </div>   
+      <h3>Terms Of Use</h3>
+         <div id="LegalNotice">
+            <p>
+            Oncoscape source code is freely available via <a href="github.com">GitHub</a> under the minimally restrictive <a href="http://opensource.org/licenses/MIT">MIT open source license</a>.
+            Access to data in Oncoscape is restricted to the same conditions of use as specified in the original data source.
+            </p>
          </div>
+      
    </div>
  
-   <div id="footerLogos" align="center">
-        <a href="http://www.fhcrc.org"><img width="235" height="80" src="../../../data/img/FHCRC_COLOR high res.jpg" alt="Fred Hutchinson Cancer Research Center"/></a>
+<!--   <div id="footerLogos" align="center" style="margin-top: 20px">
+        <a href="http://www.fhcrc.org" style="margin-right: 20px"><img width="235" height="80" src="../../../data/img/FHCRC_COLOR high res.jpg" alt="Fred Hutchinson Cancer Research Center"/></a>
         <a href="http://www.sttrcancer.org"><img width="236" height="80" src="data/img/STTR_logo_240x67.jpg" alt="STTR"/></a> 
    </div>
- 
+ -->
  </div>
 
 
