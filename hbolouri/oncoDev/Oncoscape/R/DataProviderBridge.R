@@ -415,13 +415,19 @@ get_mRNA_data <- function(WS, msg)
          printf("entities: %s", paste(entities, collapse=","))
          printf("features: %s", paste(features, collapse=","))
          tbl <- getData(dataProvider, entities=entities, features=features)
-         matrix <- as.matrix(tbl)
-         printf("matrix dim: %d, %d", nrow(matrix), ncol(matrix))
-         return.cmd <- msg$callback
-         #return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(mtx=matrixToJSON(matrix)))
-         payload <- list(mtx=matrixToJSON(matrix))
-         status <- "success"
-         }
+         if(nrow(tbl) == 0){
+            status <- "failure"
+            payload <- sprintf("get_mRNA_data, no matching rows");
+            }
+         else{            
+            matrix <- as.matrix(tbl)
+            printf("matrix dim: %d, %d", nrow(matrix), ncol(matrix))
+            return.cmd <- msg$callback
+            #return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(mtx=matrixToJSON(matrix)))
+            payload <- list(mtx=matrixToJSON(matrix))
+            status <- "success"
+            } # else: some good rows
+         } # else: legal constraint fields
        } # is.list(payload)
 
 
@@ -476,13 +482,19 @@ get_cnv_data <- function(WS, msg)
          printf("entities: %s", paste(entities, collapse=","))
          printf("features: %s", paste(features, collapse=","))
          tbl <- getData(dataProvider, entities=entities, features=features)
-         matrix <- as.matrix(tbl)
-         printf("matrix dim: %d, %d", nrow(matrix), ncol(matrix))
-         return.cmd <- msg$callback
-         #return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(mtx=matrixToJSON(matrix)))
-         payload <- list(mtx=matrixToJSON(matrix))
-         status <- "success"
-         }
+         if(nrow(tbl) == 0){
+            status <- "failure"
+            payload <- sprintf("get_mRNA_data, no matching rows");
+            }
+         else{            
+            matrix <- as.matrix(tbl)
+            printf("matrix dim: %d, %d", nrow(matrix), ncol(matrix))
+            return.cmd <- msg$callback
+            #return.msg <- list(cmd=msg$callback, callback="", status="success", payload=list(mtx=matrixToJSON(matrix)))
+            payload <- list(mtx=matrixToJSON(matrix))
+            status <- "success"
+            } # else: some good rows
+         } # else: legal.constraints
        } # is.list(payload)
 
 
