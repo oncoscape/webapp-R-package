@@ -1,59 +1,209 @@
 #                   incoming message                     function to call                             return.cmd
 #                   -------------------                  ----------------                             a-------------
+
+addRMessageHandler("PLSR.ping",                         "PLSR.ping")
 addRMessageHandler("getAgeAtDxAndSurvivalRanges",       "getAgeAtDxAndSurvivalRanges")
-addRMessageHandler("calculatePLSRActualPatientTimes",   "calculatePLSRActualPatientTimes.stage")
-#addRMessageHandler("calculatePLSR",                     "calculatePLSR")
+addRMessageHandler("calculatePLSR",   "calculatePLSR")
+
+#----------------------------------------------------------------------------------------------------
+PLSR.ping <- function(WS, msg)
+{
+
+  return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success", payload="ping back!"))
+  sendOutput(DATA=return.msg, WS=WS);
+
+} # PLSR.ping
+#----------------------------------------------------------------------------------------------------
+# create convenient global variables for relevant data types specified in the current manifest
+# print(ls(DATA.PROVIDERS))
+# printf("exists ptHis? ", exists("tbl.ptHis"))
+# stopifnot("patientHistoryTable" %in% ls(DATA.PROVIDERS))
+# if(exists("tbl.patientHistory")){
+#    printf("tbl.patientHistory (%d, %d) already loaded", nrow(tbl.patientHistory), ncol(tbl.patientHistory))
+# }else{
+#    patientHistoryProvider <- DATA.PROVIDERS$patientHistoryTable
+#    tbl.patientHistory <- getTable(patientHistoryProvider)
+#    printf("tbl.patientHistory (%d, %d) freshly loaded", nrow(tbl.patientHistory), ncol(tbl.patientHistory))
+#    }
 
 #----------------------------------------------------------------------------------------------------
 getAgeAtDxAndSurvivalRanges <- function(WS, msg)
 {
-    result <- list(ageAtDxLow=18.03,
-                   ageAtDxHigh=89.88,
-                   survivalLow=0.23,
-                   survivalHigh=82.96)
-    
-    return.msg <- toJSON(list(cmd="ageAtDxAndSurvivalRanges", status="result", payload=result))
+    print("getAgeAtDxAndSurvivalRanges");
+    if(!exists("tbl.patientHistory"))
+       return.msg <- toJSON(list(cmd=msg$callback, callback="", status="error",
+                                 payload="PLSR.R could not find tbl.patientHistory"))
+    else{
+      result <- list(ageAtDxLow=min(tbl.patientHistory$ageAtDx, na.rm=TRUE),
+                     ageAtDxHigh=max(tbl.patientHistory$ageAtDx, na.rm=TRUE),
+                     survivalLow=min(tbl.patientHistory$survival, na.rm=TRUE),
+                     survivalHigh=max(tbl.patientHistory$survival, na.rm=TRUE))
+      return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success", payload=result))
+      } # else: tbl.patientHistory exists
 
     sendOutput(DATA=return.msg, WS=WS)
 
 } # getAgeAtDxAndSurvivalRanges 
 #---------------------------------------------------------------------------------------------------
-# 'actual' rather than 'as quantiles' which is how we started (16 apr 2014)
-calculatePLSRActualPatientTimes.stage <- function(WS, msg)
+createClassificationMatrix <- function(tbl.ptHis,
+                                       ageAtDx.lo=15,
+                                       ageAtDx.hi=80,
+                                       survival.lo=0.2,
+                                       survival.hi=5
+                                       )
 {
-    payload <- fromJSON(msg$payload)
+    row.names <- tbl.ptHis$ID # eg, TCGA.02.001
+    col.names <- c("ageAtDxLow", "ageAtDxHigh", "survivalLow", "survivalHigh")
+    mtx.classify <- matrix(0, nrow(tbl.ptHis), ncol=4,dimnames=list(row.names, col.names))
 
-    ageAtDx.threshold.low <- payload$ageAtDxThresholdLow
-    ageAtDx.threshold.hi  <- payload$ageAtDxThresholdHi
-    overallSurvival.threshold.low <- payload$overallSurvivalThresholdLow
-    overallSurvival.threshold.hi <- payload$overallSurvivalThresholdHi
+    ageAtDxLowTissues <- subset(tbl.ptHis, ageAtDx <= ageAtDx.lo)$ID
+    ageAtDxHighTissues <- subset(tbl.ptHis, ageAtDx >= ageAtDx.hi)$ID
 
-    result <- patientActualTimesPLSR(ageAtDx.threshold.low,
-                                     ageAtDx.threshold.hi,
-                                     overallSurvival.threshold.low,
-                                     overallSurvival.threshold.hi,
-                                     tbl.clinical, tbl.idLookup)
-    if(is.na(result)){
-        return.msg <- toJSON(list(cmd="plotPLSRPatientTimesResult", status="error",
-                                  payload="tissue classes not disjoint"))
-        sendOutput(DATA=return.msg, WS=WS)
-        return();
-        } # is.na (result)
+    survivalLowTissues <- subset(tbl.ptHis, survival <= survival.lo)$ID
+    survivalHighTissues <- subset(tbl.ptHis, survival >= survival.hi)$ID
+
+    mtx.classify[ageAtDxLowTissues, "ageAtDxLow"] <- mtx.classify[ageAtDxLowTissues, "ageAtDxLow"] + 1;
+    mtx.classify[ageAtDxHighTissues,  "ageAtDxHigh"] <- mtx.classify[ageAtDxHighTissues, "ageAtDxHigh"] + 1;
+    
+    mtx.classify[survivalLowTissues,   "survivalLow"]  <- mtx.classify[survivalLowTissues, "survivalLow"] + 1;
+    mtx.classify[survivalHighTissues,  "survivalHigh"] <- mtx.classify[survivalHighTissues, "survivalHigh"] + 1;
+
+    mtx.classify
+
+}  # createClassificationMatrix
+#----------------------------------------------------------------------------------------------------
+# 'actual' rather than 'as quantiles' which is how we started (16 apr 2014)
+calculatePLSR <- function(WS, msg)
+{
+    print("==== calculatePLSR")
+
+    if(!exists("tbl.patientHistory")){
+       patientHistoryProvider <- Oncoscape:::DATA.PROVIDERS$patientHistoryTable
+       tbl.patientHistory <- getTable(patientHistoryProvider)
+       }
+
+    printf("tbl.patientHistory: %d x %d", nrow(tbl.patientHistory), ncol(tbl.patientHistory))
+
+    if(!exists("tbl.mrna"))
+       tbl.mrna <- getData(Oncoscape:::DATA.PROVIDERS[["mRNA"]])
+
+
+    printf("tbl.mrna: %d x %d", nrow(tbl.mrna), ncol(tbl.mrna))
+
+   #tbl.mrna <<- getData(Oncoscape:::DATA.PROVIDERS[["mRNA"]])
+   #tbl.ptclass <<- getData(Oncoscape:::DATA.PROVIDERS[["patientClassification"]])
+   #tbl.pt <<- getData(Oncoscape:::DATA.PROVIDERS[["patientHistoryTable"]])
+
+   #patientHistoryProvider <- Oncoscape:::DATA.PROVIDERS$patientHistoryTable
+   #tbl.ptHis <<- getTable(patientHistoryProvider)
+   
+   print("========= payload");
+   print(msg$payload)
+   payload <- fromJSON(msg$payload);
+
+   geneSetName <- payload[["geneSet"]]
+   printf("geneSetName: %s", geneSetName);
+    
+   ageAtDx.threshold.low <- payload[["ageAtDxThresholdLow"]]
+   ageAtDx.threshold.high  <- payload[["ageAtDxThresholdHi"]]
+   overallSurvival.threshold.low <- payload[["overallSurvivalThresholdLow"]]
+   overallSurvival.threshold.high <- payload[["overallSurvivalThresholdHi"]]
+
+   mtx.classify <- createClassificationMatrix(tbl.patientHistory,
+                                              ageAtDx.threshold.low,
+                                              ageAtDx.threshold.high,
+                                              overallSurvival.threshold.low,
+                                              overallSurvival.threshold.high)
+
+   print(colSums(mtx.classify))
+   mtx.mrna <- as.matrix(tbl.mrna)
+   if(!geneSetName %in% names(genesets))
+       keepers <- colnames(mtx.mrna)
+   else
+       keepers <- intersect(colnames(mtx.mrna), genesets[[geneSetName]])
+    
+   if(length(keepers) < 5){
+      error.msg <- sprintf("PLSR geneSet error: only %d/%d %s genes are in mRNA dataset",
+                           length(keepers), length(genesets[[geneSetName]]), geneSetName);
+      return.msg <- toJSON(list(cmd=msg$callback, callback="",  status="error",
+                            payload=error.msg))
+      sendOutput(DATA=return.msg, WS=WS)
+      return();
+      } # keepers < 10
+       
+   mtx.mrna <- mtx.mrna[, keepers]
+
+   mtx.classify <- mtx.classify[rownames(mtx.mrna),]
+     #set.seed(17)
+     # genes.indices <- sample(1:ncol(mtx.mrna), 100)
+   #gene.indices <-  1:ncol(mtx.mrna)
+   #printf("--- mtx.classify");
+   #print(head(mtx.classify))
+   #printf("--- mtx.mrna");
+   #print(head(mtx.mrna))
+    
+   fit <- plsr(mtx.classify ~ mtx.mrna, ncomp=2, scale=TRUE,validation="none")
+
+    # names(fit)
+    #
+    # coefficients    scores          loadings        loading.weights Yscores         Yloadings      
+    # projection      Xmeans          Ymeans          fitted.values   residuals       Xvar           
+    # Xtotvar         fit.time        ncomp           method          scale           call           
+    # terms           model          
+
+    # dim(mtx.mrna)             304 patients x 817 genes
+    # dim(fit$coefficients)     817 4 2
+    # dim(fit$scores)           304 2
+    # dim(fit$loadings)         817 2
+    # dim(fit$loading.weights)  817 2
+    # dim(fit$Yscores)          304 2
+    # dim(fit$Yloadings)          4 2
+    # fit$Yloadings[,1]          ageAtDxLow  ageAtDxHigh  survivalLow survivalHigh 
+    #                            0.017014155 -0.001067325 -0.008270052  0.003779102    x coordinate
+    #              [,2]          0.021748847 -0.027534816 -0.010777649  0.002372023    y coordinate
+
+    
+
+   #print(fit)
+
+   if(all(is.na(fit))){
+       return.msg <- toJSON(list(cmd=msg$callback, status="error", callback="",
+                                 payload="probable cause: patient classes not disjoint"))
+       sendOutput(DATA=return.msg, WS=WS)
+       return();
+       } # is.na (result)
 
        # genes is an n x 2 matrix, rownames are gene symbols, columns are "Comp 1", "Comp 2"
-       # vectors is a 4 x 2 matrix, rownames are the low/hi ageAtDx, low/hi survival
+       # load.vectors:  a 4 x 2 matrix, rownames are the low/hi ageAtDx, low/hi survival, colnames x & y
 
-    vectors <- result$vectors
-    scale <- 0.8 / max(abs(result$vectors))
-    vectors <- vectors * scale
-    response.payload <- list(genes=matrixToJSON(result$genes, "gene"),
-                             vectors=matrixToJSON(vectors, "vector"))
+      # create the 4 x 2 vectors matrix.
+    categories <- names(fit$Yloadings[,1]) # ageAtDxLow, ageAtDxHigh, survivalLow, survivalHigh
+    load.vectors <- matrix(c(fit$Yloadings[,1], fit$Yloadings[,2]),
+                           nrow=length(categories),
+                           dimnames=list(categories, c("x", "y")))
     
-    return.msg <- toJSON(list(cmd="plotPLSRPatientTimesResult", status="result", payload=response.payload))
+    gene.loadings <- fit$loadings[,1:2]
+
+       # these vectors are often stubby little things.
+       # scale them up so that the largest extends beyond the most extreme gene location
+
+       # we want the longest vector to project beyond the furthest point by
+       # about a factor of 1.2
+    
+    scale <- 1.2 *  max(abs(gene.loadings))/max(abs(load.vectors))
+    load.vectors <- load.vectors * scale
+
+    maximum.value <- max(abs(c(as.numeric(gene.loadings), as.numeric(load.vectors))))
+
+    payload <- list(genes=matrixToJSON(gene.loadings, category="gene"),
+                    vectors=matrixToJSON(load.vectors, category="vector"),
+                    absMaxValue=maximum.value)
+    
+    return.msg <- toJSON(list(cmd=msg$callback, callback="",  status="fit", payload=payload))
     sendOutput(DATA=return.msg, WS=WS)
     
 
-} # calculatePLSRPatientTimes.stage
+} # calculatePLSR
 #----------------------------------------------------------------------------------------------------
 patientQuantileTimesPLSR <- function(ageAtDx.threshold.low,
                              ageAtDx.threshold.hi,
@@ -278,7 +428,7 @@ patientActualTimesPLSR <- function(ageAtDx.threshold.low,
 
 } # patientActualTimesPLSR
 #----------------------------------------------------------------------------------------------------
-plsrAnalysis <- function(mtx.expression, mtx.categories, numberOfComponents=4)
+plsrAnalysis <- function(mtx.expression, mtx.categories, numberOfComponents=2)
 {
     if(nrow(mtx.expression) != nrow(mtx.categories)){
         message(sprintf("incongruent matrices for plsr, %d vs %d",
