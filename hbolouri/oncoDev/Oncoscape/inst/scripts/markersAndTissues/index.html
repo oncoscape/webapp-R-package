@@ -79967,7 +79967,10 @@ markersAndTissuesVizmap = [ {
   }, {
     "selector" : "edge[edgeType = 'mutantIn']",
     "css" : {
-      "line-color" : "rgb(0,0,0)"
+      "line-color" : "rgb(0,0,255)",
+      "line-style" : "dotted",
+      "width": 3
+
     }
   }, {
     "selector" : "edge[edgeType = 'copyNumberLoss']",
@@ -79997,7 +80000,7 @@ div {
 #markersAndTissuesDiv{
   }
 
-button, option {font-size:4pt !important;}
+button {font-size:10pt !important;}
 
 #cyMarkersDiv {
   background-color: #DDD;
@@ -80054,8 +80057,8 @@ button, option {font-size:4pt !important;}
 
 <div id="markersAndTissuesDiv">
   <div id="markerpatientsInfoLinks" class="HeaderLinks" align="right">
-      <span id="markerpatientsAboutLink" >About</span>
-      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>
+      <span id="markerpatientsAboutLink" >Credits  </span>
+<!--      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>  -->
    </div>
    <div id="markersAndTissuesButtonDiv">
        &nbsp; Search: <input type="text" id="markersAndTissuesSearchBox"></input>

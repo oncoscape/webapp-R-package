@@ -68,7 +68,10 @@ markersAndTissuesVizmap = [ {
   }, {
     "selector" : "edge[edgeType = 'mutantIn']",
     "css" : {
-      "line-color" : "rgb(0,0,0)"
+      "line-color" : "rgb(0,0,255)",
+      "line-style" : "dotted",
+      "width": 3
+
     }
   }, {
     "selector" : "edge[edgeType = 'copyNumberLoss']",
