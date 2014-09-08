@@ -3,12 +3,13 @@
 var PCAModule = (function () {
 
   var pcaDisplay;
+  var d3pcaDisplay;
+
   var pcaScores;
   var patientClassification;
   var firstTime = true;
   var pcaSelectedRegion;    // from brushing
   var d3PlotBrush;
-  var d3pcaDisplay;
   var pcaTextDisplay;
   var PatientMenu;
   var PCAsendSelectionMenu;
@@ -161,9 +162,9 @@ var PCAModule = (function () {
            .attr("r",  6)
            .attr("fill", Classifications.get(LegendLabels[i])[0].color[0])
            .attr("transform", "translate(" + (TextOffset[i]) +",0)")
-  }
+      }
  
-  }
+    } // drawLegend
   
   //--------------------------------------------------------------------------------------------
   function pcaHandleWindowResize () {
