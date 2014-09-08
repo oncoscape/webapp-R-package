@@ -530,8 +530,8 @@ getPatientHistoryDataVector <- function(WS, msg)
 
       # payload must be a list
    payload <- msg$payload;
-   printf("--- payload");
-   print(payload)
+   #printf("--- payload");
+   #print(payload)
    if(!is.list(payload)) {
        status <- "failure"
        error.message <- "need two fields in payload: 'colname' and 'patients'"
@@ -735,9 +735,9 @@ get_mutation_data <- function(WS, msg)
    dataProvider <- DATA.PROVIDERS[[signature]];
    payload <- msg$payload
    status <- "failure"
-   print("--- payload");
-   print(payload)
-   print(class(payload))
+   #print("--- payload");
+   #print(payload)
+   #print(class(payload))
      # entities and features fields can be empty, but must be present
    if(!is.list(payload)) {
        payload <- "no constraint fields in payload"
@@ -862,7 +862,7 @@ getCaisisPatientHistory <- function(WS, msg)
    category.name <- "patientHistoryEvents"
 
    printf("--- DataProviderBridge looking for '%s': %s",  category.name, category.name %in% ls(DATA.PROVIDERS))
-   printf("--- payload: %s", paste(patientIDs, collapse=","));
+   #printf("--- payload: %s", paste(patientIDs, collapse=","));
     
    if(!category.name %in% ls(DATA.PROVIDERS)){
        error.message <- "Oncoscape DataProviderBridge error:  no caisisPatientHistoryProvider defined"
