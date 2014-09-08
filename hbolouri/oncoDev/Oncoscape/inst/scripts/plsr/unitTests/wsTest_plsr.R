@@ -16,6 +16,7 @@ runTests <- function()
 {
    test_ping();
    test_plsr();
+   test_plsr_withGeneSet();
    
 } # runTests
 #----------------------------------------------------------------------------------------------------
@@ -72,6 +73,33 @@ test_plsr <- function()
    checkEquals(names(msg.incoming$payload), c("genes", "vectors", "absMaxValue"))
    checkTrue(nchar(msg.incoming$payload[["vectors"]]) > 300)  # 404 on (5 sep 2014)
    checkTrue(nchar(msg.incoming$payload[["genes"]]) > 10000)  # 83k on (5 sep 2014)
+   checkTrue(nchar(msg.incoming$payload[["absMaxValue"]]) > 0.3)  # 0.31785 on (5 sep 2014)
+
+} # test_plsr
+#----------------------------------------------------------------------------------------------------
+test_plsr_withGeneSet <- function()
+{
+   print("--- test_plsr_withGeneSet")
+   cmd <- "calculatePLSR"
+   status <- "request"
+   payload <- c(geneSet="angiogenesis",
+                ageAtDxThresholdLow=36, 
+                ageAtDxThresholdHi=64,
+                overallSurvivalThresholdLow=3.7,
+                overallSurvivalThresholdHi=7.3)
+       
+   callback <- "handle.plsr.results"
+   msg <- list(cmd=cmd, callback=callback, status=status, payload=toJSON(payload))
+   websocket_write(toJSON(msg), client)
+   
+   system("sleep 1")
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   checkEquals(msg.incoming$cmd, callback)
+   checkEquals(msg.incoming$status, "fit")
+   checkEquals(names(msg.incoming$payload), c("genes", "vectors", "absMaxValue"))
+   checkTrue(nchar(msg.incoming$payload[["vectors"]]) > 300)  # 404 on (5 sep 2014)
+   checkTrue(nchar(msg.incoming$payload[["genes"]]) > 1000)  # 1196, 12 genes (7 sep 2014)
    checkTrue(nchar(msg.incoming$payload[["absMaxValue"]]) > 0.3)  # 0.31785 on (5 sep 2014)
 
 } # test_plsr

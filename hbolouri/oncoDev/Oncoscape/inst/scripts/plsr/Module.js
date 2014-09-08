@@ -27,10 +27,11 @@ var PLSRModule = (function () {
    var ageAtDxMinThreshold, ageAtDxMaxThreshold, survivalMinThreshold, survivalMaxThreshold;
 
    var calculateButton;
-   var sendSelectionMenu;
+   //var sendSelectionMenu;
    var d3brush;
    var currentlySelectedRegion;
    var thisModuleName = "PLSR"
+   var geneSetMenu;
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -56,17 +57,19 @@ var PLSRModule = (function () {
       calculateButton.button();
       calculateButton.click(requestPLSRByOnsetAndSurvival)
 
+      geneSetMenu = $("#plsrGeneSetSelector");
       handleWindowResize();
 
       //clearSelectionButton = $("#plsrClearSelectionButton");
       //clearSelectionButton.button();
       //clearSelectionButton.click(clearSelection);
 
-      sendSelectionMenu = $("#plsrSendSelectiontoModuleMenu")
-      sendSelectionMenu.change(sendSelection);
-      sendSelectionMenu.empty();
+        // disabled (7 sep 2014) because no tabs accept gene symbols
+      //sendSelectionMenu = $("#plsrSendSelectiontoModuleMenu")
+      //sendSelectionMenu.change(sendSelection);
+      //sendSelectionMenu.empty();
 
-      sendSelectionMenu.append("<option>Send Selection to:</option>")
+      //sendSelectionMenu.append("<option>Send Selection to:</option>")
       var destinationModules = getSelectionDestinations()
       if(destinationModules.length == 0)
          destinationModules = ["selfTest"];
@@ -75,12 +78,33 @@ var PLSRModule = (function () {
          var module = destinationModules[i];
          if(module != thisModuleName){
             optionMarkup = "<option>" + module + "</option>";
-            sendSelectionMenu.append(optionMarkup);
+            //sendSelectionMenu.append(optionMarkup);
             } // if not current module
          } // for i
-      sendSelectionMenu.prop("disabled",true);
+      //sendSelectionMenu.prop("disabled",true);
       $(window).resize(handleWindowResize);
       };
+
+   //--------------------------------------------------------------------------------------------
+   function handleGeneSetNames(msg){
+      newNames = msg.payload;
+      addGeneSetNamesToMenu(newNames);
+      } // handleGeneSetNames
+
+   //--------------------------------------------------------------------------------------------
+   function addGeneSetNamesToMenu (geneSetNames) {
+
+      geneSetMenu.empty();
+      if(geneSetNames.length == 0) {
+         return;
+         }
+      
+      for(var i=0; i < geneSetNames.length; i++){
+         optionMarkup = "<option>" + geneSetNames[i] + "</option>";
+         geneSetMenu.append(optionMarkup);
+         } // for i
+
+       } // addGeneSetNamesToMenu
 
   //--------------------------------------------------------------------------------------------
   function getAgeAtDxAndSurvialInputRanges () {
@@ -120,7 +144,9 @@ var PLSRModule = (function () {
      console.log("=== requesting plsr, ageAtDx: " + ageAtDxMinThreshold + " - " + ageAtDxMaxThreshold);
      console.log("=== requesting plsr, survival: " + survivalMinThreshold + " - " + survivalMaxThreshold);
 
-     payload = {geneSet: "geneset1",
+     var currentGeneSet = geneSetMenu.val();
+
+     payload = {geneSet: currentGeneSet,
                 ageAtDxThresholdLow: ageAtDxMinThreshold,
                 ageAtDxThresholdHi:  ageAtDxMaxThreshold,
                 overallSurvivalThresholdLow: survivalMinThreshold,
@@ -245,9 +271,9 @@ var PLSRModule = (function () {
      width = Math.abs(x0-x1);
      console.log("width: " + width);
      selectedIDs = identifyEntitiesInCurrentSelection();
-     sendSelectionMenu.prop("disabled", true);
-     if(selectedIDs.length > 0) 
-        sendSelectionMenu.prop("disabled", false);
+     //sendSelectionMenu.prop("disabled", true);
+     //if(selectedIDs.length > 0) 
+     //   sendSelectionMenu.prop("disabled", false);
      }; // d3PlotBrushReader
 
   //-------------------------------------------------------------------------------------------
@@ -304,7 +330,7 @@ var PLSRModule = (function () {
    
       var assignColor = d3.scale.ordinal()
                                 .domain(["gene",     "vector"])
-                                .range(["lightgray", "red"]);
+                                .range(["gray",      "red"]);
    
       var svg = d3plsrDisplay.append("svg")
                   .attr("id", "plsrSVG")
@@ -412,7 +438,7 @@ var PLSRModule = (function () {
    //--------------------------------------------------------------------------------------------
    function sendSelection() {
       ids = identifyEntitiesInCurrentSelection()
-      destinationModule = sendSelectionMenu.val();
+      //destinationModule = sendSelectionMenu.val();
       console.log("=== sendSelection to '" + destinationModule + "': " + ids.length)
       if(ids.length > 0) {
         if(destinationModule == "Send Selection to:")
@@ -444,16 +470,26 @@ var PLSRModule = (function () {
            } // if gene
          } // for i
       return(ids);
-      sendSelectionMenu.prop("disabled", true);  // default value
+      //sendSelectionMenu.prop("disabled", true);  // default value
       if(ids.length > 0){
          console.log(" selected ids: " + ids);
-         sendSelectionMenu.prop("disabled", false);
-         destinationModule = sendSelectionMenu.val();
-         sendSelectionToModule(destinationModule, ids, {}, true);
+         //sendSelectionMenu.prop("disabled", false);
+         //destinationModule = sendSelectionMenu.val();
+         //sendSelectionToModule(destinationModule, ids, {}, true);
          //sendIDsToModule(ids, "PatientHistory", "HandlePatientIDs");
          }
        
       }; // identifyEntitiesInCurrentSelection
+
+  //--------------------------------------------------------------------------------------------
+  function requestGeneSetNames(){
+     callback = "handleGeneSetNames"
+     msg = {cmd:"get_geneset_names",
+            callback: callback,
+            status:"request",
+            payload:""}
+     socket.send(JSON.stringify(msg));
+     } // requestGeneSetNames
 
   //--------------------------------------------------------------------------------------------
   function sendIDsToModule (ids, moduleName, title){
@@ -472,13 +508,13 @@ var PLSRModule = (function () {
   return{
    init: function(){
       onReadyFunctions.push(initializeUI);
-      //addJavascriptMessageHandler('plsrPlot', displayPLSRresults);
+      addJavascriptMessageHandler("handleGeneSetNames", handleGeneSetNames);
       addJavascriptMessageHandler("handlePlsrResults", handlePlsrResults);
       //addJavascriptMessageHandler("tissueIDsForPLSR", plsrHandleIncomingTissueIDList);
       //addJavascriptMessageHandler('ageAtDxAndSurvivalRanges', handleAgeAtDxAndSurvivalRanges);
       addJavascriptMessageHandler("handleAgeAtDxAndSurvivalRanges", handleAgeAtDxAndSurvivalRanges);
       socketConnectedFunctions.push(getAgeAtDxAndSurvialInputRanges);
-      //socketConnectedFunctions.push(requestPLSRByOnsetAndSurvival);
+      socketConnectedFunctions.push(requestGeneSetNames);
       }
    };
 
