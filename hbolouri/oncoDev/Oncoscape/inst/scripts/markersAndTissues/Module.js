@@ -11,6 +11,7 @@ var markersAndTissuesModule = (function () {
   //var edgesFromSelectedButton
   var hideEdgesButton, showEdgesButton, showAllEdgesButton, clearSelectionButton;
   var edgeTypeSelector;
+  var mouseOverReadout;
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -31,14 +32,14 @@ var markersAndTissuesModule = (function () {
       hideEdgesButton = $("#cyMarkersHideEdgesButton");
       hideEdgesButton.click(hideAllEdges)
 
-      //showEdgesButton = $("#cyMarkersShowEdgesButton");
-      //showEdgesButton.click(showAllEdges)
 
       //zoomSelectedButton  = $("#cyMarkersZoomSelectedButton");
       searchBox = $("#markersAndTissuesSearchBox");
 
       edgeTypeSelector = $("#markersEdgeTypeSelector");
       //edgeTypeSelector.change(newEdgeTypeSelection);
+
+      mouseOverReadout = $("#markersAndTissuesMouseOverReadout");
 
       loadNetwork();
       $(".chosen-select").chosen();
@@ -87,6 +88,20 @@ var markersAndTissuesModule = (function () {
      ready: function() {
         console.log("cwMarkers ready");
         cwMarkers = this;
+        cwMarkers.on('mouseover', 'node', function(evt){
+           var node = evt.cyTarget;
+           mouseOverReadout.val(node.data().canonicalName)
+           })
+        cwMarkers.on('mouseout', 'node', function(evt){
+           var node = evt.cyTarget;
+           mouseOverReadout.val("");
+           })
+        cwMarkers.on('mouseover', 'edge', function(evt){
+           var edge = evt.cyTarget;
+           mouseOverReadout.val(edge.data().canonicalName)
+           })
+
+        /***************
         cwMarkers.elements().qtip({
             content: function() {
               return (this.data().canonicalName);
@@ -109,6 +124,7 @@ var markersAndTissuesModule = (function () {
                 }
               }
             }); // qtip
+         **************/
 
         searchBox.keydown(doSearch);
 
@@ -180,13 +196,43 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
    function showAllEdges (){
-      cwMarkers.filter('edge').show()
-      }
+      //cwMarkers.filter('edge').show()
+
+      var edgeTypesToDisplay = edgeTypeSelector.val();
+
+      console.log("edgeTypeToDisplay: " + edgeTypesToDisplay);
+
+      if(edgeTypesToDisplay == null){
+         return;
+         }
+
+      for(var e=0; e < edgeTypesToDisplay.length; e++){
+         var type =  edgeTypesToDisplay[e];
+         selectionString = '[edgeType="' + type + '"]';
+         console.log(" showAllEdges selection string: " + selectionString);
+         cwMarkers.edges(selectionString).show()
+         } // for e
+
+
+      } // showAllEdges
 
    //----------------------------------------------------------------------------------------------------
    function zoomSelected() {
       cwMarkers.fit(cwMarkers.$(':selected'), 100)
       }
+
+   //----------------------------------------------------------------------------------------------------
+   function allNodeIDs() {
+
+      ids = [];
+      allNodes = cwMarkers.nodes();
+
+      for(i=0; i < allNodes.length; i++)
+          ids.push(allNodes[i].data("id"))
+
+      return(ids);
+
+      } // allNodeIDs
 
    //----------------------------------------------------------------------------------------------------
    function showEdges(){
@@ -211,7 +257,7 @@ var markersAndTissuesModule = (function () {
           }
 
       if(selectedNodes.length > 0) { // show edges to and from all selected nodes
-        showEdgesForSelectedNodes(cwMarkers, edgeTypesToDisplay);
+        showEdgesForNodes(cwMarkers, selectedNodeIDs(cwMarkers), edgeTypesToDisplay);
         }
       } // showEdges
 
@@ -266,6 +312,23 @@ var markersAndTissuesModule = (function () {
         }
      return(ids);
      } // selectedNodeIDs
+
+   //----------------------------------------------------------------------------------------------------
+   function showEdgesForNodes(cw, nodeIDs, edgeTypes){
+
+     for(var e=0; e < edgeTypes.length; e++){
+        edgeType = edgeTypes[e];
+        for(var n=0; n < nodeIDs.length; n++){
+            nodeID = nodeIDs[n];
+            filterString = '[edgeType="' + edgeType + '"][source="' + nodeID + '"]';
+            //console.log("filter string: " + filterString);
+            cw.edges(filterString).show();
+            filterString = '[edgeType="' + edgeType + '"][target="' + nodeID + '"]';
+            //console.log("filter string: " + filterString);
+            cw.edges(filterString).show();
+            } // for n
+         } // for 3
+      } // showEdgesForSelectedNodes
 
    //----------------------------------------------------------------------------------------------------
    function showEdgesForSelectedNodes(cw, edgeTypes){

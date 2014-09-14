@@ -32,14 +32,15 @@ button {font-size:10pt !important;}
 
 #markersAndTissuesSearchBox{
   border: 1px solid #aaa;
-  width: 100px;
+  width: 80px;
   height: 20px;
   }
 
-#markersAndSamplesMouseOverReadoutDiv{
+markersAndTissuesMouseOverReadout{
   border: 1px solid #aaa;
-  width: 800px;
+  width: 260px !important;
   height: 20px;
+  font-size: 8pt !important;
   }
 
 
@@ -63,7 +64,8 @@ button {font-size:10pt !important;}
           box-sizing: border-box;
 }
 
-.chosen-container { width:450px !important; }
+.chosen-container { width:370px !important; 
+                    height:30px}
 
 </style>
 
@@ -83,7 +85,7 @@ button {font-size:10pt !important;}
        </select>
       <button id="cyMarkersShowEdgesButton">Show Edges</button>
       <button id="cyMarkersShowAllEdgesButton">Show All Edges</button>
-
+      <input type="text" id="markersAndTissuesMouseOverReadout" style="width: 260px"></input>
 
    </div>
    <div id="cyMarkersDiv"></div>
