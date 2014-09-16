@@ -376,20 +376,7 @@ var markersAndTissuesModule = (function () {
       if(selectedNodes.length == 0) {
          return;
          }
-
       showEdgesForNodes(cwMarkers, selectedNodes);
-
-    /**********
-      for(var n=0; n < selectedNodes.length; n++){
-         node = selectedNodes[n];
-         nodeID = node.data().id;
-         filterString = "[target='" + nodeID + "']";
-         cwMarkers.edges(filterString).show()
-         filterString = "[source='" + nodeID + "']";
-         cwMarkers.edges(filterString).show();
-         node.neighborhood().select();
-         } // for n
-    ********/
       } // showEdgesFromSelectedNodes
 
    //----------------------------------------------------------------------------------------------------
@@ -425,7 +412,7 @@ var markersAndTissuesModule = (function () {
    //----------------------------------------------------------------------------------------------------
    function selectSourceAndTargetNodesOfEdges(cw, edges){
 
-     console.log("==== selectSourceAndTargetNodes, edges: " + edges.length)
+     //console.log("==== selectSourceAndTargetNodes, edges: " + edges.length)
      for(var i=0; i < edges.length; i++){
         edge = edges[i];
         edge.target().select();
