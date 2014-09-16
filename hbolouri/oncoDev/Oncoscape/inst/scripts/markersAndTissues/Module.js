@@ -22,7 +22,7 @@ var markersAndTissuesModule = (function () {
       graphOperationsMenu = $("#cyMarkersOperationsMenu");
       graphOperationsMenu.change(doGraphOperation)
       graphOperationsMenu.empty()
-      graphOperationsMenu.append("<option>Network Operations:</option>")
+      graphOperationsMenu.append("<option>Network Operations...</option>")
 
       var operations = ["Show All Edges",
                         "Show Edges from Selected Nodes",
@@ -40,11 +40,10 @@ var markersAndTissuesModule = (function () {
       sendSelectionMenu.change(sendSelection);
       sendSelectionMenu.empty();
        
-      sendSelectionMenu.append("<option>Send Selection to:</option>")
+      sendSelectionMenu.append("<option>Send Selection to...</option>")
       var moduleNames = ["dummy1", "dummy2"]; //getSelectionDestinations();
       for(var i=0;i< moduleNames.length; i++){
          if(moduleNames[i] != myModuleName){
-            console.log("adding next")
             var optionMarkup = "<option>" + moduleNames[i] + "</option>";
             sendSelectionMenu.append(optionMarkup);
             } // if
@@ -167,7 +166,6 @@ var markersAndTissuesModule = (function () {
   //--------------------------------------------------------------------------------------------
   function sendSelection() {
      destinationModule = sendSelectionMenu.val();
-     console.log("new sendSelectionMenu value: " + destinationModule);
      //broadcastSelection();
      sendSelectionMenu.val("Send Selection to:");
      }; // sendSelectionMenuChanged
@@ -255,41 +253,6 @@ var markersAndTissuesModule = (function () {
 
 
    //----------------------------------------------------------------------------------------------------
-   function hiddennewEdgeTypeSelection (){
- 
-      var edgeTypesToDisplay = edgeTypeSelector.val();
-      if(edgeTypesToDisplay == null){
-         hideAllEdges();
-         return;
-         }
-
-      var selectedNodes = selectedNodeIDs(cwMarkers);
-
-      console.log(" newEdgeTypeSelection (" + edgeTypesToDisplay.length + 
-                  "), selectedNodes: " + selectedNodes.length);
-
-      if(edgeTypesToDisplay.length == 0){
-          hideAllEdges()
-          console.log("no edgeTypes selected")
-          return;
-          }
-
-      if(selectedNodes.length == 0) { // show edges to and from all nodes
-        for(var i=0; i < edgeTypesToDisplay.length; i++){
-          edgeType = edgeTypesToDisplay[i];
-          filterString = 'edge[edgeType="' + edgeType + '"]';
-          //console.log("filter string: " + filterString);
-          cwMarkers.filter(filterString).show();
-          } // for edgeType
-        } // no selected nodes
-      else{
-        showEdgesForSelectedNodes(cwMarkers, edgeTypesToDisplay);
-        }
-
-
-      } // newEdgeTypeSelection
-
-   //----------------------------------------------------------------------------------------------------
    function doGraphOperation(){
 
       operation = graphOperationsMenu.val();
@@ -315,7 +278,7 @@ var markersAndTissuesModule = (function () {
          } // switch
 
          // restore menu to initial condition, with only title showing
-      graphOperationsMenu.val("Network Operations:");
+      graphOperationsMenu.val("Network Operations...");
 
       } // doGraphOperation
 
@@ -327,7 +290,8 @@ var markersAndTissuesModule = (function () {
    //----------------------------------------------------------------------------------------------------
    function selectFirstNeighbors (){
      selectedNodes = cwMarkers.filter('node:selected');
-     selectedNodes.neighborhood().select();
+     showEdgesForNodes(cwMarkers, selectedNodes);
+     //selectedNodes.neighborhood().select();
      }
 
    //----------------------------------------------------------------------------------------------------
@@ -358,7 +322,7 @@ var markersAndTissuesModule = (function () {
       for(var e=0; e < edgeTypesToDisplay.length; e++){
          var type =  edgeTypesToDisplay[e];
          selectionString = '[edgeType="' + type + '"]';
-         console.log(" showAllEdges selection string: " + selectionString);
+         //console.log(" showAllEdges selection string: " + selectionString);
          cwMarkers.edges(selectionString).show()
          } // for e
 
@@ -396,17 +360,11 @@ var markersAndTissuesModule = (function () {
 
       var selectedNodes = selectedNodeIDs(cwMarkers);
 
-      console.log(" newEdgeTypeSelection (" + edgeTypesToDisplay.length + 
-                  "), selectedNodes: " + selectedNodes.length);
-
-      if(edgeTypesToDisplay.length == 0){
-          hideAllEdges()
-          console.log("no edgeTypes selected")
-          return;
-          }
+      //console.log(" newEdgeTypeSelection (" + edgeTypesToDisplay.length + 
+      //            "), selectedNodes: " + selectedNodes.length);
 
       if(selectedNodes.length > 0) { // show edges to and from all selected nodes
-        showEdgesForNodes(cwMarkers, selectedNodeIDs(cwMarkers), edgeTypesToDisplay);
+        showEdgesForNodes(cwMarkers, selectedNodes);
         }
       } // showEdges
 
@@ -419,12 +377,7 @@ var markersAndTissuesModule = (function () {
          return;
          }
 
-      var edgeTypesToDisplay = edgeTypeSelector.val();
-
-      if(edgeTypesToDisplay.length == 0)
-         return;
-
-      showEdgesForNodes(cwMarkers, selectedNodes, edgeTypesToDisplay);
+      showEdgesForNodes(cwMarkers, selectedNodes);
 
     /**********
       for(var n=0; n < selectedNodes.length; n++){
@@ -470,23 +423,53 @@ var markersAndTissuesModule = (function () {
      } // selectedNodeIDs
 
    //----------------------------------------------------------------------------------------------------
-   function showEdgesForNodes(cw, nodes, edgeTypes){
+   function selectSourceAndTargetNodesOfEdges(cw, edges){
 
-     nodeIDs = []
-     for(var i=0; i < nodes.length; i++)
-       nodeIDs.push(nodes[i].data("id"))
+     console.log("==== selectSourceAndTargetNodes, edges: " + edges.length)
+     for(var i=0; i < edges.length; i++){
+        edge = edges[i];
+        edge.target().select();
+        edge.source().select();
+        //console.log("selecting source node: " + edge.source().data("name"))
+        //console.log("selecting target node: " + edge.target().data("name"))
+        } // for i
+
+      } // selecteSourceAndTargetNodesOfEdge
+
+   //----------------------------------------------------------------------------------------------------
+   function showEdgesForNodes(cw, nodes){
+
+      var edgeTypes = edgeTypeSelector.val();
+
+      if(edgeTypes.length == 0)
+         return;
+
+     //nodeIDs = []
+     //for(var i=0; i < nodes.length; i++)
+     //  nodeIDs.push(nodes[i].data("id"))
 
      for(var e=0; e < edgeTypes.length; e++){
         edgeType = edgeTypes[e];
-        for(var n=0; n < nodeIDs.length; n++){
-            nodeID = nodeIDs[n];
+
+        for(var n=0; n < nodes.length; n++){
+
+            nodeID = nodes[n].data("id")
+
             filterString = '[edgeType="' + edgeType + '"][source="' + nodeID + '"]';
-            console.log("filter string: " + filterString);
-            cw.edges(filterString).show();
+            //console.log("source filter string: " + filterString);
+            selectedEdges = cw.edges(filterString)
+            //console.log("    edges found: " + selectedEdges.length);
+            selectedEdges.show()
+            selectSourceAndTargetNodesOfEdges(cw, selectedEdges);
+
             filterString = '[edgeType="' + edgeType + '"][target="' + nodeID + '"]';
-            console.log("filter string: " + filterString);
-            cw.edges(filterString).show();
-            
+            //console.log("target filter string: " + filterString);
+            selectedEdges = cw.edges(filterString)
+            //console.log("    edges found: " + selectedEdges.length);
+            selectedEdges.show()
+            selectSourceAndTargetNodesOfEdges(cw, selectedEdges);
+
+            //debugger;
             } // for n
          } // for 3
       } // showEdgesForSelectedNodes
@@ -521,16 +504,16 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
    function doSearch(e) {
-      console.log("=== doSearch: " + searchBox.val());
+      //console.log("=== doSearch: " + searchBox.val());
       var keyCode = e.keyCode || e.which;
       if (keyCode == 13) {
          searchString = searchBox.val();
-         console.log("searchString: " + searchString);
+         //console.log("searchString: " + searchString);
          names = nodeNames()
          matches = []
          for(var i=0; i < names.length; i++){
             if(names[i].beginsWith(searchString)) {
-               console.log(searchString + " matched " + names[i]);
+               //console.log(searchString + " matched " + names[i]);
                s = "cwMarkers.filter('node[name=\"" + names[i] + "\"]').select()";
                JAVASCRIPT_EVAL (s);
                } // if searchString matched beginning of node

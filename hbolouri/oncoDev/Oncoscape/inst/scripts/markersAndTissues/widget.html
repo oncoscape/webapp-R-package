@@ -1,7 +1,6 @@
 <script>
-include(../markersAndTissues/mut-cn-304-patients-354-genes.cyjs)
-include(../markersAndTissues/mutAndCopyNumber-vizmap.json)
-include(../markersAndTissues/mut-cn-304-patients-354-genes-vizmap.json)
+include(../markersAndTissues/current.cyjs)
+include(../markersAndTissues/current.json)
 </script>
 <style>
 
@@ -75,7 +74,7 @@ markersAndTissuesMouseOverReadout{
 <!--      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>  -->
    </div>
    <div id="markersAndTissuesButtonDiv">
-       &nbsp; Search: <input type="text" id="markersAndTissuesSearchBox"></input>
+     <input type="text" id="markersAndTissuesMouseOverReadout" style="width: 260px" disabled value="(names displayed here)"></input>
 
       <select id="cyMarkersOperationsMenu"></select>
 
@@ -86,7 +85,7 @@ markersAndTissuesMouseOverReadout{
             <option value="copyNumberLoss" selected>Copy Number Loss</option>
        </select>
      <select id="cyMarkersSendSelectionMenu" name="SendSelectionToModule"></select>
-     <input type="text" id="markersAndTissuesMouseOverReadout" style="width: 260px"></input>
+     &nbsp; Search: <input type="text" id="markersAndTissuesSearchBox"></input>
 
 
    </div>
