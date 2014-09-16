@@ -415,12 +415,18 @@ var markersAndTissuesModule = (function () {
    function showEdgesFromSelectedNodes(){
 
       var selectedNodes = cwMarkers.filter('node:selected');
-      var edgeTypesToDisplay = edgeTypeSelector.val();
-
       if(selectedNodes.length == 0) {
          return;
          }
 
+      var edgeTypesToDisplay = edgeTypeSelector.val();
+
+      if(edgeTypesToDisplay.length == 0)
+         return;
+
+      showEdgesForNodes(cwMarkers, selectedNodes, edgeTypesToDisplay);
+
+    /**********
       for(var n=0; n < selectedNodes.length; n++){
          node = selectedNodes[n];
          nodeID = node.data().id;
@@ -430,7 +436,8 @@ var markersAndTissuesModule = (function () {
          cwMarkers.edges(filterString).show();
          node.neighborhood().select();
          } // for n
-      }
+    ********/
+      } // showEdgesFromSelectedNodes
 
    //----------------------------------------------------------------------------------------------------
    function zoomSelection() {
@@ -463,18 +470,23 @@ var markersAndTissuesModule = (function () {
      } // selectedNodeIDs
 
    //----------------------------------------------------------------------------------------------------
-   function showEdgesForNodes(cw, nodeIDs, edgeTypes){
+   function showEdgesForNodes(cw, nodes, edgeTypes){
+
+     nodeIDs = []
+     for(var i=0; i < nodes.length; i++)
+       nodeIDs.push(nodes[i].data("id"))
 
      for(var e=0; e < edgeTypes.length; e++){
         edgeType = edgeTypes[e];
         for(var n=0; n < nodeIDs.length; n++){
             nodeID = nodeIDs[n];
             filterString = '[edgeType="' + edgeType + '"][source="' + nodeID + '"]';
-            //console.log("filter string: " + filterString);
+            console.log("filter string: " + filterString);
             cw.edges(filterString).show();
             filterString = '[edgeType="' + edgeType + '"][target="' + nodeID + '"]';
-            //console.log("filter string: " + filterString);
+            console.log("filter string: " + filterString);
             cw.edges(filterString).show();
+            
             } // for n
          } // for 3
       } // showEdgesForSelectedNodes
@@ -509,6 +521,7 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
    function doSearch(e) {
+      console.log("=== doSearch: " + searchBox.val());
       var keyCode = e.keyCode || e.which;
       if (keyCode == 13) {
          searchString = searchBox.val();
