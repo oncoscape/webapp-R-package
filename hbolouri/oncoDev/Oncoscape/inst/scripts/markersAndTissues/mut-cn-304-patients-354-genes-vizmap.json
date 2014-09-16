@@ -1,0 +1,570 @@
+markersAndTissuesVizmap = [ {
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.1.0",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "Sample1",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "shape" : "ellipse",
+      "background-color" : "rgb(204,204,255)",
+      "color" : "rgb(0,0,0)",
+      "height" : 40.0,
+      "background-opacity" : 1.0,
+      "border-opacity" : 1.0,
+      "font-family" : "Dialog",
+      "font-weight" : "bold",
+      "font-size" : 12,
+      "border-width" : 0.0,
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "text-opacity" : 1.0,
+      "border-color" : "rgb(0,0,0)",
+      "width" : 40.0,
+      "content" : "data(name)"
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "line-color" : "rgb(0,0,0)",
+      "text-opacity" : 1.0,
+      "width" : 1.0,
+      "color" : "rgb(0,0,0)",
+      "line-style" : "solid",
+      "opacity" : 1.0,
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "target-arrow-color" : "rgb(0,0,0)",
+      "font-size" : 10,
+      "source-arrow-color" : "rgb(0,0,0)",
+      "source-arrow-shape" : "none",
+      "target-arrow-shape" : "none",
+      "content" : "data(interaction)"
+    }
+  }, {
+    "selector" : "edge[interaction = 'pd']",
+    "css" : {
+      "line-color" : "rgb(255,0,51)"
+    }
+  }, {
+    "selector" : "edge[interaction = 'pp']",
+    "css" : {
+      "line-color" : "rgb(0,204,0)"
+    }
+  }, {
+    "selector" : "edge[interaction = 'pd']",
+    "css" : {
+      "line-style" : "dashed"
+    }
+  }, {
+    "selector" : "edge[interaction = 'pp']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+}, {
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.1.0",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "default",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "content" : "",
+      "shape" : "ellipse",
+      "background-color" : "rgb(255,255,255)",
+      "color" : "rgb(0,0,0)",
+      "height" : 50.0,
+      "background-opacity" : 1.0,
+      "border-opacity" : 1.0,
+      "font-family" : "SansSerif",
+      "font-weight" : "bold",
+      "font-size" : 60,
+      "border-width" : 1.5,
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "text-opacity" : 1.0,
+      "border-color" : "rgb(102,102,102)",
+      "width" : 50.0
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "line-color" : "rgb(255,255,255)",
+      "text-opacity" : 1.0,
+      "width" : 1.0,
+      "color" : "rgb(0,0,0)",
+      "line-style" : "solid",
+      "opacity" : 1.0,
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "target-arrow-color" : "rgb(0,0,0)",
+      "font-size" : 10,
+      "source-arrow-color" : "rgb(0,0,0)",
+      "source-arrow-shape" : "triangle",
+      "content" : "",
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+}, {
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.1.0",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "markersAndTissues",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "shape" : "ellipse",
+      "background-color" : "rgb(255,255,255)",
+      "color" : "rgb(0,0,0)",
+      "height" : 50.0,
+      "background-opacity" : 1.0,
+      "border-opacity" : 1.0,
+      "font-family" : "SansSerif",
+      "font-weight" : "bold",
+      "font-size" : 60,
+      "border-width" : 1.5,
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "text-opacity" : 1.0,
+      "border-color" : "rgb(102,102,102)",
+      "width" : 50.0,
+      "content" : "data(label)"
+    }
+  }, {
+    "selector" : "node[nodeType = 'marker']",
+    "css" : {
+      "shape" : "ellipse"
+    }
+  }, {
+    "selector" : "node[nodeType = 'tissue']",
+    "css" : {
+      "shape" : "roundrectangle"
+    }
+  }, {
+    "selector" : "node[markerSubType = 'ihcMinus']",
+    "css" : {
+      "background-color" : "rgb(255,192,203)"
+    }
+  }, {
+    "selector" : "node[markerSubType = 'cnaPlus']",
+    "css" : {
+      "background-color" : "rgb(255,0,0)"
+    }
+  }, {
+    "selector" : "node[markerSubType = 'unassigned']",
+    "css" : {
+      "background-color" : "rgb(255,255,255)"
+    }
+  }, {
+    "selector" : "node[markerSubType = 'mutations']",
+    "css" : {
+      "background-color" : "rgb(0,128,0)"
+    }
+  }, {
+    "selector" : "node[markerSubType = 'cnaMinus']",
+    "css" : {
+      "background-color" : "rgb(255,165,0)"
+    }
+  }, {
+    "selector" : "node[markerSubType = 'ihcPlus']",
+    "css" : {
+      "background-color" : "rgb(0,0,255)"
+    }
+  }, {
+    "selector" : "node[degree > 300.0]",
+    "css" : {
+      "width" : 100.0
+    }
+  }, {
+    "selector" : "node[degree = 300.0]",
+    "css" : {
+      "width" : 100.0
+    }
+  }, {
+    "selector" : "node[degree > 10.0][degree < 300.0]",
+    "css" : {
+      "width" : "mapData(degree,10.0,300.0,50.0,100.0)"
+    }
+  }, {
+    "selector" : "node[degree > 0.0][degree < 10.0]",
+    "css" : {
+      "width" : "mapData(degree,0.0,10.0,10.0,50.0)"
+    }
+  }, {
+    "selector" : "node[degree = 0.0]",
+    "css" : {
+      "width" : 10.0
+    }
+  }, {
+    "selector" : "node[degree < 0.0]",
+    "css" : {
+      "width" : 10.0
+    }
+  }, {
+    "selector" : "node[degree > 300.0]",
+    "css" : {
+      "height" : 100.0
+    }
+  }, {
+    "selector" : "node[degree = 300.0]",
+    "css" : {
+      "height" : 100.0
+    }
+  }, {
+    "selector" : "node[degree > 10.0][degree < 300.0]",
+    "css" : {
+      "height" : "mapData(degree,10.0,300.0,50.0,100.0)"
+    }
+  }, {
+    "selector" : "node[degree > 0.0][degree < 10.0]",
+    "css" : {
+      "height" : "mapData(degree,0.0,10.0,10.0,50.0)"
+    }
+  }, {
+    "selector" : "node[degree = 0.0]",
+    "css" : {
+      "height" : 10.0
+    }
+  }, {
+    "selector" : "node[degree < 0.0]",
+    "css" : {
+      "height" : 10.0
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "line-color" : "rgb(255,255,255)",
+      "text-opacity" : 1.0,
+      "width" : 1.0,
+      "color" : "rgb(0,0,0)",
+      "line-style" : "solid",
+      "opacity" : 1.0,
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "target-arrow-color" : "rgb(0,0,0)",
+      "font-size" : 10,
+      "source-arrow-color" : "rgb(0,0,0)",
+      "source-arrow-shape" : "triangle",
+      "content" : "",
+      "target-arrow-shape" : "triangle"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'displays']",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'displays']",
+    "css" : {
+      "width" : 1.0
+    }
+  }, {
+    "selector" : "edge[edgeType = 'displays']",
+    "css" : {
+      "line-style" : "solid"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'displays']",
+    "css" : {
+      "target-arrow-color" : "rgb(0,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'displays']",
+    "css" : {
+      "source-arrow-color" : "rgb(255,0,0)"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'displays']",
+    "css" : {
+      "source-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge[edgeType = 'displays']",
+    "css" : {
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+}, {
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.1.0",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "Minimal",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "content" : "",
+      "shape" : "rectangle",
+      "background-color" : "rgb(255,255,255)",
+      "color" : "rgb(0,0,0)",
+      "height" : 30.0,
+      "background-opacity" : 1.0,
+      "border-opacity" : 1.0,
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "font-size" : 12,
+      "border-width" : 0.0,
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "text-opacity" : 1.0,
+      "border-color" : "rgb(0,0,0)",
+      "width" : 30.0
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "line-color" : "rgb(51,51,51)",
+      "text-opacity" : 1.0,
+      "width" : 4.0,
+      "color" : "rgb(0,0,0)",
+      "line-style" : "solid",
+      "opacity" : 1.0,
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "target-arrow-color" : "rgb(0,0,0)",
+      "font-size" : 10,
+      "source-arrow-color" : "rgb(0,0,0)",
+      "source-arrow-shape" : "none",
+      "content" : "",
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+}, {
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.1.0",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "Solid",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "shape" : "ellipse",
+      "background-color" : "rgb(102,102,102)",
+      "color" : "rgb(0,0,0)",
+      "height" : 40.0,
+      "background-opacity" : 1.0,
+      "border-opacity" : 1.0,
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "font-size" : 18,
+      "border-width" : 0.0,
+      "text-valign" : "bottom",
+      "text-halign" : "center",
+      "text-opacity" : 0.6274509803921569,
+      "border-color" : "rgb(0,0,0)",
+      "width" : 40.0,
+      "content" : "data(name)"
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "line-color" : "rgb(204,204,204)",
+      "text-opacity" : 0.7450980392156863,
+      "width" : 12.0,
+      "color" : "rgb(102,102,102)",
+      "line-style" : "solid",
+      "opacity" : 1.0,
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "target-arrow-color" : "rgb(0,0,0)",
+      "font-size" : 10,
+      "source-arrow-color" : "rgb(0,0,0)",
+      "source-arrow-shape" : "none",
+      "target-arrow-shape" : "none",
+      "content" : "data(interaction)"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+}, {
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.1.0",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "Universe",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "shape" : "ellipse",
+      "background-color" : "rgb(0,0,0)",
+      "color" : "rgb(255,255,204)",
+      "height" : 40.0,
+      "background-opacity" : 0.0,
+      "border-opacity" : 1.0,
+      "font-family" : "Monospaced",
+      "font-weight" : "bold",
+      "font-size" : 20,
+      "border-width" : 0.0,
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "text-opacity" : 0.7058823529411765,
+      "border-color" : "rgb(0,0,0)",
+      "width" : 40.0,
+      "content" : "data(name)"
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "line-color" : "rgb(255,255,255)",
+      "text-opacity" : 1.0,
+      "width" : 3.0,
+      "color" : "rgb(0,0,0)",
+      "line-style" : "dashed",
+      "opacity" : 0.39215686274509803,
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "target-arrow-color" : "rgb(0,0,0)",
+      "font-size" : 10,
+      "source-arrow-color" : "rgb(0,0,0)",
+      "source-arrow-shape" : "none",
+      "content" : "",
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+}, {
+  "format_version" : "1.0",
+  "generated_by" : "cytoscape-3.1.0",
+  "target_cytoscapejs_version" : "~2.1",
+  "title" : "Nested Network Style",
+  "style" : [ {
+    "selector" : "node",
+    "css" : {
+      "shape" : "ellipse",
+      "background-color" : "rgb(153,255,153)",
+      "color" : "rgb(0,0,0)",
+      "height" : 40.0,
+      "background-opacity" : 0.5882352941176471,
+      "border-opacity" : 0.7450980392156863,
+      "font-family" : "SansSerif",
+      "font-weight" : "normal",
+      "font-size" : 13,
+      "border-width" : 2.0,
+      "text-valign" : "center",
+      "text-halign" : "center",
+      "text-opacity" : 1.0,
+      "border-color" : "rgb(0,153,0)",
+      "width" : 40.0,
+      "content" : "data(name)"
+    }
+  }, {
+    "selector" : "node[has_nested_network = 'true']",
+    "css" : {
+      "width" : 60.0,
+      "height" : 60.0
+    }
+  }, {
+    "selector" : "node[has_nested_network = 'true']",
+    "css" : {
+      "color" : "rgb(0,102,204)"
+    }
+  }, {
+    "selector" : "node[has_nested_network = 'true']",
+    "css" : {
+      "shape" : "rectangle"
+    }
+  }, {
+    "selector" : "node[has_nested_network = 'true']",
+    "css" : {
+      "background-color" : "rgb(255,255,255)"
+    }
+  }, {
+    "selector" : "node[has_nested_network = 'true']",
+    "css" : {
+      "border-color" : "rgb(0,102,204)"
+    }
+  }, {
+    "selector" : "node[has_nested_network = 'true']",
+    "css" : {
+      "text-valign" : "bottom"
+    }
+  }, {
+    "selector" : "node[has_nested_network = 'true']",
+    "css" : {
+      "border-width" : 5.0
+    }
+  }, {
+    "selector" : "node:selected",
+    "css" : {
+      "background-color" : "rgb(255,255,0)"
+    }
+  }, {
+    "selector" : "edge",
+    "css" : {
+      "line-color" : "rgb(51,51,51)",
+      "text-opacity" : 1.0,
+      "width" : 2.0,
+      "color" : "rgb(0,0,0)",
+      "line-style" : "solid",
+      "opacity" : 1.0,
+      "font-family" : "Dialog",
+      "font-weight" : "normal",
+      "target-arrow-color" : "rgb(0,0,0)",
+      "font-size" : 10,
+      "source-arrow-color" : "rgb(0,0,0)",
+      "source-arrow-shape" : "none",
+      "content" : "",
+      "target-arrow-shape" : "none"
+    }
+  }, {
+    "selector" : "edge:selected",
+    "css" : {
+      "line-color" : "rgb(255,0,0)"
+    }
+  } ]
+} ]
