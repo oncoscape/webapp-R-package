@@ -1,7 +1,7 @@
 <script>
-include(../markersAndTissues/mutCn834Genes304Patients.cyjs)
+include(../markersAndTissues/mut-cn-304-patients-354-genes.cyjs)
 include(../markersAndTissues/mutAndCopyNumber-vizmap.json)
-
+include(../markersAndTissues/mut-cn-304-patients-354-genes-vizmap.json)
 </script>
 <style>
 
@@ -76,16 +76,18 @@ markersAndTissuesMouseOverReadout{
    </div>
    <div id="markersAndTissuesButtonDiv">
        &nbsp; Search: <input type="text" id="markersAndTissuesSearchBox"></input>
-      <button id="cyMarkersClearSelectionButton" >Clear Selection</button>
-      <button id="cyMarkersHideEdgesButton" >Hide Edges</button>
-        <select class="chosen-select" data-placeholder="Select edge types to display" multiple id="markersEdgeTypeSelector">
+
+      <select id="cyMarkersOperationsMenu"></select>
+
+      <select class="chosen-select" data-placeholder="Select edge types to display" 
+                    multiple id="markersEdgeTypeSelector">
             <option value="mutantIn" selected>Mutation</option>
             <option value="copyNumberGain" selected>Copy Number Gain</option>
             <option value="copyNumberLoss" selected>Copy Number Loss</option>
        </select>
-      <button id="cyMarkersShowEdgesButton">Show Edges</button>
-      <button id="cyMarkersShowAllEdgesButton">Show All Edges</button>
-      <input type="text" id="markersAndTissuesMouseOverReadout" style="width: 260px"></input>
+     <select id="cyMarkersSendSelectionMenu" name="SendSelectionToModule"></select>
+     <input type="text" id="markersAndTissuesMouseOverReadout" style="width: 260px"></input>
+
 
    </div>
    <div id="cyMarkersDiv"></div>

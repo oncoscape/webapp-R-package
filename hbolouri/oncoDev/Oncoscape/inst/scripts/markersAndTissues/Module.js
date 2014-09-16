@@ -9,19 +9,115 @@ var markersAndTissuesModule = (function () {
   var searchBox;
   var edgeSelectionOn = false;
   //var edgesFromSelectedButton
-  var hideEdgesButton, showEdgesButton, showAllEdgesButton, clearSelectionButton;
+  var hideEdgesButton, showEdgesButton, showAllEdgesButton, clearSelectionButton, sfnButton;
   var edgeTypeSelector;
   var mouseOverReadout;
+  var graphOperationsMenu;
+  var myModuleName = "Markers & Patients";
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
       cyDiv = $("#cyMarkersDiv");
 
+      graphOperationsMenu = $("#cyMarkersOperationsMenu");
+      graphOperationsMenu.change(doGraphOperation)
+      graphOperationsMenu.empty()
+      graphOperationsMenu.append("<option>Network Operations:</option>")
+
+      var operations = ["Show All Edges",
+                        "Show Edges from Selected Nodes",
+                        "Hide All Edges",
+                        "Select First Neighbors of Selected Nodes",
+                        "Invert Node Selection"]
+
+      for(var i=0;i< operations.length; i++){
+         var optionMarkup = "<option>" + operations[i] + "</option>";
+         graphOperationsMenu.append(optionMarkup);
+         } // for 
+
+
+      sendSelectionMenu = $("#cyMarkersSendSelectionMenu")
+      sendSelectionMenu.change(sendSelection);
+      sendSelectionMenu.empty();
+       
+      sendSelectionMenu.append("<option>Send Selection to:</option>")
+      var moduleNames = ["dummy1", "dummy2"]; //getSelectionDestinations();
+      for(var i=0;i< moduleNames.length; i++){
+         if(moduleNames[i] != myModuleName){
+            console.log("adding next")
+            var optionMarkup = "<option>" + moduleNames[i] + "</option>";
+            sendSelectionMenu.append(optionMarkup);
+            } // if
+         } // for 
+
       showEdgesButton = $("#cyMarkersShowEdgesButton");
       showEdgesButton.click(showEdges);
+      showEdgesButton.qtip({
+          content: "Display edges of the currently<br> selected type/s, between all<br>selected nodes.",
+          show: {
+              event: 'mouseover',
+              delay: 1000
+              },
+          hide: "mouseout",
+          position: {
+              my: 'top center',
+              at: 'bottom center'
+              },
+          style: {
+            classes: 'qtip-bootstrap',
+               tip: {
+                 width: 12,
+                 height: 12
+                }
+              }
+          });
+
 
       showAllEdgesButton = $("#cyMarkersShowAllEdgesButton");
       showAllEdgesButton.click(showAllEdges);
+      showAllEdgesButton.qtip({
+          content: "Display edges of the currently<br>selected type/s, between all nodes.",
+          show: {
+              event: 'mouseover',
+              delay: 1000
+              },
+          hide: "mouseout",
+          position: {
+              my: 'top center',
+              at: 'bottom center'
+              },
+          style: {
+            classes: 'qtip-bootstrap',
+               tip: {
+                 width: 12,
+                 height: 12
+                }
+              }
+          });
+
+      sfnButton = $("#cyMarkersSFNButton");
+      sfnButton.click(selectFirstNeighbors);
+      sfnButton.qtip({
+          content: "Select nodes which are<br>first neighbors of currently selected nodes.",
+          show: { delay: 700, solo: true,effect: { length: 1000 }},
+          hide: { event: "mouseout"},
+          //show: {
+          //    event: 'mouseover',
+          //    delay: 1000
+          //    },
+          //hide: "mouseout",
+          position: {
+              my: 'top center',
+              at: 'bottom center'
+              },
+          style: {
+            classes: 'qtip-bootstrap',
+               tip: {
+                 width: 12,
+                 height: 12
+                }
+              }
+          });
 
       clearSelectionButton = $("#cyMarkersClearSelectionButton");
       clearSelectionButton.click(clearSelection);
@@ -69,6 +165,15 @@ var markersAndTissuesModule = (function () {
     }  
 
   //--------------------------------------------------------------------------------------------
+  function sendSelection() {
+     destinationModule = sendSelectionMenu.val();
+     console.log("new sendSelectionMenu value: " + destinationModule);
+     //broadcastSelection();
+     sendSelectionMenu.val("Send Selection to:");
+     }; // sendSelectionMenuChanged
+  //--------------------------------------------------------------------------------------------
+
+
   function loadNetwork () {
 
        // the pathways graph is included explicitly by widget.html, so the
@@ -122,8 +227,8 @@ var markersAndTissuesModule = (function () {
                  width: 16,
                  height: 8
                 }
-              }
-            }); // qtip
+              } 
+           }); // qtip
          **************/
 
         searchBox.keydown(doSearch);
@@ -185,9 +290,53 @@ var markersAndTissuesModule = (function () {
       } // newEdgeTypeSelection
 
    //----------------------------------------------------------------------------------------------------
+   function doGraphOperation(){
+
+      operation = graphOperationsMenu.val();
+
+      switch(operation){
+         case "Show All Edges":
+            showAllEdges();
+            break;
+         case "Show Edges from Selected Nodes":
+            showEdgesFromSelectedNodes();
+            break;
+         case "Hide All Edges":
+            hideAllEdges();
+            break;
+         case "Select First Neighbors of Selected Nodes":
+            selectFirstNeighbors();
+            break;
+         case "Invert Node Selection":
+            invertSelection();
+            break;
+         default:
+            console.log("unrecoginized graph operation requested from menu: " + operation)
+         } // switch
+
+         // restore menu to initial condition, with only title showing
+      graphOperationsMenu.val("Network Operations:");
+
+      } // doGraphOperation
+
+   //----------------------------------------------------------------------------------------------------
    function clearSelection (){
      cwMarkers.elements().unselect()
      }
+
+   //----------------------------------------------------------------------------------------------------
+   function selectFirstNeighbors (){
+     selectedNodes = cwMarkers.filter('node:selected');
+     selectedNodes.neighborhood().select();
+     }
+
+   //----------------------------------------------------------------------------------------------------
+   function invertSelection (){
+      selected = cwMarkers.filter("node:selected");
+      unselected = cwMarkers.filter("node:unselected");
+      selected.unselect();
+      unselected.select();
+      }
 
    //----------------------------------------------------------------------------------------------------
    function hideAllEdges (){
