@@ -32,6 +32,7 @@ var ThisModuleName = "ClinicalTable"
         
         ClTblsendSelectionMenu.append("<option>Send Selection to:</option>")
         var ModuleNames = getSelectionDestinations()
+        console.log("=== ClinicalTable::initializeUI, modules: " + ModuleNames);
         for(var i=0;i< ModuleNames.length; i++){
            var SendToModule = ModuleNames[i]
            if(SendToModule !== ThisModuleName){

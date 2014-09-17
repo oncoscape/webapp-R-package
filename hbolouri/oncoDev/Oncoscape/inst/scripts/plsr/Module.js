@@ -27,11 +27,15 @@ var PLSRModule = (function () {
    var ageAtDxMinThreshold, ageAtDxMaxThreshold, survivalMinThreshold, survivalMaxThreshold;
 
    var calculateButton;
-   //var sendSelectionMenu;
+   var sendSelectionMenu;
    var d3brush;
    var currentlySelectedRegion;
    var thisModuleName = "PLSR"
    var geneSetMenu;
+
+   var myModuleName = "PLSR";
+   var myDivName = "plsrDiv";
+
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -58,6 +62,21 @@ var PLSRModule = (function () {
       calculateButton.click(requestPLSRByOnsetAndSurvival)
 
       geneSetMenu = $("#plsrGeneSetSelector");
+
+
+      sendSelectionMenu = $("#plsrSendSelectionMenu")
+      sendSelectionMenu.change(sendSelection);
+      sendSelectionMenu.empty();
+       
+      sendSelectionMenu.append("<option>Send Selection...</option>")
+      var moduleNames = getSelectionDestinations();
+      for(var i=0;i< moduleNames.length; i++){
+         if(moduleNames[i] != myModuleName){
+            var optionMarkup = "<option>" + moduleNames[i] + "</option>";
+            sendSelectionMenu.append(optionMarkup);
+            } // if
+         } // for 
+
       handleWindowResize();
 
       //clearSelectionButton = $("#plsrClearSelectionButton");
@@ -131,6 +150,17 @@ var PLSRModule = (function () {
       console.log("survivalMax: " + survivalMax);
       setupSliders();
       } // handleAgeAtDxAndSurvivalRanges 
+
+   //--------------------------------------------------------------------------------------------------
+   function sendSelection() {
+     destinationModule = sendSelectionMenu.val();
+     selectedIDs = identifyEntitiesInCurrentSelection();
+     metadata = {};
+     debugger;
+     sendSelectionToModule(destinationModule, selectedIDs, metadata);
+     sendSelectionMenu.val("Send Selection...");
+     }; // sendSelectionMenuChanged
+
 
    //--------------------------------------------------------------------------------------------------
    requestPLSRByOnsetAndSurvival = function() {
@@ -271,6 +301,8 @@ var PLSRModule = (function () {
      width = Math.abs(x0-x1);
      console.log("width: " + width);
      selectedIDs = identifyEntitiesInCurrentSelection();
+     console.log("plsr brush reader, selectedIDs");
+     console.log(selectedIDs);
      //sendSelectionMenu.prop("disabled", true);
      //if(selectedIDs.length > 0) 
      //   sendSelectionMenu.prop("disabled", false);
@@ -436,19 +468,19 @@ var PLSRModule = (function () {
      };
 
    //--------------------------------------------------------------------------------------------
-   function sendSelection() {
-      ids = identifyEntitiesInCurrentSelection()
-      //destinationModule = sendSelectionMenu.val();
-      console.log("=== sendSelection to '" + destinationModule + "': " + ids.length)
-      if(ids.length > 0) {
-        if(destinationModule == "Send Selection to:")
-          return;
-        if(destinationModule == "selfTest")
-           console.log("selfTest selection destination, id count: " + ids.length + ": " + ids);
-        else
-           sendSelectionToModule(destinationModule, ids, {}, true);
-        } // if ids
-    } // sendSelectionToModule
+//   function sendSelection() {
+//      ids = identifyEntitiesInCurrentSelection()
+//      //destinationModule = sendSelectionMenu.val();
+//      console.log("=== sendSelection to '" + destinationModule + "': " + ids.length)
+//      if(ids.length > 0) {
+//        if(destinationModule == "Send Selection to:")
+//          return;
+//        if(destinationModule == "selfTest")
+//           console.log("selfTest selection destination, id count: " + ids.length + ": " + ids);
+//        else
+//           sendSelectionToModule(destinationModule, ids, {}, true);
+//        } // if ids
+//    } // sendSelectionToModule
 
 
    //--------------------------------------------------------------------------------------------

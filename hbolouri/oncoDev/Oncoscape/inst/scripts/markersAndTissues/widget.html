@@ -63,7 +63,7 @@ markersAndTissuesMouseOverReadout{
           box-sizing: border-box;
 }
 
-.chosen-container { width:370px !important; 
+.chosen-container { width:420px !important; 
                     height:30px}
 
 </style>
@@ -71,21 +71,34 @@ markersAndTissuesMouseOverReadout{
 <div id="markersAndTissuesDiv">
   <div id="markerpatientsInfoLinks" class="HeaderLinks" align="right">
       <span id="markerpatientsAboutLink" >Credits  </span>
-<!--      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>  -->
+        <!--      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>  -->
    </div>
+
    <div id="markersAndTissuesButtonDiv">
-     <input type="text" id="markersAndTissuesMouseOverReadout" style="width: 260px" disabled value="(names displayed here)"></input>
+     <input type="text" id="markersAndTissuesMouseOverReadout" 
+        style="width: 240px; font-size:8pt" disabled value="(names displayed here)"></input>
 
-      <select id="cyMarkersOperationsMenu"></select>
+      <select id="cyMarkersOperationsMenu" style="font-size:8pt"></select>
 
-      <select class="chosen-select" data-placeholder="Select edge types to display" 
+      <select class="chosen-select" 
+                    style="font-size:8pt width:400px"
+                    data-placeholder="Select edge types to display" 
                     multiple id="markersEdgeTypeSelector">
-            <option value="mutantIn" selected>Mutation</option>
-            <option value="copyNumberGain" selected>Copy Number Gain</option>
-            <option value="copyNumberLoss" selected>Copy Number Loss</option>
+            <option value="mutantIn" style="font-size:8pt" selected>Mutation</option>
+            <option value="copyNumberGain" style="font-size:8pt" selected>Copy Number Gain</option>
+            <option value="copyNumberLoss" style="font-size:8pt" selected>Copy Number Loss</option>
        </select>
-     <select id="cyMarkersSendSelectionMenu" name="SendSelectionToModule"></select>
-     &nbsp; Search: <input type="text" id="markersAndTissuesSearchBox"></input>
+     <select id="cyMarkersSendSelectionMenu" 
+                    style="font-size:8pt"
+             name="SendSelectionToModule">
+             </select>
+     &nbsp; 
+     <!-- span style="font-size:8pt">Search: </span --> 
+     <input type="text" 
+            style="font-size:8pt"
+            value="(search)"
+            id="markersAndTissuesSearchBox">
+            </input>
 
 
    </div>

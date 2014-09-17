@@ -29,7 +29,7 @@ callbackFunction <- function(DATA, WS, ...)
 } # callbackFunction
 #----------------------------------------------------------------------------------------------------
 if(!exists("client")){
-   client <- websocket("ws://localhost", port=7781L)
+   client <- websocket("ws://localhost", port=7777L)
    }
 setCallback("receive", callbackFunction, client);
 #----------------------------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ test_plsr <- function()
    print("--- test_plsr")
    cmd <- "calculatePLSR"
    status <- "request"
-   payload <- c(geneSet="default",
+   payload <- c(geneSet="tcga_GBM_centroid",
                 ageAtDxThresholdLow=36, 
                 ageAtDxThresholdHi=64,
                 overallSurvivalThresholdLow=3.7,

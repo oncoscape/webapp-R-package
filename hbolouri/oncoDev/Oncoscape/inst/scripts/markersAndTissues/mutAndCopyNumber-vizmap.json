@@ -14,12 +14,12 @@ markersAndTissuesVizmap = [ {
       "shape" : "ellipse",
       "border-width" : 1.5,
       "width" : 40.0,
+      "height" : 40.0,
       "border-color" : "rgb(102,102,102)",
       "text-valign" : "center",
       "text-halign" : "center",
       "text-opacity" : 1.0,
       "background-opacity" : 1.0,
-      "height" : 40.0,
       "background-color" : "rgb(255,255,255)",
       "content" : "data(name)"
     }
@@ -34,6 +34,8 @@ markersAndTissuesVizmap = [ {
   {"selector" : "node[label = 'Classical']",         "css": {"font-size" : 80, "width": 0.0}}, 
 
 
+     {"selector" : "node[degree >= 0]", "css": {"width"   : "mapData(degree,0.0,180.0, 20.0, 100.0)"}},
+     {"selector" : "node[degree >= 0]", "css": {"height"  : "mapData(degree,0.0,180.0, 20.0, 100.0)"}},
 
    {"selector" : "node[subType = 'Proneural']",   "css" : {"background-color" : "blue"}},
    {"selector" : "node[subType = 'Neural']",      "css" : {"background-color" : "turquoise"}},

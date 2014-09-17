@@ -13,7 +13,8 @@ var markersAndTissuesModule = (function () {
   var edgeTypeSelector;
   var mouseOverReadout;
   var graphOperationsMenu;
-  var myModuleName = "Markers & Patients";
+  var myModuleName = "MarkersAndPatients";
+  var myDivName = "markersAndTissuesDiv";
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -27,7 +28,7 @@ var markersAndTissuesModule = (function () {
       var operations = ["Show All Edges",
                         "Show Edges from Selected Nodes",
                         "Hide All Edges",
-                        "Select First Neighbors of Selected Nodes",
+                        "Select First Neighbors",
                         "Invert Node Selection"]
 
       for(var i=0;i< operations.length; i++){
@@ -40,8 +41,8 @@ var markersAndTissuesModule = (function () {
       sendSelectionMenu.change(sendSelection);
       sendSelectionMenu.empty();
        
-      sendSelectionMenu.append("<option>Send Selection to...</option>")
-      var moduleNames = ["dummy1", "dummy2"]; //getSelectionDestinations();
+      sendSelectionMenu.append("<option>Send Selection...</option>")
+      var moduleNames = getSelectionDestinations();
       for(var i=0;i< moduleNames.length; i++){
          if(moduleNames[i] != myModuleName){
             var optionMarkup = "<option>" + moduleNames[i] + "</option>";
@@ -155,23 +156,23 @@ var markersAndTissuesModule = (function () {
    //----------------------------------------------------------------------------------------------------
     function showAbout_markerpatients(){
   
-          var   info ={Modulename: "Markers and Patients",
-                    CreatedBy: "Hamid Boulori,\nPaul Shannon",
-                    MaintainedBy: "Hamid Boulori,\nPaul Shannon",
-                    Folder: "markersAndTissues"}
-
-         about.OpenAboutWindow(info) ;
-    }  
+        var   info ={Modulename: "Markers and Patients",
+                     CreatedBy: "Hamid Boulori,\nPaul Shannon",
+                     MaintainedBy: "Hamid Boulori,\nPaul Shannon",
+                     Folder: "markersAndTissues"}
+        about.OpenAboutWindow(info) ;
+        }  
 
   //--------------------------------------------------------------------------------------------
   function sendSelection() {
      destinationModule = sendSelectionMenu.val();
-     //broadcastSelection();
-     sendSelectionMenu.val("Send Selection to:");
+     nodeNames = selectedNodeNames(cwMarkers)
+     metadata = {};
+     sendSelectionToModule(destinationModule, nodeNames, metadata);
+     sendSelectionMenu.val("Send Selection...");
      }; // sendSelectionMenuChanged
+
   //--------------------------------------------------------------------------------------------
-
-
   function loadNetwork () {
 
        // the pathways graph is included explicitly by widget.html, so the
@@ -267,7 +268,7 @@ var markersAndTissuesModule = (function () {
          case "Hide All Edges":
             hideAllEdges();
             break;
-         case "Select First Neighbors of Selected Nodes":
+         case "Select First Neighbors of":
             selectFirstNeighbors();
             break;
          case "Invert Node Selection":
@@ -333,6 +334,36 @@ var markersAndTissuesModule = (function () {
    function zoomSelected() {
       cwMarkers.fit(cwMarkers.$(':selected'), 100)
       }
+
+   //----------------------------------------------------------------------------------------------------
+   function handleIncomingIdentifiers(msg){
+      console.log("Module.markers, handleIncomingIdentifiers, msg: ");
+      console.log(msg);
+      console.log(msg.payload);
+      selectNodes(msg.payload.ids);
+      }
+
+   //----------------------------------------------------------------------------------------------------
+     // run all that should happen when this module receives an incoming selection of patientIDs
+   demoMarkersIncomingSelectionOfIDs = function() {
+
+      names = ["TCGA.06.0210", "TCGA.02.0106", "TCGA.02.0111",
+               "TCGA.06.0194", "TCGA.06.0164", "TCGA.06.0409", "TCGA.02.0004",
+               "TCGA.02.0051", "TCGA.08.0390", "TCGA.02.0025", "TCGA.08.0392",
+               "TCGA.02.0079", "TCGA.12.0620", "TCGA.08.0373", "TCGA.06.0645",
+               "TCGA.06.0192", "TCGA.12.0776", "TCGA.12.0778", "TCGA.06.0750",
+               "TCGA.06.0878", "TCGA.14.0789", "TCGA.06.0881", "BCL11A",
+               "BRCA1", "MDM2", "PIK3R1", "ABCA1", "CDK6", "CNTRL", "FH",
+               "IFNA1", "LMO2", "PRKCA", "RELA", "STK11", "ZEB1", "CCNB1IP1",
+               "CREB3L1", "GDF2", "OR4K2", "PRKCH", "WAS"];
+
+      subset = []
+      for(var i=0; i < 10; i++)
+        subset.push(names[getRandomInt(0, names.length -1)]);
+
+      selectNodes(subset);
+      } // demoIncomingSelectionOfPatientIDs
+
 
    //----------------------------------------------------------------------------------------------------
    function allNodeIDs() {
@@ -408,6 +439,16 @@ var markersAndTissuesModule = (function () {
         }
      return(ids);
      } // selectedNodeIDs
+
+   //----------------------------------------------------------------------------------------------------
+    function selectedNodeNames(cw){
+      names = [];
+      noi = cw.filter('node:selected');
+      for(var n=0; n < noi.length; n++){
+        names.push(noi[n].data('name'));
+        }
+     return(names);
+     } // selectedNodeNames
 
    //----------------------------------------------------------------------------------------------------
    function selectSourceAndTargetNodesOfEdges(cw, edges){
@@ -490,8 +531,20 @@ var markersAndTissuesModule = (function () {
      } // nodeNames
 
    //----------------------------------------------------------------------------------------------------
+      // todo: build up the filter string first, then send it all at once
+   function selectNodes(nodeNames) {
+
+     for(var i=0; i < nodeNames.length; i++){
+       s = "cwMarkers.filter('node[name=\"" + nodeNames[i] + "\"]').select()";
+       console.log("markers selectNodes: " + s);
+       JAVASCRIPT_EVAL (s);
+       } // for i
+
+    } // selectNodes
+
+   //----------------------------------------------------------------------------------------------------
    function doSearch(e) {
-      //console.log("=== doSearch: " + searchBox.val());
+      console.log("=== doSearch: " + searchBox.val());
       var keyCode = e.keyCode || e.which;
       if (keyCode == 13) {
          searchString = searchBox.val();
@@ -500,9 +553,10 @@ var markersAndTissuesModule = (function () {
          matches = []
          for(var i=0; i < names.length; i++){
             if(names[i].beginsWith(searchString)) {
-               //console.log(searchString + " matched " + names[i]);
-               s = "cwMarkers.filter('node[name=\"" + names[i] + "\"]').select()";
-               JAVASCRIPT_EVAL (s);
+               console.log(searchString + " matched " + names[i]);
+               selectNodes([names[i]]);
+               //s = "cwMarkers.filter('node[name=\"" + names[i] + "\"]').select()";
+               //JAVASCRIPT_EVAL (s);
                } // if searchString matched beginning of node
             } // for i
          } // if 13 (return key)
@@ -511,7 +565,10 @@ var markersAndTissuesModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
+       addSelectionDestination(myModuleName, myDivName);
        onReadyFunctions.push(initializeUI);
+       addJavascriptMessageHandler("MarkersAndPatientsHandlePatientIDs",
+                                   handleIncomingIdentifiers);
        //socketConnectedFunctions.push(runDemo);
        }
      };

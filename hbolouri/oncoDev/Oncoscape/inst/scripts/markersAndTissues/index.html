@@ -322,6 +322,75 @@ $(document).ready(function()
 
 </script>
 
+<script>
+var ActiveModules = {};
+
+//----------------------------------------------------------------------------------------------------
+addSelectionDestination = function(modulename, modulediv)
+{
+   if(modulename in ActiveModules){
+        alert("Selection Destination message handler for '" + modulediv +": "+ modulename + " already set");
+   } else{  ActiveModules[modulename] = modulediv  }
+}
+
+//----------------------------------------------------------------------------------------------------
+getSelectionDestinations = function(){
+    var keys = [];
+    for(var k in ActiveModules) keys.push(k);
+    return keys;
+//   return tissueMenu.children().map(function() {return $(this).val();}).get();
+}
+
+ //--------------------------------------------------------------------------------------------
+   function validSelectionToSend(modulename, ids){
+       if(modulename == "PCA") 
+          return checkBeforeSendSelectionsToPCA(ids)
+       return true;
+    }
+   //--------------------------------------------------------------------------------------------
+   function checkBeforeSendSelectionsToPCA(ids){
+      var minimumPatientsForPCA = 8;
+      if(ids.length < minimumPatientsForPCA){
+         alert("Error! " + minimumPatientsForPCA + " or more patients needed to calculate PCA");
+         return false;
+         }
+      return true;
+      } // checkBeforeSendSelectionsToPCA
+
+
+//--------------------------------------------------------------------------------------------
+function sendSelectionToModule(moduleName, currentIDs, metadata, raiseDiv){
+    
+       raiseDiv = true;
+       if(moduleName == "Save Selection"){
+          var selectionname = PromptForSelectionName()
+          if(typeof(selectionname) !== "string")  
+             return;
+          metadata.selectionname = selectionname;
+          raiseDiv = false;
+        }
+    
+       if(validSelectionToSend(moduleName, currentIDs)){    
+          console.log(currentIDs.length + " patientIDs going to " + moduleName)    
+       
+          callback = moduleName + "HandlePatientIDs";    // genralize to "HandleSelectedIDs"?
+          msg = {cmd:"sendIDsToModule",                  // generalize to "sendIDsToModule"?
+                 callback: callback,
+                 status:"request",
+                 payload:{targetModule: moduleName,
+                          ids: currentIDs,
+                          metadata: metadata}
+                 };
+         socket.send(JSON.stringify(msg));
+
+         if(raiseDiv == true)
+           raiseTab(ActiveModules[moduleName])
+        }
+    }
+
+</script>
+
+ 
 
 
 
@@ -341,7 +410,8 @@ var markersAndTissuesModule = (function () {
   var edgeTypeSelector;
   var mouseOverReadout;
   var graphOperationsMenu;
-  var myModuleName = "Markers & Patients";
+  var myModuleName = "MarkersAndPatients";
+  var myDivName = "markersAndTissuesDiv";
 
   //--------------------------------------------------------------------------------------------
   function initializeUI () {
@@ -355,7 +425,7 @@ var markersAndTissuesModule = (function () {
       var operations = ["Show All Edges",
                         "Show Edges from Selected Nodes",
                         "Hide All Edges",
-                        "Select First Neighbors of Selected Nodes",
+                        "Select First Neighbors",
                         "Invert Node Selection"]
 
       for(var i=0;i< operations.length; i++){
@@ -368,8 +438,8 @@ var markersAndTissuesModule = (function () {
       sendSelectionMenu.change(sendSelection);
       sendSelectionMenu.empty();
        
-      sendSelectionMenu.append("<option>Send Selection to...</option>")
-      var moduleNames = ["dummy1", "dummy2"]; //getSelectionDestinations();
+      sendSelectionMenu.append("<option>Send Selection...</option>")
+      var moduleNames = getSelectionDestinations();
       for(var i=0;i< moduleNames.length; i++){
          if(moduleNames[i] != myModuleName){
             var optionMarkup = "<option>" + moduleNames[i] + "</option>";
@@ -483,23 +553,23 @@ var markersAndTissuesModule = (function () {
    //----------------------------------------------------------------------------------------------------
     function showAbout_markerpatients(){
   
-          var   info ={Modulename: "Markers and Patients",
-                    CreatedBy: "Hamid Boulori,\nPaul Shannon",
-                    MaintainedBy: "Hamid Boulori,\nPaul Shannon",
-                    Folder: "markersAndTissues"}
-
-         about.OpenAboutWindow(info) ;
-    }  
+        var   info ={Modulename: "Markers and Patients",
+                     CreatedBy: "Hamid Boulori,\nPaul Shannon",
+                     MaintainedBy: "Hamid Boulori,\nPaul Shannon",
+                     Folder: "markersAndTissues"}
+        about.OpenAboutWindow(info) ;
+        }  
 
   //--------------------------------------------------------------------------------------------
   function sendSelection() {
      destinationModule = sendSelectionMenu.val();
-     //broadcastSelection();
-     sendSelectionMenu.val("Send Selection to:");
+     nodeNames = selectedNodeNames(cwMarkers)
+     metadata = {};
+     sendSelectionToModule(destinationModule, nodeNames, metadata);
+     sendSelectionMenu.val("Send Selection...");
      }; // sendSelectionMenuChanged
+
   //--------------------------------------------------------------------------------------------
-
-
   function loadNetwork () {
 
        // the pathways graph is included explicitly by widget.html, so the
@@ -595,7 +665,7 @@ var markersAndTissuesModule = (function () {
          case "Hide All Edges":
             hideAllEdges();
             break;
-         case "Select First Neighbors of Selected Nodes":
+         case "Select First Neighbors of":
             selectFirstNeighbors();
             break;
          case "Invert Node Selection":
@@ -663,6 +733,36 @@ var markersAndTissuesModule = (function () {
       }
 
    //----------------------------------------------------------------------------------------------------
+   function handleIncomingIdentifiers(msg){
+      console.log("Module.markers, handleIncomingIdentifiers, msg: ");
+      console.log(msg);
+      console.log(msg.payload);
+      selectNodes(msg.payload.ids);
+      }
+
+   //----------------------------------------------------------------------------------------------------
+     // run all that should happen when this module receives an incoming selection of patientIDs
+   demoMarkersIncomingSelectionOfIDs = function() {
+
+      names = ["TCGA.06.0210", "TCGA.02.0106", "TCGA.02.0111",
+               "TCGA.06.0194", "TCGA.06.0164", "TCGA.06.0409", "TCGA.02.0004",
+               "TCGA.02.0051", "TCGA.08.0390", "TCGA.02.0025", "TCGA.08.0392",
+               "TCGA.02.0079", "TCGA.12.0620", "TCGA.08.0373", "TCGA.06.0645",
+               "TCGA.06.0192", "TCGA.12.0776", "TCGA.12.0778", "TCGA.06.0750",
+               "TCGA.06.0878", "TCGA.14.0789", "TCGA.06.0881", "BCL11A",
+               "BRCA1", "MDM2", "PIK3R1", "ABCA1", "CDK6", "CNTRL", "FH",
+               "IFNA1", "LMO2", "PRKCA", "RELA", "STK11", "ZEB1", "CCNB1IP1",
+               "CREB3L1", "GDF2", "OR4K2", "PRKCH", "WAS"];
+
+      subset = []
+      for(var i=0; i < 10; i++)
+        subset.push(names[getRandomInt(0, names.length -1)]);
+
+      selectNodes(subset);
+      } // demoIncomingSelectionOfPatientIDs
+
+
+   //----------------------------------------------------------------------------------------------------
    function allNodeIDs() {
 
       ids = [];
@@ -704,20 +804,7 @@ var markersAndTissuesModule = (function () {
       if(selectedNodes.length == 0) {
          return;
          }
-
       showEdgesForNodes(cwMarkers, selectedNodes);
-
-    /**********
-      for(var n=0; n < selectedNodes.length; n++){
-         node = selectedNodes[n];
-         nodeID = node.data().id;
-         filterString = "[target='" + nodeID + "']";
-         cwMarkers.edges(filterString).show()
-         filterString = "[source='" + nodeID + "']";
-         cwMarkers.edges(filterString).show();
-         node.neighborhood().select();
-         } // for n
-    ********/
       } // showEdgesFromSelectedNodes
 
    //----------------------------------------------------------------------------------------------------
@@ -749,6 +836,16 @@ var markersAndTissuesModule = (function () {
         }
      return(ids);
      } // selectedNodeIDs
+
+   //----------------------------------------------------------------------------------------------------
+    function selectedNodeNames(cw){
+      names = [];
+      noi = cw.filter('node:selected');
+      for(var n=0; n < noi.length; n++){
+        names.push(noi[n].data('name'));
+        }
+     return(names);
+     } // selectedNodeNames
 
    //----------------------------------------------------------------------------------------------------
    function selectSourceAndTargetNodesOfEdges(cw, edges){
@@ -831,8 +928,20 @@ var markersAndTissuesModule = (function () {
      } // nodeNames
 
    //----------------------------------------------------------------------------------------------------
+      // todo: build up the filter string first, then send it all at once
+   function selectNodes(nodeNames) {
+
+     for(var i=0; i < nodeNames.length; i++){
+       s = "cwMarkers.filter('node[name=\"" + nodeNames[i] + "\"]').select()";
+       console.log("markers selectNodes: " + s);
+       eval (s);
+       } // for i
+
+    } // selectNodes
+
+   //----------------------------------------------------------------------------------------------------
    function doSearch(e) {
-      //console.log("=== doSearch: " + searchBox.val());
+      console.log("=== doSearch: " + searchBox.val());
       var keyCode = e.keyCode || e.which;
       if (keyCode == 13) {
          searchString = searchBox.val();
@@ -841,9 +950,10 @@ var markersAndTissuesModule = (function () {
          matches = []
          for(var i=0; i < names.length; i++){
             if(names[i].beginsWith(searchString)) {
-               //console.log(searchString + " matched " + names[i]);
-               s = "cwMarkers.filter('node[name=\"" + names[i] + "\"]').select()";
-               eval (s);
+               console.log(searchString + " matched " + names[i]);
+               selectNodes([names[i]]);
+               //s = "cwMarkers.filter('node[name=\"" + names[i] + "\"]').select()";
+               //eval (s);
                } // if searchString matched beginning of node
             } // for i
          } // if 13 (return key)
@@ -852,7 +962,10 @@ var markersAndTissuesModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
+       addSelectionDestination(myModuleName, myDivName);
        onReadyFunctions.push(initializeUI);
+       addJavascriptMessageHandler("MarkersAndPatientsHandlePatientIDs",
+                                   handleIncomingIdentifiers);
        //socketConnectedFunctions.push(runDemo);
        }
      };
@@ -72395,7 +72508,7 @@ markersAndTissuesMouseOverReadout{
           box-sizing: border-box;
 }
 
-.chosen-container { width:370px !important; 
+.chosen-container { width:420px !important; 
                     height:30px}
 
 </style>
@@ -72403,21 +72516,34 @@ markersAndTissuesMouseOverReadout{
 <div id="markersAndTissuesDiv">
   <div id="markerpatientsInfoLinks" class="HeaderLinks" align="right">
       <span id="markerpatientsAboutLink" >Credits  </span>
-<!--      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>  -->
+        <!--      <span id="markerpatientsTooltipsLink"  dx=10>Tooltips</span>  -->
    </div>
+
    <div id="markersAndTissuesButtonDiv">
-     <input type="text" id="markersAndTissuesMouseOverReadout" style="width: 260px" disabled value="(names displayed here)"></input>
+     <input type="text" id="markersAndTissuesMouseOverReadout" 
+        style="width: 240px; font-size:8pt" disabled value="(names displayed here)"></input>
 
-      <select id="cyMarkersOperationsMenu"></select>
+      <select id="cyMarkersOperationsMenu" style="font-size:8pt"></select>
 
-      <select class="chosen-select" data-placeholder="Select edge types to display" 
+      <select class="chosen-select" 
+                    style="font-size:8pt width:400px"
+                    data-placeholder="Select edge types to display" 
                     multiple id="markersEdgeTypeSelector">
-            <option value="mutantIn" selected>Mutation</option>
-            <option value="copyNumberGain" selected>Copy Number Gain</option>
-            <option value="copyNumberLoss" selected>Copy Number Loss</option>
+            <option value="mutantIn" style="font-size:8pt" selected>Mutation</option>
+            <option value="copyNumberGain" style="font-size:8pt" selected>Copy Number Gain</option>
+            <option value="copyNumberLoss" style="font-size:8pt" selected>Copy Number Loss</option>
        </select>
-     <select id="cyMarkersSendSelectionMenu" name="SendSelectionToModule"></select>
-     &nbsp; Search: <input type="text" id="markersAndTissuesSearchBox"></input>
+     <select id="cyMarkersSendSelectionMenu" 
+                    style="font-size:8pt"
+             name="SendSelectionToModule">
+             </select>
+     &nbsp; 
+     <!-- span style="font-size:8pt">Search: </span --> 
+     <input type="text" 
+            style="font-size:8pt"
+            value="(search)"
+            id="markersAndTissuesSearchBox">
+            </input>
 
 
    </div>
