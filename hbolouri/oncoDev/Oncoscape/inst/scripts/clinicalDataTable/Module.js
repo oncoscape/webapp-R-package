@@ -126,6 +126,7 @@ var ThisModuleName = "ClinicalTable"
       $("#overallSurvivalMinSliderReadout").text(0);
       $("#overallSurvivalMaxSliderReadout").text(11);
 
+      tableRef.fnDraw()
       }
 
     //--------------------------------------------------------------------------------------------

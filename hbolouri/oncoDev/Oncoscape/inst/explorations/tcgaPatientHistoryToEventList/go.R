@@ -15,7 +15,7 @@ if(!exists("tbl.pt")){
    tbl.pt <- read.table("clinical_patient_gbm.txt", quote="", sep="\t", header=TRUE, as.is=TRUE)
    tbl.pt <- tbl.pt[3:nrow(tbl.pt),]
    tbl.drug <- read.table("clinical_drug_gbm.txt", quote="", sep="\t", header=TRUE, as.is=TRUE)
-   tbl.drug <- tbl.drug[3:nrow(tbl.pt),]
+   tbl.drug <- tbl.drug[3:nrow(tbl.drug),]
    tbl.rad <- read.table("clinical_radiation_gbm.txt", quote="", sep="\t", header=TRUE, as.is=TRUE)
    tbl.rad <- tbl.rad[3:nrow(tbl.rad),]
    tbl.f1 <- read.table("clinical_follow_up_v1.0_gbm.txt", quote="", sep="\t", header=TRUE, as.is=TRUE)
@@ -39,7 +39,7 @@ if(!exists("tcga.ids")){
    names(id.map) <- fixed.ids
    }
 #------------------------------------------------------------------------------------------------------------------------
-run = function(patient.ids=NA, file="testTCGApatientHistory_7-28-14.RData")
+run = function(patient.ids=NA, file="testTCGApatientHistory_9-16-14.RData")
 {
     if(all(is.na(patient.ids)))
         patient.ids <- tcga.ids
@@ -156,6 +156,56 @@ create.Chemo.record <- function(patient.id)
       start.date <- reformatDate(start.date.unformatted)
       end.date <- reformatDate(end.date.unformatted)
       drug <- tbl.drugSub$pharmaceutical_therapy_drug_name[chemoEvent]
+
+//t<- tbl.drug$pharmaceutical_therapy_drug_name
+//t<-  sapply(tbl.drug$pharmaceutical_therapy_drug_name, function(drug){ 
+      if( grepl("Cis Retinoic Acid", drug, ignore.case=TRUE) | drug == "Cis-retinoic acid" | drug =="Reinoid/CIS retinoic acid") { drug = "CRA"}
+      if( drug == "Temozomide" | drug == "Temozolamide" | drug == "Temozolomoide" | drug =="temozolomide"| drug =="Temoxolomide" | drug =="Temozlomide" | drug =="Temozolomode") { drug = "Temozolomide" }
+      if( drug == "Irintocean" | drug =="Irintotecan" | drug =="irinotecan" | drug =="Irunotecan") { drug = "Irinotecan" }
+      if( drug == "dc Vax (Dendritic Cell Vaccine)" | drug == "Dendritic Cell Vaccine (dcvax)"){ drug = "dcVax" }
+      if( drug == "CPT 11" | drug == "CPT11" | drug =="cpt-11"){ drug = "CPT-11"}
+      if( drug == "ch81c6" | drug == "81C6" | drug =="mu81c6" | drug =="MU81C6") {drug = "81c6"}
+      if( drug == "MAB I 131" | drug == "MABI131" | drug =="MAb I-131" | drug =="MAB I131") { drug = "MAB I-131"}
+      if( drug == "O6BG" | drug == "06-BG (NABTT 0803)" | drug == "06BG" | drug == "06GB" | drug =="O6B6" | drug =="06-BG")    { drug = "O6-BG"}
+      if( drug == "SCH66336" | drug =="SCH63666"){ drug = "SCH6636"}
+      if( drug == "Temador" | drug == "Temodor" | drug == "Temudar" | drug =="temodar" | drug =="Temodar" | drug =="Temodar (escalation)") { drug = "Temodor"}
+      if( drug == "Gliadel Wafer (BCNU)" | drug == "Gliadel Waters" | drug =="Gliadel" | drug == "Gliadel Wafers" | drug =="BCNU" | drug =="Gliadel BCNU" | drug =="Gliadle Wafer"| drug =="Gliadel wafers" | drug =="Gliadel wafer carmustine" | drug =="Gliadel Wafer"){ drug = "Gliadel wafer"}
+      if( drug == "Dexamethazone" | drug == "Dexamethsone" | drug =="Dexamethasome" |  drug== "Dexaethasone" | drug =="Dexmethasone") { drug = "Dexamethasone"}
+      if( drug == "ABT-888 Parp Inhibitor") { drug = "ABT-888"}
+      if( drug == "Bevacozimab" | drug == "Bevacizumab Avastin" | drug =="Bevcizumab"){ drug = "Bevacizumab"}
+      if( drug == "Hydroxurea" | drug =="Hyroxyurea" | drug=="Hyrdroxyurea" | drug == "Hydroxyuerea"| drug =="Hydoxyurea") { drug = "Hydroxyurea"}
+      if( drug == "CI 980" | drug == "CI980") {drug = "CI-980"}
+      if( drug == "VP16" | drug =="VP 16 (Etoposide)" | drug =="Vp 16" | drug =="VP 16") { drug = "VP-16"}
+      if( drug == "Rapamcyin") { drug ="Rapamycin"}
+      if( drug == "[Not Available]"){ drug = "NA"}
+      if( drug == "6 Thiguanine") { drug = "6 Thioguanine"}
+      if( drug ==  "Acctuane"){ drug =  "Accutane"}
+      if( drug == "Arsenic Tnoxide" | drug == "Arsenic Trioxide (ATO)"){ drug = "Arsenic Trioxide"}
+      if( drug == "BIBW2992"){ drug = "BIBW 2992"}
+      if( drug == "BS1-201"){ drug ="BSI-201"}
+      if( drug == "CAI (NABTT 97212)" | drug == "CAI (NABTT 9712)") { drug = "CAI NABTT 9712"}
+      if( drug == "Carmustin" | drug == "Carmustine (BCNU)") { drug = "Carmustine"}
+      if( drug == "Celbrex"){ drug = "Celebrex"}
+      if( drug == "Cisplatain"){ drug = "Cisplatin"}
+      if( drug == "Erlotinib (Tarceva)") { drug ="Erlotinib"}
+      if( drug == "Gleevec" ){ drug = "Gleevac" }
+      if( drug == "IL-13 with Pseudomonas exotoxin" | drug =="IL-13 with Pseudomonas Exotoxin" | drug =="IL-13 Pseudomonas exotoxin" ){ drug ="IL-13PE" }
+      if( drug == "Levenracetam") { drug = "Levetiracetam"}
+      if( drug == "Lumustine" | drug =="Lomustine CCNU"){ drug ="Lomustine"}
+      if( drug == "Metexafin Gadolinium" | drug =="Motexatin Gadoinium"){ drug = "Motexafin Gadolinium"}
+      if( drug =="Procarbizine" ){ drug ="Procarbazine" }
+      if( drug == "Tamoxiten"){ drug = "Tamoxifen"}
+      if( drug == "Tanceva" | drug == "Tarveca"){ drug ="Tarceva"}
+      if(drug =="Topecan" ){ drug ="Topotecan" }
+      if(drug =="Vincristin") { drug ="Vincristine"}
+      if( drug =="XL 184" | drug =="XL184"){ drug ="XL-184" }
+      if( drug =="procarbazine"){ drug = "Procarbazine"}
+      if( drug =="PS 341"){ drug ="PS-341"}
+      if( drug =="Tipfarnib (R115777)"){ drug ="Tipifarnib (R115777)"}
+      if( drug =="Valproic acid"){ drug="Valproic Acid"}
+            drug
+//      })
+//t<- unique(t); t<- t[order(t)]
       new.event <- list(PatientID=patient.id,
                         PtNum=patient.number,
                         Name=name,
@@ -191,10 +241,10 @@ test_create.Chemo.record <- function()
 #------------------------------------------------------------------------------------------------------------------------
 create.all.Chemo.records <- function(patient.ids)
 {
-      # 388 good rows
+      # 921 good rows
   tbl.good <- subset(tbl.drug, bcr_patient_barcode %in% patient.ids & pharmaceutical_therapy_type =="Chemotherapy" &
-                     pharmaceutical_tx_started_days_to != "[Not Available]")
-  ids <- unique(tbl.good$bcr_patient_barcode)   # 167
+                     pharmaceutical_tx_started_days_to != "[Not Available]" & pharmaceutical_tx_ended_days_to != "[Not Available]")
+  ids <- unique(tbl.good$bcr_patient_barcode)   # 364
 
   count <- 1
   result <- vector("list", nrow(tbl.good))
