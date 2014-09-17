@@ -273,7 +273,7 @@ var markersAndTissuesModule = (function () {
          case "Hide All Edges":
             hideAllEdges();
             break;
-         case "Select First Neighbors of":
+         case "Select First Neighbors":
             selectFirstNeighbors();
             break;
          case "Invert Node Selection":
