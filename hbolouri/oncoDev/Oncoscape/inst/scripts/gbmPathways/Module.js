@@ -96,6 +96,7 @@ var gbmPathwaysModule = (function () {
      ready: function() {
         console.log("cwGbm ready");
         cwGbm = this;
+        /*******************
         cwGbm.elements().qtip({
             content: function() {
               return (this.data().canonicalName);
@@ -119,6 +120,7 @@ var gbmPathwaysModule = (function () {
                 }
               }
             }); // qtip
+          *************/
 
         cwGbm.on('select', 'edge', function(evt){
            var edge = evt.cyTarget;

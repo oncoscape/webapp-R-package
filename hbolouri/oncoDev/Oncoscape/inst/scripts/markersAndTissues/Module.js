@@ -52,6 +52,7 @@ var markersAndTissuesModule = (function () {
 
       showEdgesButton = $("#cyMarkersShowEdgesButton");
       showEdgesButton.click(showEdges);
+      /**********
       showEdgesButton.qtip({
           content: "Display edges of the currently<br> selected type/s, between all<br>selected nodes.",
           show: {
@@ -71,10 +72,12 @@ var markersAndTissuesModule = (function () {
                 }
               }
           });
+        *********/
 
 
       showAllEdgesButton = $("#cyMarkersShowAllEdgesButton");
       showAllEdgesButton.click(showAllEdges);
+      /*************
       showAllEdgesButton.qtip({
           content: "Display edges of the currently<br>selected type/s, between all nodes.",
           show: {
@@ -94,9 +97,11 @@ var markersAndTissuesModule = (function () {
                 }
               }
           });
+        *********/
 
       sfnButton = $("#cyMarkersSFNButton");
       sfnButton.click(selectFirstNeighbors);
+      /***************
       sfnButton.qtip({
           content: "Select nodes which are<br>first neighbors of currently selected nodes.",
           show: { delay: 700, solo: true,effect: { length: 1000 }},
@@ -118,7 +123,7 @@ var markersAndTissuesModule = (function () {
                 }
               }
           });
-
+       ***********/
       clearSelectionButton = $("#cyMarkersClearSelectionButton");
       clearSelectionButton.click(clearSelection);
 

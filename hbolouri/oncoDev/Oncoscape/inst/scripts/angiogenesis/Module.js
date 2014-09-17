@@ -113,6 +113,7 @@ var angioPathwaysModule = (function () {
      ready: function() {
         console.log("cwAngio ready");
         cwAngio = this;
+        /**********
         cwAngio.elements().qtip({
             content: function() {
               return (this.data().canonicalName);
@@ -136,6 +137,7 @@ var angioPathwaysModule = (function () {
                 }
               }
             }); // qtip
+        **********/
 
         cwAngio.on('select', 'edge', function(evt){
            var edge = evt.cyTarget;
