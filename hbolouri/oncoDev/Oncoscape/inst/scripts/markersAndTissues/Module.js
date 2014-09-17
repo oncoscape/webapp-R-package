@@ -536,7 +536,7 @@ var markersAndTissuesModule = (function () {
 
      for(var i=0; i < nodeNames.length; i++){
        s = "cwMarkers.filter('node[name=\"" + nodeNames[i] + "\"]').select()";
-       console.log("markers selectNodes: " + s);
+       //console.log("markers selectNodes: " + s);
        JAVASCRIPT_EVAL (s);
        } // for i
 
@@ -544,7 +544,6 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
    function doSearch(e) {
-      console.log("=== doSearch: " + searchBox.val());
       var keyCode = e.keyCode || e.which;
       if (keyCode == 13) {
          searchString = searchBox.val();
@@ -553,7 +552,6 @@ var markersAndTissuesModule = (function () {
          matches = []
          for(var i=0; i < names.length; i++){
             if(names[i].beginsWith(searchString)) {
-               console.log(searchString + " matched " + names[i]);
                selectNodes([names[i]]);
                //s = "cwMarkers.filter('node[name=\"" + names[i] + "\"]').select()";
                //JAVASCRIPT_EVAL (s);
