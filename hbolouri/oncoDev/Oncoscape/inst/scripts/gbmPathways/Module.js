@@ -22,7 +22,10 @@ var gbmPathwaysModule = (function () {
   var mutationData;
 
   var moviePlaying = false;
-  var thisModuleName = "gbmPathways";
+
+  var sendSelectionMenu;
+  var myModuleName = "gbmPathways";
+  var myDivName = "gbmPathwaysDiv";
 
 
 
@@ -63,6 +66,22 @@ var gbmPathwaysModule = (function () {
 
       movieButton.click(togglePlayMovie);
       searchBox = $("#gbmPathwaysSearchBox");
+
+      sendSelectionMenu = $("#gbmPathwaysSendSelectionMenu")  // only unique part?
+      sendSelectionMenu.change(sendSelection);
+      sendSelectionMenu.empty();
+       
+      sendSelectionMenu.append("<option>Send Selection...</option>")
+      var moduleNames = getSelectionDestinations();
+      for(var i=0;i< moduleNames.length; i++){
+         if(moduleNames[i] != myModuleName){
+            var optionMarkup = "<option>" + moduleNames[i] + "</option>";
+            sendSelectionMenu.append(optionMarkup);
+            } // if
+         } // for 
+
+
+
       loadNetwork(network, vizmap);
       $(window).resize(handleWindowResize);
       $("#gbmPathwayAboutLink").click(showAbout_gbmPathway)
@@ -71,7 +90,7 @@ var gbmPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
     function showAbout_gbmPathway(){
   
-          var   info ={Modulename: thisModuleName,
+          var   info ={Modulename: myModuleName,
                     CreatedBy: "Hamid Boulori,\nPaul Shannon",
                     MaintainedBy: "Hamid Boulori,\nPaul Shannon",
                     Folder: "gbmPathways"}
@@ -80,7 +99,28 @@ var gbmPathwaysModule = (function () {
     }  
 
   //--------------------------------------------------------------------------------------------
-  function loadNetwork (network, vizmap) {
+   function sendSelection() {
+
+     destinationModule = sendSelectionMenu.val();
+     selectedIDs = identifyEntitiesInCurrentSelection();
+     metadata = {};
+     sendSelectionToModule(destinationModule, selectedIDs, metadata);
+     sendSelectionMenu.val("Send Selection...");
+
+     }; // sendSelection
+
+   //--------------------------------------------------------------------------------------------
+   function identifyEntitiesInCurrentSelection(){
+      var names = [];
+      var noi = cwGbm.filter('node:selected'); 
+      for(var n=0; n < noi.length; n++){
+        names.push(noi[n].data('name'));
+        }
+     return(names);
+     } // identifyEntitiesInCurrentSelection
+
+   //--------------------------------------------------------------------------------------------
+   function loadNetwork (network, vizmap) {
 
     cwGbm = $("#cwGbmPathwaysDiv");
     cwGbm.cytoscape({
@@ -145,7 +185,7 @@ var gbmPathwaysModule = (function () {
    function handleWindowResize () {
       console.log("gbmPathways window resize: " + $(window).width() + ", " + $(window).height());
       cyDiv.width(0.95 * $(window).width());
-      cyDiv.height(0.9 * $(window).height());
+      cyDiv.height(0.8 * $(window).height());
       cwGbm.resize();
       cwGbm.fit(50);
       } // handleWindowResize
@@ -556,7 +596,6 @@ var gbmPathwaysModule = (function () {
        addJavascriptMessageHandler("handle_gbmPathways_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_gbmPathways_mutation_data",  handle_mutation_data);
        addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
-
        } // init
      }; 
 
