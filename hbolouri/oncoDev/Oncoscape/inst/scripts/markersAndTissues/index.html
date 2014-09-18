@@ -449,6 +449,7 @@ var markersAndTissuesModule = (function () {
 
       showEdgesButton = $("#cyMarkersShowEdgesButton");
       showEdgesButton.click(showEdges);
+      /**********
       showEdgesButton.qtip({
           content: "Display edges of the currently<br> selected type/s, between all<br>selected nodes.",
           show: {
@@ -468,10 +469,12 @@ var markersAndTissuesModule = (function () {
                 }
               }
           });
+        *********/
 
 
       showAllEdgesButton = $("#cyMarkersShowAllEdgesButton");
       showAllEdgesButton.click(showAllEdges);
+      /*************
       showAllEdgesButton.qtip({
           content: "Display edges of the currently<br>selected type/s, between all nodes.",
           show: {
@@ -491,9 +494,11 @@ var markersAndTissuesModule = (function () {
                 }
               }
           });
+        *********/
 
       sfnButton = $("#cyMarkersSFNButton");
       sfnButton.click(selectFirstNeighbors);
+      /***************
       sfnButton.qtip({
           content: "Select nodes which are<br>first neighbors of currently selected nodes.",
           show: { delay: 700, solo: true,effect: { length: 1000 }},
@@ -515,7 +520,7 @@ var markersAndTissuesModule = (function () {
                 }
               }
           });
-
+       ***********/
       clearSelectionButton = $("#cyMarkersClearSelectionButton");
       clearSelectionButton.click(clearSelection);
 
@@ -665,7 +670,7 @@ var markersAndTissuesModule = (function () {
          case "Hide All Edges":
             hideAllEdges();
             break;
-         case "Select First Neighbors of":
+         case "Select First Neighbors":
             selectFirstNeighbors();
             break;
          case "Invert Node Selection":
@@ -933,7 +938,7 @@ var markersAndTissuesModule = (function () {
 
      for(var i=0; i < nodeNames.length; i++){
        s = "cwMarkers.filter('node[name=\"" + nodeNames[i] + "\"]').select()";
-       console.log("markers selectNodes: " + s);
+       //console.log("markers selectNodes: " + s);
        eval (s);
        } // for i
 
@@ -941,7 +946,6 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
    function doSearch(e) {
-      console.log("=== doSearch: " + searchBox.val());
       var keyCode = e.keyCode || e.which;
       if (keyCode == 13) {
          searchString = searchBox.val();
@@ -950,7 +954,6 @@ var markersAndTissuesModule = (function () {
          matches = []
          for(var i=0; i < names.length; i++){
             if(names[i].beginsWith(searchString)) {
-               console.log(searchString + " matched " + names[i]);
                selectNodes([names[i]]);
                //s = "cwMarkers.filter('node[name=\"" + names[i] + "\"]').select()";
                //eval (s);
@@ -72400,7 +72403,7 @@ markersAndTissuesVizmap = [ {
 
   {"selector" : "node:selected",
     "css" : {
-      "background-color" : "rgb(255,255,0)"
+      "background-color" : "rgb(0,0,0)",
     }
   }, 
 {
