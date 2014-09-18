@@ -50,94 +50,52 @@ curatedGBMVizmap = [ {
     }
   }, {
     "selector" : "node[nodeType = 'smallMolecule']",
-    "css" : {
-      "shape" : "diamond"
-    }
+    "css" : { "shape" : "diamond" }},
 
 
-  }, {
-    "selector" : "node[score = 20000]",
-    "css" : {
-      "width" : 250.0
-    }
-
-  }, {
-    "selector" : "node[score > 100000]",
-    "css" : {
-      "width" : 400.0
-    }
-
-  }, {
-    "selector" : "node[score > 100000]",
-    "css" : {
-      "height" : 400.0
-    }
-
-  }, {
-    "selector" : "node[score > 20000.0][score < 100000.0]",
-    "css" : {
-      "width" : "mapData(score,20000.0,100000.0, 350.0, 600.0)"
-    }
-
-  }, {
-    "selector" : "node[score > 0.0][score < 20000.0]",
-    "css" : {
-      "width" : "mapData(score,0.0,20000.0, 200.0, 350.0)"
-    }
+  {"selector" : "node[score > 0][score < 100]", "css" : {"width" : "mapData(score,0,100, 40, 600.0)" }}, 
 
 
-  }, {
-    "selector" : "node[score = 20000]",
-    "css" : {
-      "heigth" : 250.0
-    }
-
-  }, {
-    "selector" : "node[score > 20000.0][score < 100000.0]",
-    "css" : {
-      "height" : "mapData(score,20000.0,100000.0, 350.0, 600.0)"
-    }
-
-  }, {
-    "selector" : "node[score > 0.0][score < 20000.0]",
-    "css" : {
-      "height" : "mapData(score,0.0,20000.0,200.0, 350.0)"
-    }
-
-  }, {
-    "selector" : "node[score > 8000.0]",
+   {"selector" : "node[score > 8000.0]",
     "css" : {
       "background-color" : "rgb(221,0,0)"
     }
-  }, {
-    "selector" : "node[score = 20000.0]",
+  }, 
+
+{ "selector" : "node[score = 20000.0]",
     "css" : {
       "background-color" : "rgb(221,0,0)"
     }
 
-  }, {
-    "selector" : "node[score > 1.0][score < 20000.0]",
+  }, 
+
+{ "selector" : "node[score > 1.0][score < 20000.0]",
     "css" : {
       "background-color" : "mapData(score,1.0,20000.0,rgb(255,200,200),rgb(221,0,0))"
     }
 
-  }, {
-    "selector" : "node[score < 1.0]",
+  }, 
+
+{"selector" : "node[score < 1.0]",
     "css" : {
       "background-color" : "rgb(255,255,255)"
     }
 
-  }, {
-    "selector" : "node[score = -80.0]",
+  }, 
+
+{"selector" : "node[score = -80.0]",
     "css" : {
       "background-color" : "rgb(0,0,221)"
     }
-  }, {
-    "selector" : "node[score < -80.0]",
+  }, 
+
+{"selector" : "node[score < -80.0]",
     "css" : {
       "background-color" : "rgb(0,0,221)"
     }
-  }, {
+  }, 
+
+{
     "selector" : "node[mut > 20.0]",
     "css" : {
       "border-color" : "rgb(0,0,0)"
