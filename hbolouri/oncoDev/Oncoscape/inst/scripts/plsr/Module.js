@@ -156,7 +156,6 @@ var PLSRModule = (function () {
      destinationModule = sendSelectionMenu.val();
      selectedIDs = identifyEntitiesInCurrentSelection();
      metadata = {};
-     debugger;
      sendSelectionToModule(destinationModule, selectedIDs, metadata);
      sendSelectionMenu.val("Send Selection...");
      }; // sendSelectionMenuChanged
@@ -484,7 +483,7 @@ var PLSRModule = (function () {
 
 
    //--------------------------------------------------------------------------------------------
-   identifyEntitiesInCurrentSelection = function(){
+   function identifyEntitiesInCurrentSelection (){
       console.log("identifyEntitiesInCurrentSelection: " + currentlySelectedRegion);
       x1 = currentlySelectedRegion[0][0];
       y1 = currentlySelectedRegion[0][1];
