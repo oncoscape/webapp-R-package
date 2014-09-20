@@ -1,0 +1,9 @@
+include(../m4-workarounds.txt)
+include(../index.common)
+include(../common.js)
+include(../sendSelectionMenu.js)
+include(../tabsApp/code.js)
+<body>
+include(tabs.html)
+</body>
+</html>

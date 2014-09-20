@@ -1,0 +1,22 @@
+<style>
+.ui-tabs .ui-tabs-nav li a {font-size:10pt !important;}
+.ui-button .ui-button-text {font-size:10pt !important;}
+</style>
+
+<script>
+</script>
+
+include(../angiogenesis/Module.js)
+include(../markersAndTissues/Module.js)
+
+<div id="oncoscapeTabs">
+   <ul>
+     <li><a href="#angiogenesisDiv">Angiogenesis</a></li>
+     <li><a href="#markersAndTissuesDiv">Markers &amp; Patients</a></li>
+   </ul>
+
+include(../angiogenesis/widget.html)
+include(../markersAndTissues/widget.html)
+
+</div>
+
