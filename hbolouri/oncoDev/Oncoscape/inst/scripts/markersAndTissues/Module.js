@@ -28,8 +28,12 @@ var markersAndTissuesModule = (function () {
       var operations = ["Show All Edges",
                         "Show Edges from Selected Nodes",
                         "Hide All Edges",
-                        "Select First Neighbors",
-                        "Invert Node Selection"]
+                        //"Connect to First Neighbors",
+                        "Invert Node Selection",
+                        "Clear Selections",
+                        "Select All Connected Nodes",
+                        "Hide Unselected Nodes",
+                        "Show All Nodes"]
 
       for(var i=0;i< operations.length; i++){
          var optionMarkup = "<option>" + operations[i] + "</option>";
@@ -171,7 +175,7 @@ var markersAndTissuesModule = (function () {
   //--------------------------------------------------------------------------------------------
   function sendSelection() {
      destinationModule = sendSelectionMenu.val();
-     nodeNames = selectedNodeNames(cwMarkers)
+     var nodeNames = selectedNodeNames(cwMarkers)
      metadata = {};
      sendSelectionToModule(destinationModule, nodeNames, metadata);
      sendSelectionMenu.val("Send Selection...");
@@ -273,11 +277,20 @@ var markersAndTissuesModule = (function () {
          case "Hide All Edges":
             hideAllEdges();
             break;
-         case "Select First Neighbors":
-            selectFirstNeighbors();
-            break;
          case "Invert Node Selection":
             invertSelection();
+            break;
+         case "Clear Selections":
+            cwMarkers.filter('node:selected').unselect()
+            break;
+         case "Select All Connected Nodes":
+            selectAllConnectedNodes()
+            break;
+         case "Hide Unselected Nodes":
+            cwMarkers.filter("node:unselected").hide();
+            break;
+         case "Show All Nodes":
+            cwMarkers.filter('node:hidden').show();
             break;
          default:
             console.log("unrecoginized graph operation requested from menu: " + operation)
@@ -449,8 +462,8 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
     function selectedNodeNames(cw){
-      names = [];
-      noi = cw.filter('node:selected');
+      var names = [];
+      var noi = cw.filter('node:selected');
       for(var n=0; n < noi.length; n++){
         names.push(noi[n].data('name'));
         }
@@ -459,6 +472,8 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
    function selectSourceAndTargetNodesOfEdges(cw, edges){
+
+      var edgesVisible = cwMarkers.filter('edge:visible').length
 
      //console.log("==== selectSourceAndTargetNodes, edges: " + edges.length)
      for(var i=0; i < edges.length; i++){
@@ -479,10 +494,6 @@ var markersAndTissuesModule = (function () {
       if(edgeTypes.length == 0)
          return;
 
-     //nodeIDs = []
-     //for(var i=0; i < nodes.length; i++)
-     //  nodeIDs.push(nodes[i].data("id"))
-
      for(var e=0; e < edgeTypes.length; e++){
         edgeType = edgeTypes[e];
 
@@ -495,18 +506,23 @@ var markersAndTissuesModule = (function () {
             selectedEdges = cw.edges(filterString)
             //console.log("    edges found: " + selectedEdges.length);
             selectedEdges.show()
-            selectSourceAndTargetNodesOfEdges(cw, selectedEdges);
-
+            //selectSourceAndTargetNodesOfEdges(cw, selectedEdges);
             filterString = '[edgeType="' + edgeType + '"][target="' + nodeID + '"]';
             //console.log("target filter string: " + filterString);
             selectedEdges = cw.edges(filterString)
             //console.log("    edges found: " + selectedEdges.length);
             selectedEdges.show()
-            selectSourceAndTargetNodesOfEdges(cw, selectedEdges);
-
+            //selectSourceAndTargetNodesOfEdges(cw, selectedEdges);
             } // for n
          } // for 3
       } // showEdgesForSelectedNodes
+
+   //----------------------------------------------------------------------------------------------------
+   function selectAllConnectedNodes(){
+
+       var selectedEdges = cwMarkers.filter("edge:visible");
+       selectSourceAndTargetNodesOfEdges(cwMarkers, selectedEdges);
+       } // selectAllConnectedNodes
 
    //----------------------------------------------------------------------------------------------------
    function showEdgesForSelectedNodes(cw, edgeTypes){
@@ -528,8 +544,8 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
    function nodeNames (){
-     nodes = cwMarkers.filter("node:visible");
-     result = [];
+     var nodes = cwMarkers.filter("node:visible");
+     var result = [];
      for(var i=0; i < nodes.length; i++){
        result.push(nodes[i].data().label)
        } // for i

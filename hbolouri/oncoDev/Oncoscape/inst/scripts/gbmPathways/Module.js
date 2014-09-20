@@ -268,16 +268,32 @@ var gbmPathwaysModule = (function () {
 
       console.log("=== entering handlePatientIDs for gbm");
       console.log("status: " + msg.status);
-   
-      tissueIDCount = msg.payload.count;
-      tissueIDs = msg.payload.ids;
+      incomingIds = msg.payload.ids;
+      ourGeneNames = nodeNames();
+      recognizedGeneNames = [];
+      for(var i=0; i < incomingIds.length; i++){
+        if(ourGeneNames.indexOf(incomingIds[i]) >= 0)
+           recognizedGeneNames.push(incomingIds[i]);
+        } // for i
+
+      if(recognizedGeneNames.length > 0){
+         console.log(" incoming ids had some gene names");
+         selectNodes(recognizedGeneNames);
+         }
+         // other logical option at present (20 sep 2014) is tissue (patient ids) for which molecular 
+         // data will be obtained
+      else{
+         tissueIDCount = msg.payload.count;
+         tissueIDs = msg.payload.ids;
  
         // solve the R/javascript difference about vectors of length 1 vs a single scalar
-      if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
+        if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
       
-      request_mRNA_data(tissueIDs, geneSymbols());   // entities: patient, tissue or sample ids
-      request_cnv_data(tissueIDs, geneSymbols());
-      request_mutation_data(tissueIDs, geneSymbols());
+        request_mRNA_data(tissueIDs, geneSymbols());   // entities: patient, tissue or sample ids
+        request_cnv_data(tissueIDs, geneSymbols());
+        request_mutation_data(tissueIDs, geneSymbols());
+        } // else: patientIDs, not genes
+
       } // handlePatientIDs
 
    //----------------------------------------------------------------------------------------------------
@@ -294,7 +310,8 @@ var gbmPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    function nodeNames() {
 
-     nodes = cwGbm.filter("node:visible");
+     nodes = cwGbm.nodes();
+     //nodes = cwGbm.filter("node:visible");
      result = [];
      for(var i=0; i < nodes.length; i++){
        result.push(nodes[i].data().label)
@@ -314,6 +331,17 @@ var gbmPathwaysModule = (function () {
        } // for i
      return(result)
      } // geneSymbols
+
+   //----------------------------------------------------------------------------------------------------
+   function selectNodes(nodeNames) {
+
+     for(var i=0; i < nodeNames.length; i++){
+        s = "cwGbm.filter('node[name=\"" + nodeNames[i] + "\"]').select()";
+        console.log("markers selectNodes: " + s);
+        JAVASCRIPT_EVAL (s);
+        } // for i
+
+     } // selectNodes
 
    //----------------------------------------------------------------------------------------------------
    function changeMovieSpeed(delta) {

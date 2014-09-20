@@ -178,7 +178,10 @@ curatedGBMVizmap = [ {
   }, {
     "selector" : "node:selected",
     "css" : {
-      "background-color" : "rgb(255,255,0)"
+      "background-color" : "rgb(255,255,0)",
+      "width"  : 100,
+      "height" : 100
+
     }
   }, {
     "selector" : "edge",

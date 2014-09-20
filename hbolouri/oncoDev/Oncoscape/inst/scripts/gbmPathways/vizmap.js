@@ -57,7 +57,10 @@ vizmap = [ {
    {"selector" : "node[copyNumber = 0]","css" : {"border-color" : "rgb(0,0,0)"}},
    {"selector" : "node[copyNumber = -2]","css" : {"border-color" : "rgb(0,0,0)"}},
    {"selector" : "node[copyNumber = -1]","css" : {"border-color" : "rgb(0,0,0)"}},
-   {"selector" : "node:selected","css" : {"background-color" : "rgb(255,255,0)"}},
+
+   {"selector" : "node:selected","css" : {"background-color" : "rgb(255,255,0)", "width"  : 260, "height" : 260}},
+
+
    {"selector" : "edge","css" : {"target-arrow-shape" : "triangle","color" : "rgb(0,0,0)","target-arrow-color" : "rgb(0,0,0)","font-size" : 10,"width" : 6.0,"line-color" : "rgb(255,255,255)","font-family" : "Dialog","font-weight" : "normal","content" : "","text-opacity" : 1.0,"line-style" : "solid","opacity" : 1.0,"source-arrow-color" : "rgb(0,0,0)","source-arrow-shape" : "triangle"}},
    {"selector" : "edge[edgeType = 'expression']","css" : {"target-arrow-shape" : "triangle"}},
    {"selector" : "edge[edgeType = 'psi-mi:MI:0403(colocalization)']","css" : {"target-arrow-shape" : "none"}},
