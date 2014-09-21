@@ -635,7 +635,7 @@ var angioPathwaysModule = (function () {
         addJavascriptMessageHandler("handle_angio_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_angio_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_angio_mutation_data",  handle_mutation_data);
-       addJavascriptMessageHandler("angiogenesisHandlePatientIDs", handlePatientIDs);
+       addJavascriptMessageHandler("AngiogenesisHandlePatientIDs", handlePatientIDs);
        //if(typeof(window.tabsAppRunning) == "undefined") {
        //   socketConnectedFunctions.push(angiogenesisDemoVizChanges)
        //   }

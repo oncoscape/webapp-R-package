@@ -465,7 +465,6 @@ var angioPathwaysModule = (function () {
   var mutationData;
 
   var moviePlaying = false;
-  var thisModuleName = "angiogenesis";
 
   var sendSelectionMenu;
   var myModuleName = "Angiogenesis";
@@ -1071,7 +1070,7 @@ var angioPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
-       addSelectionDestination(thisModuleName, "angiogenesisDiv");
+       addSelectionDestination(myModuleName, myDivName);
        onReadyFunctions.push(function() {
           initializeUI(angiogenesisNetwork.elements, angiogenesisVizmap[0].style);
           });
@@ -1079,7 +1078,7 @@ var angioPathwaysModule = (function () {
         addJavascriptMessageHandler("handle_angio_mRNA_data", handle_mRNA_data);
        addJavascriptMessageHandler("handle_angio_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_angio_mutation_data",  handle_mutation_data);
-       addJavascriptMessageHandler("angiogenesisHandlePatientIDs", handlePatientIDs);
+       addJavascriptMessageHandler("AngiogenesisHandlePatientIDs", handlePatientIDs);
        //if(typeof(window.tabsAppRunning) == "undefined") {
        //   socketConnectedFunctions.push(angiogenesisDemoVizChanges)
        //   }
