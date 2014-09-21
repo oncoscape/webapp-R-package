@@ -22,7 +22,10 @@ var PairedDistributionsModule = (function () {
   var dataRequests = [];
   var itemRequesting = 0;
   var DistributionsSendSelectionMenu;
-  var ThisModuleName = "Distributions"
+  var ThisModuleName = "Distributions";
+  var d3pairedDistributionsDisplay;
+  
+  
   
   
   //--------------------------------------------------------------------------------------------
@@ -33,20 +36,22 @@ var PairedDistributionsModule = (function () {
       generatePairedDistributionsDataButton.click(clear);
 //       pairedDistributionsBroadcastSelectionButton =  $("#pairedDistributionsBroadcastSelectionButton");
 //       pairedDistributionsBroadcastSelectionButton.click(pairedDistributionsBroadcastSelection);
+
       pairedDistributionsDisplay = $("#pairedDistributionsDisplay");
+      d3pairedDistributionsDisplay = d3.select("#pairedDistributionsDisplay");
       pairedDistributionsHandleWindowResize();
       $(window).resize(pairedDistributionsHandleWindowResize);
       $("#pairedDistributionAboutLink").click(showAbout_pairedDistribution);
+      
       selectionDisplay = $("#pairedDistributionsDiv");
       selector = $("#attributeDropDown");
-      selector.chosen({disable_search_threshold: 10,
+      selector.chosen({disable_search_threshold: 2,
                        width: "50%"});
       selector.chosen().change(replot);
       
       DistributionssendSelectionMenu = $("#DistributionSendSelectiontoModuleButton")
       DistributionssendSelectionMenu.change(sendToModuleChanged);
-      DistributionssendSelectionMenu.empty();
-       
+      DistributionssendSelectionMenu.empty();    
       DistributionssendSelectionMenu.append("<option>Send Selection to:</option>")
       var ModuleNames = getSelectionDestinations();
       console.log("MODULE NAMES:");
@@ -58,6 +63,12 @@ var PairedDistributionsModule = (function () {
              DistributionssendSelectionMenu.append(optionMarkup);
            }
         }  
+        
+      pValueSelect = $("#DistributionPValue");
+      pValueSelect.chosen({max_selected_options: 2});
+      pValueSelect.chosen().change(tTest);
+      pValueDisplay = $("#pValueDisplay");
+      
     };
   //----------------------------------------------------------------------------------------------------
   function showAbout_pairedDistribution(){
@@ -105,6 +116,9 @@ var PairedDistributionsModule = (function () {
       console.log("Module.pairedDistributions: handlePatientIDs");
       if(msg.status == "success"){
       	 numberOfSelections ++;
+      	 '<option value="foo">Bar</option>'
+      	 pValueSelect.append("<option value=pop" + numberOfSelections + ">Population " + numberOfSelections + "</option>");
+      	 pValueSelect.trigger("chosen:updated");
          requestValues(msg.payload.ids);
       }else{
          console.log("handlePatientIDs about to call alert: " + msg)
@@ -117,7 +131,7 @@ var PairedDistributionsModule = (function () {
       //var dropDown = document.getElementById("attributeDropDown");
   	  //var attribute = dropDown.value;
   	  var requests = ["ageAtDx", "FirstProgression", "survival"];
-  	  console.log("request: " + requests[itemRequesting]);
+  	  //console.log("request: " + requests[itemRequesting]);
   	  //for (i=0;i<requests.length;i++){
           msg = {cmd: "getPatientHistoryDataVector",
                  callback:  "handlePatientData",
@@ -229,8 +243,48 @@ var PairedDistributionsModule = (function () {
       prevStorageLength = 0;
       numberOfSelections = 0;
       colorCounter = 0;
+      pValueSelect.find('option').remove().end();
+      pValueSelect.trigger("chosen:updated");
       d3.select("#pairedDistributionsSVG").remove()
      };
+  //--------------------------------------------------------------------------------------------
+  function tTest(){
+      console.log("Module.pairedDistributions: tTest");
+      var select = document.getElementById("DistributionPValue");
+      var tTestPopulations = Array.prototype.filter.call(select.options, function(el) {return el.selected;}).map(function(el) {return el.value;});
+      if(tTestPopulations.length>1){
+         var dropDown = document.getElementById("attributeDropDown");
+  	     var attribute = dropDown.value;
+  	     var pop1 = tTestPopulations[0];
+  	     var pop2 = tTestPopulations[1];
+  	     
+  	     var pop1Values = [];
+  	     var pop2Values = [];
+  	     
+  	     for(i=0;i<storage.length;i++){
+  	        if (storage[i]["name"] == pop1){
+  	           pop1Values.push(storage[i][attribute]);
+  	           }
+  	        if (storage[i]["name"] == pop2){
+  	           pop2Values.push(storage[i][attribute]);
+  	           }
+  	        }
+  	     
+         msg = {cmd: "tTest",
+                callback:  "handlePValue",
+                status: "request", 
+                payload: {pop1: pop1Values, pop2: pop2Values}
+                };
+         socket.send(JSON.stringify(msg));
+            //get p value
+         }
+      };
+  //--------------------------------------------------------------------------------------------
+  function handlePValue(msg){
+      console.log("Module.pairedDistributions: handlePValue");
+      console.log(msg);
+      pValueDisplay.text(msg.payload);
+      };
   //--------------------------------------------------------------------------------------------
   function d3PlotBrushReader(){
      console.log("plotBrushReader");
@@ -319,6 +373,11 @@ var PairedDistributionsModule = (function () {
     
     var dropDown = document.getElementById("attributeDropDown");
   	var attribute = dropDown.value;
+  	
+  	console.log("storage");
+  	console.log(data);
+  	
+  	
     
     var padding = 50;
     var width = $("#pairedDistributionsDisplay").width();
@@ -330,6 +389,7 @@ var PairedDistributionsModule = (function () {
     yMax = max * 1.1
     yMin = 0
         // select our svg by identifier, remove it
+    //d3pairedDistributionsDisplay.remove()
     d3.select("#pairedDistributionsSVG").remove()
 
         //flip axis
@@ -431,6 +491,7 @@ var PairedDistributionsModule = (function () {
       addSelectionDestination("Distributions", "pairedDistributionsDiv");
       addJavascriptMessageHandler("DistributionsHandlePatientIDs", handlePatientIds);
       addJavascriptMessageHandler("handlePatientData", handlePatientData);
+      addJavascriptMessageHandler("tTest", handlePValue);
       //socketConnectedFunctions.push(runDemo);
       }
    };
