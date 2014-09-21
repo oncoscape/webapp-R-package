@@ -22,10 +22,11 @@ var angioPathwaysModule = (function () {
   var mutationData;
 
   var moviePlaying = false;
-  var thisModuleName = "angiogenesis";
 
   var sendSelectionMenu;
-  var destinationModule;
+  var myModuleName = "Angiogenesis";
+  var myDivName = "angiogenesisDiv";
+
 
   //--------------------------------------------------------------------------------------------
   function initializeUI (network, vizmap) {
@@ -65,19 +66,18 @@ var angioPathwaysModule = (function () {
       movieButton.click(togglePlayMovie);
       searchBox = $("#angiogenesisSearchBox");
 
- //     sendSelectionMenu = $("#angioSendSelectionMenu");
- //     sendSelectionMenu.change(sendToModuleChanged);
- //     sendSelectionMenu.empty();
-        
- //     sendSelectionMenu.append("<option>Send Selection to:</option>")
- //     var ModuleNames = getSelectionDestinations()
- //     for(var i=0;i< ModuleNames.length; i++){
- //        var sendToModule = ModuleNames[i]
- //        if(sendToModule !== thisModuleName){
- //           optionMarkup = "<option>" + sendToModule + "</option>";
- //           sendSelectionMenu.append(optionMarkup);
- //          }
- //       } // for i
+      sendSelectionMenu = $("#angioSendSelectionMenu")  // only unique part?
+      sendSelectionMenu.change(sendSelection);
+      sendSelectionMenu.empty();
+       
+      sendSelectionMenu.append("<option>Send Selection...</option>")
+      var moduleNames = getSelectionDestinations();
+      for(var i=0;i< moduleNames.length; i++){
+         if(moduleNames[i] != myModuleName){
+            var optionMarkup = "<option>" + moduleNames[i] + "</option>";
+            sendSelectionMenu.append(optionMarkup);
+            } // if
+         } // for 
 
       loadNetwork(network, vizmap);
       $(window).resize(handleWindowResize);
@@ -177,6 +177,29 @@ var angioPathwaysModule = (function () {
 //      } // sendToModuleChanged
 
    //----------------------------------------------------------------------------------------------------
+   function sendSelection() {
+     destinationModule = sendSelectionMenu.val();
+     selectedIDs = identifyEntitiesInCurrentSelection();
+     metadata = {};
+     sendSelectionToModule(destinationModule, selectedIDs, metadata);
+     sendSelectionMenu.val("Send Selection...");
+     }; // sendSelectionMenuChanged
+
+
+   //----------------------------------------------------------------------------------------------------
+    function identifyEntitiesInCurrentSelection(){
+      var names = [];
+      var noi = cwAngio.filter('node:selected');   // module global variable cwXXX
+      for(var n=0; n < noi.length; n++){
+        geneName = noi[n].data("geneSymbol");
+        if(geneName != null)
+           names.push(geneName);
+        }
+     return(names);
+     } // identifyEntitiesInCurrentSelection
+
+
+   //----------------------------------------------------------------------------------------------------
    function broadcastSelection(destinationModule) {
       selectedNodes = cwAngio.filter("node:selected");
       if(selectedNodes.length == 0)
@@ -270,16 +293,46 @@ var angioPathwaysModule = (function () {
       console.log("=== entering handlePatientIDs for angio");
       console.log("status: " + msg.status);
    
-      tissueIDCount = msg.payload.count;
-      tissueIDs = msg.payload.ids;
- 
-        // solve the R/javascript difference about vectors of length 1 vs a single scalar
-      if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
+      var incomingIds = msg.payload.ids;
+      if(typeof(incomingIds) == "string")
+         incomingIds = [incomingIds];
+
+      var ourGeneNames = geneSymbols();
+      var recognizedGeneNames = [];
+
+      for(var i=0; i < incomingIds.length; i++){
+        if(ourGeneNames.indexOf(incomingIds[i]) >= 0)
+           recognizedGeneNames.push(incomingIds[i]);
+        } // for i
+
+      debugger;
+
+      if(recognizedGeneNames.length > 0){
+         console.log(" incoming ids had some gene names");
+         selectNodes(recognizedGeneNames);
+         }
+      else{ // assumed to be patientIDs, for which molecular data is available
+        tissueIDCount = msg.payload.count;
+        tissueIDs = msg.payload.ids;
+          // solve the R/javascript difference about vectors of length 1 vs a single scalar
+        if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
       
-      request_mRNA_data(tissueIDs, geneSymbols());   // entities: patient, tissue or sample ids
-      request_cnv_data(tissueIDs, geneSymbols());
-      request_mutation_data(tissueIDs, geneSymbols());
+        request_mRNA_data(tissueIDs, geneSymbols());   // entities: patient, tissue or sample ids
+        request_cnv_data(tissueIDs, geneSymbols());
+        request_mutation_data(tissueIDs, geneSymbols());
+        } // else
       } // handlePatientIDs
+
+   //----------------------------------------------------------------------------------------------------
+   function selectNodes(nodeNames) {
+
+     for(var i=0; i < nodeNames.length; i++){
+        s = "cwAngio.filter('node[geneSymbol=\"" + nodeNames[i] + "\"]').select()";
+        console.log("markers selectNodes: " + s);
+        JAVASCRIPT_EVAL (s);
+        } // for i
+
+     } // selectNodes
 
    //----------------------------------------------------------------------------------------------------
    function nodeIDs(){
@@ -574,7 +627,7 @@ var angioPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    return{
      init: function(){
-       addSelectionDestination(thisModuleName, "angiogenesisDiv");
+       addSelectionDestination(myModuleName, myDivName);
        onReadyFunctions.push(function() {
           initializeUI(angiogenesisNetwork.elements, angiogenesisVizmap[0].style);
           });
