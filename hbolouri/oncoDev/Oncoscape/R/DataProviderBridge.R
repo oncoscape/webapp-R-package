@@ -24,6 +24,7 @@ addRMessageHandler("get_mRNA_data",                    "get_mRNA_data");
 addRMessageHandler("get_cnv_data",                     "get_cnv_data");
 addRMessageHandler("get_mutation_data",                "get_mutation_data");
 addRMessageHandler("get_geneset_names",                "get_geneset_names");
+addRMessageHandler("tTest",                            "tTest");
 #----------------------------------------------------------------------------------------------------
 genesets <- list(angiogenesis=c("ACVRL1","ANG","ANGPT1","ANGPT2","ANGPTL4","ATPIF1","CCL2","CTNNB1",
                                 "EGLN1","EGLN3","EP300","ERAP1","FGF2","GDF2","HIF1AN","HMOX1",
@@ -1294,4 +1295,13 @@ calculatePairedDistributionsOfPatientHistoryData <- function(WS, msg)
    sendOutput(DATA=toJSON(return.msg), WS=WS)   
 
 } # calculatePairedDistributionsOfPatientHistoryData
+#----------------------------------------------------------------------------------------------------
+tTest <- function(WS, msg)
+{
+ pop1 <- msg$payload[["pop1"]]
+ pop2 <- msg$payload[["pop2"]]
+ pValue <- t.test(pop1, pop2)$p.value
+ return.msg <- list(cmd="tTest", callback="", status="success", payload = toString(pValue))
+ sendOutput(DATA=toJSON(return.msg), WS=WS)
+}
 #----------------------------------------------------------------------------------------------------
