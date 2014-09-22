@@ -6,20 +6,30 @@ library(Oncoscape)
 #----------------------------------------------------------------------------------------------------
 TEST.PORT = 7777L   # local build of tabsApp listens here
 #----------------------------------------------------------------------------------------------------
+# convenience function, to save typing on endless reloads during development
+re <- function() source("test.R");   
+#----------------------------------------------------------------------------------------------------
 runTests <- function()
 {
    test_oncoscape_ping();
+
    test_request_mRNA_data()  # for entities and features (patients & genes) for which data exists
    test_request_mRNA_data_bogus_entities()
    test_request_mRNA_data_bogus_features()
    test_request_mRNA_data_largeSet()
+
+   # todo: replicate the previous 4 with cnv and mut data
 
    test_plsr_ping();
    test_plsr();
    test_getGeneSetNames()
    test_plsr_withGeneSet();
    
-   
+   test_ttest_simple();
+   test_ttest_error_insufficient_values()
+   test_ttest_error_missing_values()
+   test_ttest_error_null_values()
+
 } # runTests
 #----------------------------------------------------------------------------------------------------
 callbackFunction <- function(DATA, WS, ...)
@@ -43,7 +53,7 @@ test_oncoscape_ping <- function()
    callback <- "handle.oncoscape.ping"
    websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload="")), client)
    
-   Sys.sleep(1)
+   Sys.sleep(2)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -74,7 +84,7 @@ test_request_mRNA_data <- function()
    msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
    websocket_write(toJSON(msg), client)
    
-   Sys.sleep(1)
+   Sys.sleep(2)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -118,7 +128,7 @@ test_request_mRNA_data_bogus_entities <- function()
    msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
    websocket_write(toJSON(msg), client)
    
-   Sys.sleep(1)
+   Sys.sleep(2)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -147,7 +157,7 @@ test_request_mRNA_data_bogus_features <- function()
    msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
    websocket_write(toJSON(msg), client)
    
-   Sys.sleep(1)
+   Sys.sleep(2)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -546,7 +556,7 @@ test_plsr_ping <- function()
    callback <- "handle.plsr.ping"
    websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload="")), client)
    
-   Sys.sleep(1)
+   Sys.sleep(2)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -593,7 +603,7 @@ test_getGeneSetNames <- function()
    msg <- list(cmd=cmd, callback=callback, status=status, payload=toJSON(payload))
    websocket_write(toJSON(msg), client)
    
-   Sys.sleep(1)
+   Sys.sleep(2)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -630,4 +640,139 @@ test_plsr_withGeneSet <- function()
    checkTrue(msg.incoming$payload[["absMaxValue"]] > 0.1)     # 0.17696 on (22 sep 2014)
 
 } # test_plsr
+#----------------------------------------------------------------------------------------------------
+test_ttest_simple <- function()
+{
+   print("--- test_ttest_simple")
+   cmd <- "tTest"
+   callback <- "handlePValue";
+   status <- "request"
+   pop1.values <- c(7, 8, 6, 9, 7.2, 8.1)
+   pop2.values <- c(1, 1.1, 1.2, 1.9, 3)
+   payload <- list(pop1=pop1.values, pop2=pop2.values)
+       
+   msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
+   websocket_write(toJSON(msg), client)
+   
+   Sys.sleep(2)
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   checkEquals(msg.incoming$cmd, callback)
+   checkEquals(msg.incoming$status, "success")
+      # currently returned as a string, needs conversion
+   pval <- as.numeric(msg.incoming$payload)
+   checkTrue(pval < 1.0e-5)
+
+} # test_ttest_simple
+#----------------------------------------------------------------------------------------------------
+test_ttest_error_insufficient_values <- function()
+{
+   print("--- test_ttest_error_insufficient_values")
+   cmd <- "tTest"
+   callback <- "handlePValue";
+   status <- "request"
+   pop1.values <- c(7)
+   pop2.values <- c(1, 1.1, 1.2, 1.9, 3)
+   payload <- list(pop1=pop1.values, pop2=pop2.values)
+       
+   msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
+   websocket_write(toJSON(msg), client)
+   
+   Sys.sleep(2)
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   checkEquals(msg.incoming$cmd, callback)
+
+   checkEquals(msg.incoming$status, "failure")
+   checkEquals(msg.incoming$payload, "not enough 'x' observations")
+
+     # switch the vectors
+   payload <- list(pop1=pop2.values, pop2=pop1.values)
+       
+   msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
+   websocket_write(toJSON(msg), client)
+   
+   Sys.sleep(1)
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   checkEquals(msg.incoming$cmd, callback)
+
+   checkEquals(msg.incoming$status, "failure")
+   checkEquals(msg.incoming$payload, "not enough 'y' observations")
+   
+} # test_ttest_error_insufficient_values
+#----------------------------------------------------------------------------------------------------
+test_ttest_error_missing_values <- function()
+{
+   print("--- test_ttest_error_missing_values")
+   cmd <- "tTest"
+   callback <- "handlePValue";
+   status <- "request"
+   pop1.values <- c()
+   pop2.values <- c(1, 1.1, 1.2, 1.9, 3)
+   payload <- list(pop1=pop1.values, pop2=pop2.values)
+       
+   msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
+   websocket_write(toJSON(msg), client)
+   
+   Sys.sleep(2)
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   checkEquals(msg.incoming$cmd, callback)
+
+   checkEquals(msg.incoming$status, "failure")
+   checkEquals(msg.incoming$payload, " pop1 contains bad data, perhaps some null values.  ");
+
+     # switch the vectors
+   payload <- list(pop1=pop2.values, pop2=pop1.values)
+       
+   msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
+   websocket_write(toJSON(msg), client)
+   
+   Sys.sleep(2)
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   checkEquals(msg.incoming$cmd, callback)
+
+   checkEquals(msg.incoming$status, "failure")
+   checkEquals(msg.incoming$payload, " pop2 contains bad data, perhaps some null values.  ");
+   
+} # test_ttest_error_missing_values
+#----------------------------------------------------------------------------------------------------
+test_ttest_error_null_values <- function()
+{
+   print("--- test_ttest_error_null_values")
+   cmd <- "tTest"
+   callback <- "handlePValue";
+   status <- "request"
+   pop1.values <- list(8, 9, NULL, 12, NULL, 13, 10, 12)
+   pop2.values <- c(1, 1.1, 1.2, 1.9, 3)
+   payload <- list(pop1=pop1.values, pop2=pop2.values)
+       
+   msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
+   websocket_write(toJSON(msg), client)
+   
+   Sys.sleep(2)
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   checkEquals(msg.incoming$cmd, callback)
+
+   checkEquals(msg.incoming$status, "failure")
+   checkEquals(msg.incoming$payload, " pop1 contains bad data, perhaps some null values.  ");
+
+     # switch the vectors
+   payload <- list(pop1=pop2.values, pop2=pop1.values)
+       
+   msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
+   websocket_write(toJSON(msg), client)
+   
+   Sys.sleep(2)
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   checkEquals(msg.incoming$cmd, callback)
+
+   checkEquals(msg.incoming$status, "failure")
+   checkEquals(msg.incoming$payload, " pop2 contains bad data, perhaps some null values.  ");
+   
+} # test_ttest_error_null_values
 #----------------------------------------------------------------------------------------------------
