@@ -356,7 +356,7 @@ var markersAndTissuesModule = (function () {
    //----------------------------------------------------------------------------------------------------
    function handleIncomingIdentifiers(msg){
       console.log("Module.markers, handleIncomingIdentifiers");
-      console.log(msg.payload.ids);
+      console.log(msg.payload.ids.length);
       ids = msg.payload.ids;
       if(typeof(ids) == "string")
         ids = [ids];
@@ -558,7 +558,7 @@ var markersAndTissuesModule = (function () {
 
      for(var i=0; i < nodeNames.length; i++){
        s = "cwMarkers.filter('node[name=\"" + nodeNames[i] + "\"]').select()";
-       console.log("markers selectNodes: " + s);
+       //console.log("markers selectNodes: " + s);
        JAVASCRIPT_EVAL (s);
        } // for i
 
