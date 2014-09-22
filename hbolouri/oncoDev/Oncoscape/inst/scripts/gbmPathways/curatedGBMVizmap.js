@@ -128,12 +128,12 @@ curatedGBMVizmap = [ {
   }, {
     "selector" : "node[cnv = 2]",
     "css" : {
-      "border-color" : "rgb(102,255,255)"
+      "border-color" : "rgb(255,0,0)"
     }
   }, {
     "selector" : "node[cnv = 1]",
     "css" : {
-      "border-color" : "rgb(102,255,255)"
+      "border-color" : "rgb(255,0,0)"
     }
   }, {
     "selector" : "node[cnv = 0]",

@@ -268,9 +268,14 @@ var gbmPathwaysModule = (function () {
 
       console.log("=== entering handlePatientIDs for gbm");
       console.log("status: " + msg.status);
-      incomingIds = msg.payload.ids;
-      ourGeneNames = nodeNames();
-      recognizedGeneNames = [];
+
+      var incomingIds = msg.payload.ids;
+      if(typeof(incomingIds) == "string")
+         incomingIds = [incomingIds];
+
+      var ourGeneNames = nodeNames();
+      var recognizedGeneNames = [];
+
       for(var i=0; i < incomingIds.length; i++){
         if(ourGeneNames.indexOf(incomingIds[i]) >= 0)
            recognizedGeneNames.push(incomingIds[i]);

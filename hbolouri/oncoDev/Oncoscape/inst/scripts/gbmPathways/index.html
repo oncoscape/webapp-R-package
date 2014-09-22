@@ -711,16 +711,32 @@ var gbmPathwaysModule = (function () {
 
       console.log("=== entering handlePatientIDs for gbm");
       console.log("status: " + msg.status);
-   
-      tissueIDCount = msg.payload.count;
-      tissueIDs = msg.payload.ids;
+      incomingIds = msg.payload.ids;
+      ourGeneNames = nodeNames();
+      recognizedGeneNames = [];
+      for(var i=0; i < incomingIds.length; i++){
+        if(ourGeneNames.indexOf(incomingIds[i]) >= 0)
+           recognizedGeneNames.push(incomingIds[i]);
+        } // for i
+
+      if(recognizedGeneNames.length > 0){
+         console.log(" incoming ids had some gene names");
+         selectNodes(recognizedGeneNames);
+         }
+         // other logical option at present (20 sep 2014) is tissue (patient ids) for which molecular 
+         // data will be obtained
+      else{
+         tissueIDCount = msg.payload.count;
+         tissueIDs = msg.payload.ids;
  
         // solve the R/javascript difference about vectors of length 1 vs a single scalar
-      if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
+        if (tissueIDCount == 1){ tissueIDs = [tissueIDs];    }
       
-      request_mRNA_data(tissueIDs, geneSymbols());   // entities: patient, tissue or sample ids
-      request_cnv_data(tissueIDs, geneSymbols());
-      request_mutation_data(tissueIDs, geneSymbols());
+        request_mRNA_data(tissueIDs, geneSymbols());   // entities: patient, tissue or sample ids
+        request_cnv_data(tissueIDs, geneSymbols());
+        request_mutation_data(tissueIDs, geneSymbols());
+        } // else: patientIDs, not genes
+
       } // handlePatientIDs
 
    //----------------------------------------------------------------------------------------------------
@@ -737,7 +753,8 @@ var gbmPathwaysModule = (function () {
    //----------------------------------------------------------------------------------------------------
    function nodeNames() {
 
-     nodes = cwGbm.filter("node:visible");
+     nodes = cwGbm.nodes();
+     //nodes = cwGbm.filter("node:visible");
      result = [];
      for(var i=0; i < nodes.length; i++){
        result.push(nodes[i].data().label)
@@ -757,6 +774,17 @@ var gbmPathwaysModule = (function () {
        } // for i
      return(result)
      } // geneSymbols
+
+   //----------------------------------------------------------------------------------------------------
+   function selectNodes(nodeNames) {
+
+     for(var i=0; i < nodeNames.length; i++){
+        s = "cwGbm.filter('node[name=\"" + nodeNames[i] + "\"]').select()";
+        console.log("markers selectNodes: " + s);
+        eval (s);
+        } // for i
+
+     } // selectNodes
 
    //----------------------------------------------------------------------------------------------------
    function changeMovieSpeed(delta) {
@@ -1039,7 +1067,6 @@ var gbmPathwaysModule = (function () {
        addJavascriptMessageHandler("handle_gbmPathways_cnv_data",  handle_cnv_data);
        addJavascriptMessageHandler("handle_gbmPathways_mutation_data",  handle_mutation_data);
        addJavascriptMessageHandler("gbmPathwaysHandlePatientIDs", handlePatientIDs);
-
        } // init
      }; 
 
@@ -1223,7 +1250,7 @@ var markersAndTissuesModule = (function () {
   //--------------------------------------------------------------------------------------------
   function sendSelection() {
      destinationModule = sendSelectionMenu.val();
-     nodeNames = selectedNodeNames(cwMarkers)
+     var nodeNames = selectedNodeNames(cwMarkers)
      metadata = {};
      sendSelectionToModule(destinationModule, nodeNames, metadata);
      sendSelectionMenu.val("Send Selection...");
@@ -1399,7 +1426,6 @@ var markersAndTissuesModule = (function () {
       ids = msg.payload.ids;
       if(typeof(ids) == "string")
         ids = [ids];
-      debugger;
       selectNodes(ids);
       }
 
@@ -1502,8 +1528,8 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
     function selectedNodeNames(cw){
-      names = [];
-      noi = cw.filter('node:selected');
+      var names = [];
+      var noi = cw.filter('node:selected');
       for(var n=0; n < noi.length; n++){
         names.push(noi[n].data('name'));
         }
@@ -1557,7 +1583,6 @@ var markersAndTissuesModule = (function () {
             selectedEdges.show()
             selectSourceAndTargetNodesOfEdges(cw, selectedEdges);
 
-            //debugger;
             } // for n
          } // for 3
       } // showEdgesForSelectedNodes
@@ -1582,8 +1607,8 @@ var markersAndTissuesModule = (function () {
 
    //----------------------------------------------------------------------------------------------------
    function nodeNames (){
-     nodes = cwMarkers.filter("node:visible");
-     result = [];
+     var nodes = cwMarkers.filter("node:visible");
+     var result = [];
      for(var i=0; i < nodes.length; i++){
        result.push(nodes[i].data().label)
        } // for i
@@ -1608,6 +1633,7 @@ var markersAndTissuesModule = (function () {
       if (keyCode == 13) {
          searchString = searchBox.val();
          //console.log("searchString: " + searchString);
+         debugger;
          names = nodeNames()
          matches = []
          for(var i=0; i < names.length; i++){
@@ -8205,7 +8231,10 @@ vizmap = [ {
    {"selector" : "node[copyNumber = 0]","css" : {"border-color" : "rgb(0,0,0)"}},
    {"selector" : "node[copyNumber = -2]","css" : {"border-color" : "rgb(0,0,0)"}},
    {"selector" : "node[copyNumber = -1]","css" : {"border-color" : "rgb(0,0,0)"}},
-   {"selector" : "node:selected","css" : {"background-color" : "rgb(255,255,0)"}},
+
+   {"selector" : "node:selected","css" : {"background-color" : "rgb(255,255,0)", "width"  : 260, "height" : 260}},
+
+
    {"selector" : "edge","css" : {"target-arrow-shape" : "triangle","color" : "rgb(0,0,0)","target-arrow-color" : "rgb(0,0,0)","font-size" : 10,"width" : 6.0,"line-color" : "rgb(255,255,255)","font-family" : "Dialog","font-weight" : "normal","content" : "","text-opacity" : 1.0,"line-style" : "solid","opacity" : 1.0,"source-arrow-color" : "rgb(0,0,0)","source-arrow-shape" : "triangle"}},
    {"selector" : "edge[edgeType = 'expression']","css" : {"target-arrow-shape" : "triangle"}},
    {"selector" : "edge[edgeType = 'psi-mi:MI:0403(colocalization)']","css" : {"target-arrow-shape" : "none"}},
@@ -80126,7 +80155,9 @@ markersAndTissuesVizmap = [ {
 
   {"selector" : "node:selected",
     "css" : {
-      "background-color" : "rgb(0,0,0)",
+      "background-color" : "rgb(255, 255, 0)",
+      "width"  : 100,
+      "height" : 100
     }
   }, 
 {
