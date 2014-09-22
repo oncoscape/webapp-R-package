@@ -505,13 +505,13 @@ test_request_mRNA_data_largeSet <- function()
                 "ZNF711",      "ZNF8",        "ZNF804A",     "ZRSR2",       "ZYX")
                
    patient.count <- 20
-   gene.count <- 24
+   gene.count <- 100
    payload <- list(entities=patients[1:patient.count], features=genes[1:gene.count])
        
    msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
    websocket_write(toJSON(msg), client)
    
-   system("sleep 1")
+   system("sleep 3")
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
