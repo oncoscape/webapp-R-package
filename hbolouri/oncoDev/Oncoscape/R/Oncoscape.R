@@ -467,6 +467,7 @@ invokeCommand <- function(DATA)
 # the standard "toJSON" ignores rownames, so here we convert rownames into an extra column -- a trick
 # which the receiver must understand.
 # there are at least a few classic inefficiencies in the current design.
+# warning:  row count clamped to 30 to avoid those inefficiences
 matrixToJSON <- function(mtx, category=NA, quiet=TRUE)
 {
     if(!is.null(rownames(mtx)))
@@ -479,6 +480,12 @@ matrixToJSON <- function(mtx, category=NA, quiet=TRUE)
         }
     
     s <- "["
+    
+    if(nrow(mtx) > 30 & ncol(mtx) > 100){
+       printf("Oncoscape::matrixToJSON expsdiency: %d rows clamped to 30 pending code rewrite", nrow(mtx));
+       mtx <- mtx[1:30,]
+       }
+
     max <- nrow(mtx)
     if(!quiet)
         printf("matrixToJSON converting a matrix of %d rows, %d cols", nrow(mtx), ncol(mtx));
