@@ -305,7 +305,6 @@ var angioPathwaysModule = (function () {
            recognizedGeneNames.push(incomingIds[i]);
         } // for i
 
-      debugger;
 
       if(recognizedGeneNames.length > 0){
          console.log(" incoming ids had some gene names");
@@ -328,7 +327,7 @@ var angioPathwaysModule = (function () {
 
      for(var i=0; i < nodeNames.length; i++){
         s = "cwAngio.filter('node[geneSymbol=\"" + nodeNames[i] + "\"]').select()";
-        console.log("markers selectNodes: " + s);
+        console.log("angio selectNodes: " + s);
         JAVASCRIPT_EVAL (s);
         } // for i
 
@@ -494,29 +493,40 @@ var angioPathwaysModule = (function () {
     function handle_mRNA_data(msg) {
 
        console.log("handling mRNA data");
-       var mtx = JSON.parse(msg.payload.mtx);
-       expressionData = transformMatrixToPatientOrientedNamedList(mtx);
-       addTissueIDsToSelector(expressionData.tissues);
-       movieButton.prop("disabled", false);
-       selectLabel.css("color", "black");
-       raiseTab("angiogenesisDiv");
+       if(msg.status == "success"){
+          var mtx = JSON.parse(msg.payload.mtx);
+          expressionData = transformMatrixToPatientOrientedNamedList(mtx);
+          console.log("=== angio adding tissue ids to selector");
+          addTissueIDsToSelector(expressionData.tissues);
+          movieButton.prop("disabled", false);
+          selectLabel.css("color", "black");
+          raiseTab("angiogenesisDiv");
+          } // if success
+       //else{
+       //   raiseTab("angiogenesisDiv");
+       //   alert("Warning:  none of your identifiers were found in this tab's data.");
+       //   }
        } // handle_mRNA_data
 
     //----------------------------------------------------------------------------------------------------
     function handle_cnv_data(msg) {
 
        console.log("handling cnv data");
-       var mtx = JSON.parse(msg.payload.mtx);
-       cnvData = transformMatrixToPatientOrientedNamedList(mtx);
-       } // handle_mRNA_data
+       if(msg.status == "success"){
+          var mtx = JSON.parse(msg.payload.mtx);
+          cnvData = transformMatrixToPatientOrientedNamedList(mtx);
+          }
+       } // handle_cnv_data
 
     //----------------------------------------------------------------------------------------------------
     function handle_mutation_data(msg) {
 
        console.log("handling mutation data");
-       var mtx = JSON.parse(msg.payload.mtx);
-       mutationData = transformMatrixToPatientOrientedNamedList(mtx);
-       } // handle_mRNA_data
+       if(msg.status == "success"){
+          var mtx = JSON.parse(msg.payload.mtx);
+          mutationData = transformMatrixToPatientOrientedNamedList(mtx);
+          }
+       } // handle_cnv_data
 
     //----------------------------------------------------------------------------------------------------
     function tissueSelectorChanged() {
@@ -528,7 +538,7 @@ var angioPathwaysModule = (function () {
 
     //----------------------------------------------------------------------------------------------------
     function setInfoNodeLabel (newLabel){
-       console.log("angio setInfoNodeLabel: " + newLabel);
+       //console.log("angio setInfoNodeLabel: " + newLabel);
        infoNodeID = cwAngio.filter('node[canonicalName="info.node"]').data("id")
        noa = {};
        noa[infoNodeID] = {label: newLabel};
