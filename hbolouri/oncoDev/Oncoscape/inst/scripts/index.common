@@ -4,9 +4,9 @@
 <head>
    <meta charset="UTF-8">
    <title> Oncoscape </title>
-   <script src="http://s3.amazonaws.com/oncoscape/js/jquery-2.1.0.min.js"></script>
-   <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-   <link   rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+   <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+   <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
+   <link   rel="stylesheet" href="http://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
 
    <script src="http://s3.amazonaws.com/oncoscape/js/cytoscape-2.2.9.min.js"></script>
 
