@@ -9,6 +9,11 @@ var DashboardModule = (function () {
  //----------------------------------------------------------------------------------------------------
      function DashboardInitializeUI(){
         
+
+       if(navigator.userAgent.indexOf("Chrome/37") < 0){
+          alert("To display networks reliably, Chrome v37 is required. Please switch or upgrade.");
+          }
+
         console.log("===== Display User Information")        
         document.getElementById("UserName").innerHTML = getUsername();
 
