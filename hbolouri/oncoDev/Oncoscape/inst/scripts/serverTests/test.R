@@ -16,6 +16,7 @@ runTests <- function()
 
    test_plsr_ping();
    test_plsr();
+   test_getGeneSetNames()
    test_plsr_withGeneSet();
    
    
@@ -42,7 +43,7 @@ test_oncoscape_ping <- function()
    callback <- "handle.oncoscape.ping"
    websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload="")), client)
    
-   system("sleep 1")
+   Sys.sleep(1)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -64,13 +65,16 @@ test_request_mRNA_data <- function()
    cmd <- "get_mRNA_data"
    callback <- "handle.mRNA.results"
    status <- "request"
-   payload <- list(entities=c("TCGA.06.0877", "TCGA.19.0964"),
-                   features=c("TEK","JUN","SP1"))
+
+   patients <- c("TCGA.06.0877", "TCGA.19.0964")
+   genes <- c("TEK","JUN","SP1")
+
+   payload <- list(entities=patients, features=genes)
        
    msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
    websocket_write(toJSON(msg), client)
    
-   system("sleep 1")
+   Sys.sleep(1)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -82,10 +86,10 @@ test_request_mRNA_data <- function()
    checkEquals(length(data), 2)
    checkEquals(length(data[[1]]), 4)
 
-   checkEquals(names(data[[1]]), c("TEK","JUN","SP1", "rowname"))
-   checkEquals(names(data[[2]]), c("TEK","JUN","SP1", "rowname"))
-   checkEquals(data[[1]]$rowname, "TCGA.06.0877")
-   checkEquals(data[[2]]$rowname, "TCGA.19.0964")
+   checkEquals(names(data[[1]]), c(genes, "rowname"))
+   checkEquals(names(data[[2]]), c(genes, "rowname"))
+   checkEquals(data[[1]]$rowname, patients[1])
+   checkEquals(data[[2]]$rowname, patients[2])
 
    checkEqualsNumeric(data[[1]]$TEK, -0.37949)
    checkEqualsNumeric(data[[2]]$TEK, -1.0123)
@@ -105,13 +109,16 @@ test_request_mRNA_data_bogus_entities <- function()
    cmd <- "get_mRNA_data"
    callback <- "handle.mRNA.results"
    status <- "request"
-   payload <- list(entities=c("fee", "fi", "fo"),
-                   features=c("TEK","JUN","SP1"))
+
+   patients <- c("fee", "fi", "fo")
+   genes <- c("TEK","JUN","SP1")
+
+   payload <- list(entities=patients, features=genes)
        
    msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
    websocket_write(toJSON(msg), client)
    
-   system("sleep 1")
+   Sys.sleep(1)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -140,7 +147,7 @@ test_request_mRNA_data_bogus_features <- function()
    msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
    websocket_write(toJSON(msg), client)
    
-   system("sleep 1")
+   Sys.sleep(1)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -511,7 +518,7 @@ test_request_mRNA_data_largeSet <- function()
    msg <- list(cmd=cmd, callback=callback, status=status, payload=payload)
    websocket_write(toJSON(msg), client)
    
-   system("sleep 3")
+   Sys.sleep(3)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -539,7 +546,7 @@ test_plsr_ping <- function()
    callback <- "handle.plsr.ping"
    websocket_write(toJSON(list(cmd=cmd, callback=callback, status=status, payload="")), client)
    
-   system("sleep 1")
+   Sys.sleep(1)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
@@ -563,24 +570,46 @@ test_plsr <- function()
    msg <- list(cmd=cmd, callback=callback, status=status, payload=toJSON(payload))
    websocket_write(toJSON(msg), client)
    
-   system("sleep 1")
+   Sys.sleep(2)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
    checkEquals(msg.incoming$status, "fit")
    checkEquals(names(msg.incoming$payload), c("genes", "vectors", "absMaxValue"))
-   checkTrue(nchar(msg.incoming$payload[["vectors"]]) > 300)  # 404 on (5 sep 2014)
-   checkTrue(nchar(msg.incoming$payload[["genes"]]) > 10000)  # 83k on (5 sep 2014)
-   checkTrue(nchar(msg.incoming$payload[["absMaxValue"]]) > 0.3)  # 0.31785 on (5 sep 2014)
+   checkTrue(nchar(msg.incoming$payload[["vectors"]]) > 300)  # 397 on (22 sep 2014)
+   checkTrue(nchar(msg.incoming$payload[["genes"]]) > 10000)  # 140k on (22 sep 2014)
+   checkTrue(msg.incoming$payload[["absMaxValue"]] > 0.1)    # 0.11347 on (22 sep 2014)
 
 } # test_plsr
+#----------------------------------------------------------------------------------------------------
+test_getGeneSetNames <- function()
+{
+   print("--- test_getGeneSetNames")
+   cmd <- "get_geneset_names"
+   status <- "request"
+   payload <- ""
+
+   callback <- "handle.geneSetNames"
+   msg <- list(cmd=cmd, callback=callback, status=status, payload=toJSON(payload))
+   websocket_write(toJSON(msg), client)
+   
+   Sys.sleep(1)
+   service(client)
+   checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
+   checkEquals(msg.incoming$cmd, callback)
+   checkEquals(msg.incoming$status, "success")
+
+   expected <- c("tcga.GBM.classifiers", "marker.genes.545")
+   checkTrue(all(expected %in% msg.incoming$payload))
+
+} # test_getGeneSetNames
 #----------------------------------------------------------------------------------------------------
 test_plsr_withGeneSet <- function()
 {
    print("--- test_plsr_withGeneSet")
    cmd <- "calculatePLSR"
    status <- "request"
-   payload <- c(geneSet="angiogenesis",
+   payload <- c(geneSet="marker.genes.545",
                 ageAtDxThresholdLow=36, 
                 ageAtDxThresholdHi=64,
                 overallSurvivalThresholdLow=3.7,
@@ -590,15 +619,15 @@ test_plsr_withGeneSet <- function()
    msg <- list(cmd=cmd, callback=callback, status=status, payload=toJSON(payload))
    websocket_write(toJSON(msg), client)
    
-   system("sleep 1")
+   Sys.sleep(3)
    service(client)
    checkEquals(names(msg.incoming), c("cmd", "callback", "status", "payload"))
    checkEquals(msg.incoming$cmd, callback)
    checkEquals(msg.incoming$status, "fit")
    checkEquals(names(msg.incoming$payload), c("genes", "vectors", "absMaxValue"))
-   checkTrue(nchar(msg.incoming$payload[["vectors"]]) > 300)  # 404 on (5 sep 2014)
-   checkTrue(nchar(msg.incoming$payload[["genes"]]) > 1000)  # 1196, 12 genes (7 sep 2014)
-   checkTrue(nchar(msg.incoming$payload[["absMaxValue"]]) > 0.3)  # 0.31785 on (5 sep 2014)
+   checkTrue(nchar(msg.incoming$payload[["vectors"]]) > 300)  # 398 on (5 sep 2014)
+   checkTrue(nchar(msg.incoming$payload[["genes"]]) > 10000)  # 42k  (22 sep 2014)
+   checkTrue(msg.incoming$payload[["absMaxValue"]] > 0.1)     # 0.17696 on (22 sep 2014)
 
 } # test_plsr
 #----------------------------------------------------------------------------------------------------
