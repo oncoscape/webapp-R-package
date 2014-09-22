@@ -1,15 +1,16 @@
 <script>
 //----------------------------------------------------------------------------------------------------
+
+
 var PCAModule = (function () {
 
   var pcaDisplay;
   var d3pcaDisplay;
-
+  var d3PlotBrush;
   var pcaScores;
   var patientClassification;
   var firstTime = true;
   var pcaSelectedRegion;    // from brushing
-  var d3PlotBrush;
   var pcaTextDisplay;
   var PatientMenu;
   var PCAsendSelectionMenu;
