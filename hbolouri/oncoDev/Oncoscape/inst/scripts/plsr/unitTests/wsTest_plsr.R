@@ -29,7 +29,7 @@ callbackFunction <- function(DATA, WS, ...)
 } # callbackFunction
 #----------------------------------------------------------------------------------------------------
 if(!exists("client")){
-   client <- websocket("ws://localhost", port=7777L)
+   client <- websocket("ws://localhost", port=7878L)
    }
 setCallback("receive", callbackFunction, client);
 #----------------------------------------------------------------------------------------------------
