@@ -273,7 +273,6 @@ var PairedDistributionsModule = (function () {
      	              pop2Values.push(x2);
   	           }
   	        }
-         debugger;  	     
          msg = {cmd: "tTest",
                 callback:  "handlePValue",
                 status: "request", 
