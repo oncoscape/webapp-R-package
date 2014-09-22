@@ -670,7 +670,7 @@ get_mRNA_data <- function(WS, msg)
        }
 
    printf("--- get_mRNA_data, msg fields: %s", paste(names(msg), collapse=","))
-   printf("    payload fields: %s", names(msg$payload))
+   # printf("    payload fields: %s", names(msg$payload))
    
    dataProvider <- DATA.PROVIDERS[[signature]];
    payload <- msg$payload
@@ -715,8 +715,6 @@ get_mRNA_data <- function(WS, msg)
       status <- "failure"
       payload <- "empty table"
       }
-
-   status <- "success"
 
    return.msg <- list(cmd=msg$callback, callback="", status=status, payload=payload)
 
