@@ -163,7 +163,7 @@ var angioPathwaysModule = (function () {
    function handleWindowResize () {
       console.log("angioPathways window resize: " + $(window).width() + ", " + $(window).height());
       cyDiv.width(0.95 * $(window).width());
-      cyDiv.height(0.9 * $(window).height());
+      cyDiv.height(0.82 * $(window).height());
       cwAngio.resize();
       cwAngio.fit(50);
       } // handleWindowResize
