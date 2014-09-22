@@ -263,13 +263,17 @@ var PairedDistributionsModule = (function () {
   	     
   	     for(i=0;i<storage.length;i++){
   	        if (storage[i]["name"] == pop1){
-  	           pop1Values.push(storage[i][attribute]);
+                   var x1 = storage[i][attribute]
+                   if(x1 != null)
+                      pop1Values.push(x1);
   	           }
   	        if (storage[i]["name"] == pop2){
-  	           pop2Values.push(storage[i][attribute]);
+                   var x2 = storage[i][attribute];
+                   if(x2 != null)
+     	              pop2Values.push(x2);
   	           }
   	        }
-  	     
+         debugger;  	     
          msg = {cmd: "tTest",
                 callback:  "handlePValue",
                 status: "request", 
@@ -491,7 +495,7 @@ var PairedDistributionsModule = (function () {
       addSelectionDestination("Distributions", "pairedDistributionsDiv");
       addJavascriptMessageHandler("DistributionsHandlePatientIDs", handlePatientIds);
       addJavascriptMessageHandler("handlePatientData", handlePatientData);
-      addJavascriptMessageHandler("tTest", handlePValue);
+      addJavascriptMessageHandler("handlePValue", handlePValue);
       //socketConnectedFunctions.push(runDemo);
       }
    };
