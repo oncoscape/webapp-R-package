@@ -692,8 +692,8 @@ get_mRNA_data <- function(WS, msg)
       else {
          entities <- payload$entities
          features <- payload$features
-         printf("entities: %s", paste(entities, collapse=","))
-         printf("features: %s", paste(features, collapse=","))
+         #printf("entities: %s", paste(entities, collapse=","))
+         #printf("features: %s", paste(features, collapse=","))
          tbl <- getData(dataProvider, entities=entities, features=features)
          if(nrow(tbl) == 0){
             status <- "failure"
@@ -1371,11 +1371,59 @@ calculatePairedDistributionsOfPatientHistoryData <- function(WS, msg)
 # needs work and testing!
 tTest <- function(WS, msg)
 {
+   print(msg)
+
+   status <- "success"  # be optimistic
+   payload <- msg$payload
+
+   if(!is.list(payload)) {
+       status <- "failure"
+       error.msg <- "no population fields in payload"
+       }
+   else{  # is.list(payload))
+      constraint.fields <- sort(names(payload))
+      legal.constraint.fields <- constraint.fields == c("pop1", "pop2")
+      if (any(!legal.constraint.fields)){
+          status <- "failure"
+          error.msg <- sprintf("payload fields not precisely 'entities', 'features': %s",
+                             paste(constraint.fields, collapse=", "))
+         }
+      }
+
+   if(status == "failure"){
+      return.msg <- list(cmd=msg$callback, callback="", status="failure", payload=error.msg);
+      sendOutput(DATA=toJSON(return.msg), WS=WS)
+      return()
+      }
+
    pop1.raw <- msg$payload[["pop1"]]
    pop2.raw <- msg$payload[["pop2"]]
 
+     # javascript toJSON appears to convert any array containing a null into
+     # what, in R looks like a list rather than a numeric vector
+     # detect that here, and return failure.
+   
+   pop1.class <- class(pop1.raw)
+   pop2.class <- class(pop2.raw)
+
+   error.msg <- ""
+   if(pop1.class != "numeric")
+       error.msg <- paste(error.msg, "pop1 contains bad data, perhaps some null values.  ")
+   if(pop2.class != "numeric")
+       error.msg <- paste(error.msg, "pop2 contains bad data, perhaps some null values.  ")
+
+   if(nchar(error.msg) > 0) {
+      return.msg <- list(cmd= msg$callback, callback="", status="failure", payload=error.msg);
+      sendOutput(DATA=toJSON(return.msg), WS=WS)
+      return()
+      } # detected bad data
+   
+
    printf("---- pop1.raw"); print(pop1.raw)
    printf("---- pop2.raw"); print(pop2.raw)
+
+   printf("class(pop1.raw): %s", class(pop1.raw));
+   printf("class(pop2.raw): %s", class(pop2.raw));
    
    pop1 <- as.numeric(pop1.raw)
    pop2 <- as.numeric(pop2.raw)
@@ -1397,6 +1445,7 @@ tTest <- function(WS, msg)
    print(result)
 
    if(class(result) == "htest"){
+       # todo: reconsider -- better to return as numeric?
       payload <- toString(result$p.value)
       status <- "success"
       }
