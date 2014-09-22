@@ -1370,12 +1370,49 @@ calculatePairedDistributionsOfPatientHistoryData <- function(WS, msg)
 
 } # calculatePairedDistributionsOfPatientHistoryData
 #----------------------------------------------------------------------------------------------------
+# needs work and testing!
 tTest <- function(WS, msg)
 {
- pop1 <- msg$payload[["pop1"]]
- pop2 <- msg$payload[["pop2"]]
- pValue <- t.test(pop1, pop2)$p.value
- return.msg <- list(cmd="tTest", callback="", status="success", payload = toString(pValue))
- sendOutput(DATA=toJSON(return.msg), WS=WS)
-}
+   pop1.raw <- msg$payload[["pop1"]]
+   pop2.raw <- msg$payload[["pop2"]]
+
+   printf("---- pop1.raw"); print(pop1.raw)
+   printf("---- pop2.raw"); print(pop2.raw)
+   
+   pop1 <- as.numeric(pop1.raw)
+   pop2 <- as.numeric(pop2.raw)
+   
+   deleters <- which(is.null(pop1))
+   if(length(deleters) > 0)
+       pop1 <- pop1[-deleters]
+   
+   deleters <- which(is.null(pop2))
+   if(length(deleters) > 0)
+       pop2 <- pop2[-deleters]
+
+   printf("---- pop1"); print(pop1)
+   printf("---- pop2"); print(pop2)
+   
+   result <- tryCatch(t.test(pop1, pop2), warning=conditionMessage, error=conditionMessage)
+
+   printf("result: ")
+   print(result)
+
+   if(class(result) == "htest"){
+      payload <- toString(result$p.value)
+      status <- "success"
+      }
+
+   if(class(result) == "character"){
+      payload <- result
+      status <- "failure"
+      }
+
+   printf("payload: %s", payload);
+   printf("status:  %s", status);
+   
+   return.msg <- list(cmd=msg$callback, callback="", status=status, payload = payload)
+   sendOutput(DATA=toJSON(return.msg), WS=WS)
+   
+} #  tTest
 #----------------------------------------------------------------------------------------------------
