@@ -466,7 +466,8 @@ invokeCommand <- function(DATA)
 #----------------------------------------------------------------------------------------------------
 # the standard "toJSON" ignores rownames, so here we convert rownames into an extra column -- a trick
 # which the receiver must understand.
-matrixToJSON <- function(mtx, category=NA)
+# there are at least a few classic inefficiencies in the current design.
+matrixToJSON <- function(mtx, category=NA, quiet=TRUE)
 {
     if(!is.null(rownames(mtx)))
         mtx <- cbind(as.data.frame(mtx), rowname=rownames(mtx))
@@ -479,7 +480,12 @@ matrixToJSON <- function(mtx, category=NA)
     
     s <- "["
     max <- nrow(mtx)
+    if(!quiet)
+        printf("matrixToJSON converting a matrix of %d rows, %d cols", nrow(mtx), ncol(mtx));
+    
     for(r in 1:max){
+       if(!quiet & (r %% 10 == 0))
+           printf("converting mtx row %d", r)
        new.row <- toJSON(mtx[r,])
        separator <- ","
        if(r == 1)
@@ -555,6 +561,16 @@ dataProviders <- function()
 
 } # dataProviders
 #----------------------------------------------------------------------------------------------------
+oncoscape.ping <- function(WS, msg)
+{
+  return.msg <- toJSON(list(cmd=msg$callback, callback="", status="success",
+                            payload="oncoscape ping back!"))
+  
+  sendOutput(DATA=return.msg, WS=WS);
+
+} # oncoscape.ping
+#----------------------------------------------------------------------------------------------------
+addRMessageHandler("oncoscape.ping", "oncoscape.ping");
 addRMessageHandler("sendPatientIDsToModule", "sendPatientIDsToModule");
 addRMessageHandler("sendIDsToModule", "sendIDsToModule");
 addRMessageHandler("getModuleModificationDate", "getModuleModificationDate");
